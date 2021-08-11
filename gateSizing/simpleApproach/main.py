@@ -2,35 +2,19 @@ import numpy as np
 import cvxpy as cp
 import mosek
 
-# hard coded example
-
-numberOfGates = 7
-
-f = np.array([1, 0.8, 1, 0.7, 0.7, 0.5, 0.5])
-e = np.array([1, 2, 1, 1.5, 1.5, 1, 2])
-Cout6 = 10
-Cout7 = 10
-
-a = np.ones(numberOfGates)
-alpha = np.ones(numberOfGates)
-beta = np.ones(numberOfGates)
-gamma = np.ones(numberOfGates)
-
-Amax = 25
-Pmax = 50
 
 """ Calculate input capacitance as affine function ... alpha + beta * x
 
       Params:
-        alphas: array [1xN] of ???
-        betas: array [1xN] of ???
+        alphas: array [1xN]
+        betas: array [1xN]
         x: variable [1xN]
       Return: array [1xN] of load capacitances """
-
 
 def computeInputCapacitance(alphas, betas, x):
     inputCap = alphas + cp.multiply(x, betas)
     return inputCap
+
 
     # TODO - generalize
     """ Load capacitance is computed as a sum of a fanout.
@@ -41,7 +25,6 @@ def computeInputCapacitance(alphas, betas, x):
           numberOfGates : Integer, total number of gates
         Return: array [1xN] of load capacitances
     """
-
 
 def computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates):
     cload = [None] * numberOfGates
@@ -57,21 +40,24 @@ def computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates):
 
     return cp.hstack(cload)  # concatenation
 
+
     """ Delay on each gate is computed as (load capacitance * gamma) / resistance 
   
         Params:
           capLoad : [1xN] of load capacitances
           gammas : array [1xN] of  gamma constants
           x : [1xN] variable
-          numberOfGates : Integer, total number of gates
         Return: array [1xN] of gate delays        """
 
-
-def computeGateDelays(capLoad, gammas, x, numberOfGates):
-    cloadTimesGamma = cp.multiply ( capLoad , gamma )
+def computeGateDelays(capLoad, gammas, x):
+    cloadTimesGamma = cp.multiply ( capLoad , gammas )
     gateDelays = cp.multiply (cloadTimesGamma , 1 / x)
 
     return gateDelays
+
+
+
+
 
     # TODO: generalize, use SSTA
     """ Get all possible path delays
@@ -79,7 +65,6 @@ def computeGateDelays(capLoad, gammas, x, numberOfGates):
         Params:
           gateDelays : array [1xN] of gate delays
         Return: array [1xK] of all possible delay paths        """
-
 
 def getPathDelays(gateDelays):
     delays = [gateDelays[0] + gateDelays[3] + gateDelays[5],
@@ -98,10 +83,14 @@ def getPathDelays(gateDelays):
           pathDelays : array [1xK] of all possible delay paths
         Return: [1x1] maximum of all path delays       """
 
-
 def getMaximumDelay(pathDelays):
     circuitDelay = cp.max(pathDelays)
     return circuitDelay
+
+
+
+
+
 
     """ Compute total power 
   
@@ -133,6 +122,8 @@ def computeTotalArea(gateScales, x):
 
 
 
+
+
 def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, maxArea, maxPower, loadCapacitances,
                   numberOfGates):
     # defining variable
@@ -141,7 +132,7 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
     inputCapacitance = computeInputCapacitance(alphas, betas, x)
     loadCapacitance = computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates)
 
-    gateDelays = computeGateDelays(loadCapacitance, gammas, x, numberOfGates)
+    gateDelays = computeGateDelays(loadCapacitance, gammas, x)
 
     pathDelays = getPathDelays(gateDelays)
     circuitDelay = getMaximumDelay(pathDelays)
@@ -159,8 +150,27 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
 
     print("sizing params: ", x.value)
 
-    return prob.value;
+    return prob.value
+
+
 
 
 # hard coded example
+
+numberOfGates = 7
+
+f = np.array([1, 0.8, 1, 0.7, 0.7, 0.5, 0.5])
+e = np.array([1, 2, 1, 1.5, 1.5, 1, 2])
+Cout6 = 10
+Cout7 = 10
+
+a = np.ones(numberOfGates)
+alpha = np.ones(numberOfGates)
+beta = np.ones(numberOfGates)
+gamma = np.ones(numberOfGates)
+
+Amax = 25
+Pmax = 50
+
+
 optimizeGates(f, e, a, alpha, beta, gamma, Amax, Pmax, [Cout6, Cout7], numberOfGates)
