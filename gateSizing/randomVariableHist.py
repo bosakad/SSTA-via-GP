@@ -2,7 +2,8 @@ import cvxpy as cp
 import numpy as np
 
 
-"""
+""" Random variable 
+
     Class representing a random variable given by histogram.
     Class includes: 
         bins: len n of frequencies
@@ -59,8 +60,8 @@ class RandomVariable:
             print("Wrong data!")
             return -1
 
-        # print(frequency.value)
-        return (prob.value, newHistogram)
+        maxDelay = RandomVariable(newHistogram, self.edges)
+        return prob.value, maxDelay
 
 
     """ Convolution of two independent random variables
@@ -86,7 +87,7 @@ class RandomVariable:
             for k in range(0, z + 1):
                 newHistogram[z] += f[k] * g[z - k]
 
-        return newHistogram
+        return RandomVariable(newHistogram, self.edges)
 
 
     """ Calculate mean

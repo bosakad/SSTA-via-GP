@@ -1,5 +1,6 @@
 import numpy as np
 import cvxpy as cp
+import SSTA
 import mosek
 
 
@@ -129,28 +130,36 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
     # defining variable
     x = cp.Variable(numberOfGates, pos=True)
 
-    inputCapacitance = computeInputCapacitance(alphas, betas, x)
-    loadCapacitance = computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates)
+    # computing the objective function
 
-    gateDelays = computeGateDelays(loadCapacitance, gammas, x)
+    # inputCapacitance = computeInputCapacitance(alphas, betas, x)
+    # loadCapacitance = computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates)
+    # gateDelays = computeGateDelays(loadCapacitance, gammas, x)
+    #
+    # pathDelays = getPathDelays(gateDelays)
+    # circuitDelay = getMaximumDelay(pathDelays)
 
-    pathDelays = getPathDelays(gateDelays)
-    circuitDelay = getMaximumDelay(pathDelays)
 
-    totalPower = computeTotalPower(frequencies, energyLoss, x)
-    totalArea = computeTotalArea(gateScales, x)
+    # computing the circuit delay using the Gaussian Comb.
+
+    # circuitDelay = SSTA.calculateCircuitDelay()       # TODO
+
+    # computing the constraints
+
+    # totalPower = computeTotalPower(frequencies, energyLoss, x)
+    # totalArea = computeTotalArea(gateScales, x)
 
     # formulating GGP
 
-    constraints = [totalPower <= maxPower, totalArea <= maxArea]
-    objective = cp.Minimize(circuitDelay)
-
-    prob = cp.Problem(objective, constraints)
-    prob.solve(gp=True, verbose=True, solver=cp.MOSEK)
-
-    print("sizing params: ", x.value)
-
-    return prob.value
+    # constraints = [totalPower <= maxPower, totalArea <= maxArea]
+    # objective = cp.Minimize(circuitDelay)
+    #
+    # prob = cp.Problem(objective, constraints)
+    # prob.solve(gp=True, verbose=True, solver=cp.MOSEK)
+    #
+    # print("sizing params: ", x.value)
+    #
+    # return prob.value
 
 
 
