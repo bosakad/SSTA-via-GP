@@ -13,15 +13,17 @@ Function executes the algorithm for finding out the PDF of a circuit delay.
                         array of previous nodes
 
     Return:
-        mean: mean value of the circuits PDF
-
+        # mean: mean value of the circuits PDF
+        newRandomVariables: array of new RVs, with computed mean and variance
 
 """
 
 
 def calculateCircuitDelay(rootNodes):
     queue = Queue()
-    outputDelays = []
+    sink = []
+
+    newRandomVariables = []
 
     putIntoQueue(queue, rootNodes)
 
@@ -40,13 +42,14 @@ def calculateCircuitDelay(rootNodes):
             nextNode.appendPrevDelays(currentRandVar)
 
         if not tmpNode.nextNodes:                                   # save for later ouput delays
-            outputDelays.append(currentRandVar)
+            sink.append(currentRandVar)
 
         putIntoQueue(queue, tmpNode.nextNodes)
+        newRandomVariables.append(currentRandVar)
 
-    maxDelay = maxOfDistributions(outputDelays)
+    # maxDelay = maxOfDistributions(sink)
 
-    return maxDelay.mean
+    return newRandomVariables
 
 
 """ Calculates maximum of an array of PDFs

@@ -60,7 +60,7 @@ class RandomVariable:
             print("Wrong data!")
             return -1
 
-        maxDelay = RandomVariable(newHistogram, self.edges)
+        maxDelay = RandomVariable(newHistogram, self.edges  )
         return prob.value, maxDelay
 
 

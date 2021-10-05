@@ -15,16 +15,19 @@ Script calls all fundamental methods as well as parsers.
 
 def main(argv):
 
-    circuitMatrix = parser.getIncidenceMatrixFromNetlist(argv)
+    # circuitMatrix = parser.getIncidenceMatrixFromNetlist(argv)
 
     # h1 = RandomVariable([2, 3, 4], [0, 1, 3, 7])
     # h2 = RandomVariable([3, 8, 6], [0, 1, 3, 7])
 
+    numberOfBins = 3
+    numberOfSamples = 4
+
     g1 = histogramGenerator.get_gauss_bins(2, 1, 3, 4)          # g1, g2 INPUT gates, g3 middle
-    g2 = histogramGenerator.get_gauss_bins(1, 1, 3, 4)          # g4 output - inputs: g3 g1
-    g3 = histogramGenerator.get_gauss_bins(0.5, 1, 3, 4)        # g5 output - inputs: g3, g2
-    g4 = histogramGenerator.get_gauss_bins(1, 1, 3, 4)
-    g5 = histogramGenerator.get_gauss_bins(0.5, 1, 3, 4)
+    # g2 = histogramGenerator.get_gauss_bins(1, 1, 3, 4)          # g4 output - inputs: g3 g1
+    # g3 = histogramGenerator.get_gauss_bins(0.5, 1, 3, 4)        # g5 output - inputs: g3, g2
+    # g4 = histogramGenerator.get_gauss_bins(1, 1, 3, 4)
+    # g5 = histogramGenerator.get_gauss_bins(0.5, 1, 3, 4)
 
 
     n1 = Node(g1)

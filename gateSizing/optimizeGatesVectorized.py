@@ -62,7 +62,15 @@ def computeIncidenceMatrices(A):
     Aout = np.where(A > 0, 1, 0)
     Ain = np.where(A < 0, 1, 0)
 
-    return ( cp.bmat( Aout ), cp.bmat( Ain ))
+    AoutParam = cp.Parameter(Aout.shape, pos=True)
+    AoutParam.value = Aout
+
+    AinParam = cp.Parameter(Ain.shape, pos=True)
+    AinParam.value = Ain
+
+    return AoutParam, AinParam
+
+    # return ( cp.bmat( Aout ), cp.bmat( Ain ))
 
 
 """ Calculate input capacitance as affine function ... alpha + beta * x
@@ -185,8 +193,8 @@ def computeGateDelays(capLoad, gammas, x):
 def getConstrCload(capLoad, loadCapacitances):
     # TODO: generalize
     constr_cload = []
-    constr_cload.append(capLoad[5] <= loadCapacitances[0])
-    constr_cload.append(capLoad[6] <= loadCapacitances[1])
+    constr_cload.append(capLoad[5] == loadCapacitances[0])
+    constr_cload.append(capLoad[6] == loadCapacitances[1])
 
     return constr_cload
 
@@ -208,11 +216,13 @@ def getConstrCload(capLoad, loadCapacitances):
 
 def getConstrTiming(Aout, Ain, gateDelays, t):
 
-    constr_timing = Aout.T @ t + Ain.T @ gateDelays <= Ain.T @ t
+    print(gateDelays)
+
+    constr_timing = Aout.T @ t + Ain.T @ cp.hstack(gateDelays) <= Ain.T @ t
 
     input_timing = getInputTimingConstr(gateDelays, t)
 
-    return constr_timing, input_timing
+    return constr_timing , input_timing
 
     # TODO: generalize
 
@@ -270,29 +280,6 @@ def computeTotalArea(gateScales, x):
 
 
 
-
-
-
-# def getPathDelays(gateDelays):
-#     delays = [gateDelays[0] + gateDelays[3] + gateDelays[5],
-#               gateDelays[0] + gateDelays[3] + gateDelays[6],
-#               gateDelays[1] + gateDelays[3] + gateDelays[5],
-#               gateDelays[1] + gateDelays[3] + gateDelays[6],
-#               gateDelays[1] + gateDelays[4] + gateDelays[6],
-#               gateDelays[2] + gateDelays[4] + gateDelays[5],
-#               gateDelays[2] + gateDelays[6]]
-#
-#     return cp.hstack(delays)
-#
-#
-# def getMaximumDelay(pathDelays):
-#     circuitDelay = cp.max(pathDelays)
-#     return circuitDelay
-
-
-
-
-
 def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, maxArea, maxPower,
                   loadCapacitances, A, numberOfCells):
     # optimization variables
@@ -301,30 +288,30 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
 
     Aout, Ain = computeIncidenceMatrices(A)
 
-    inputCap = computeInputCapacitance(alphas, betas, x)
-    loadCapacitance = computeLoadCapacitance(Aout, Ain, inputCap)
+    alphasParam = cp.Parameter(alphas.shape, pos=True)
+    alphasParam.value = alphas
 
-    gateDelays = computeGateDelays(loadCapacitance, gammas, x)
+    betasParam = cp.Parameter(betas.shape, pos=True)
+    betasParam.value = betas
+
+    gammasParam = cp.Parameter(gammas.shape, pos=True)
+    gammasParam.value = gammas
+
+    inputCap = computeInputCapacitance(alphasParam, betasParam, x)
+    computedLCapacitance = computeLoadCapacitance(Aout, Ain, inputCap)
+
+    gateDelays = computeGateDelays(computedLCapacitance, gammasParam, x)
     maxDelay = getMaximumDelay(t)
 
     totalPower = computeTotalPower(frequencies, energyLoss, x)
     totalArea = computeTotalArea(gateScales, x)
 
-    # pathDelays = getPathDelays(gateDelays)
-    # circuitDelay = getMaximumDelay(pathDelays)
-
-
-
     # get constraints
 
-    # cloadConstr = getConstrCload(loadCapacitance, loadCapacitances)
+    cloadConstr = getConstrCload(computedLCapacitance, loadCapacitances)
     timingConstr, inputTimingConstr = getConstrTiming(Aout, Ain, gateDelays, t)
 
-        # return inputTimingConstr
-    posX = x >= 1  # all sizes greater than 1 (normalized)
-
-    # print(gateDelays)
-    # exit(0)
+    posX = x >= 1  # all sizes greater than 1 (normalized)expr
 
     # formulate the GGP
 
@@ -334,7 +321,7 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
     objective = cp.Minimize(maxDelay)
 
     prob = cp.Problem(objective, constraints)
-    prob.solve(gp=True, verbose=True, solver=cp.MOSEK)
+    prob.solve(gp=True, verbose=False, solver=cp.MOSEK)
 
     print("sizing params: ", x.value)
 
