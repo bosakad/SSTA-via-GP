@@ -21,9 +21,10 @@ Function executes the algorithm for finding out the PDF of a circuit delay.
 
 def calculateCircuitDelay(rootNodes):
     queue = Queue()
-    sink = []
 
-    newRandomVariables = []
+    sink = []
+    newDelays = []
+    closedList = []
 
     putIntoQueue(queue, rootNodes)
 
@@ -32,11 +33,21 @@ def calculateCircuitDelay(rootNodes):
         tmpNode = queue.get()                                       # get data
         currentRandVar = tmpNode.randVar
 
+        if tmpNode in closedList:
+            continue
+
+
         # print(queue, tmpNode)
 
         if tmpNode.prevDelays:                                      # get maximum + convolution
-            maxDelay = maxOfDistributions(tmpNode.prevDelays)
+            print(tmpNode.prevDelays[0].mean)
+            print(tmpNode.prevDelays[1].mean)
+            maxDelay = maxOfDistributions3(tmpNode.prevDelays)
+            print(maxDelay.mean)
+            print(currentRandVar.mean)
             currentRandVar = currentRandVar.convolutionOfTwoVars(maxDelay)
+            print(currentRandVar.mean)
+            print()
 
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
             nextNode.appendPrevDelays(currentRandVar)
@@ -44,12 +55,14 @@ def calculateCircuitDelay(rootNodes):
         if not tmpNode.nextNodes:                                   # save for later ouput delays
             sink.append(currentRandVar)
 
+        closedList.append(tmpNode)
         putIntoQueue(queue, tmpNode.nextNodes)
-        newRandomVariables.append(currentRandVar)
+        newDelays.append(currentRandVar)
 
-    # maxDelay = maxOfDistributions(sink)
+    print(len(sink))
+    sinkDelay = maxOfDistributions3(sink)
 
-    return newRandomVariables
+    return [newDelays, sinkDelay]
 
 
 """ Calculates maximum of an array of PDFs
@@ -68,6 +81,40 @@ def maxOfDistributions(delays):
     for i in range(0, size - 1):
         val, newRV = delays[i].getMaximum(delays[i + 1])
         delays[i+1] = newRV
+
+    max = delays[-1]
+
+    return max
+
+
+""" Calculates maximum of an array of PDFs
+
+    Params: 
+        delays: array of RandomVariables
+
+    Return:
+        max: RandomVariable - maximum delay
+
+"""
+
+
+def maxOfDistributions2(delays):
+
+    size = len(delays)
+    for i in range(0, size - 1):
+        newRV = delays[i].getMaximum2(delays[i + 1])
+        delays[i + 1] = newRV
+
+    max = delays[-1]
+
+    return max
+
+def maxOfDistributions3(delays):
+
+    size = len(delays)
+    for i in range(0, size - 1):
+        newRV = delays[i].getMaximum3(delays[i + 1])
+        delays[i + 1] = newRV
 
     max = delays[-1]
 

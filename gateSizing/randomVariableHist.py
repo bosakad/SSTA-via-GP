@@ -19,7 +19,14 @@ class RandomVariable:
         self.bins = np.array(bins)
         self.edges = np.array(edges)
         self.mean = self.calculateMean()
-        self.variance = self.calculateVariance()
+        self.std = self.calculateSTD()
+
+    # def __init__(self, bins, edges, numbers=None):
+    #     self.bins = np.array(bins)
+    #     self.edges = np.array(edges)
+    #     self.numbers = numbers
+    #     self.mean = np.mean(numbers)
+    #     self.std = np.std(numbers)
 
 
     """ Maximum of 2 distribution functions
@@ -63,6 +70,24 @@ class RandomVariable:
         maxDelay = RandomVariable(newHistogram, self.edges  )
         return prob.value, maxDelay
 
+    def getMaximum2(self, secondVariable):
+
+
+        max = np.maximum(self.numbers, secondVariable.numbers)
+
+        data, edges = np.histogram(max, self.edges)
+
+        maxDelay = RandomVariable(data, self.edges, max)
+        return maxDelay
+
+
+    def getMaximum3(self, secondVariable):
+
+        maxEdges = np.maximum(self.edges, secondVariable.edges)
+
+        maxDelay = RandomVariable(self.bins, maxEdges)
+        return maxDelay
+
 
     """ Convolution of two independent random variables
     
@@ -89,6 +114,17 @@ class RandomVariable:
 
         return RandomVariable(newHistogram, self.edges)
 
+    def convolutionOfTwoVars2(self, secondVariable):
+        f = self.numbers
+        g = secondVariable.numbers
+
+        newNumbers = f + g
+
+        data, edges = np.histogram(newNumbers, self.edges)
+
+        return RandomVariable(data, self.edges, newNumbers)
+
+
 
     """ Calculate mean
     
@@ -109,10 +145,10 @@ class RandomVariable:
 
         """
 
-    def calculateVariance(self):
+    def calculateSTD(self):
         midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
         variance = np.average((midPoints - self.mean) ** 2, weights=self.bins)
-        return variance
+        return np.sqrt(variance)
 
 
 
