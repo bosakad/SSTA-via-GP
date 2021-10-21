@@ -1,4 +1,7 @@
 from queue import Queue
+
+import numpy as np
+
 from randomVariableHist import RandomVariable
 
 """ Compute circuit delay using PDFs algorithm
@@ -19,7 +22,7 @@ Function executes the algorithm for finding out the PDF of a circuit delay.
 """
 
 
-def calculateCircuitDelay(rootNodes):
+def calculateCircuitDelay(rootNodes: []) -> []:
     queue = Queue()
 
     sink = []
@@ -40,14 +43,14 @@ def calculateCircuitDelay(rootNodes):
         # print(queue, tmpNode)
 
         if tmpNode.prevDelays:                                      # get maximum + convolution
-            print(tmpNode.prevDelays[0].mean)
-            print(tmpNode.prevDelays[1].mean)
+            # print(tmpNode.prevDelays[0].mean)
+            # print(tmpNode.prevDelays[1].mean)
             maxDelay = maxOfDistributions3(tmpNode.prevDelays)
-            print(maxDelay.mean)
-            print(currentRandVar.mean)
+            # print(maxDelay.mean)
+            # print(currentRandVar.mean)
             currentRandVar = currentRandVar.convolutionOfTwoVars(maxDelay)
-            print(currentRandVar.mean)
-            print()
+            # print(currentRandVar.mean)
+            # print()
 
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
             nextNode.appendPrevDelays(currentRandVar)
@@ -59,10 +62,11 @@ def calculateCircuitDelay(rootNodes):
         putIntoQueue(queue, tmpNode.nextNodes)
         newDelays.append(currentRandVar)
 
-    print(len(sink))
+    # print(len(sink))
     sinkDelay = maxOfDistributions3(sink)
+    newDelays.append(sinkDelay)
 
-    return [newDelays, sinkDelay]
+    return newDelays
 
 
 """ Calculates maximum of an array of PDFs
@@ -75,7 +79,7 @@ def calculateCircuitDelay(rootNodes):
 
 """
 
-def maxOfDistributions(delays):
+def maxOfDistributions(delays: []):
 
     size = len(delays)
     for i in range(0, size - 1):
@@ -98,7 +102,7 @@ def maxOfDistributions(delays):
 """
 
 
-def maxOfDistributions2(delays):
+def maxOfDistributions2(delays: []) -> RandomVariable:
 
     size = len(delays)
     for i in range(0, size - 1):
@@ -109,11 +113,12 @@ def maxOfDistributions2(delays):
 
     return max
 
-def maxOfDistributions3(delays):
+def maxOfDistributions3(delays: []) -> RandomVariable:
 
     size = len(delays)
+
     for i in range(0, size - 1):
-        newRV = delays[i].getMaximum3(delays[i + 1])
+        newRV = delays[i].getMaximum4(delays[i + 1])
         delays[i + 1] = newRV
 
     max = delays[-1]
@@ -126,7 +131,7 @@ def maxOfDistributions3(delays):
     Function puts list into queue. 
         
 """
-def putIntoQueue(queue, list):
+def putIntoQueue(queue: Queue, list: []) -> None:
 
     for item in list:
         queue.put(item)

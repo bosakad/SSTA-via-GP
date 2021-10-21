@@ -83,10 +83,31 @@ class RandomVariable:
 
     def getMaximum3(self, secondVariable):
 
-        maxEdges = np.maximum(self.edges, secondVariable.edges)
+        maxBins = np.maximum(self.bins, secondVariable.bins)
 
-        maxDelay = RandomVariable(self.bins, maxEdges)
+        maxDelay = RandomVariable(maxBins, self.edges)
         return maxDelay
+
+
+    def getMaximum4(self, secondVariable):
+
+        n = len(self.bins)
+
+        f1 = self.bins
+        f2 = secondVariable.bins
+
+        max = np.array([0.]* n)
+
+        for i in range(0, n):
+            F2 = np.sum(f2[:i+1])
+            F1 = np.sum(f1[:i])     # only for discrete - not to count with 1 number twice
+
+            max[i] = f1[i] * F2 + f2[i] * F1
+
+        maxDelay = RandomVariable(max, self.edges)
+        return maxDelay
+
+
 
 
     """ Convolution of two independent random variables
@@ -105,24 +126,14 @@ class RandomVariable:
         g = secondVariable.bins
 
         size = len(f)
-        newHistogram = []
+        newHistogram = np.array([0.] * size)
 
         for z in range(0, size):
-            newHistogram.append(0)
             for k in range(0, z + 1):
                 newHistogram[z] += f[k] * g[z - k]
 
+
         return RandomVariable(newHistogram, self.edges)
-
-    def convolutionOfTwoVars2(self, secondVariable):
-        f = self.numbers
-        g = secondVariable.numbers
-
-        newNumbers = f + g
-
-        data, edges = np.histogram(newNumbers, self.edges)
-
-        return RandomVariable(data, self.edges, newNumbers)
 
 
 

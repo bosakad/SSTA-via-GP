@@ -58,19 +58,31 @@ Pmax = 50
       Return: tuple(Ain, Aout) of edge-outgoing and edge-incoming part """
 
 
-def computeIncidenceMatrices(A):
+def computeIncidenceMatrices(A: np.array):
     Aout = np.where(A > 0, 1, 0)
     Ain = np.where(A < 0, 1, 0)
 
-    AoutParam = cp.Parameter(Aout.shape, pos=True)
-    AoutParam.value = Aout
 
-    AinParam = cp.Parameter(Ain.shape, pos=True)
-    AinParam.value = Ain
+
+    return Aout, Ain
+
+    # AoutParam = cp.Variable(Aout.shape, pos=True)
+    # AoutParam = cp.Parameter(Aout.shape, pos=True)
+    # AoutParam.value = Aout
+    # AoutParam = cp.Constant(Aout)
+
+    # AinParam = cp.expressions.constants.Constant(cp.bmat(Ain))
+    # AinParam.value = Ain
+    # AinParam = cp.Parameter(shape=Ain.shape, pos=True)
+    # AinParam.value = Ain
+    # AinParam = cp.Constant(Ain)
+
+
+    # AinParam = cp.Variable(Ain.shape, pos=True)
 
     return AoutParam, AinParam
 
-    # return ( cp.bmat( Aout ), cp.bmat( Ain ))
+    # return cp.bmat(Aout), cp.bmat(Ain)
 
 
 """ Calculate input capacitance as affine function ... alpha + beta * x
@@ -82,7 +94,7 @@ def computeIncidenceMatrices(A):
       Return: array [1xN] of load capacitances """
 
 
-def computeInputCapacitance(alphas, betas, x):
+def computeInputCapacitance(alphas: np.array, betas: np.array, x: cp.Variable) -> cp.Expression:
     inputCap = alphas + cp.multiply(x, betas)
     return inputCap
 
@@ -103,11 +115,15 @@ def computeInputCapacitance(alphas, betas, x):
     """
 
 
-def computeLoadCapacitance(Aout, Ain, inputCapacitance):
-    Fout = cp.bmat( Aout @ Ain.T )
+def computeLoadCapacitance(Aout, Ain, inputCapacitance: cp.Expression) -> cp.Expression:
+
+    Fout = Aout @ Ain.T
     cloadMat = Fout @ inputCapacitance
 
-    cload = [None] * 7
+    # print(cloadMat)
+    return cloadMat
+
+    cload = np.array([None] * 7)
 
     cload[0] = cloadMat[0]
     cload[1] = cloadMat[1]
@@ -121,7 +137,7 @@ def computeLoadCapacitance(Aout, Ain, inputCapacitance):
     #return cload
     # return inputCapacitance
     return cp.hstack(cload)
-
+    # return cp.bmat(cload)
 
 # Create an array of constraints
 # constr_cload = []
@@ -142,7 +158,7 @@ def computeLoadCapacitance(Aout, Ain, inputCapacitance):
         Return: array [1xN] of gate delays        """
 
 
-def computeGateDelays(capLoad, gammas, x):
+def computeGateDelays(capLoad: cp.Expression, gammas: np.array, x: cp.Variable) -> cp.Expression:
     cloadTimesGamma = cp.multiply(capLoad, gammas)
     gateDelays = cp.multiply(cloadTimesGamma, 1 / x)
 
@@ -214,11 +230,15 @@ def getConstrCload(capLoad, loadCapacitances):
         Return: tuple (constr_timing, input_timing) of all timing constraints        """
 
 
-def getConstrTiming(Aout, Ain, gateDelays, t):
+def getConstrTiming(Aout, Ain, gateDelays, t: cp.Variable, x):
 
-    print(gateDelays)
+    constr_timing = Aout.T @ t + Ain.T @ gateDelays <= Ain.T @ t
 
-    constr_timing = Aout.T @ t + Ain.T @ cp.hstack(gateDelays) <= Ain.T @ t
+    constr_timing = Aout.T @ t <= Ain.T @ t
+
+    constr_timing = Aout.T @ t + Ain.T @ [1, 1, 1, 1, 1, 1, 1] <= Ain.T @ t
+    # constr_timing = Aout.T @ t + Ain.T @ (cp.multiply(x, np.array([1,1,1,1,1,1,1])) + np.array([1,1,1,1,1,1,1])) <= Ain.T @ t
+
 
     input_timing = getInputTimingConstr(gateDelays, t)
 
@@ -227,10 +247,11 @@ def getConstrTiming(Aout, Ain, gateDelays, t):
     # TODO: generalize
 
 
-def getInputTimingConstr(gateDelays, t):
-    constr = gateDelays[0:2] <= t[0:2]
+def getInputTimingConstr(gateDelays: cp.Expression, t: cp.Variable) -> cp.Expression:
+    constr1 = gateDelays[0] <= t[0]
+    constr2 = gateDelays[1] <= t[1]
 
-    return constr
+    return [constr1, constr2]
 
 
 """ Get maximum delay - that is the upper bound 
@@ -242,9 +263,9 @@ def getInputTimingConstr(gateDelays, t):
         Return: [1x1] maximum of all path delays       """
 
 
-def getMaximumDelay(t):  # TODO: generalize
+def getMaximumDelay(t: cp.Variable) -> cp.Expression:  # TODO: generalize
 
-    varsToMin = cp.hstack( [t[5], t[6]] )
+    varsToMin = cp.hstack([t[5], t[6]])
     circuitDelay = cp.max(varsToMin)
 
     return circuitDelay
@@ -260,7 +281,8 @@ def getMaximumDelay(t):  # TODO: generalize
         Return: Double, total power        """
 
 
-def computeTotalPower(frequencies, energyLoss, x):
+def computeTotalPower(frequencies: np.array, energyLoss: np.array, x: cp.Variable) -> cp.Expression:
+
     power = cp.sum(cp.multiply((cp.multiply(frequencies, x)), energyLoss))
     return power
 
@@ -273,7 +295,7 @@ def computeTotalPower(frequencies, energyLoss, x):
         Return: Double, total area        """
 
 
-def computeTotalArea(gateScales, x):
+def computeTotalArea(gateScales: np.array, x: cp.Variable) -> cp.Expression:
     area = cp.sum(cp.multiply(gateScales, x))
     return area
 
@@ -288,18 +310,22 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
 
     Aout, Ain = computeIncidenceMatrices(A)
 
-    alphasParam = cp.Parameter(alphas.shape, pos=True)
-    alphasParam.value = alphas
+    # alphasParam = cp.Parameter(alphas.shape, pos=True)
+    # alphasParam.value = alphas
+    alphasParam = cp.Constant(alphas)
 
-    betasParam = cp.Parameter(betas.shape, pos=True)
-    betasParam.value = betas
+    # betasParam = cp.Parameter(betas.shape, pos=True)
+    # betasParam.value = betas
+    betasParam = cp.Constant(betas)
 
-    gammasParam = cp.Parameter(gammas.shape, pos=True)
-    gammasParam.value = gammas
+    # gammasParam = cp.Parameter(gammas.shape, pos=True)
+    # gammasParam.value = gammas
+    gammasParam = cp.Constant(gammas)
 
     inputCap = computeInputCapacitance(alphasParam, betasParam, x)
     computedLCapacitance = computeLoadCapacitance(Aout, Ain, inputCap)
 
+    # computedLCapacitance = x
     gateDelays = computeGateDelays(computedLCapacitance, gammasParam, x)
     maxDelay = getMaximumDelay(t)
 
@@ -309,19 +335,22 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
     # get constraints
 
     cloadConstr = getConstrCload(computedLCapacitance, loadCapacitances)
-    timingConstr, inputTimingConstr = getConstrTiming(Aout, Ain, gateDelays, t)
+    timingConstr, inputTimingConstr = getConstrTiming(Aout, Ain, gateDelays, t, x   )
 
     posX = x >= 1  # all sizes greater than 1 (normalized)expr
 
+
     # formulate the GGP
 
-    # constraints = [totalPower <= maxPower, totalArea <= maxArea, timingConstr, inputTimingConstr, posX]
-    constraints = [totalPower <= maxPower, totalArea <= maxArea, timingConstr, posX]
+
+    # constraints = [totalPower <= maxPower, totalArea <= maxArea, timingConstr, posX] + inputTimingConstr
+    constraints = [totalPower <= maxPower, totalArea <= maxArea, posX, timingConstr] + inputTimingConstr
 
     objective = cp.Minimize(maxDelay)
 
     prob = cp.Problem(objective, constraints)
-    prob.solve(gp=True, verbose=False, solver=cp.MOSEK)
+
+    prob.solve(gp=True, verbose=True, solver=cp.MOSEK)
 
     print("sizing params: ", x.value)
 

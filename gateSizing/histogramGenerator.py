@@ -17,11 +17,15 @@ Generates a randomly generated gaussian histogram with given mean and standard d
 """
 
 
-def get_gauss_bins(mu, sigma, numberOfEdges, numberOfSamples):
+def get_gauss_bins(mu: float, sigma: float, numberOfEdges: int, numberOfSamples: int) -> RandomVariable:
     s = np.random.normal(mu, sigma, numberOfSamples)
-    data, edges = np.histogram(s, numberOfEdges)
 
-    randomVar = RandomVariable(data, edges)
+    STATIC_BINS = np.arange(-1, 10, 12 / numberOfEdges)
+
+    data, edges = np.histogram(s, bins=STATIC_BINS)
+    dataNorm = np.array(data) / np.sum(data)
+
+    randomVar = RandomVariable(dataNorm, edges)
 
     return randomVar
 

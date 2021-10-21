@@ -86,8 +86,6 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
     m0 = gate[0]
     s0 = gate[1]
 
-    print(n_samples)
-
 
     # list that contains simulation data for inputs
     montecarlo = input_simulation_data
@@ -98,19 +96,17 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
         a = list(G.predecessors(node))[0]
         b = list(G.predecessors(node))[1]
 
-        print(np.mean(montecarlo[a]))
-        print(np.mean(montecarlo[b]))
+        # print(np.mean(montecarlo[a]))
+        # print(np.mean(montecarlo[b]))
 
         max = np.maximum(montecarlo[a], montecarlo[b])
-        print(np.mean(max))
-        print(np.mean(np.random.normal(m0, s0, n_samples)))
-        if node != sink:   #sink
-            montecarlo[node] = max + np.random.normal(m0, s0, n_samples)
-        else:
-            montecarlo[node] = max
+        # print(np.mean(max))
+        # print(np.mean(np.random.normal(m0, s0, n_samples)))
 
-        print(np.mean(montecarlo[node]))
-        print()
+        montecarlo[node] = max + np.random.normal(m0, s0, n_samples)
+
+
+        # print(np.mean(montecarlo[node]))
 
 
     return montecarlo
@@ -150,9 +146,9 @@ def main():
 
     list_of_inputs = get_inputs(adjacency)
 
-    print(list_of_inputs)
+    # print(list_of_inputs)
     unknown_nodes = get_unknown_nodes(G, list_of_inputs)
-    print(f'The circuit consist of {len(unknown_nodes)} nodes.\n')
+    # print(f'The circuit consist of {len(unknown_nodes)} nodes.\n')
 
     # gates are assumed to have the same delays
     gate = [0.5, 0.5]  # mean and std for the gates
@@ -171,8 +167,17 @@ def main():
     mc = simulation(G, inputs_simulation, unknown_nodes, gate, n_samples)
     maxdelay = mc[-1]
 
-    print(f'The mean delay is {np.mean(maxdelay)}')
-    print(f'The std of a delay is {np.std(maxdelay)}')
+
+    # print out the results
+
+    for i in range(1, len(mc)):
+
+        delay = mc[i]
+        print('Mean of ' + str(i) + 'th delay is: ' + str(np.mean(delay)) + ', std: ' + str(np.std(delay)) )
+
+
+    # print(f'The mean delay is {np.mean(maxdelay)}')
+    # print(f'The std of a delay is {np.std(maxdelay)}')
 
     _ = plt.hist(maxdelay, bins=50, density='PDF', alpha=0.7)
     plt.ylabel('PDF of delay', size=14)
