@@ -234,9 +234,9 @@ def getConstrTiming(Aout, Ain, gateDelays, t: cp.Variable, x):
 
     constr_timing = Aout.T @ t + Ain.T @ gateDelays <= Ain.T @ t
 
-    constr_timing = Aout.T @ t <= Ain.T @ t
-
-    constr_timing = Aout.T @ t + Ain.T @ [1, 1, 1, 1, 1, 1, 1] <= Ain.T @ t
+    # constr_timing = Aout.T @ t <= Ain.T @ t
+    #
+    # constr_timing = Aout.T @ t + Ain.T @ [1, 1, 1, 1, 1, 1, 1] <= Ain.T @ t
     # constr_timing = Aout.T @ t + Ain.T @ (cp.multiply(x, np.array([1,1,1,1,1,1,1])) + np.array([1,1,1,1,1,1,1])) <= Ain.T @ t
 
 
