@@ -23,7 +23,7 @@ def get_gauss_bins(mu: float, sigma: float, numberOfEdges: int, numberOfSamples:
     STATIC_BINS = np.arange(-1, 10, 12 / numberOfEdges)
 
     data, edges = np.histogram(s, bins=STATIC_BINS)
-    dataNorm = np.array(data) / np.sum(data)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
 
     randomVar = RandomVariable(dataNorm, edges)
 

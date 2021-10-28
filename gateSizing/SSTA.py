@@ -43,14 +43,8 @@ def calculateCircuitDelay(rootNodes: []) -> []:
         # print(queue, tmpNode)
 
         if tmpNode.prevDelays:                                      # get maximum + convolution
-            # print(tmpNode.prevDelays[0].mean)
-            # print(tmpNode.prevDelays[1].mean)
-            maxDelay = maxOfDistributions3(tmpNode.prevDelays)
-            # print(maxDelay.mean)
-            # print(currentRandVar.mean)
+            maxDelay = maxOfDistributions4(tmpNode.prevDelays)
             currentRandVar = currentRandVar.convolutionOfTwoVars(maxDelay)
-            # print(currentRandVar.mean)
-            # print()
 
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
             nextNode.appendPrevDelays(currentRandVar)
@@ -62,8 +56,8 @@ def calculateCircuitDelay(rootNodes: []) -> []:
         putIntoQueue(queue, tmpNode.nextNodes)
         newDelays.append(currentRandVar)
 
-    # print(len(sink))
-    sinkDelay = maxOfDistributions3(sink)
+
+    sinkDelay = maxOfDistributions4(sink)
     newDelays.append(sinkDelay)
 
     return newDelays
@@ -119,6 +113,18 @@ def maxOfDistributions3(delays: []) -> RandomVariable:
 
     for i in range(0, size - 1):
         newRV = delays[i].getMaximum4(delays[i + 1])
+        delays[i + 1] = newRV
+
+    max = delays[-1]
+
+    return max
+
+def maxOfDistributions4(delays: []) -> RandomVariable:
+
+    size = len(delays)
+
+    for i in range(0, size - 1):
+        newRV = delays[i].getMaximum5(delays[i + 1])
         delays[i + 1] = newRV
 
     max = delays[-1]

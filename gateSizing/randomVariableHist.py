@@ -16,6 +16,9 @@ import numpy as np
 class RandomVariable:
 
     def __init__(self, bins, edges):
+
+        # normalize if isnt
+
         self.bins = np.array(bins)
         self.edges = np.array(edges)
         self.mean = self.calculateMean()
@@ -106,6 +109,35 @@ class RandomVariable:
 
         maxDelay = RandomVariable(max, self.edges)
         return maxDelay
+
+    def getMaximum5(self, secondVariable):
+
+        # get data
+        n = len(self.bins)
+
+        bins1 = self.bins
+        edges1 = self.edges
+        midPoints1 = 0.5 * (edges1[1:] + edges1[:-1])    # midpoints of the edges of hist.
+
+        bins2 = secondVariable.bins
+        edges2 = secondVariable.edges
+        midPoints2 = 0.5 * (edges2[1:] + edges2[:-1])  # midpoints of the edges of hist.
+
+        # prealloc
+        maximum = np.array([0.]* n)
+
+        # calc. maximum
+        for i in range(0, n):
+            for j in range(0, n):
+                e1 = midPoints1[i]
+                e2 = midPoints2[j]
+
+                if e1 >= e2:
+                    maximum[i] += bins1[i] * bins2[j]
+                else:
+                    maximum[j] += bins1[i] * bins2[j]
+
+        return RandomVariable(maximum, self.edges)
 
 
 

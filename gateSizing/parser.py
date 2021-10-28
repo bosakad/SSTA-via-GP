@@ -1,6 +1,7 @@
 import io
 import sys
-
+import re
+import numpy
 
 """ Get incidence matrix from netlist.
 
@@ -16,8 +17,8 @@ import sys
 def getIncidenceMatrixFromNetlist(argv):
     netListString = parseFileName(argv)
 
-    # matrix = parseNetListIntoMatrix(netListString)
-    # return matrix
+    matrix = parseNetListIntoMatrix(netListString)
+    return matrix
 
     return None
 
@@ -72,18 +73,25 @@ Parses string and puts the information into cell-edge incidence matrix.
       Return: cell-edge incidence matrix  """
 
 def parseNetListIntoMatrix(netList):
+    global gateIndex, edgeIndex, mappingList, matrixDict
     buf = io.StringIO(netList)
     readLine = ""
+
+    inputGates = []
 
     # skip empty lines or comments
     while not readLine.startswith("INPUT"):
         readLine = buf.readline()
 
+
         # read inputs
     while readLine.startswith("INPUT"):
-        print(readLine)
-        # todo: save input gates
+
+        gateNum = int(re.search(r'\d+', readLine).group())
+        inputGates.append(gateNum)   # input gates are -1
+
         readLine = buf.readline()
+
 
         # skip empty lines or comments
     while not readLine.startswith("OUTPUT"):
@@ -91,7 +99,7 @@ def parseNetListIntoMatrix(netList):
 
         # read outputs
     while readLine.startswith("OUTPUT"):
-        print(readLine)
+        # print(readLine)
         # todo: save output gates
         readLine = buf.readline()
 
@@ -99,11 +107,46 @@ def parseNetListIntoMatrix(netList):
     while readLine.startswith("\n"):
         readLine = buf.readline()
 
-        # parse circuit
+
+
+        matrixDict = {} # matrix in dict
+        mappingList = {} # list to map a gate to a matrix index
+
+        edgeIndex = 0
+        gateIndex = 0
+
+        # parse circuit - for circuit information
     while readLine != "":
-        print(readLine)
-        # todo: save circuit into matrix
+        gates = list(map(int, re.findall(r'\d+', readLine)))    # get line gates
+
+        newGate = gates[0]                  # get new gate and create a mapping
+        mappingList[newGate] = gateIndex
+
+        if gates[1] not in inputGates:
+            matrixDict[(gateIndex, edgeIndex)] = -1
+            matrixDict[(mappingList[gates[1]], edgeIndex)] = 1
+            edgeIndex += 1
+        if gates[2] not in inputGates:
+            matrixDict[(gateIndex, edgeIndex)] = -1
+            matrixDict[(mappingList[gates[2]], edgeIndex)] = 1
+            edgeIndex += 1
+
+        gateIndex += 1
+
         readLine = buf.readline()
+
+
+    # put dict. into matrix
+
+    matrix = numpy.array([[0]* edgeIndex] * gateIndex)
+
+    for (key, value) in matrixDict.items():
+        c = key[0]
+        e = key[1]
+        matrix[c, e] = value
+
+
+    return matrix
 
 
 """ Parse gate properties from .txt
