@@ -20,7 +20,7 @@ Generates a randomly generated gaussian histogram with given mean and standard d
 def get_gauss_bins(mu: float, sigma: float, numberOfEdges: int, numberOfSamples: int) -> RandomVariable:
     s = np.random.normal(mu, sigma, numberOfSamples)
 
-    STATIC_BINS = np.arange(-1, 10, 12 / numberOfEdges)
+    STATIC_BINS = np.linspace(0, 5, 50)
 
     data, edges = np.histogram(s, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))

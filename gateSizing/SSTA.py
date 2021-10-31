@@ -1,7 +1,4 @@
 from queue import Queue
-
-import numpy as np
-
 from randomVariableHist import RandomVariable
 
 """ Compute circuit delay using PDFs algorithm
@@ -38,9 +35,6 @@ def calculateCircuitDelay(rootNodes: []) -> []:
 
         if tmpNode in closedList:
             continue
-
-
-        # print(queue, tmpNode)
 
         if tmpNode.prevDelays:                                      # get maximum + convolution
             maxDelay = maxOfDistributions4(tmpNode.prevDelays)

@@ -20,8 +20,6 @@ def getIncidenceMatrixFromNetlist(argv):
     matrix = parseNetListIntoMatrix(netListString)
     return matrix
 
-    return None
-
 
 
 """ Parses file name. Does edge casing. Returns content of the file if
@@ -99,7 +97,6 @@ def parseNetListIntoMatrix(netList):
 
         # read outputs
     while readLine.startswith("OUTPUT"):
-        # print(readLine)
         # todo: save output gates
         readLine = buf.readline()
 
@@ -160,3 +157,6 @@ def parseNetListIntoMatrix(netList):
 def parseGatesPropertiesFromTXT(fileName, gates):
     #TODO
     pass
+
+
+

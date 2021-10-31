@@ -168,6 +168,21 @@ class RandomVariable:
         return RandomVariable(newHistogram, self.edges)
 
 
+    def convolutionOfTwoVars2(self, secondVariable):
+        f = self.bins
+        g = secondVariable.bins
+
+        convolution = np.convolve(f, g, mode="full")
+
+        diff = self.edges[1] - self.edges[0]
+        end = self.edges[-1]
+
+        appended = np.linspace(end + diff, end + diff * (len(g)), len(g) - 1)
+
+        edges = np.append(self.edges, appended)
+
+        return RandomVariable(convolution, edges)
+
 
     """ Calculate mean
     

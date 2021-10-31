@@ -35,13 +35,11 @@ def main(argv):
 
     ## Matrix parsing
 
-    circuitMatrix = parser.getIncidenceMatrixFromNetlist(argv)
-    print(circuitMatrix)
-
+    # circuitMatrix = parser.getIncidenceMatrixFromNetlist(argv)
 
     # SSTA
 
-    numberOfBins = 50
+    numberOfBins = 100
     numberOfSamples = int(100000)
 
     g1 = histogramGenerator.get_gauss_bins(1, 0.45, numberOfBins, numberOfSamples)  # g1, g2 INPUT gates, g3 middle
@@ -87,44 +85,13 @@ def main(argv):
     # print(f'Optimized delay:  {MinimizedDelay}')
 
 
-
-
-
-
-
-    ## DEBUGGING ##
-
-    # numberOfBins = 50
-    # numberOfSamples = int(100000)
-    #
-    # g1 = histogramGenerator.get_gauss_bins(1, 0.45, numberOfBins, numberOfSamples)  # g1, g2 INPUT gates, g3 middle
-    # g2 = histogramGenerator.get_gauss_bins(0.5, 0.3, numberOfBins, numberOfSamples)  # g4 output - inputs: g3 g1
-    # g3 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples)  # g5 output - inputs: g3, g2
-    #
-    # print("g1 mean: " + str(g1.mean))
-    # print("g2 mean: " + str(g2.mean))
-    # print("g3 mean: " + str(g3.mean))
-    #
-    # max = g1.getMaximum5(g2)
-    # print("mean, std of max: " + str(max.mean) + ", " + str(max.std))
-    # conv = max.convolutionOfTwoVars(g3)
-    # print("mean, std of convolution: " + str(conv.mean) + ", " + str(conv.std))
-    #
-    # print(np.convolve([1, 2, 3], [0, 1, 0.5]))
-    #
-    # h1 = RandomVariable([1, 2, 3, 0, 0], [0, 1, 2, 3, 4, 5])
-    # h2 = RandomVariable([0, 1, 0.5, 0, 0], [0, 1, 2, 3, 4, 5])
-    # print(h1.convolutionOfTwoVars(h2).bins)
-
-
-    ############ plotting
-
     # plot histogram
-    # plt.hist(sinkDelay.edges[:-1], sinkDelay.edges, weights=sinkDelay.bins, density="PDF")
-    # plt.ylabel('PDF of delay', size=14)
-    # plt.xlabel('time', size=14)
-    # plt.title('Histogram of the MAX delay', size=16)
-    # plt.show()
+
+    plt.hist(sinkDelay.edges[:-1], sinkDelay.edges, weights=sinkDelay.bins, density="PDF")
+    plt.ylabel('PDF of delay', size=14)
+    plt.xlabel('time', size=14)
+    plt.title('Histogram of the MAX delay', size=16)
+    plt.show()
 
 
 if __name__ == "__main__":
