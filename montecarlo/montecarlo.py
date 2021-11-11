@@ -96,6 +96,9 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
         a = list(G.predecessors(node))[0]
         b = list(G.predecessors(node))[1]
 
+        # print(np.mean(montecarlo[a]), np.std(montecarlo[a]))
+        # print(np.mean(montecarlo[b]), np.std(montecarlo[a]))
+
         max = np.maximum(montecarlo[a], montecarlo[b])
         # print("mean, std of max: " + str(np.mean(max)) + ", " + str(np.std(max)))
 
@@ -105,7 +108,6 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
             montecarlo[node] = max
 
         # print("mean, std of convolution: " + str(np.mean(montecarlo[node])) + ", " + str(np.std(montecarlo[node])))
-
 
 
     return montecarlo
@@ -169,10 +171,10 @@ def main():
 
     # print out the results
 
-    for i in range(1, len(mc)):
-
-        delay = mc[i]
-        print('Mean of ' + str(i) + 'th delay is: ' + str(np.mean(delay)) + ', std: ' + str(np.std(delay)) )
+    # for i in range(1, len(mc)):
+    #
+    #     delay = mc[i]
+    #     print('Mean of ' + str(i) + 'th delay is: ' + str(np.mean(delay)) + ', std: ' + str(np.std(delay)) )
 
 
     # print(f'The mean delay is {np.mean(maxdelay)}')

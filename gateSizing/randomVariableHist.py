@@ -1,3 +1,5 @@
+import math
+
 import cvxpy as cp
 import numpy as np
 
@@ -164,22 +166,64 @@ class RandomVariable:
             for k in range(0, z + 1):
                 newHistogram[z] += f[k] * g[z - k]
 
-
         return RandomVariable(newHistogram, self.edges)
 
+    """ Convolution of two independent random variables using numpy.convolve function.
+
+        Input:
+            frequencies: 2xB array, where B is number of bins of given a histogram
+
+        Output:
+
+        (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
+
+        """
 
     def convolutionOfTwoVars2(self, secondVariable):
         f = self.bins
         g = secondVariable.bins
 
+            # convolve
         convolution = np.convolve(f, g, mode="full")
 
-        diff = self.edges[1] - self.edges[0]
-        end = self.edges[-1]
+            # pick the largest edges
+        if secondVariable.edges.size > self.edges.size:
+            self.edges = secondVariable.edges
 
-        appended = np.linspace(end + diff, end + diff * (len(g)), len(g) - 1)
+            # append new edges
+        diff = self.edges[1] - self.edges[0]
+        appended = []
+        if len(self.edges) != len(convolution) + 1:
+
+            end = self.edges[-1]
+            appended = np.linspace(end + diff, end + diff * (len(g) - 1), len(g) - 1)
+
 
         edges = np.append(self.edges, appended)
+
+        # shift edges
+
+        # edges = edges +   edges[0]    # shift made by indexing from 0
+
+        # if edges[0] > 0:        # add bins
+        #     numberOfBinsNeeded = round(edges[0] / diff)
+        #     inserted = np.linspace(edges[0], 2*edges[0] - diff, numberOfBinsNeeded)
+        #
+        #     edges = edges + edges[0]
+        #     edges = np.append(inserted, edges)
+        #
+        #     convolution = np.append(np.zeros(numberOfBinsNeeded), convolution)
+
+        if edges[0] > 0:      # cut bins
+            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
+            convolution = np.append( np.zeros(numberOfBinsNeeded), convolution[:-numberOfBinsNeeded] )
+        elif edges[0] < 0:      # cut bins
+            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
+            convolution = np.append( convolution[numberOfBinsNeeded:], np.zeros(numberOfBinsNeeded) )
+
+
+
+        convolution = convolution / (np.sum(convolution) * diff)
 
         return RandomVariable(convolution, edges)
 

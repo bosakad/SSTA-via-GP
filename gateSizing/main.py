@@ -39,14 +39,15 @@ def main(argv):
 
     # SSTA
 
-    numberOfBins = 100
-    numberOfSamples = int(100000)
+    numberOfBins = 1000
+    numberOfSamples = int(1000000)
+    binsInterval = (-1, 8)
 
-    g1 = histogramGenerator.get_gauss_bins(1, 0.45, numberOfBins, numberOfSamples)  # g1, g2 INPUT gates, g3 middle
-    g2 = histogramGenerator.get_gauss_bins(0.5, 0.3, numberOfBins, numberOfSamples)  # g4 output - inputs: g3 g1
-    g3 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples)  # g5 output - inputs: g3, g2
-    g4 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples)
-    g5 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples)
+    g1 = histogramGenerator.get_gauss_bins(1, 0.45,  numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
+    g2 = histogramGenerator.get_gauss_bins(0.5, 0.3, numberOfBins, numberOfSamples, binsInterval)  # g4 output - inputs: g3 g1
+    g3 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
+    g4 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples, binsInterval)
+    g5 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples, binsInterval)
 
     n1 = Node(g1)
     n2 = Node(g2)
