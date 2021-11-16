@@ -205,18 +205,18 @@ class RandomVariable:
 
         # edges = edges +   edges[0]    # shift made by indexing from 0
 
-        # if edges[0] > 0:        # add bins
-        #     numberOfBinsNeeded = round(edges[0] / diff)
-        #     inserted = np.linspace(edges[0], 2*edges[0] - diff, numberOfBinsNeeded)
-        #
-        #     edges = edges + edges[0]
-        #     edges = np.append(inserted, edges)
-        #
-        #     convolution = np.append(np.zeros(numberOfBinsNeeded), convolution)
+        if edges[0] > 0:        # add bins
+            numberOfBinsNeeded = round(edges[0] / diff)
+            inserted = np.linspace(edges[0], 2*edges[0] - diff, numberOfBinsNeeded)
 
-        if edges[0] > 0:      # cut bins
-            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
-            convolution = np.append( np.zeros(numberOfBinsNeeded), convolution[:-numberOfBinsNeeded] )
+            edges = edges + edges[0]
+            edges = np.append(inserted, edges)
+
+            convolution = np.append(np.zeros(numberOfBinsNeeded), convolution)
+
+        # if edges[0] > 0:      # cut bins
+        #     numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
+        #     convolution = np.append( np.zeros(numberOfBinsNeeded), convolution[:-numberOfBinsNeeded] )
         elif edges[0] < 0:      # cut bins
             numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
             convolution = np.append( convolution[numberOfBinsNeeded:], np.zeros(numberOfBinsNeeded) )

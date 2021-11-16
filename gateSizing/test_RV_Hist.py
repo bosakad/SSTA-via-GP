@@ -169,7 +169,7 @@ def testConvolutionUniform(dec: int):
     low = 5
     high = 8
     numberOfSamples = 100000
-    numberOfBins = 500
+    numberOfBins = 600
 
         # DESIRED
 
@@ -183,7 +183,7 @@ def testConvolutionUniform(dec: int):
 
         # ACTUAL
 
-    STATIC_BINS = np.linspace(5, 12, numberOfBins)
+    STATIC_BINS = np.linspace(0, 100, numberOfBins)
 
     data, edges = np.histogram(rv1, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
@@ -338,7 +338,7 @@ if __name__ == "__main__":
     testMaximum4(dec=1)
     testMaximum5(dec=1)
 
-    testConvolutionUniform(dec=2)
+    testConvolutionUniform(dec=4)
     testConvolutionGauss(dec=2)
 
 
