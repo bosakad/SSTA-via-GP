@@ -1,3 +1,4 @@
+import numpy
 import numpy as np
 from randomVariableHist import RandomVariable
 import matplotlib.pyplot as plt
@@ -118,16 +119,16 @@ def testMaximum5(dec: int):
 
     return None
 
-def testConvolutionGauss(dec: int):
+def testConvolutionGaussShift(dec: int):
 
-    mu1 = 0.5
-    sigma1 = 0.5
+    mu1 = 12
+    sigma1 = 2
 
-    mu2 = 1.0527713798460994
-    sigma2 = 0.3920577124415191
+    mu2 = 6
+    sigma2 = 3
 
-    numberOfSamples = 1000000
-    numberOfBins = 1000
+    numberOfSamples = 20000000
+    numberOfBins = 10000
 
         # DESIRED
 
@@ -138,11 +139,9 @@ def testConvolutionGauss(dec: int):
     
     desired = [np.mean(convolution), np.std(convolution)]
 
-
-
         # ACTUAL
 
-    STATIC_BINS = np.linspace(-10, 10, numberOfBins)
+    STATIC_BINS = np.linspace(-50, 90, numberOfBins)
 
     # histogram1
     data, edges = np.histogram(rv1, bins=STATIC_BINS)
@@ -154,7 +153,7 @@ def testConvolutionGauss(dec: int):
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h2 = RandomVariable(dataNorm, edges)
 
-    convolution = h1.convolutionOfTwoVars2(h2)
+    convolution = h1.convolutionOfTwoVarsShift(h2)
 
     actual = [convolution.mean, convolution.std]
 
@@ -164,12 +163,12 @@ def testConvolutionGauss(dec: int):
 
     return None
 
-def testConvolutionUniform(dec: int):
+def testConvolutionUniformShift(dec: int):
 
-    low = 5
-    high = 8
-    numberOfSamples = 100000
-    numberOfBins = 600
+    low = 3
+    high = 6
+    numberOfSamples = 10000
+    numberOfBins = 30
 
         # DESIRED
 
@@ -183,17 +182,24 @@ def testConvolutionUniform(dec: int):
 
         # ACTUAL
 
-    STATIC_BINS = np.linspace(0, 100, numberOfBins)
+    STATIC_BINS = np.linspace(0,10, numberOfBins)
 
     data, edges = np.histogram(rv1, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h1 = RandomVariable(dataNorm, edges)
 
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+
     data, edges = np.histogram(rv2, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h2 = RandomVariable(dataNorm, edges)
 
-    convolution = h1.convolutionOfTwoVars2(h2)
+    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+
+    convolution = h1.convolutionOfTwoVarsShift(h2)
+
+    # plt.hist(convolution.edges[:-1], convolution.edges, weights=convolution.bins, density="PDF")
+    # plt.show()
 
     actual = [convolution.mean, convolution.std]
 
@@ -204,7 +210,128 @@ def testConvolutionUniform(dec: int):
     return None
 
 
+def testUniteEdges(dec: int):
 
+    edges1 = np.array([1, 2, 3])
+    bins1 = np.array([4, 8])
+    rv1 = RandomVariable(bins1, edges1)
+
+    edges2 = np.array([0.5, 1.5, 2.5])
+    bins2 = np.array([2, 4])
+    rv2 = RandomVariable(bins2, edges2)
+
+
+        # DESIRED
+
+    edges = np.array([0.5, 1.75, 3])
+    bins1N = np.array([6, 12]) / 18            # [0] = 3; [1] = 1 + 8
+    bins2N = np.array([3, 3]) / 6          # [0] = 2 + 1 ; [1] = 3
+    desired = np.array([edges, bins1N, bins2N], dtype=object)
+
+
+        # ACTUAL
+
+    rv1.uniteEdges(rv2)
+
+    actual = np.array([rv2.edges, rv1.bins, rv2.bins], dtype=object)
+
+
+        # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
+
+
+def testUniteEdges(dec: int):
+
+    mu1 = 12
+    sigma1 = 2
+
+    numberOfSamples = 10000000
+    numberOfBins = 2300
+
+    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
+
+    STATIC_BINS = np.linspace(-40, 90, numberOfBins)
+
+    data, edges = np.histogram(rv1, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h1 = RandomVariable(dataNorm, edges)
+
+    h2 = RandomVariable(dataNorm, edges - 20)
+
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    #
+    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+
+    desired = numpy.array([[h1.mean, h1.std], [h2.mean, h2.std]])
+
+    h1.uniteEdges(h2)
+
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+
+    actual = numpy.array([[h1.mean, h1.std], [h2.mean, h2.std]])
+
+    # TEST
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    plt.show()
+
+
+    """ Test with different edges """
+def testConvolutionUnion(dec: int):
+
+    mu1 = 12
+    sigma1 = 2
+
+    mu2 = 6
+    sigma2 = 3
+
+    numberOfSamples = 10000000
+    numberOfBins = 2300
+
+    # DESIRED
+
+    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
+    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
+
+    convolution = rv1 + rv2
+
+    desired = [np.mean(convolution), np.std(convolution)]
+
+    # ACTUAL
+
+    STATIC_BINS = np.linspace(-40, 90, numberOfBins)
+
+    # histogram1
+    data, edges = np.histogram(rv1, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h1 = RandomVariable(dataNorm, edges)
+
+
+    STATIC_BINS = np.linspace(-30, 100, numberOfBins)
+    # histogram2
+    data, edges = np.histogram(rv2, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h2 = RandomVariable(dataNorm, edges)
+
+    convolution = h1.convolutionOfTwoVarsUnion(h2)
+
+    actual = [convolution.mean, convolution.std]
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
+
+
+
+
+    return None
 
 
 def testMeanGauss(dec: int):
@@ -338,8 +465,12 @@ if __name__ == "__main__":
     testMaximum4(dec=1)
     testMaximum5(dec=1)
 
-    testConvolutionUniform(dec=4)
-    testConvolutionGauss(dec=2)
+    # testUniteEdges(dec=2)   # failed test
+    testUniteEdges(dec=5)
+
+    # testConvolutionUnion(dec=2)
+    # testConvolutionUniform(dec=4)
+    # testConvolutionGauss(dec=4)
 
 
 

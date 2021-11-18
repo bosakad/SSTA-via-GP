@@ -100,14 +100,14 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
         # print(np.mean(montecarlo[b]), np.std(montecarlo[a]))
 
         max = np.maximum(montecarlo[a], montecarlo[b])
-        # print("mean, std of max: " + str(np.mean(max)) + ", " + str(np.std(max)))
+        print("mean, std of max: " + str(np.mean(max)) + ", " + str(np.std(max)))
 
         if node != sink:
             montecarlo[node] = max + np.random.normal(m0, s0, n_samples)
         else:
             montecarlo[node] = max
 
-        # print("mean, std of convolution: " + str(np.mean(montecarlo[node])) + ", " + str(np.std(montecarlo[node])))
+        print("mean, std of convolution: " + str(np.mean(montecarlo[node])) + ", " + str(np.std(montecarlo[node])))
 
 
     return montecarlo

@@ -110,10 +110,10 @@ def testSSTA_1(dec: int):
 
 def testSSTA_2(dec: int):
 
-    numberOfSamples = int(1000000)
-    numberOfBins = 1000
+    numberOfSamples = int(2000000)
+    numberOfBins = 2000
     distribution = 'Normal'
-    binsInterval = (2, 19)
+    binsInterval = (-20, 60)
 
         # DESIRED - monte carlo
 
@@ -141,7 +141,7 @@ def testSSTA_2(dec: int):
     mc = simulation(G, inputs_simulation, unknown_nodes, gate, numberOfSamples)
 
     desired = putTuplesIntoArray(numbers=mc)
-
+    print()
 
         # ACTUAL - ssta
 

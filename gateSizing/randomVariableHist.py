@@ -2,6 +2,7 @@ import math
 
 import cvxpy as cp
 import numpy as np
+import scipy.stats
 
 
 """ Random variable 
@@ -21,8 +22,8 @@ class RandomVariable:
 
         # normalize if isnt
 
-        self.bins = np.array(bins)
-        self.edges = np.array(edges)
+        self.bins = np.array(bins, dtype=float)
+        self.edges = np.array(edges, dtype=float)
         self.mean = self.calculateMean()
         self.std = self.calculateSTD()
 
@@ -32,6 +33,14 @@ class RandomVariable:
     #     self.numbers = numbers
     #     self.mean = np.mean(numbers)
     #     self.std = np.std(numbers)
+
+
+    """
+    Recalculates parameters mean and std after their change
+    """
+    def recalculateParams(self):
+        self.mean = self.calculateMean()
+        self.std = self.calculateSTD()
 
 
     """ Maximum of 2 distribution functions
@@ -96,6 +105,9 @@ class RandomVariable:
 
     def getMaximum4(self, secondVariable):
 
+        # unite
+        self.uniteEdges(secondVariable)
+
         n = len(self.bins)
 
         f1 = self.bins
@@ -114,12 +126,16 @@ class RandomVariable:
 
     def getMaximum5(self, secondVariable):
 
+        # unite
+        self.uniteEdges(secondVariable)
+
         # get data
         n = len(self.bins)
 
         bins1 = self.bins
         edges1 = self.edges
         midPoints1 = 0.5 * (edges1[1:] + edges1[:-1])    # midpoints of the edges of hist.
+
 
         bins2 = secondVariable.bins
         edges2 = secondVariable.edges
@@ -155,7 +171,7 @@ class RandomVariable:
     
     """
 
-    def convolutionOfTwoVars(self, secondVariable):
+    def convolutionOfTwoVarsNaive(self, secondVariable):
         f = self.bins
         g = secondVariable.bins
 
@@ -168,8 +184,11 @@ class RandomVariable:
 
         return RandomVariable(newHistogram, self.edges)
 
-    """ Convolution of two independent random variables using numpy.convolve function.
 
+
+    """ Convolution of two independent random variables using numpy.convolve function.
+        after convolution histogram is shifted
+        
         Input:
             frequencies: 2xB array, where B is number of bins of given a histogram
 
@@ -179,53 +198,157 @@ class RandomVariable:
 
         """
 
-    def convolutionOfTwoVars2(self, secondVariable):
+    def convolutionOfTwoVarsShift(self, secondVariable):
         f = self.bins
         g = secondVariable.bins
 
-            # convolve
-        convolution = np.convolve(f, g, mode="full")
-
-            # pick the largest edges
-        if secondVariable.edges.size > self.edges.size:
-            self.edges = secondVariable.edges
-
-            # append new edges
         diff = self.edges[1] - self.edges[0]
-        appended = []
-        if len(self.edges) != len(convolution) + 1:
 
-            end = self.edges[-1]
-            appended = np.linspace(end + diff, end + diff * (len(g) - 1), len(g) - 1)
+        # Convolve
+        convolution = np.convolve(f, g, mode="full")[:f.size]   # get the same range
 
+        # Deal With Edges
+        self.cutBins(self.edges, convolution)
 
-        edges = np.append(self.edges, appended)
+        # normalize
+        convolution = convolution / (np.sum(convolution) * diff)
 
-        # shift edges
-
-        # edges = edges +   edges[0]    # shift made by indexing from 0
-
-        if edges[0] > 0:        # add bins
-            numberOfBinsNeeded = round(edges[0] / diff)
-            inserted = np.linspace(edges[0], 2*edges[0] - diff, numberOfBinsNeeded)
-
-            edges = edges + edges[0]
-            edges = np.append(inserted, edges)
-
-            convolution = np.append(np.zeros(numberOfBinsNeeded), convolution)
-
-        # if edges[0] > 0:      # cut bins
-        #     numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
-        #     convolution = np.append( np.zeros(numberOfBinsNeeded), convolution[:-numberOfBinsNeeded] )
-        elif edges[0] < 0:      # cut bins
-            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
-            convolution = np.append( convolution[numberOfBinsNeeded:], np.zeros(numberOfBinsNeeded) )
+        return RandomVariable(convolution, self.edges)
 
 
+    """ Convolution of two independent random variables using numpy.convolve function.
+        after convolution histograms edges are unionised.
+            Input:
+                frequencies: 2xB array, where B is number of bins of given a histogram
+
+            Output:
+
+            (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
+
+            """
+
+    def convolutionOfTwoVarsUnion(self, secondVariable):
+
+        # Unite Edges
+        self.uniteEdges(secondVariable)
+
+        f = self.bins
+        g = secondVariable.bins
+        diff = self.edges[1] - self.edges[0]
+
+        # print(self.mean, secondVariable.mean)
+
+        # Convolve
+        convolution = np.convolve(f, g, mode="full")[:f.size]  # get the same range
+
+        # Deal With Edges
+        edges = self.edges + self.edges[0]    # shift made by indexing from 0
 
         convolution = convolution / (np.sum(convolution) * diff)
 
         return RandomVariable(convolution, edges)
+
+
+    """ Makes a union of two histograms
+    
+        Edges are considered to have the same difference and same length
+    
+    """
+
+    def uniteEdges(self, secondVariable):
+
+        edges1 = self.edges
+        bins1 = self.bins
+        edges2 = secondVariable.edges
+        bins2 = secondVariable.bins
+
+        numberOfBins = bins1.size
+
+        if edges1[0] == edges2[0]:    # edges are same, no union needed
+            return None
+
+
+            # get lower and upper bounds
+        minE = min(edges1[0], edges2[0])
+        maxE = max(edges1[-1], edges2[-1])
+
+            # create new edges
+        edgesN = np.linspace(minE, maxE, numberOfBins + 1)
+        self.edges = edgesN
+        secondVariable.edges = edgesN
+
+            # create new values
+        cdf1 = scipy.stats.rv_histogram((bins1, edgesN)).cdf
+        cdf2 = scipy.stats.rv_histogram((bins2, edgesN)).cdf
+        pdf1 = scipy.stats.rv_histogram((bins1, edges1)).pdf
+        pdf2 = scipy.stats.rv_histogram((bins2, edges2)).pdf
+
+        for i in range(0, numberOfBins):
+            # value1 = cdf1(edgesN[i+1]) - cdf1(edgesN[i])
+            # value2 = cdf2(edgesN[i+1]) - cdf2(edgesN[i])
+            value1 = pdf1((edgesN[i+1] + edgesN[i]) / 2)
+            value2 = pdf2((edgesN[i+1] + edgesN[i]) / 2)
+            # value1 = pdf1(edges1[i])
+            # value2 = pdf2(edges2[i])
+
+            bins1[i] = value1
+            bins2[i] = value2
+
+        # set new bins
+        self.bins = bins1
+        secondVariable.bins = bins2
+        self.recalculateParams()
+        secondVariable.recalculateParams()
+
+        return None
+
+    """ Makes a union of two histograms, Naive implementation
+
+            Edges are considered to have the same difference and same length
+
+        """
+    @staticmethod
+    def uniteEdgesNaive(edges1, edges2, convolution, g):
+
+        # pick the largest edges
+        if edges2.size > edges1.size:
+            edges1 = edges2
+
+            # append new edges
+        diff = edges1[1] - edges1[0]
+        appended = []
+
+        if len(edges1) != len(convolution) + 1:
+            end = edges1[-1]
+            appended = np.linspace(end + diff, end + diff * (len(g) - 1), len(g) - 1)
+
+        edges = np.append(edges1, appended)
+
+        return edges
+
+
+    """ Cuts bins depending on edge[0]  
+        if edge[0] < 0: cuts left bins and adds zeros to the end
+        if edge[0] > 0: cuts right bins and adds zeros to the beginning
+
+    """
+
+    @staticmethod
+    def cutBins(edges, bins):
+
+        diff = edges[1] - edges[0]
+
+        if edges[0] > 0:  # cut bins
+
+            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
+            bins[:numberOfBinsNeeded] = 0
+            bins[numberOfBinsNeeded:] = bins[:-numberOfBinsNeeded]
+
+        elif edges[0] < 0:  # cut bins
+
+            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
+            bins[:-numberOfBinsNeeded] = bins[numberOfBinsNeeded:]
+            bins[-numberOfBinsNeeded:] = 0
 
 
     """ Calculate mean
