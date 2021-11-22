@@ -1,6 +1,8 @@
 from queue import Queue
 from randomVariableHist import RandomVariable
 from node import Node
+import matplotlib.pyplot as plt
+import histogramGenerator
 
 """ Compute circuit delay using PDFs algorithm
 
@@ -41,12 +43,13 @@ def calculateCircuitDelay(rootNodes: [Node]) -> [Node]:
             # print(tmpNode.prevDelays[0].mean, tmpNode.prevDelays[0].std)
             # print(tmpNode.prevDelays[1].mean, tmpNode.prevDelays[0].std)
             # print(len(tmpNode.prevDelays))
-            maxDelay = maxOfDistributions3(tmpNode.prevDelays)
-            print("mean, std of max: " + str(maxDelay.mean) + ", " + str(maxDelay.std))
-            # currentRandVar = currentRandVar.convolutionOfTwoVarsShift(maxDelay)
-            currentRandVar = currentRandVar.convolutionOfTwoVarsUnion(maxDelay)
 
-            print("mean, std of convolution: " + str(currentRandVar.mean) + ", " + str(currentRandVar.std))
+            maxDelay = maxOfDistributionsFORM(tmpNode.prevDelays)
+            print("mean, std of max: " + str(maxDelay.mean) + ", " + str(maxDelay.std))
+            currentRandVar = currentRandVar.convolutionOfTwoVarsShift(maxDelay)
+            # currentRandVar = currentRandVar.convolutionOfTwoVarsUnion(maxDelay)
+
+            print("mean, std of conmaxvolution: " + str(currentRandVar.mean) + ", " + str(currentRandVar.std))
 
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
             nextNode.appendPrevDelays(currentRandVar)
@@ -58,36 +61,26 @@ def calculateCircuitDelay(rootNodes: [Node]) -> [Node]:
         putIntoQueue(queue, tmpNode.nextNodes)
         newDelays.append(currentRandVar)
 
+    # plt.hist(sink[0].edges[:-1], sink[0].edges, weights=sink[0].bins, density="PDF")
+    # plt.hist(sink[1].edges[:-1], sink[1].edges, weights=sink[1].bins, density="PDF")
+    #
+    # plt.show()
 
-    sinkDelay = maxOfDistributions4(sink)
+    sinkDelay = maxOfDistributionsFORM(sink)
+    # g5 = histogramGenerator.get_gauss_bins(5, 0.5, 3000, 1000000, (-20, 120))
+    # sinkDelay = sinkDelay.convolutionOfTwoVarsShift(g5)
     newDelays.append(sinkDelay)
 
     return newDelays
 
 
-""" Calculates maximum of an array of PDFs
 
-    Params: 
-        delays: array of RandomVariables
-    
-    Return:
-        max: RandomVariable - maximum delay
 
-"""
-
-def maxOfDistributions(delays: [RandomVariable]) -> RandomVariable:
-
-    size = len(delays)
-    for i in range(0, size - 1):
-        val, newRV = delays[i].getMaximum(delays[i + 1])
-        delays[i+1] = newRV
-
-    max = delays[-1]
-
-    return max
 
 
 """ Calculates maximum of an array of PDFs
+
+    Using elementwise maximum - np.maximum
 
     Params: 
         delays: array of RandomVariables
@@ -98,36 +91,43 @@ def maxOfDistributions(delays: [RandomVariable]) -> RandomVariable:
 """
 
 
-def maxOfDistributions2(delays: [RandomVariable]) -> RandomVariable:
+def maxOfDistributionsELEMENTWISE(delays: [RandomVariable]) -> RandomVariable:
 
     size = len(delays)
     for i in range(0, size - 1):
-        newRV = delays[i].getMaximum3(delays[i + 1])
+        newRV = delays[i].maxOfDistributionsELEMENTWISE(delays[i + 1])
         delays[i + 1] = newRV
 
     max = delays[-1]
 
     return max
 
-def maxOfDistributions3(delays: [RandomVariable]) -> RandomVariable:
+
+"""
+    Using formula - look up function maxOfDistributionsFORM
+"""
+def maxOfDistributionsFORM(delays: [RandomVariable]) -> RandomVariable:
 
     size = len(delays)
 
     for i in range(0, size - 1):
-        newRV = delays[i].getMaximum4(delays[i + 1])
+        newRV = delays[i].maxOfDistributionsFORM(delays[i + 1])
         delays[i + 1] = newRV
 
     max = delays[-1]
 
     return max
 
-def maxOfDistributions4(delays: [RandomVariable]) -> RandomVariable:
+"""
+    Using maxOfDistributionsQUAD, quadratic algorithm
+"""
+def maxOfDistributionsQUAD(delays: [RandomVariable]) -> RandomVariable:
 
     size = len(delays)
 
     for i in range(0, size - 1):
 
-        newRV = delays[i].getMaximum5(delays[i + 1])
+        newRV = delays[i].maxOfDistributionsQUAD(delays[i + 1])
         delays[i + 1] = newRV
 
     max = delays[-1]

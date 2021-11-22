@@ -20,19 +20,11 @@ class RandomVariable:
 
     def __init__(self, bins, edges):
 
-        # normalize if isnt
-
         self.bins = np.array(bins, dtype=float)
         self.edges = np.array(edges, dtype=float)
         self.mean = self.calculateMean()
         self.std = self.calculateSTD()
 
-    # def __init__(self, bins, edges, numbers=None):
-    #     self.bins = np.array(bins)
-    #     self.edges = np.array(edges)
-    #     self.numbers = numbers
-    #     self.mean = np.mean(numbers)
-    #     self.std = np.std(numbers)
 
 
     """
@@ -41,6 +33,7 @@ class RandomVariable:
     def recalculateParams(self):
         self.mean = self.calculateMean()
         self.std = self.calculateSTD()
+
 
 
     """ Maximum of 2 distribution functions
@@ -53,57 +46,27 @@ class RandomVariable:
     
     """
 
-    def getMaximum(self, secondVariable):
-        frequencies = [self.bins, secondVariable.bins]
-        intervalEnds = self.edges[1:]
+    def maxOfDistributionsELEMENTWISE(self, secondVariable):
 
-        F = np.matrix(frequencies)
-        E = np.matrix(intervalEnds)
+        self.uniteEdges(secondVariable)
 
-        L = F > 0  # logical matrix
+        # normalize
+        self.bins = self.bins / (np.sum(self.bins) * (self.edges[1] - self.edges[0]))
 
-        B = len(frequencies[0])
-        frequency = cp.Variable((1, B))
-
-        objective = cp.Minimize(cp.max(cp.multiply(frequency, E)))
-        constraints = [frequency >= L[0], frequency >= L[1]]
-
-        prob = cp.Problem(objective, constraints)
-        prob.solve()
-
-        # sum columns of 2 given histograms
-        newHistogram = np.sum(frequencies, axis=0)
-        norm = np.linalg.norm(newHistogram)
-        newHistogram = newHistogram / norm
-
-        # norm check
-        if (np.sum(newHistogram) <= 1):
-            print("Wrong data!")
-            return -1
-
-        maxDelay = RandomVariable(newHistogram, self.edges  )
-        return prob.value, maxDelay
-
-    def getMaximum2(self, secondVariable):
-
-
-        max = np.maximum(self.numbers, secondVariable.numbers)
-
-        data, edges = np.histogram(max, self.edges)
-
-        maxDelay = RandomVariable(data, self.edges, max)
-        return maxDelay
-
-
-    def getMaximum3(self, secondVariable):
+        # normalize
+        secondVariable.bins = secondVariable.bins / (np.sum(secondVariable.bins) * (self.edges[1] - self.edges[0]))
 
         maxBins = np.maximum(self.bins, secondVariable.bins)
+
+
+        # normalize
+        maxBins = maxBins / (np.sum(maxBins) * (self.edges[1] - self.edges[0]))
 
         maxDelay = RandomVariable(maxBins, self.edges)
         return maxDelay
 
 
-    def getMaximum4(self, secondVariable):
+    def maxOfDistributionsFORM(self, secondVariable):
 
         # unite
         self.uniteEdges(secondVariable)
@@ -113,18 +76,29 @@ class RandomVariable:
         f1 = self.bins
         f2 = secondVariable.bins
 
-        max = np.array([0.]* n)
+
+        maximum = np.zeros(n)
 
         for i in range(0, n):
             F2 = np.sum(f2[:i+1])
-            F1 = np.sum(f1[:i])     # only for discrete - not to count with 1 number twice
+            F1 = np.sum(f1[:i])                 # only for discrete - not to count with 1 number twice
 
-            max[i] = f1[i] * F2 + f2[i] * F1
+            maximum[i] = f1[i] * F2 + f2[i] * F1
 
-        maxDelay = RandomVariable(max, self.edges)
+
+            # vectorized code from above
+        # F2 = np.cumsum(f2)
+        # F1 = np.cumsum(f1)
+        # maximum = np.multiply(f1, F2) + np.multiply(f2, F1)
+
+
+        # normalize
+        maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
+
+        maxDelay = RandomVariable(maximum, self.edges)
         return maxDelay
 
-    def getMaximum5(self, secondVariable):
+    def maxOfDistributionsQUAD(self, secondVariable):
 
         # unite
         self.uniteEdges(secondVariable)
@@ -142,7 +116,7 @@ class RandomVariable:
         midPoints2 = 0.5 * (edges2[1:] + edges2[:-1])  # midpoints of the edges of hist.
 
         # prealloc
-        maximum = np.array([0.]* n)
+        maximum = np.zeros(n)
 
         # calc. maximum
         for i in range(0, n):
@@ -154,6 +128,9 @@ class RandomVariable:
                     maximum[i] += bins1[i] * bins2[j]
                 else:
                     maximum[j] += bins1[i] * bins2[j]
+
+        # normalize
+        maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
 
         return RandomVariable(maximum, self.edges)
 
@@ -236,8 +213,6 @@ class RandomVariable:
         g = secondVariable.bins
         diff = self.edges[1] - self.edges[0]
 
-        # print(self.mean, secondVariable.mean)
-
         # Convolve
         convolution = np.convolve(f, g, mode="full")[:f.size]  # get the same range
 
@@ -278,18 +253,16 @@ class RandomVariable:
         secondVariable.edges = edgesN
 
             # create new values
-        cdf1 = scipy.stats.rv_histogram((bins1, edgesN)).cdf
-        cdf2 = scipy.stats.rv_histogram((bins2, edgesN)).cdf
+        cdf1 = scipy.stats.rv_histogram((bins1, edges1)).cdf
+        cdf2 = scipy.stats.rv_histogram((bins2, edges2)).cdf
         pdf1 = scipy.stats.rv_histogram((bins1, edges1)).pdf
         pdf2 = scipy.stats.rv_histogram((bins2, edges2)).pdf
 
         for i in range(0, numberOfBins):
-            # value1 = cdf1(edgesN[i+1]) - cdf1(edgesN[i])
-            # value2 = cdf2(edgesN[i+1]) - cdf2(edgesN[i])
-            value1 = pdf1((edgesN[i+1] + edgesN[i]) / 2)
-            value2 = pdf2((edgesN[i+1] + edgesN[i]) / 2)
-            # value1 = pdf1(edges1[i])
-            # value2 = pdf2(edges2[i])
+            value1 = (cdf1(edgesN[i+1]) - cdf1(edgesN[i]))
+            value2 = (cdf2(edgesN[i+1]) - cdf2(edgesN[i]))
+            # value1 = pdf1((edgesN[i+1] + edgesN[i]) / 2)
+            # value2 = pdf2((edgesN[i+1] + edgesN[i]) / 2)
 
             bins1[i] = value1
             bins2[i] = value2
@@ -297,6 +270,7 @@ class RandomVariable:
         # set new bins
         self.bins = bins1
         secondVariable.bins = bins2
+
         self.recalculateParams()
         secondVariable.recalculateParams()
 

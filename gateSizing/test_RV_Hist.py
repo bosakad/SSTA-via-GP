@@ -3,14 +3,16 @@ import numpy as np
 from randomVariableHist import RandomVariable
 import matplotlib.pyplot as plt
 
-def testMaximum3(dec: int):
 
-    mu = 1
+
+def maxOfDistributionsELEMENTWISE(dec: int):
+
+    mu = 10
     sigma = 0.5
-    numberOfSamples = 1000
-    numberOfBins = 40
+    numberOfSamples = 1000000
+    numberOfBins = 1000
 
-    STATIC_BINS = np.linspace(-1, 10, numberOfBins)
+    STATIC_BINS = np.linspace(-20, 40, numberOfBins)
 
         # DESIRED
 
@@ -30,7 +32,7 @@ def testMaximum3(dec: int):
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h2 = RandomVariable(dataNorm, edges)
 
-    max2 = h1.getMaximum3(h2)
+    max2 = h1.maxOfDistributionsELEMENTWISE(h2)
 
     actual = [max2.mean, max2.std]
 
@@ -40,18 +42,113 @@ def testMaximum3(dec: int):
 
     return None
 
-def testMaximum4(dec: int):
+def maxOfDistributionsFORM_MultiMax(dec: int):
 
-    mu1 = 1
-    sigma1 = 0.4491837314887311
+    mu1 = 25
+    sigma1 = 0.5
 
-    mu2 = 1.55
-    sigma2 = 0.4491837314887311
+    mu2 = 29
+    sigma2 = 0.5
 
-    numberOfSamples = 10000
-    numberOfBins = 50
+    mu3 = 31
+    sigma3 = 0.5
 
-    STATIC_BINS = np.linspace(-2, 5, numberOfBins)
+    mu4 = 18
+    sigma4 = 0.5
+
+    mu5 = 22
+    sigma5 = 0.9
+
+    numberOfSamples = 1000000
+    numberOfBins = 2000
+
+    STATIC_BINS = np.linspace(-100, 200, numberOfBins)
+
+        # DESIRED
+
+    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
+    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
+    rv3 = np.random.normal(mu3, sigma3, numberOfSamples)
+    rv4 = np.random.normal(mu4, sigma4, numberOfSamples)
+    rv5 = np.random.normal(mu5, sigma5, numberOfSamples)
+
+
+    desired = np.zeros((4, 2))
+
+    max = np.maximum(rv1, rv2)
+    max2 = np.maximum(rv3, max)
+    max3 = np.maximum(rv4, max2)
+    max4 = np.maximum(rv5, max3)
+
+    desired[0, :] = [np.mean(max), np.std(max)]
+    desired[1, :] = [np.mean(max2), np.std(max2)]
+    desired[2, :] = [np.mean(max3), np.std(max3)]
+    desired[3, :] = [np.mean(max4), np.std(max4)]
+
+
+    # ACTUAL
+
+    data, edges = np.histogram(rv1, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h1 = RandomVariable(dataNorm, edges)
+
+    data, edges = np.histogram(rv2, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h2 = RandomVariable(dataNorm, edges)
+
+    data, edges = np.histogram(rv3, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h3 = RandomVariable(dataNorm, edges)
+
+    data, edges = np.histogram(rv4, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h4 = RandomVariable(dataNorm, edges)
+
+    data, edges = np.histogram(rv5, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h5 = RandomVariable(dataNorm, edges)
+
+
+    max21 = h1.maxOfDistributionsFORM(h2)
+    max22 = max21.maxOfDistributionsFORM(h3)
+    max23 = max22.maxOfDistributionsFORM(h4)
+    max24 = max23.maxOfDistributionsFORM(h5)
+
+
+
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+    # plt.hist(max21.edges[:-1], max21.edges, weights=max21.bins, density="PDF")
+    # plt.hist(h3.edges[:-1], h3.edges, weights=h3.bins, density="PDF")
+    # plt.hist(max22.edges[:-1], max22.edges, weights=max22.bins, density="PDF")
+
+    # plt.show()
+
+    actual = np.zeros((4, 2))
+    actual[0, :] = [max21.mean, max21.std]
+    actual[1, :] = [max22.mean, max22.std]
+    actual[2, :] = [max23.mean, max23.std]
+    actual[3, :] = [max24.mean, max24.std]
+
+        # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec,  err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
+
+    return None
+
+def testmaxOfDistributionsQUAD(dec: int):
+    mu1 = 21.98553396
+    sigma1 = 0.76804456
+
+    mu2 = 21.98483475
+    sigma2 = 0.76802585
+
+    numberOfSamples = 1000000
+    numberOfBins = 2000
+
+    STATIC_BINS1 = np.linspace(-20, 100, numberOfBins)
+    STATIC_BINS2 = np.linspace(-10, 107, numberOfBins)
+
 
         # DESIRED
 
@@ -63,53 +160,22 @@ def testMaximum4(dec: int):
 
        # ACTUAL
 
-    data, edges = np.histogram(rv1, bins=STATIC_BINS)
+    data, edges = np.histogram(rv1, bins=STATIC_BINS1)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h1 = RandomVariable(dataNorm, edges)
 
-    data, edges = np.histogram(rv2, bins=STATIC_BINS)
+    data, edges = np.histogram(rv2, bins=STATIC_BINS2)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h2 = RandomVariable(dataNorm, edges)
 
-    max2 = h1.getMaximum4(h2)
+    max2 = h1.maxOfDistributionsFORM(h2)
+    # max2 = h1.maxOfDistributionsQUAD(h2)
 
-    actual = [max2.mean, max2.std]
-
-        # TESTING
-
-    np.testing.assert_almost_equal(desired, actual, decimal=dec)
-
-    return None
-
-def testMaximum5(dec: int):
-
-    mu = 1
-    sigma = 0.5
-    numberOfSamples = 1000
-    numberOfBins = 40
-
-    STATIC_BINS = np.linspace(-1, 10, numberOfBins)
-
-
-        # DESIRED
-
-    rv1 = np.random.normal(mu, sigma, numberOfSamples)
-    rv2 = np.random.normal(mu, sigma, numberOfSamples)
-
-    max = np.maximum(rv1, rv2)
-    desired = [np.mean(max), np.std(max)]
-
-       # ACTUAL
-
-    data, edges = np.histogram(rv1, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h1 = RandomVariable(dataNorm, edges)
-
-    data, edges = np.histogram(rv2, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h2 = RandomVariable(dataNorm, edges)
-
-    max2 = h1.getMaximum5(h2)
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+    #
+    # plt.hist(max2.edges[:-1], max2.edges, weights=max2.bins, density="PDF")
+    # plt.show()
 
     actual = [max2.mean, max2.std]
 
@@ -163,87 +229,8 @@ def testConvolutionGaussShift(dec: int):
 
     return None
 
-def testConvolutionUniformShift(dec: int):
 
-    low = 3
-    high = 6
-    numberOfSamples = 10000
-    numberOfBins = 30
-
-        # DESIRED
-
-    rv1 = np.random.uniform(low, high, numberOfSamples)
-    rv2 = np.random.uniform(low, high, numberOfSamples)
-
-    convolution = rv1 + rv2
-
-    desired = [np.mean(convolution), np.std(convolution)]
-
-
-        # ACTUAL
-
-    STATIC_BINS = np.linspace(0,10, numberOfBins)
-
-    data, edges = np.histogram(rv1, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h1 = RandomVariable(dataNorm, edges)
-
-    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
-
-    data, edges = np.histogram(rv2, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h2 = RandomVariable(dataNorm, edges)
-
-    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
-
-    convolution = h1.convolutionOfTwoVarsShift(h2)
-
-    # plt.hist(convolution.edges[:-1], convolution.edges, weights=convolution.bins, density="PDF")
-    # plt.show()
-
-    actual = [convolution.mean, convolution.std]
-
-        # TESTING
-
-    np.testing.assert_almost_equal(desired, actual, decimal=dec)
-
-    return None
-
-
-def testUniteEdges(dec: int):
-
-    edges1 = np.array([1, 2, 3])
-    bins1 = np.array([4, 8])
-    rv1 = RandomVariable(bins1, edges1)
-
-    edges2 = np.array([0.5, 1.5, 2.5])
-    bins2 = np.array([2, 4])
-    rv2 = RandomVariable(bins2, edges2)
-
-
-        # DESIRED
-
-    edges = np.array([0.5, 1.75, 3])
-    bins1N = np.array([6, 12]) / 18            # [0] = 3; [1] = 1 + 8
-    bins2N = np.array([3, 3]) / 6          # [0] = 2 + 1 ; [1] = 3
-    desired = np.array([edges, bins1N, bins2N], dtype=object)
-
-
-        # ACTUAL
-
-    rv1.uniteEdges(rv2)
-
-    actual = np.array([rv2.edges, rv1.bins, rv2.bins], dtype=object)
-
-
-        # TESTING
-
-    np.testing.assert_almost_equal(desired, actual, decimal=dec)
-
-    return None
-
-
-def testUniteEdges(dec: int):
+def testUniteEdgesNormal(dec: int):
 
     mu1 = 12
     sigma1 = 2
@@ -261,16 +248,9 @@ def testUniteEdges(dec: int):
 
     h2 = RandomVariable(dataNorm, edges - 20)
 
-    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
-    #
-    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
-
     desired = numpy.array([[h1.mean, h1.std], [h2.mean, h2.std]])
 
     h1.uniteEdges(h2)
-
-    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
-    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
 
     actual = numpy.array([[h1.mean, h1.std], [h2.mean, h2.std]])
 
@@ -278,20 +258,59 @@ def testUniteEdges(dec: int):
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
-    plt.show()
-
 
     """ Test with different edges """
+
+
+def testUniteEdgesStudent(dec: int):
+
+    chi = 6
+
+    numberOfSamples = 1000000
+    numberOfBins = 1000
+
+    # DESIRED
+
+    rv1 = np.random.standard_t(chi, numberOfSamples)
+
+    STATIC_BINS = np.linspace(-40, 90, numberOfBins)
+
+    data, edges = np.histogram(rv1, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h1 = RandomVariable(dataNorm, edges)
+
+    h2 = RandomVariable(dataNorm, edges - 20)
+
+    desired = numpy.array([[h1.mean, h1.std], [h2.mean, h2.std]])
+
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+    # plt.show()
+
+    # ACTUAL
+
+    h1.uniteEdges(h2)
+
+    actual = numpy.array([[h1.mean, h1.std], [h2.mean, h2.std]])
+
+    # TEST
+
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+    # plt.show()
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
 def testConvolutionUnion(dec: int):
 
-    mu1 = 12
+    mu1 = 40
     sigma1 = 2
 
-    mu2 = 6
+    mu2 = 25
     sigma2 = 3
 
-    numberOfSamples = 10000000
-    numberOfBins = 2300
+    numberOfSamples = 1000000
+    numberOfBins = 2000
 
     # DESIRED
 
@@ -304,7 +323,7 @@ def testConvolutionUnion(dec: int):
 
     # ACTUAL
 
-    STATIC_BINS = np.linspace(-40, 90, numberOfBins)
+    STATIC_BINS = np.linspace(-10, 120, numberOfBins)
 
     # histogram1
     data, edges = np.histogram(rv1, bins=STATIC_BINS)
@@ -312,7 +331,7 @@ def testConvolutionUnion(dec: int):
     h1 = RandomVariable(dataNorm, edges)
 
 
-    STATIC_BINS = np.linspace(-30, 100, numberOfBins)
+    STATIC_BINS = np.linspace(-5, 125, numberOfBins)
     # histogram2
     data, edges = np.histogram(rv2, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
@@ -330,6 +349,65 @@ def testConvolutionUnion(dec: int):
 
 
 
+
+    return None
+
+
+def testMaxAndConvolution(dec: int):
+    mu1 = 40
+    sigma1 = 0.5
+
+    mu2 = 22
+    sigma2 = 3
+
+    mu3 = 14
+    sigma3 = 0.5
+
+    numberOfSamples = 2000000
+    numberOfBins = 2000
+
+    # DESIRED
+
+    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
+    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
+    rv3 = np.random.normal(mu3, sigma3, numberOfSamples)
+
+    maximum = np.maximum(rv1, rv2)
+    convolution = maximum + rv3
+
+    desired = np.zeros((2, 2))
+    desired[0, :] = [np.mean(maximum), np.std(maximum)]
+    desired[1, :] = [np.mean(convolution), np.std(convolution)]
+
+    # ACTUAL
+
+    STATIC_BINS = np.linspace(-10, 80, numberOfBins)
+
+    # histogram1
+    data, edges = np.histogram(rv1, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h1 = RandomVariable(dataNorm, edges)
+
+    # histogram2
+    data, edges = np.histogram(rv2, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h2 = RandomVariable(dataNorm, edges)
+
+    data, edges = np.histogram(rv3, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h3 = RandomVariable(dataNorm, edges)
+
+    maximum2 = h1.maxOfDistributionsFORM(h2)
+    convolution2 = maximum2.convolutionOfTwoVarsShift(h3)
+
+    actual = np.zeros((2, 2))
+    actual[0, :] = [maximum2.mean, maximum2.std]
+    actual[1, :] = [convolution2.mean, convolution2.std]
+
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
 
@@ -455,22 +533,25 @@ if __name__ == "__main__":
 
         # dec param is Desired precision
 
-    testMeanGauss(dec=2)
-    testMeanUniform(dec=2)
-
-    testStdGauss(dec=2)
-    testStdUniform(dec=2)
-
-    testMaximum3(dec=0)
-    testMaximum4(dec=1)
-    testMaximum5(dec=1)
+    # testMeanGauss(dec=2)
+    # testMeanUniform(dec=2)
+    #
+    # testStdGauss(dec=2)
+    # testStdUniform(dec=2)
+    #
+    # maxOfDistributionsELEMENTWISE(dec=0)
+    # maxOfDistributionsFORM_MultiMax(dec=5)
+    testmaxOfDistributionsQUAD(dec=5)
 
     # testUniteEdges(dec=2)   # failed test
-    testUniteEdges(dec=5)
+    # testUniteEdgesNormal(dec=2)
+    # testUniteEdgesStudent(dec=2)
+    #
+    # testMaxAndConvolution(dec=1)
 
     # testConvolutionUnion(dec=2)
-    # testConvolutionUniform(dec=4)
-    # testConvolutionGauss(dec=4)
+    # testConvolutionUniformShift(dec=4)
+    # testConvolutionGaussShift(dec=4)
 
 
 

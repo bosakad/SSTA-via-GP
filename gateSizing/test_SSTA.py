@@ -5,12 +5,69 @@ import histogramGenerator
 import SSTA
 import networkx as nx
 from randomVariableHist import RandomVariable
+import matplotlib.pyplot as plt
 
 import sys
 # setting path
 sys.path.append('../montecarlo')
 
 from montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
+
+
+
+"""
+Plots error as function of depth of the gate
+
+Params:
+    mc: (n, 2) matrix
+    ssta: (n, 2) matrix
+
+"""
+def plotError(mc, ssta):
+
+    error = mc - ssta
+    errors = np.sum( np.abs(error), axis=1 )
+
+    n = len(errors)
+
+    edges = np.arange(0, n+1, 1)
+
+    plt.hist(edges[:-1], edges, weights=errors)
+    plt.show()
+
+
+
+"""
+ Test maximum on data from mc - compare it to ssta data
+"""
+def testMCMax(mc, binsInterval, numberOfBins):
+
+    rv1 = mc[-3]
+    rv2 = mc[-2]
+
+    STATIC_BINS = np.linspace(binsInterval[0], binsInterval[1], numberOfBins)
+
+    data, edges = np.histogram(rv1, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h1 = RandomVariable(dataNorm, edges)
+
+    data, edges = np.histogram(rv2, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h2 = RandomVariable(dataNorm, edges)
+
+        # compute max from mc data
+    h3 = h1.maxOfDistributionsQUAD(h2)
+
+    actual = [h3.mean, h3.std]
+    desired = [np.mean(mc[-1]), np.std(mc[-1])]
+
+    np.testing.assert_almost_equal(desired, actual, decimal=3)
+
+
+
+
+
+
 
 
 '''
@@ -110,10 +167,10 @@ def testSSTA_1(dec: int):
 
 def testSSTA_2(dec: int):
 
-    numberOfSamples = int(2000000)
-    numberOfBins = 2000
+    numberOfSamples = 2000000
+    numberOfBins = 500
     distribution = 'Normal'
-    binsInterval = (-20, 60)
+    binsInterval = (0, 30)
 
         # DESIRED - monte carlo
 
@@ -141,7 +198,6 @@ def testSSTA_2(dec: int):
     mc = simulation(G, inputs_simulation, unknown_nodes, gate, numberOfSamples)
 
     desired = putTuplesIntoArray(numbers=mc)
-    print()
 
         # ACTUAL - ssta
 
@@ -168,7 +224,21 @@ def testSSTA_2(dec: int):
 
         # TESTING
 
+    # plt.hist(mc[-1], bins=numberOfBins, density='PDF', alpha=0.7)
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, density="PDF")
+    # plt.show()
+
+
+    # plotError(desired, actual)
+
+    testMCMax(mc, binsInterval, numberOfBins)
+
+        # test whole
     np.testing.assert_almost_equal(desired, actual, decimal=dec, err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
+
+
+
+
 
     return None
 

@@ -105,6 +105,7 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
         if node != sink:
             montecarlo[node] = max + np.random.normal(m0, s0, n_samples)
         else:
+
             montecarlo[node] = max
 
         print("mean, std of convolution: " + str(np.mean(montecarlo[node])) + ", " + str(np.std(montecarlo[node])))
@@ -180,7 +181,7 @@ def main():
     # print(f'The mean delay is {np.mean(maxdelay)}')
     # print(f'The std of a delay is {np.std(maxdelay)}')
 
-    _ = plt.hist(maxdelay, bins=50, density='PDF', alpha=0.7)
+    _ = plt.hist(maxdelay, bins=2000, density='PDF', alpha=0.7)
     plt.ylabel('PDF of delay', size=14)
     plt.xlabel('time', size=14)
     plt.title('Histogram of the MAX delay', size=16)
