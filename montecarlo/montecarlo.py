@@ -99,8 +99,11 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
         # print(np.mean(montecarlo[a]), np.std(montecarlo[a]))
         # print(np.mean(montecarlo[b]), np.std(montecarlo[a]))
 
+        np.random.shuffle(montecarlo[a])    # to secure randomness
+        np.random.shuffle(montecarlo[b])
+
         max = np.maximum(montecarlo[a], montecarlo[b])
-        print("mean, std of max: " + str(np.mean(max)) + ", " + str(np.std(max)))
+        # print("mean, std of max: " + str(np.mean(max)) + ", " + str(np.std(max)))
 
         if node != sink:
             montecarlo[node] = max + np.random.normal(m0, s0, n_samples)
@@ -108,7 +111,7 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
 
             montecarlo[node] = max
 
-        print("mean, std of convolution: " + str(np.mean(montecarlo[node])) + ", " + str(np.std(montecarlo[node])))
+        # print("mean, std of convolution: " + str(np.mean(montecarlo[node])) + ", " + str(np.std(montecarlo[node])))
 
 
     return montecarlo

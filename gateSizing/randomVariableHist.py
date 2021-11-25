@@ -20,8 +20,8 @@ class RandomVariable:
 
     def __init__(self, bins, edges):
 
-        self.bins = np.array(bins, dtype=float)
-        self.edges = np.array(edges, dtype=float)
+        self.bins = np.array(bins, dtype=np.double)
+        self.edges = np.array(edges, dtype=np.double)
         self.mean = self.calculateMean()
         self.std = self.calculateSTD()
 
@@ -73,27 +73,35 @@ class RandomVariable:
 
         n = len(self.bins)
 
+        diff = self.edges[1] - self.edges[0]
+
         f1 = self.bins
         f2 = secondVariable.bins
 
+        # f1 = f1 / (np.sum(f1) * (self.edges[1] - self.edges[0]))
+        # f2 = f2 / (np.sum(f2) * (self.edges[1] - self.edges[0]))
 
-        maximum = np.zeros(n)
 
-        for i in range(0, n):
-            F2 = np.sum(f2[:i+1])
-            F1 = np.sum(f1[:i])                 # only for discrete - not to count with 1 number twice
-
-            maximum[i] = f1[i] * F2 + f2[i] * F1
+        # maximum = np.zeros(n)
+        #
+        # for i in range(0, n):
+        #     F2 = np.sum(f2[:i+1])
+        #     F1 = np.sum(f1[:i])                 # only for discrete - not to count with 1 number twice
+        #
+        #     maximum[i] = f1[i] * F2 + f2[i] * F1
 
 
             # vectorized code from above
-        # F2 = np.cumsum(f2)
-        # F1 = np.cumsum(f1)
-        # maximum = np.multiply(f1, F2) + np.multiply(f2, F1)
+        F2 = np.cumsum(f2)
+        F1 = np.cumsum(f1)
+
+        F1[1:] = F1[:-1]
+        F1[0] = 0
+        maximum = np.multiply(f1, F2) + np.multiply(f2, F1)
 
 
         # normalize
-        maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
+        # maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
 
         maxDelay = RandomVariable(maximum, self.edges)
         return maxDelay
@@ -106,17 +114,18 @@ class RandomVariable:
         # get data
         n = len(self.bins)
 
+
         bins1 = self.bins
         edges1 = self.edges
         midPoints1 = 0.5 * (edges1[1:] + edges1[:-1])    # midpoints of the edges of hist.
-
 
         bins2 = secondVariable.bins
         edges2 = secondVariable.edges
         midPoints2 = 0.5 * (edges2[1:] + edges2[:-1])  # midpoints of the edges of hist.
 
+
         # prealloc
-        maximum = np.zeros(n)
+        maximum = np.zeros(n, dtype=np.double)
 
         # calc. maximum
         for i in range(0, n):
@@ -126,7 +135,7 @@ class RandomVariable:
 
                 if e1 >= e2:
                     maximum[i] += bins1[i] * bins2[j]
-                else:
+                elif e1 < e2:
                     maximum[j] += bins1[i] * bins2[j]
 
         # normalize
@@ -346,7 +355,7 @@ class RandomVariable:
 
     def calculateSTD(self):
         midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
-        variance = np.average((midPoints - self.mean) ** 2, weights=self.bins)
+        variance = np.average(np.square(midPoints - self.mean), weights=self.bins)
         return np.sqrt(variance)
 
 

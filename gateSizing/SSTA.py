@@ -45,11 +45,11 @@ def calculateCircuitDelay(rootNodes: [Node]) -> [Node]:
             # print(len(tmpNode.prevDelays))
 
             maxDelay = maxOfDistributionsFORM(tmpNode.prevDelays)
-            print("mean, std of max: " + str(maxDelay.mean) + ", " + str(maxDelay.std))
+            # print("mean, std of max: " + str(maxDelay.mean) + ", " + str(maxDelay.std))
             currentRandVar = currentRandVar.convolutionOfTwoVarsShift(maxDelay)
             # currentRandVar = currentRandVar.convolutionOfTwoVarsUnion(maxDelay)
 
-            print("mean, std of conmaxvolution: " + str(currentRandVar.mean) + ", " + str(currentRandVar.std))
+            # print("mean, std of convolution: " + str(currentRandVar.mean) + ", " + str(currentRandVar.std))
 
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
             nextNode.appendPrevDelays(currentRandVar)
@@ -67,7 +67,7 @@ def calculateCircuitDelay(rootNodes: [Node]) -> [Node]:
     # plt.show()
 
     sinkDelay = maxOfDistributionsFORM(sink)
-    # g5 = histogramGenerator.get_gauss_bins(5, 0.5, 3000, 1000000, (-20, 120))
+    # g5 = histogramGenerator.get_gauss_bins(5, 5, 3000, 1000000, (-20, 150))
     # sinkDelay = sinkDelay.convolutionOfTwoVarsShift(g5)
     newDelays.append(sinkDelay)
 

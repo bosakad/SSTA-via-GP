@@ -33,6 +33,9 @@ def plotError(mc, ssta):
     edges = np.arange(0, n+1, 1)
 
     plt.hist(edges[:-1], edges, weights=errors)
+    plt.ylabel('Error', size=14)
+    plt.xlabel('Gate', size=14)
+    plt.title('Function of an error.', size=16)
     plt.show()
 
 
@@ -45,7 +48,7 @@ def testMCMax(mc, binsInterval, numberOfBins):
     rv1 = mc[-3]
     rv2 = mc[-2]
 
-    STATIC_BINS = np.linspace(binsInterval[0], binsInterval[1], numberOfBins)
+    STATIC_BINS = np.linspace(-100, 500, 15000)
 
     data, edges = np.histogram(rv1, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
@@ -55,8 +58,32 @@ def testMCMax(mc, binsInterval, numberOfBins):
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h2 = RandomVariable(dataNorm, edges)
 
+    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+    #
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    # plt.show()
+
+    print(h1.mean, h2.mean)
+
         # compute max from mc data
-    h3 = h1.maxOfDistributionsQUAD(h2)
+    h3 = h1.maxOfDistributionsFORM(h2)
+
+
+    # _ = plt.hist(mc[-3], bins=2000, density='PDF', alpha=0.7)
+
+    # mu1 = 21.98553396
+    # sigma1 = 0.76804456
+    # rv1 = np.random.normal(mu1, sigma1, 2000000)
+    # _ = plt.hist(rv1, bins=2000, density='PDF', alpha=0.7)
+    # _ = plt.hist(rv2, bins=2000, density='PDF', alpha=0.7)
+    # _ = plt.hist(np.maximum(mc[-2], mc[-3]), bins=2000, density='PDF', alpha=0.7)
+    # plt.hist(h3.edges[:-1], h3.edges, weights=h3.bins, density="PDF")
+
+    # plt.show()
+
+
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    # plt.show()
 
     actual = [h3.mean, h3.std]
     desired = [np.mean(mc[-1]), np.std(mc[-1])]
@@ -167,10 +194,10 @@ def testSSTA_1(dec: int):
 
 def testSSTA_2(dec: int):
 
-    numberOfSamples = 2000000
-    numberOfBins = 500
+    numberOfSamples = 5000000
+    numberOfBins = 2000
     distribution = 'Normal'
-    binsInterval = (0, 30)
+    binsInterval = (-20, 100)
 
         # DESIRED - monte carlo
 
@@ -198,7 +225,7 @@ def testSSTA_2(dec: int):
     mc = simulation(G, inputs_simulation, unknown_nodes, gate, numberOfSamples)
 
     desired = putTuplesIntoArray(numbers=mc)
-
+    # print()
         # ACTUAL - ssta
 
     g1 = histogramGenerator.get_gauss_bins(10, 0.45, numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
@@ -229,16 +256,12 @@ def testSSTA_2(dec: int):
     # plt.show()
 
 
-    # plotError(desired, actual)
+    plotError(desired, actual)
 
-    testMCMax(mc, binsInterval, numberOfBins)
+    # testMCMax(mc, binsInterval, numberOfBins)
 
         # test whole
     np.testing.assert_almost_equal(desired, actual, decimal=dec, err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
-
-
-
-
 
     return None
 
@@ -248,7 +271,7 @@ if __name__ == "__main__":
         # dec param is Desired precision
 
     # testSSTA_1(dec=1)
-    testSSTA_2(dec=2)
+    testSSTA_2(dec=5)
 
 
     print("All tests passed!")

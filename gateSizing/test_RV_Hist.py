@@ -50,19 +50,19 @@ def maxOfDistributionsFORM_MultiMax(dec: int):
     mu2 = 29
     sigma2 = 0.5
 
-    mu3 = 31
-    sigma3 = 0.5
+    mu3 = 34
+    sigma3 = 5
 
-    mu4 = 18
-    sigma4 = 0.5
+    mu4 = 54
+    sigma4 = 20
 
-    mu5 = 22
+    mu5 = 100
     sigma5 = 0.9
 
-    numberOfSamples = 1000000
+    numberOfSamples = 2000000
     numberOfBins = 2000
 
-    STATIC_BINS = np.linspace(-100, 200, numberOfBins)
+    STATIC_BINS = np.linspace(40, 250, numberOfBins)
 
         # DESIRED
 
@@ -75,43 +75,52 @@ def maxOfDistributionsFORM_MultiMax(dec: int):
 
     desired = np.zeros((4, 2))
 
-    max = np.maximum(rv1, rv2)
-    max2 = np.maximum(rv3, max)
-    max3 = np.maximum(rv4, max2)
+    max = rv1 + rv2
+    max2 = rv3 + max
+    max3 = rv4 + max2
     max4 = np.maximum(rv5, max3)
 
-    desired[0, :] = [np.mean(max), np.std(max)]
-    desired[1, :] = [np.mean(max2), np.std(max2)]
-    desired[2, :] = [np.mean(max3), np.std(max3)]
+    # desired[0, :] = [np.mean(max), np.std(max)]
+    # desired[1, :] = [np.mean(max2), np.std(max2)]
+    # desired[2, :] = [np.mean(max3), np.std(max3)]
     desired[3, :] = [np.mean(max4), np.std(max4)]
 
 
     # ACTUAL
+    #
+    # data, edges = np.histogram(rv1, bins=STATIC_BINS)
+    # dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    # h1 = RandomVariable(dataNorm, edges)
 
-    data, edges = np.histogram(rv1, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h1 = RandomVariable(dataNorm, edges)
+    # data, edges = np.histogram(rv2, bins=STATIC_BINS)
+    # dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    # h2 = RandomVariable(dataNorm, edges)
+    #
+    # data, edges = np.histogram(rv3, bins=STATIC_BINS)
+    # dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    # h3 = RandomVariable(dataNorm, edges)
+    #
+    # data, edges = np.histogram(rv4, bins=STATIC_BINS)
+    # dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    # h4 = RandomVariable(dataNorm, edges)
+    #
+    # data, edges = np.histogram(rv5, bins=STATIC_BINS)
+    # dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    # h5 = RandomVariable(dataNorm, edges)
 
-    data, edges = np.histogram(rv2, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h2 = RandomVariable(dataNorm, edges)
 
-    data, edges = np.histogram(rv3, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h3 = RandomVariable(dataNorm, edges)
 
-    data, edges = np.histogram(rv4, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h4 = RandomVariable(dataNorm, edges)
-
-    data, edges = np.histogram(rv5, bins=STATIC_BINS)
+    data, edges = np.histogram(max3, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h5 = RandomVariable(dataNorm, edges)
 
+    data, edges = np.histogram(rv5, bins=STATIC_BINS)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    max23 = RandomVariable(dataNorm, edges)
 
-    max21 = h1.maxOfDistributionsFORM(h2)
-    max22 = max21.maxOfDistributionsFORM(h3)
-    max23 = max22.maxOfDistributionsFORM(h4)
+    # max21 = h1.convolutionOfTwoVarsUnion(h2)
+    # max22 = max21.convolutionOfTwoVarsUnion(h3)
+    # max23 = max22.convolutionOfTwoVarsUnion(h4)
     max24 = max23.maxOfDistributionsFORM(h5)
 
 
@@ -125,9 +134,9 @@ def maxOfDistributionsFORM_MultiMax(dec: int):
     # plt.show()
 
     actual = np.zeros((4, 2))
-    actual[0, :] = [max21.mean, max21.std]
-    actual[1, :] = [max22.mean, max22.std]
-    actual[2, :] = [max23.mean, max23.std]
+    # actual[0, :] = [max21.mean, max21.std]
+    # actual[1, :] = [max22.mean, max22.std]
+    # actual[2, :] = [max23.mean, max23.std]
     actual[3, :] = [max24.mean, max24.std]
 
         # TESTING
@@ -171,11 +180,16 @@ def testmaxOfDistributionsQUAD(dec: int):
     max2 = h1.maxOfDistributionsFORM(h2)
     # max2 = h1.maxOfDistributionsQUAD(h2)
 
-    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
-    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
-    #
-    # plt.hist(max2.edges[:-1], max2.edges, weights=max2.bins, density="PDF")
-    # plt.show()
+    plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+
+    plt.hist(max2.edges[:-1], max2.edges, weights=max2.bins, density="PDF")
+    plt.show()
+
+    _ = plt.hist(rv1, bins=2000, density='PDF', alpha=0.7)
+    _ = plt.hist(rv2, bins=1000, density='PDF', alpha=0.7)
+    _ = plt.hist(max, bins=2000, density='PDF', alpha=0.7)
+    plt.show()
 
     actual = [max2.mean, max2.std]
 
@@ -540,8 +554,8 @@ if __name__ == "__main__":
     # testStdUniform(dec=2)
     #
     # maxOfDistributionsELEMENTWISE(dec=0)
-    # maxOfDistributionsFORM_MultiMax(dec=5)
-    testmaxOfDistributionsQUAD(dec=5)
+    maxOfDistributionsFORM_MultiMax(dec=5)
+    # testmaxOfDistributionsQUAD(dec=5)
 
     # testUniteEdges(dec=2)   # failed test
     # testUniteEdgesNormal(dec=2)
