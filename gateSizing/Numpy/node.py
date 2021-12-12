@@ -1,16 +1,13 @@
-import randomVariableHist
-
-""" Node class
-
-    Class representing a node.
-    Class includes: 
-        class 'RandomVariable',
-        array of next gates,
-
-"""
-
 
 class Node:
+    """
+    Class representing a node.
+
+    Class includes:
+        class 'RandomVariable' or cvxpy variable,
+        array of next gates,
+        array of previous gates
+    """
 
     def __init__(self, randomVar):
         self.randVar = randomVar

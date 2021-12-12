@@ -122,9 +122,6 @@ def putTuplesIntoArray(rvs: [RandomVariable] = None, numbers: [float] = None):
             actual[i, 0] = np.mean(delay)
             actual[i, 1] = np.std(delay)
 
-
-
-
     return actual
 
 
@@ -195,7 +192,7 @@ def testSSTA_1(dec: int):
 def testSSTA_2(dec: int):
 
     numberOfSamples = 5000000
-    numberOfBins = 2000
+    numberOfBins = 10000
     distribution = 'Normal'
     binsInterval = (-20, 100)
 

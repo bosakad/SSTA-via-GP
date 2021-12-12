@@ -4,30 +4,30 @@ import SSTA
 import mosek
 
 
-""" Calculate input capacitance as affine function ... alpha + beta * x
-
-      Params:
-        alphas: array [1xN]
-        betas: array [1xN]
-        x: variable [1xN]
-      Return: array [1xN] of load capacitances """
-
 def computeInputCapacitance(alphas, betas, x):
+    """
+    Calculate input capacitance as affine function ... alpha + beta * x
+
+    :param alphas: array of alphas
+    :param betas: array of betas
+    :param x: cvxpy variable (1, n)
+    :return inputCap: (1, n) array of input capacitances
+    """
+
     inputCap = alphas + cp.multiply(x, betas)
     return inputCap
 
 
-    # TODO - generalize
-    """ Load capacitance is computed as a sum of a fanout.
-  
-        Params:
-          inputCapacitance : array variable [1xN] of input capacitances
-          loadCapacitances : array [1xM] of load capacitances of output gates
-          numberOfGates : Integer, total number of gates
-        Return: array [1xN] of load capacitances
+def computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates):
+    """
+    Load capacitance is computed as a sum of a fanout.
+
+    :param inputCapacitance: (1, n) cvxpy var of input capacitanes
+    :param loadCapacitances: (1, m) of load capacitances of output gates
+    :param numberOfGates: int, total number of gates
+    :return cload: (1, n) array of load capacitances
     """
 
-def computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates):
     cload = [None] * numberOfGates
 
     # cload[0] = inputCapacitance[3]
@@ -51,32 +51,29 @@ def computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates):
     return cp.hstack(cload)  # concatenation
 
 
-    """ Delay on each gate is computed as (load capacitance * gamma) / resistance 
-  
-        Params:
-          capLoad : [1xN] of load capacitances
-          gammas : array [1xN] of  gamma constants
-          x : [1xN] variable
-        Return: array [1xN] of gate delays        """
-
 def computeGateDelays(capLoad, gammas, x):
+    """
+    Delay on each gate is computed as (load capacitance * gamma) / resistance
+
+    :param capLoad: (1, n) cvxpy var of load capacitanes
+    :param gammas: (1, n) gammas
+    :param x: (1, n) cvxpy variable
+    :return cload: (1, n) array of load capacitances
+    """
+
     cloadTimesGamma = cp.multiply ( capLoad , gammas )
     gateDelays = cp.multiply (cloadTimesGamma , 1 / x)
 
     return gateDelays
 
 
-
-
-
-    # TODO: generalize, use SSTA
-    """ Get all possible path delays
-  
-        Params:
-          gateDelays : array [1xN] of gate delays
-        Return: array [1xK] of all possible delay paths        """
-
 def getPathDelays(gateDelays):
+    """
+    Delay on each gate is computed as (load capacitance * gamma) / resistance
+
+    :param gateDelays: (1, n) cvxpy variable of delays
+    :return cload: (1, m) cvxpy array of all delay paths
+    """
     # delays = [gateDelays[0] + gateDelays[3] + gateDelays[5],
     #           gateDelays[0] + gateDelays[3] + gateDelays[6],
     #           gateDelays[1] + gateDelays[3] + gateDelays[5],
@@ -92,51 +89,44 @@ def getPathDelays(gateDelays):
 
     return cp.hstack(delays)
 
-    """ Get maximum delay
-  
-        Params:
-          pathDelays : array [1xK] of all possible delay paths
-        Return: [1x1] maximum of all path delays       """
 
 def getMaximumDelay(pathDelays):
+    """
+    Delay on each gate is computed as (load capacitance * gamma) / resistance
+
+   :param pathDelays: (1, m) cvxpy variable of path delays
+   :return circuitDelay: cvxpy variable - max delay
+   """
+
     circuitDelay = cp.max(pathDelays)
     return circuitDelay
 
 
-
-
-
-
-    """ Compute total power 
-  
-        as sum_i ( f_i * e_i * x_i ) ;    
-        Params:
-          frequencies : array [1xN] of gate frequencies
-          energyLoss : array [1xN] of energy loss of each gate
-          x : [1xN] variable
-        Return: Double, total power        """
-
-
 def computeTotalPower(frequencies, energyLoss, x):
+    """
+    Compute total power as sum_i ( f_i * e_i * x_i )
+
+    :param frequencies: (1, n) cvxpy variable of gate frequencies
+    :param energyLoss: (1, n) cvxpy variable of energy loss of each gate
+    :param x: (1, n) cvxpy variable
+    :return circuitDelay: cvxpy variable - max delay
+    """
+
     power = cp.sum(cp.multiply((cp.multiply(frequencies, x)), energyLoss))
     return power
 
-    """ Compute total area
-  
-        as sum_i ( gateScale_i * x_i ) ;                       
-        Params:
-          gateScales : array [1xN] of unit scaling factor of gate i
-          x : [1x1] variable scale of gate i 
-        Return: Double, total area        """
-
 
 def computeTotalArea(gateScales, x):
+    """
+    Compute total area as sum_i ( gateScale_i * x_i )
+
+    :param gateScales: (1, n) array of unit scaling factor of gate i
+    :param x: (1, n) cvxpy variable
+    :return area: Double, total area
+    """
+
     area = cp.sum(cp.multiply(gateScales, x))
     return area
-
-
-
-
 
 
 def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, maxArea, maxPower, loadCapacitances,

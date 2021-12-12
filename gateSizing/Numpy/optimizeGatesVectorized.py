@@ -2,6 +2,8 @@ import numpy as np
 import cvxpy as cp
 import mosek
 
+        # IMPORTANT FOR JAKUB: commented code outside of functions is code from dmytro (see google collab)
+
 numberOfCells = 7  # number of cells
 numberOfEdges = 8  # number of edges
 A = np.zeros((numberOfCells, numberOfEdges))
@@ -51,14 +53,14 @@ Pmax = 50
 # cin = alpha + beta*x
 
 
-""" Calculate input capacitance as affine function ... alpha + beta * x
-
-      Params:
-        A: [MxN] standard cell-edge incidence matrix of the circuit
-      Return: tuple(Ain, Aout) of edge-outgoing and edge-incoming part """
-
-
 def computeIncidenceMatrices(A: np.array):
+    """
+    Get standard cell-edge incidence matrix of the circuit
+
+    :param A: (m, n) numpy array
+    :return tuple(Ain, Aout) of edge-outgoing and edge-incoming part
+    """
+
     Aout = np.where(A > 0, 1, 0)
     Ain = np.where(A < 0, 1, 0)
 
@@ -85,16 +87,17 @@ def computeIncidenceMatrices(A: np.array):
     # return cp.bmat(Aout), cp.bmat(Ain)
 
 
-""" Calculate input capacitance as affine function ... alpha + beta * x
-
-      Params:
-        alphas: array [1xN]
-        betas: array [1xN]
-        x: variable [1xN]
-      Return: array [1xN] of load capacitances """
-
 
 def computeInputCapacitance(alphas: np.array, betas: np.array, x: cp.Variable) -> cp.Expression:
+    """
+    Calculate input capacitance as affine function ... alpha + beta * x
+
+    :param alphas: array of alphas
+    :param betas: array of betas
+    :param x: cvxpy variable (1, n)
+    :return inputCap: (1, n) array of input capacitances
+    """
+
     inputCap = alphas + cp.multiply(x, betas)
     return inputCap
 
@@ -103,19 +106,17 @@ def computeInputCapacitance(alphas: np.array, betas: np.array, x: cp.Variable) -
 # given by Fout = Aout*Ain'
 # cload = (Aout @ Ain.T) * cin
 
-""" Load capacitance is the input capacitance times the fan-out matrix.
-    Given by Fout = Aout*Ain'
-    (sum of a fanout)
-
-        Params:
-          inputCapacitance : array variable [1xN] of input capacitances
-          loadCapacitances : array [1xM] of load capacitances of output gates
-          numberOfGates : Integer, total number of gates
-        Return: array [1xN] of load capacitances
-    """
 
 
 def computeLoadCapacitance(Aout, Ain, inputCapacitance: cp.Expression) -> cp.Expression:
+    """
+    Load capacitance is computed as a sum of a fanout.
+
+    :param Aout: (m, n) output matrix
+    :param Ain: (m, n) input matrix
+    :param inputCapacitance: (1, n) cvxpy variable of input capacitance
+    :return cloadMat: (m, n) load capacitance matrix
+    """
 
     Fout = Aout @ Ain.T
     cloadMat = Fout @ inputCapacitance
@@ -149,16 +150,16 @@ def computeLoadCapacitance(Aout, Ain, inputCapacitance: cp.Expression) -> cp.Exp
 # delay is the product of its driving resistance R = gamma/x and cload
 # d = cload * gamma/x
 
-""" Delay on each gate is computed as (load capacitance * gamma) / resistance 
-
-        Params:
-          capLoad : [1xN] of load capacitances
-          gammas : array [1xN] of  gamma constants
-          x : [1xN] variable
-        Return: array [1xN] of gate delays        """
-
 
 def computeGateDelays(capLoad: cp.Expression, gammas: np.array, x: cp.Variable) -> cp.Expression:
+    """
+    Load capacitance is computed as a sum of a fanout.
+
+    :param Aout: (m, n) output matrix
+    :param Ain: (m, n) input matrix
+    :param inputCapacitance: (1, n) cvxpy variable of input capacitance
+    :return cloadMat: (m, n) load capacitance matrix
+    """
     cloadTimesGamma = cp.multiply(capLoad, gammas)
     gateDelays = cp.multiply(cloadTimesGamma, 1 / x)
 
@@ -196,18 +197,17 @@ def computeGateDelays(capLoad: cp.Expression, gammas: np.array, x: cp.Variable) 
 # problem = cp.Problem(objective, constraints)
 # problem.solve(gp=True)
 
-""" Function gets capacitance load constraint.
-    Load capacitances of end gates are given, cannot set due 
-    to cvxpy expression - it is set as an constraint instead.
-
-        Params:
-          capLoad : [1xN] of computed load capacitances
-          loadCapacitances: [1xK] given array of load capacitances
-        Return: array [1xK] of constraints        """
-
 
 def getConstrCload(capLoad, loadCapacitances):
-    # TODO: generalize
+    """
+    Function gets capacitance load constraint.
+    Load capacitances of end gates are given, cannot set due
+    to cvxpy expression - it is set as an constraint instead.
+
+    :param capLoad: (1, n) cvxpy variable of capacitance load
+    :param loadCapacitances: (1, m) array of load capacitances of output gates
+    :return constr_cload: (1, m) load cap. constr.
+    """
     constr_cload = []
     constr_cload.append(capLoad[5] == loadCapacitances[0])
     constr_cload.append(capLoad[6] == loadCapacitances[1])
@@ -215,55 +215,56 @@ def getConstrCload(capLoad, loadCapacitances):
     return constr_cload
 
 
-""" Timing constraints. 
-        Aout' * t + Ain' * gateDelays <= Ain' * t
-    These constraints enforce t_j + d_j <= t_i 
-    over all gates j that drive gate i.
-    
-    For gates with inputs not connected to other gates we enforce d_i <= t_i
-
-        Params:
-          Aout : [1xN] of computed load capacitances
-          Ain: [1xK] given array of load capacitances
-          gateDelays: array [1xN] of gate delays
-          t: variable [1xN]
-        Return: tuple (constr_timing, input_timing) of all timing constraints        """
-
 
 def getConstrTiming(Aout, Ain, gateDelays, t: cp.Variable, x):
+    """
+    Timing constraints.
+        Aout' * t + Ain' * gateDelays <= Ain' * t
+    These constraints enforce t_j + d_j <= t_i
+    over all gates j that drive gate i.
 
+    For gates with inputs not connected to other gates we enforce d_i <= t_i
+
+    :param Aout: (n, m) cvxpy variable of capacitance load
+    :param Ain: (n, m) array of load capacitances of output gates
+    :param gateDelays: (1, m) array of load capacitances of output gates
+    :param t: (1, m) of cvxpy variable of timing
+    :return constr_cload: (1, m) load cap. constr.
+    """
     constr_timing = Aout.T @ t + Ain.T @ gateDelays <= Ain.T @ t
-
-    # constr_timing = Aout.T @ t <= Ain.T @ t
-    #
-    # constr_timing = Aout.T @ t + Ain.T @ [1, 1, 1, 1, 1, 1, 1] <= Ain.T @ t
-    # constr_timing = Aout.T @ t + Ain.T @ (cp.multiply(x, np.array([1,1,1,1,1,1,1])) + np.array([1,1,1,1,1,1,1])) <= Ain.T @ t
-
 
     input_timing = getInputTimingConstr(gateDelays, t)
 
     return constr_timing , input_timing
 
-    # TODO: generalize
 
 
-def getInputTimingConstr(gateDelays: cp.Expression, t: cp.Variable) -> cp.Expression:
+def getInputTimingConstr(gateDelays: cp.Expression, t: cp.Variable) -> [bool]:
+    """
+    Get timing constraints for gate delays
+
+    :param gateDelays: (1, n) cvxpy variable of gate delays
+    :param t: (1, n) cvxpy variable of timing
+    :return timing_constr: (1, n) cvxpy expression of timing constr.
+    """
+
     constr1 = gateDelays[0] <= t[0]
     constr2 = gateDelays[1] <= t[1]
 
-    return [constr1, constr2]
+    timing_constr = [constr1, constr2]
+
+    return timing_constr
 
 
-""" Get maximum delay - that is the upper bound 
-    on the overall delay and that is the max of 
+def getMaximumDelay(t: cp.Variable) -> cp.Expression:
+    """
+    Get maximum delay - that is the upper bound
+    on the overall delay and that is the max of
     arrival times for output gates
 
-        Params:
-          t : array [1xK] arrival times variable
-        Return: [1x1] maximum of all path delays       """
-
-
-def getMaximumDelay(t: cp.Variable) -> cp.Expression:  # TODO: generalize
+    :param t: (1, n) cvxpy variable of timing
+    :return circuitDelay: (1, n) cvxpy expression of circuit delay
+    """
 
     varsToMin = cp.hstack([t[5], t[6]])
     circuitDelay = cp.max(varsToMin)
@@ -271,31 +272,29 @@ def getMaximumDelay(t: cp.Variable) -> cp.Expression:  # TODO: generalize
     return circuitDelay
 
 
-""" Compute total power 
-
-        as sum_i ( f_i * e_i * x_i ) ;    
-        Params:
-          frequencies : array [1xN] of gate frequencies
-          energyLoss : array [1xN] of energy loss of each gate
-          x : [1xN] variable
-        Return: Double, total power        """
-
-
 def computeTotalPower(frequencies: np.array, energyLoss: np.array, x: cp.Variable) -> cp.Expression:
+    """
+    Compute total power as sum_i ( f_i * e_i * x_i )
+
+    :param frequencies: (1, n) numpy array of gate frequencies
+    :param energyLoss: (1, n) numpy array of energy loss of each gate
+    :param x: (1, n) cvxpy variable
+    :return circuitDelay: (1, n) cvxpy expression of circuit delay
+    """
 
     power = cp.sum(cp.multiply((cp.multiply(frequencies, x)), energyLoss))
     return power
 
-    """ Compute total area
-
-        as sum_i ( gateScale_i * x_i ) ;                       
-        Params:
-          gateScales : array [1xN] of unit scaling factor of gate i
-          x : [1x1] variable scale of gate i 
-        Return: Double, total area        """
-
 
 def computeTotalArea(gateScales: np.array, x: cp.Variable) -> cp.Expression:
+    """
+    Compute total area as sum_i ( gateScale_i * x_i )
+
+    :param gateScales: (1, n) numpy array of unit scaling factor of gate i
+    :param x: (1, n) cvxpy variable
+    :return area: Double, total area
+    """
+
     area = cp.sum(cp.multiply(gateScales, x))
     return area
 

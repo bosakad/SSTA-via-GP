@@ -5,48 +5,48 @@ import numpy as np
 import scipy.stats
 
 
-""" Random variable 
 
+class RandomVariable:
+    """
     Class representing a random variable given by histogram.
-    Class includes: 
+    Class includes:
+
+    Class includes:
         bins: len n of frequencies
         edges: len n+1 of histogram edges
         mean: computed sample mean
         variance: computed sample variance
+    """
 
-"""
-
-class RandomVariable:
 
     def __init__(self, bins, edges):
 
-        self.bins = np.array(bins, dtype=np.double)
-        self.edges = np.array(edges, dtype=np.double)
+        self.bins = np.array(bins)
+        self.edges = np.array(edges)
         self.mean = self.calculateMean()
         self.std = self.calculateSTD()
 
 
 
-    """
-    Recalculates parameters mean and std after their change
-    """
+
     def recalculateParams(self):
+        """
+        Recalculates parameters mean and std after their change
+        :return:
+        """
         self.mean = self.calculateMean()
         self.std = self.calculateSTD()
 
 
-
-    """ Maximum of 2 distribution functions
-    
-    Input:
-        secondHistogram: class Histogram with bins and edges data
-    
-    Output: 
-        max_x { intervalEnds[x] | x in [0, N-1]; max_i { frequencies[i][x]} > 0 }
-    
-    """
 
     def maxOfDistributionsELEMENTWISE(self, secondVariable):
+        """
+        Maximum of 2 distribution functions using elementwise
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class, elementwise maximum of 2 histograms
+        """
 
         self.uniteEdges(secondVariable)
 
@@ -67,31 +67,33 @@ class RandomVariable:
 
 
     def maxOfDistributionsFORM(self, secondVariable):
+        """
+        Maximum of 2 distribution functions using formula
 
-        # unite
-        self.uniteEdges(secondVariable)
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class, elementwise maximum of 2 histograms
+        """
 
-        n = len(self.bins)
-
-        diff = self.edges[1] - self.edges[0]
-
-        f1 = self.bins
-        f2 = secondVariable.bins
-
+        # n = self.bins.shape
+        # diff = self.edges[1] - self.edges[0]
         # f1 = f1 / (np.sum(f1) * (self.edges[1] - self.edges[0]))
         # f2 = f2 / (np.sum(f2) * (self.edges[1] - self.edges[0]))
-
-
         # maximum = np.zeros(n)
-        #
         # for i in range(0, n):
         #     F2 = np.sum(f2[:i+1])
         #     F1 = np.sum(f1[:i])                 # only for discrete - not to count with 1 number twice
-        #
         #     maximum[i] = f1[i] * F2 + f2[i] * F1
 
+        # normalize
+        # maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
 
-            # vectorized code from above
+        # unite
+        self.uniteEdges(secondVariable)
+        f1 = self.bins
+        f2 = secondVariable.bins
+
+        # vectorized code from above
         F2 = np.cumsum(f2)
         F1 = np.cumsum(f1)
 
@@ -100,13 +102,17 @@ class RandomVariable:
         maximum = np.multiply(f1, F2) + np.multiply(f2, F1)
 
 
-        # normalize
-        # maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
-
         maxDelay = RandomVariable(maximum, self.edges)
         return maxDelay
 
     def maxOfDistributionsQUAD(self, secondVariable):
+        """
+        Maximum of 2 distribution functions using quadratic algorithm
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class, elementwise maximum of 2 histograms
+        """
 
         # unite
         self.uniteEdges(secondVariable)
@@ -145,19 +151,16 @@ class RandomVariable:
 
 
 
-
-    """ Convolution of two independent random variables
-    
-    Input:
-        frequencies: 2xB array, where B is number of bins of given a histogram
-    
-    Output:
-    
-    (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
-    
-    """
-
     def convolutionOfTwoVarsNaive(self, secondVariable):
+        """
+        Convolution of two independent random variables naively:
+            (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class of convolution
+        """
+
         f = self.bins
         g = secondVariable.bins
 
@@ -171,20 +174,16 @@ class RandomVariable:
         return RandomVariable(newHistogram, self.edges)
 
 
+    def convolutionOfTwoVarsShift(self, secondVariable):
+        """
+        Convolution of two independent random variables numpy and shift afterwards.
+            (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
 
-    """ Convolution of two independent random variables using numpy.convolve function.
-        after convolution histogram is shifted
-        
-        Input:
-            frequencies: 2xB array, where B is number of bins of given a histogram
-
-        Output:
-
-        (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
-
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class of convolution
         """
 
-    def convolutionOfTwoVarsShift(self, secondVariable):
         f = self.bins
         g = secondVariable.bins
 
@@ -202,18 +201,16 @@ class RandomVariable:
         return RandomVariable(convolution, self.edges)
 
 
-    """ Convolution of two independent random variables using numpy.convolve function.
-        after convolution histograms edges are unionised.
-            Input:
-                frequencies: 2xB array, where B is number of bins of given a histogram
-
-            Output:
-
+    def convolutionOfTwoVarsUnion(self, secondVariable):
+        """
+        Convolution of two independent random variables numpy and union of edges afterwards:
             (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
 
-            """
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class of convolution
+        """
 
-    def convolutionOfTwoVarsUnion(self, secondVariable):
 
         # Unite Edges
         self.uniteEdges(secondVariable)
@@ -233,13 +230,16 @@ class RandomVariable:
         return RandomVariable(convolution, edges)
 
 
-    """ Makes a union of two histograms
-    
-        Edges are considered to have the same difference and same length
-    
-    """
-
     def uniteEdges(self, secondVariable):
+        """
+        Makes a union of two histograms.
+        Edges are considered to have the same difference and same length.
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :returns None
+        """
+
 
         edges1 = self.edges
         bins1 = self.bins
@@ -285,13 +285,18 @@ class RandomVariable:
 
         return None
 
-    """ Makes a union of two histograms, Naive implementation
 
-            Edges are considered to have the same difference and same length
-
-        """
     @staticmethod
     def uniteEdgesNaive(edges1, edges2, convolution, g):
+        """
+        Makes a union of two histograms, Naive implementation
+        Edges are considered to have the same difference and same length.
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :returns None
+        """
+
 
         # pick the largest edges
         if edges2.size > edges1.size:
@@ -310,14 +315,17 @@ class RandomVariable:
         return edges
 
 
-    """ Cuts bins depending on edge[0]  
+    @staticmethod
+    def cutBins(edges, bins):
+        """
+        Cuts bins depending on edge[0]
         if edge[0] < 0: cuts left bins and adds zeros to the end
         if edge[0] > 0: cuts right bins and adds zeros to the beginning
 
-    """
-
-    @staticmethod
-    def cutBins(edges, bins):
+        :param edges: (1, n+1) numpy array of edges
+        :param bins: (1, n) numpy array of bins
+        :returns None
+        """
 
         diff = edges[1] - edges[0]
 
@@ -334,26 +342,29 @@ class RandomVariable:
             bins[-numberOfBinsNeeded:] = 0
 
 
-    """ Calculate mean
-    
-    Function calculates sample mean of the random variable.
-    Calculation: weighted average of the frequencies, edges being the weights    
-        
-    """
     def calculateMean(self):
+        """
+        Function calculates sample mean of the random variable.
+        Calculation: weighted average of the frequencies, edges being the weights
+
+        :param self: random variable class
+        :returns mean: double value
+        """
+
         midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
         mean = np.average(midPoints, weights=self.bins)
         return mean
 
 
-    """ Calculate variance
+    def calculateSTD(self):
+        """
+        Function calculates sample std of the random variable.
+        Calculation: weighted average of the frequencies, edges being the weights
 
-        Function calculates sample variance of the random variable.
-        Calculation: weighted average of the frequencies, edges being the weights    
-
+        :param self: random variable class
+        :returns std: double value
         """
 
-    def calculateSTD(self):
         midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
         variance = np.average(np.square(midPoints - self.mean), weights=self.bins)
         return np.sqrt(variance)

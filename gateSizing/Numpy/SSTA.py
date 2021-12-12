@@ -1,29 +1,26 @@
 from queue import Queue
 from randomVariableHist import RandomVariable
 from node import Node
+import cvxpy as cp
 import matplotlib.pyplot as plt
 import histogramGenerator
 
-""" Compute circuit delay using PDFs algorithm
-
-Function executes the algorithm for finding out the PDF of a circuit delay.
-
-    Params:
-        rootNodes: graph of the circuit - array of root nodes
-                      nodes include:
-                        class 'RandomVariable',
-                        array of next nodes,
-                        array of previous nodes
-
-    Return:
-        # mean: mean value of the circuits PDF
-        newRandomVariables: array of new RVs, with computed mean and variance
-
-"""
 
 
-def calculateCircuitDelay(rootNodes: [Node]) -> [Node]:
+def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
+    """
+    Compute circuit delay using PDFs algorithm
+    Function executes the algorithm for finding out the PDF of a circuit delay.
+
+    :param rootNodes: array of root nodes, [Node], Node includes next nodes and previous nodes
+    :return newDelays: array of new RVs
+    """
+
+
     queue = Queue()
+
+    # if cvxpy:
+    #     MaximumF =
 
     sink = []
     newDelays = []
@@ -40,16 +37,9 @@ def calculateCircuitDelay(rootNodes: [Node]) -> [Node]:
             continue
 
         if tmpNode.prevDelays:                                      # get maximum + convolution
-            # print(tmpNode.prevDelays[0].mean, tmpNode.prevDelays[0].std)
-            # print(tmpNode.prevDelays[1].mean, tmpNode.prevDelays[0].std)
-            # print(len(tmpNode.prevDelays))
-
             maxDelay = maxOfDistributionsFORM(tmpNode.prevDelays)
-            # print("mean, std of max: " + str(maxDelay.mean) + ", " + str(maxDelay.std))
             currentRandVar = currentRandVar.convolutionOfTwoVarsShift(maxDelay)
-            # currentRandVar = currentRandVar.convolutionOfTwoVarsUnion(maxDelay)
 
-            # print("mean, std of convolution: " + str(currentRandVar.mean) + ", " + str(currentRandVar.std))
 
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
             nextNode.appendPrevDelays(currentRandVar)
@@ -61,14 +51,8 @@ def calculateCircuitDelay(rootNodes: [Node]) -> [Node]:
         putIntoQueue(queue, tmpNode.nextNodes)
         newDelays.append(currentRandVar)
 
-    # plt.hist(sink[0].edges[:-1], sink[0].edges, weights=sink[0].bins, density="PDF")
-    # plt.hist(sink[1].edges[:-1], sink[1].edges, weights=sink[1].bins, density="PDF")
-    #
-    # plt.show()
 
     sinkDelay = maxOfDistributionsFORM(sink)
-    # g5 = histogramGenerator.get_gauss_bins(5, 5, 3000, 1000000, (-20, 150))
-    # sinkDelay = sinkDelay.convolutionOfTwoVarsShift(g5)
     newDelays.append(sinkDelay)
 
     return newDelays
@@ -76,37 +60,48 @@ def calculateCircuitDelay(rootNodes: [Node]) -> [Node]:
 
 
 
+def maxOfDistributionsCVXPY(delays: [cp.Variable]) -> cp.Variable:
+    """
+    Calculates maximum of an array of PDFs of cvxpy variable
+
+    :param delays: array of cvxpy variables (n, m), n gates, m bins
+    :return maximum:  cvxpy variable (1, m)
+    """
+
+    pass
 
 
-""" Calculates maximum of an array of PDFs
-
-    Using elementwise maximum - np.maximum
-
-    Params: 
-        delays: array of RandomVariables
-
-    Return:
-        max: RandomVariable - maximum delay
-
-"""
 
 
 def maxOfDistributionsELEMENTWISE(delays: [RandomVariable]) -> RandomVariable:
+    """
+    Calculates maximum of an array of PDFs of cvxpy variable
+    Using elementwise maximum - np.maximum
+
+    :param delays: array of RandomVariables
+    :return maximum: RandomVariable - maximum delay
+    """
 
     size = len(delays)
     for i in range(0, size - 1):
         newRV = delays[i].maxOfDistributionsELEMENTWISE(delays[i + 1])
         delays[i + 1] = newRV
 
-    max = delays[-1]
+    maximum = delays[-1]
 
-    return max
+    return maximum
 
 
-"""
-    Using formula - look up function maxOfDistributionsFORM
-"""
+
 def maxOfDistributionsFORM(delays: [RandomVariable]) -> RandomVariable:
+    """
+    Calculates maximum of an array of PDFs of cvxpy variable
+    Using formula - look up function maxOfDistributionsFORM
+
+    :param delays: array of RandomVariables
+    :return maximum: RandomVariable - maximum delay
+    """
+
 
     size = len(delays)
 
@@ -114,14 +109,19 @@ def maxOfDistributionsFORM(delays: [RandomVariable]) -> RandomVariable:
         newRV = delays[i].maxOfDistributionsFORM(delays[i + 1])
         delays[i + 1] = newRV
 
-    max = delays[-1]
+    maximum = delays[-1]
 
-    return max
+    return maximum
 
-"""
-    Using maxOfDistributionsQUAD, quadratic algorithm
-"""
+
 def maxOfDistributionsQUAD(delays: [RandomVariable]) -> RandomVariable:
+    """
+    Calculates maximum of an array of PDFs of cvxpy variable
+    Using maxOfDistributionsQUAD, quadratic algorithm
+
+    :param delays: array of RandomVariables
+    :return maximum: RandomVariable - maximum delay
+    """
 
     size = len(delays)
 
@@ -135,12 +135,13 @@ def maxOfDistributionsQUAD(delays: [RandomVariable]) -> RandomVariable:
     return max
 
 
-""" Put into queue
-        
-    Function puts list into queue. 
-        
-"""
 def putIntoQueue(queue: Queue, list: [Node]) -> None:
+    """
+    Function puts list into queue.
+
+    :param queue: Queue
+    :return list: array of Node class
+    """
 
     for item in list:
         queue.put(item)

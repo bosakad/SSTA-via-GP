@@ -3,33 +3,30 @@ import sys
 import re
 import numpy
 
-""" Get incidence matrix from netlist.
 
-    Function calls parser functions, return a cell-edge incidence matrix of a circuit.
 
-    Params:
-        argv: arguments given to main function
-    Return:
-        matrix: incidence matrix 
+def getIncidenceMatrixFromNetlist(argv) -> numpy.array:
+    """
+    Get incidence matrix from netlist.
 
-"""
+    :param argv: arguments given to main function
+    :return matrix: incidence matrix
+    """
 
-def getIncidenceMatrixFromNetlist(argv):
     netListString = parseFileName(argv)
-
     matrix = parseNetListIntoMatrix(netListString)
+
     return matrix
 
 
-
-""" Parses file name. Does edge casing. Returns content of the file if
+def parseFileName(argv) -> str:
+    """
+    Parses file name. Does edge casing. Returns content of the file if
     no errors appeared.
 
-      Params:
-        argv: list of arguments
-      Return: name of the file  """
-
-def parseFileName(argv):
+    :param argv: arguments given to main function
+    :return ret: name of the file
+    """
 
     # edge casing
 
@@ -62,15 +59,16 @@ def parseFileName(argv):
 
     return ret
 
-""" TODO: FINISH
 
-Parses string and puts the information into cell-edge incidence matrix.
+def parseNetListIntoMatrix(netList: str) -> numpy.array:
+    """
+    Parses file name. Does edge casing. Returns content of the file if
+    no errors appeared.
 
-      Params:
-        netList: string with circuit information
-      Return: cell-edge incidence matrix  """
+    :param netList: string with circuit information
+    :return matrix: wanted incidence matrix
+    """
 
-def parseNetListIntoMatrix(netList):
     global gateIndex, edgeIndex, mappingList, matrixDict
     buf = io.StringIO(netList)
     readLine = ""
@@ -146,16 +144,18 @@ def parseNetListIntoMatrix(netList):
     return matrix
 
 
-""" Parse gate properties from .txt
+def parseGatesPropertiesFromTXT(fileName, gates):   # TODO
+    """
+    Parse gate properties from .txt
 
     Function should parse all gates properties for VLSI optimization such as
     -- alphas, betas, gammas constants
     -- energyLoss, frequencies
 
-"""
+    :param netList: string with circuit information
+    :return matrix: wanted incidence matrix
+    """
 
-def parseGatesPropertiesFromTXT(fileName, gates):
-    #TODO
     pass
 
 
