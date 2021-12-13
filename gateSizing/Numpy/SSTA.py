@@ -1,9 +1,14 @@
 from queue import Queue
+
 from randomVariableHist import RandomVariable
 from node import Node
 import cvxpy as cp
-import matplotlib.pyplot as plt
-import histogramGenerator
+
+import sys
+# setting path
+sys.path.append('../Cvxpy')
+
+import cvxpyVariable
 
 
 
@@ -13,19 +18,21 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
     Function executes the algorithm for finding out the PDF of a circuit delay.
 
     :param rootNodes: array of root nodes, [Node], Node includes next nodes and previous nodes
+    :param cvxpy: Bool, true if cvxpy objects are used, false if just RandomVariables class is used
     :return newDelays: array of new RVs
     """
 
+    # pointer to a max and convolution functions
+    MaximumF = maxOfDistributionsCVXPY if cvxpy else maxOfDistributionsFORM
+    ConvolutionF = cvxpyVariable.convolutionCVXPY if cvxpy else RandomVariable.convolutionOfTwoVarsShift
 
+    # init. data structures
     queue = Queue()
-
-    # if cvxpy:
-    #     MaximumF =
-
     sink = []
     newDelays = []
-    closedList = []
+    closedList = set()
 
+    # put root nodes into Queue
     putIntoQueue(queue, rootNodes)
 
     while not queue.empty():
@@ -37,8 +44,8 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
             continue
 
         if tmpNode.prevDelays:                                      # get maximum + convolution
-            maxDelay = maxOfDistributionsFORM(tmpNode.prevDelays)
-            currentRandVar = currentRandVar.convolutionOfTwoVarsShift(maxDelay)
+            maxDelay = MaximumF(tmpNode.prevDelays)
+            currentRandVar = ConvolutionF(currentRandVar, maxDelay)
 
 
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
@@ -47,12 +54,12 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
         if not tmpNode.nextNodes:                                   # save for later ouput delays
             sink.append(currentRandVar)
 
-        closedList.append(tmpNode)
+        closedList.add(tmpNode)
         putIntoQueue(queue, tmpNode.nextNodes)
         newDelays.append(currentRandVar)
 
 
-    sinkDelay = maxOfDistributionsFORM(sink)
+    sinkDelay = MaximumF(sink)
     newDelays.append(sinkDelay)
 
     return newDelays
@@ -60,7 +67,9 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
 
 
 
-def maxOfDistributionsCVXPY(delays: [cp.Variable]) -> cp.Variable:
+
+
+def maxOfDistributionsCVXPY(delays: [cp.Expression]) -> cp.Variable:
     """
     Calculates maximum of an array of PDFs of cvxpy variable
 
@@ -68,7 +77,14 @@ def maxOfDistributionsCVXPY(delays: [cp.Variable]) -> cp.Variable:
     :return maximum:  cvxpy variable (1, m)
     """
 
-    pass
+    size = len(delays)
+    for i in range(0, size - 1):
+        newRV = cvxpyVariable.maximumCVXPY(delays[i], delays[i + 1])
+        delays[i + 1] = newRV
+
+    maximum = delays[-1]
+
+    return maximum
 
 
 

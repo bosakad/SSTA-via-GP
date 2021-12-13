@@ -76,17 +76,34 @@ def SSTA_CVXPY(dec: int):
     n2.setNextNodes([n3, n5])
     n3.setNextNodes([n4, n5])
 
-    delays = SSTA.calculateCircuitDelay([n1, n2])
+    # calculate delay with ssta
+    delays = SSTA.calculateCircuitDelay([n1, n2], cvxpy=True)
 
+    print(delays)
 
-    actual = putTuplesIntoArray(rvs=delays)
+    # solve
+    constraints = [x[0, :] >= g1.bins, x[1, :] >= g2.bins, x[2, :] >= g3.bins, x[3, :] >= g4.bins, x[4, :] >= g5.bins]
+    objective = cp.Minimize( cp.sum( cp.sum(delays) ))
+    prob = cp.Problem(objective, constraints)
+    prob.solve(verbose=True, solver=cp.MOSEK)
 
-    print(actual)
+    print("prob value: ", prob.value)
+    print("x: ", x.value)
 
-    # testMCMax(mc, binsInterval, numberOfBins)
+    # get means and stds
+    rv1 = RandomVariable(x.value[0, :], g1.edges)
+    rv2 = RandomVariable(x.value[1, :], g2.edges)
+    rv3 = RandomVariable(x.value[2, :], g3.edges)
+    rv4 = RandomVariable(x.value[3, :], g4.edges)
+    rv5 = RandomVariable(x.value[4, :], g5.edges)
 
-        # test whole
-    # np.testing.assert_almost_equal(desired, actual, decimal=dec, err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
+    # print out the results
+
+    print(rv1.mean, rv1.std)
+    print(rv2.mean, rv2.std)
+    print(rv3.mean, rv3.std)
+    print(rv4.mean, rv4.std)
+    print(rv5.mean, rv5.std)
 
     return None
 

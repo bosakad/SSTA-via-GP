@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 import sys
 # setting path
-sys.path.append('../montecarlo')
+sys.path.append('../../montecarlo')
 
 from montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
 
