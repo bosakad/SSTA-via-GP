@@ -16,7 +16,7 @@ def get_gauss_bins(mu: float, sigma: float, numberOfBins: int, numberOfSamples: 
 
     s = np.random.normal(mu, sigma, numberOfSamples)
 
-    STATIC_BINS = np.linspace(binsInterval[0], binsInterval[1], numberOfBins)
+    STATIC_BINS = np.linspace(binsInterval[0], binsInterval[1], numberOfBins+1)
 
     data, edges = np.histogram(s, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))

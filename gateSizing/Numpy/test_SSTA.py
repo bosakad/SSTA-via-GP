@@ -6,6 +6,7 @@ import SSTA
 import networkx as nx
 from randomVariableHist import RandomVariable
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 import sys
 # setting path
@@ -35,7 +36,7 @@ def plotError(mc, ssta):
     plt.hist(edges[:-1], edges, weights=errors)
     plt.ylabel('Error', size=14)
     plt.xlabel('Gate', size=14)
-    plt.title('Function of an error.', size=16)
+    # plt.title('Function of an error.', size=16)
     plt.show()
 
 
@@ -66,10 +67,10 @@ def testMCMax(mc, binsInterval, numberOfBins):
     print(h1.mean, h2.mean)
 
         # compute max from mc data
-    h3 = h1.maxOfDistributionsFORM(h2)
+    # h3 = h1.maxOfDistributionsFORM(h2)
 
 
-    # _ = plt.hist(mc[-3], bins=2000, density='PDF', alpha=0.7)
+    _ = plt.hist(mc[-1], bins=2000, density='PDF', alpha=0.7)
 
     # mu1 = 21.98553396
     # sigma1 = 0.76804456
@@ -85,10 +86,10 @@ def testMCMax(mc, binsInterval, numberOfBins):
     # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
     # plt.show()
 
-    actual = [h3.mean, h3.std]
-    desired = [np.mean(mc[-1]), np.std(mc[-1])]
-
-    np.testing.assert_almost_equal(desired, actual, decimal=3)
+    # actual = [h3.mean, h3.std]
+    # desired = [np.mean(mc[-1]), np.std(mc[-1])]
+    #
+    # np.testing.assert_almost_equal(desired, actual, decimal=3)
 
 
 
@@ -162,11 +163,11 @@ def testSSTA_1(dec: int):
 
         # ACTUAL - ssta
 
-    g1 = histogramGenerator.get_gauss_bins(1, 0.45, numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
-    g2 = histogramGenerator.get_gauss_bins(0.5, 0.3, numberOfBins, numberOfSamples, binsInterval)  # g4 output - inputs: g3 g1
-    g3 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
-    g4 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples, binsInterval)
-    g5 = histogramGenerator.get_gauss_bins(0.5, 0.5, numberOfBins, numberOfSamples, binsInterval)
+    g1 = histogramGenerator.get_gauss_bins(8, 0.45, numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
+    g2 = histogramGenerator.get_gauss_bins(12, 0.3, numberOfBins, numberOfSamples, binsInterval)  # g4 output - inputs: g3 g1
+    g3 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
+    g4 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
+    g5 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
 
     n1 = Node(g1)
     n2 = Node(g2)
@@ -192,9 +193,9 @@ def testSSTA_1(dec: int):
 def testSSTA_2(dec: int):
 
     numberOfSamples = 5000000
-    numberOfBins = 10000
+    numberOfBins = 100
     distribution = 'Normal'
-    binsInterval = (-20, 100)
+    binsInterval = (-5, 50)
 
         # DESIRED - monte carlo
 
@@ -248,12 +249,20 @@ def testSSTA_2(dec: int):
 
         # TESTING
 
+    # density = stats.gaussian_kde(mc[-1])
     # plt.hist(mc[-1], bins=numberOfBins, density='PDF', alpha=0.7)
-    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, density="PDF")
+    # plt.plot(delays[-1].edges[450:-445], density(delays[-1].edges[450:-445]))
+
+    plt.hist(delays[-1].edges[450:-446], delays[-1].edges[450:-445], weights=delays[-1].bins[450:-445], density="PDF")
+    plt.legend(['Monte Carlo', 'Histogram approximation'])
+
+    plt.ylabel('PDF', size=14)
+    plt.xlabel('Time', size=14)
+
     # plt.show()
 
 
-    plotError(desired, actual)
+    # plotError(desired, actual)
 
     # testMCMax(mc, binsInterval, numberOfBins)
 

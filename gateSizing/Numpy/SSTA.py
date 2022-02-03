@@ -69,7 +69,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
 
 
 
-def maxOfDistributionsCVXPY(delays: [cp.Expression]) -> cp.Variable:
+def maxOfDistributionsCVXPY(delays: [{cp.Expression}]) -> cp.Variable:
     """
     Calculates maximum of an array of PDFs of cvxpy variable
 

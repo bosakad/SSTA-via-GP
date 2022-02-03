@@ -30,23 +30,14 @@ def computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates):
 
     cload = [None] * numberOfGates
 
-    # cload[0] = inputCapacitance[3]
-    # cload[1] = inputCapacitance[3] + inputCapacitance[4]
-    # cload[2] = inputCapacitance[4] + inputCapacitance[6]
-    # cload[3] = inputCapacitance[5] + inputCapacitance[6]
-    # cload[4] = inputCapacitance[6]
+    cload[0] = inputCapacitance[3]
+    cload[1] = inputCapacitance[3] + inputCapacitance[4]
+    cload[2] = inputCapacitance[4] + inputCapacitance[6]
+    cload[3] = inputCapacitance[5] + inputCapacitance[6]
+    cload[4] = inputCapacitance[6]
 
-    # cload[5] = loadCapacitances[0]
-    # cload[6] = loadCapacitances[1]
-
-
-
-    cload[0] = inputCapacitance[0]
-    cload[1] = inputCapacitance[0] + inputCapacitance[1]
-    cload[2] = inputCapacitance[1] + inputCapacitance[2]
-
-    cload[3] = loadCapacitances[0]
-    cload[4] = loadCapacitances[1]
+    cload[5] = loadCapacitances[0]
+    cload[6] = loadCapacitances[1]
 
     return cp.hstack(cload)  # concatenation
 
@@ -74,18 +65,13 @@ def getPathDelays(gateDelays):
     :param gateDelays: (1, n) cvxpy variable of delays
     :return cload: (1, m) cvxpy array of all delay paths
     """
-    # delays = [gateDelays[0] + gateDelays[3] + gateDelays[5],
-    #           gateDelays[0] + gateDelays[3] + gateDelays[6],
-    #           gateDelays[1] + gateDelays[3] + gateDelays[5],
-    #           gateDelays[1] + gateDelays[3] + gateDelays[6],
-    #           gateDelays[1] + gateDelays[4] + gateDelays[6],
-    #           gateDelays[2] + gateDelays[4] + gateDelays[5],
-    #           gateDelays[2] + gateDelays[6]]
-
-    delays = [gateDelays[0] + gateDelays[2] + gateDelays[3],
-              gateDelays[0] + gateDelays[2] + gateDelays[4],
-              gateDelays[1] + gateDelays[2] + gateDelays[3],
-              gateDelays[1] + gateDelays[2] + gateDelays[4]]
+    delays = [gateDelays[0] + gateDelays[3] + gateDelays[5],
+              gateDelays[0] + gateDelays[3] + gateDelays[6],
+              gateDelays[1] + gateDelays[3] + gateDelays[5],
+              gateDelays[1] + gateDelays[3] + gateDelays[6],
+              gateDelays[1] + gateDelays[4] + gateDelays[6],
+              gateDelays[2] + gateDelays[4] + gateDelays[5],
+              gateDelays[2] + gateDelays[6]]
 
     return cp.hstack(delays)
 
@@ -136,14 +122,13 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
 
     # computing the objective function
 
-    # inputCapacitance = computeInputCapacitance(alphas, betas, x)
-    # loadCapacitance = computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates)
-    # gateDelays = computeGateDelays(loadCapacitance, gammas, x)
-    #
-    # pathDelays = getPathDelays(gateDelays)
-    # circuitDelay = getMaximumDelay(pathDelays)
-    print(delaysRVs)
-    circuitDelay = cp.sum( cp.multiply(x, delaysRVs) )
+    inputCapacitance = computeInputCapacitance(alphas, betas, x)
+    loadCapacitance = computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates)
+    gateDelays = computeGateDelays(loadCapacitance, gammas, x)
+
+    pathDelays = getPathDelays(gateDelays)
+    circuitDelay = getMaximumDelay(pathDelays)
+    # circuitDelay = cp.sum( cp.multiply(x, delaysRVs) )
 
 
     # computing the constraints
@@ -153,12 +138,11 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
 
     # formulating GGP
 
-    print(circuitDelay)
     constraints = [totalPower <= maxPower, totalArea <= maxArea]
     objective = cp.Minimize(circuitDelay)
 
     prob = cp.Problem(objective, constraints)
-    prob.solve(gp=False, verbose=True, solver=cp.MOSEK)
+    prob.solve(gp=True, verbose=True, solver=cp.MOSEK)
 
     print("sizing params: ", x.value)
 
@@ -170,22 +154,20 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
 # hard coded example
 
 numberOfGates = 7
-numberOfGates = 5
+# numberOfGates = 5
 
-# f = np.array([1, 0.8, 1, 0.7, 0.7, 0.5, 0.5])
-# e = np.array([1, 2, 1, 1.5, 1.5, 1, 2])
-f = np.array([1, 0.8, 1, 0.7, 0.7])
-e = np.array([1, 2, 1, 1.5, 1.5])
-Cout6 = 10
-Cout7 = 10
+f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5, 2.5])
+e = np.array([1, 2, 1, 1.5, 1.5, 1, 0.2])
+Cout6 = 7
+Cout7 = 5
 
 a = np.ones(numberOfGates)
 alpha = np.ones(numberOfGates)
 beta = np.ones(numberOfGates)
 gamma = np.ones(numberOfGates)
 
-Amax = 25
-Pmax = 50
+Amax = 30
+Pmax = 55
 
 
-# optimizeGates(f, e, a, alpha, beta, gamma, Amax, Pmax, [Cout6, Cout7], numberOfGates)
+optimizeGates(f, e, a, alpha, beta, gamma, Amax, Pmax, [Cout6, Cout7], numberOfGates)
