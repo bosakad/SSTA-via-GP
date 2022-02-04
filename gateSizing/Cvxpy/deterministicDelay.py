@@ -103,31 +103,13 @@ def FindMaxDelayGates():
     print("path: ", path.value)
 
 
-def FindMaxDelayEdges():
+def FindMaxDelayEdges(source):
     """
     Computes maximum possible path. CVXPY variables as edges
-    :return:
+    :param: Source of the graph - Node class
+    :return: integer, maximum delay
     """
 
-    # define cvxpy variable for each edge
-
-    source = Node(0)
-    n1 = Node(3)
-    n2 = Node(2)
-    n3 = Node(1)
-    n4 = Node(4)
-    n5 = Node(10)
-    sink = Node(0)
-
-    # set circuit design
-    n1.setNextNodes([n3, n4])
-    n2.setNextNodes([n3, n5])
-    n3.setNextNodes([n4, n5])
-
-    # set sink and source
-    n4.setNextNodes([sink])
-    n5.setNextNodes([sink])
-    source.setNextNodes([n1, n2])
 
     # set constraints for fan-out
 
@@ -159,7 +141,7 @@ def FindMaxDelayEdges():
         fanout = 0
         for nextGate in nextNodes:
 
-            edge = cp.Variable((1, ), boolean=True)
+            edge = cp.Variable((1, ), nonneg=True)
             variables.append(edge)
 
             fanout += edge
@@ -209,6 +191,9 @@ def FindMaxDelayEdges():
         print(variable.value)
 
 
+    return problem.value
+
+
 def putIntoQueue(queue: Queue, list: [Node]) -> None:
     """
     Function puts list into queue.
@@ -225,5 +210,25 @@ def putIntoQueue(queue: Queue, list: [Node]) -> None:
 
 # call function
 
-# FindMaxDelayGates()
-FindMaxDelayEdges()
+if __name__ == "__main__":
+
+    source = Node(0)
+    n1 = Node(3)
+    n2 = Node(2)
+    n3 = Node(1)
+    n4 = Node(4)
+    n5 = Node(10)
+    sink = Node(0)
+
+    # set circuit design
+    n1.setNextNodes([n3, n4])
+    n2.setNextNodes([n3, n5])
+    n3.setNextNodes([n4, n5])
+
+    # set sink and source
+    n4.setNextNodes([sink])
+    n5.setNextNodes([sink])
+    source.setNextNodes([n1, n2])
+
+    # call the function
+    FindMaxDelayEdges(source)
