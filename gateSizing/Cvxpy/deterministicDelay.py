@@ -177,7 +177,7 @@ def FindMaxDelayEdges(source):
 
     # formulate LP
 
-    obj = cp.Maximize( cp.sum( circuitDelay ) )
+    obj = cp.Maximize( circuitDelay )
 
     # solve
     problem = cp.Problem(obj, constr)

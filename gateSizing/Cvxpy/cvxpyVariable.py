@@ -25,8 +25,8 @@ def convolutionCVXPY(x1: {cp.Expression}, x2: {cp.Expression}) -> {cp.Expression
 
     for z in range(0, size):
         for k in range(0, z + 1):
-            # convolution[z] += x1[k] - x2[z - k]
-            convolution[z] += x1[k] + x2[z - k]
+            convolution[z] += x1[k] * x2[z - k]
+            # convolution[z] += x1[k] + x2[z - k]
 
     return convolution
 
