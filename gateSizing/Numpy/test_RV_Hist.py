@@ -539,6 +539,28 @@ def testStdUniform(dec: int):
     return None
 
 
+def testConvolutionNaive(dec: int):
+
+
+    edges = np.array([0, 1, 2, 3])
+    values1 = np.array([1, 2, 3])
+    values2 = np.array([0, 1, 0.5])
+
+    rv1 = RandomVariable(values1, edges)
+    rv2 = RandomVariable(values2, edges)
+
+    actual = (rv1.convolutionOfTwoVarsNaive(rv2)).bins
+
+
+    desired = np.convolve([1, 2, 3], [0, 1, 0.5])
+
+        # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
+
+
 
 
 
@@ -554,7 +576,7 @@ if __name__ == "__main__":
     # testStdUniform(dec=2)
     #
     # maxOfDistributionsELEMENTWISE(dec=0)
-    maxOfDistributionsFORM_MultiMax(dec=5)
+    # maxOfDistributionsFORM_MultiMax(dec=5)
     # testmaxOfDistributionsQUAD(dec=5)
 
     # testUniteEdges(dec=2)   # failed test
@@ -565,7 +587,9 @@ if __name__ == "__main__":
 
     # testConvolutionUnion(dec=2)
     # testConvolutionUniformShift(dec=4)
-    # testConvolutionGaussShift(dec=4)
+    testConvolutionGaussShift(dec=4)
+
+    # testConvolutionNaive(1)
 
 
 

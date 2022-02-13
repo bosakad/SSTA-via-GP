@@ -90,11 +90,9 @@ def SSTA_CVXPY(dec: int):
     n3.setNextNodes([n4, n5])
 
     # calculate delay with ssta
-    delays = SSTA.calculateCircuitDelay([n1, n2], cvxpy=True)
+    delays, constraints = SSTA.calculateCircuitDelay([n1, n2], cvxpy=True)
 
     # set constraints
-
-    constraints = []
 
     for gate in range(0, numberOfGates):
         for bin in range(0, numberOfBins):

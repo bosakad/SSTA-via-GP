@@ -151,9 +151,9 @@ class RandomVariable:
 
 
 
-    def convolutionOfTwoVarsNaive(self, secondVariable):
+    def convolutionOfTwoVarsNaiveFULL(self, secondVariable):
         """
-        Convolution of two independent random variables naively:
+        'Full' Convolution of two independent random variables naively - using 2 for loops:
             (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
 
         :param self: random variable class
@@ -164,14 +164,58 @@ class RandomVariable:
         f = self.bins
         g = secondVariable.bins
 
-        size = len(f)
-        newHistogram = np.array([0.] * size)
+        diff = self.edges[1] - self.edges[0]
 
-        for z in range(0, size):
+        N = len(f)
+        M = len(g)
+
+        finalSize = N + M - 1
+        convolution = np.array([0.] * finalSize)
+
+        for z in range(0, finalSize):
             for k in range(0, z + 1):
-                newHistogram[z] += f[k] * g[z - k]
+                if k >= N:
+                    convolution[z] += 0
+                elif z - k >= M:
+                    convolution[z] += 0
+                else:
+                    convolution[z] += f[k] * g[z - k]
 
-        return RandomVariable(newHistogram, self.edges)
+        convolution = convolution[:f.size]    # get the wanted range
+
+
+        # Deal With Edges
+        self.cutBins(self.edges, convolution)
+
+        # normalize
+        convolution = convolution / (np.sum(convolution) * diff)
+
+        return RandomVariable(convolution, self.edges)
+
+    def convolutionOfTwoVarsNaiveSAME(self, secondVariable):
+        """
+        'SAME' Convolution of two independent random variables naively - using 2 for loops:
+            (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class of convolution
+        """
+
+        f = self.bins
+        g = secondVariable.bins
+
+        finalSize = len(f)
+        convolution = np.array([0.] * finalSize)
+
+        for z in range(0, finalSize):
+            for k in range(0, z + 1):
+                convolution[z] += f[k] * g[z - k]
+
+        # Deal With Edges
+        self.cutBins(self.edges, convolution)
+
+        return RandomVariable(convolution, self.edges)
 
 
     def convolutionOfTwoVarsShift(self, secondVariable):

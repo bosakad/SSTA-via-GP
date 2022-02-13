@@ -31,6 +31,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
     sink = []
     newDelays = []
     closedList = set()
+    AllConstr = []
 
     # put root nodes into Queue
     putIntoQueue(queue, rootNodes)
@@ -44,7 +45,13 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
             continue
 
         if tmpNode.prevDelays:                                      # get maximum + convolution
-            maxDelay = MaximumF(tmpNode.prevDelays)
+
+            if cvxpy:
+                maxDelay, newConstraints = MaximumF(tmpNode.prevDelays)
+                AllConstr.extend(newConstraints)
+            else:
+                maxDelay = MaximumF(tmpNode.prevDelays)
+
             currentRandVar = ConvolutionF(currentRandVar, maxDelay)
 
 
@@ -58,11 +65,15 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
         putIntoQueue(queue, tmpNode.nextNodes)
         newDelays.append(currentRandVar)
 
-
+        # make max into sink
     sinkDelay = MaximumF(sink)
     newDelays.append(sinkDelay)
 
-    return newDelays
+        # return dependent on cvxpy / numpy
+    if cvxpy:
+        return newDelays, AllConstr
+    else:
+        return newDelays
 
 
 
