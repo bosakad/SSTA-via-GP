@@ -58,7 +58,6 @@ def SSTA_CVXPY(dec: int):
 
     # create cvxpy variable
 
-    # x = cp.Variable((5, numberOfBins-1), pos=True)
     xs = {}
 
     # create a variable as a dict.

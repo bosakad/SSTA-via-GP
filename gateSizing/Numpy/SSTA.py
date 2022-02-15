@@ -24,14 +24,14 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
 
     # pointer to a max and convolution functions
     MaximumF = maxOfDistributionsCVXPY if cvxpy else maxOfDistributionsFORM
-    ConvolutionF = cvxpyVariable.convolutionCVXPY if cvxpy else RandomVariable.convolutionOfTwoVarsShift
+    ConvolutionF = cvxpyVariable.convolutionCVXPY_CONSTANT if cvxpy else RandomVariable.convolutionOfTwoVarsShift
 
     # init. data structures
     queue = Queue()
     sink = []
     newDelays = []
     closedList = set()
-    AllConstr = []
+    # AllConstr = []
 
     # put root nodes into Queue
     putIntoQueue(queue, rootNodes)
@@ -47,8 +47,9 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
         if tmpNode.prevDelays:                                      # get maximum + convolution
 
             if cvxpy:
-                maxDelay, newConstraints = MaximumF(tmpNode.prevDelays)
-                AllConstr.extend(newConstraints)
+                # maxDelay, newConstraints = MaximumF(tmpNode.prevDelays)   # old code with constr.
+                # AllConstr.extend(newConstraints)
+                maxDelay = MaximumF(tmpNode.prevDelays)
             else:
                 maxDelay = MaximumF(tmpNode.prevDelays)
 
@@ -69,11 +70,13 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
     sinkDelay = MaximumF(sink)
     newDelays.append(sinkDelay)
 
-        # return dependent on cvxpy / numpy
-    if cvxpy:
-        return newDelays, AllConstr
-    else:
-        return newDelays
+    return newDelays
+
+        # return dependent on cvxpy / numpy     # old code with constr, might of use in the future
+    # if cvxpy:
+    #     return newDelays, AllConstr
+    # else:
+    #     return newDelays
 
 
 
@@ -90,7 +93,7 @@ def maxOfDistributionsCVXPY(delays: [{cp.Expression}]) -> cp.Variable:
 
     size = len(delays)
     for i in range(0, size - 1):
-        newRV = cvxpyVariable.maximumCVXPY(delays[i], delays[i + 1])
+        newRV = cvxpyVariable.maximumCVXPY_ELEMENTWISE(delays[i], delays[i + 1])
         delays[i + 1] = newRV
 
     maximum = delays[-1]

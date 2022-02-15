@@ -1,5 +1,6 @@
 import numpy
 import numpy as np
+import histogramGenerator
 from randomVariableHist import RandomVariable
 import matplotlib.pyplot as plt
 
@@ -145,59 +146,7 @@ def maxOfDistributionsFORM_MultiMax(dec: int):
 
     return None
 
-def testmaxOfDistributionsQUAD(dec: int):
-    mu1 = 21.98553396
-    sigma1 = 0.76804456
 
-    mu2 = 21.98483475
-    sigma2 = 0.76802585
-
-    numberOfSamples = 1000000
-    numberOfBins = 2000
-
-    STATIC_BINS1 = np.linspace(-20, 100, numberOfBins)
-    STATIC_BINS2 = np.linspace(-10, 107, numberOfBins)
-
-
-        # DESIRED
-
-    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
-    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
-
-    max = np.maximum(rv1, rv2)
-    desired = [np.mean(max), np.std(max)]
-
-       # ACTUAL
-
-    data, edges = np.histogram(rv1, bins=STATIC_BINS1)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h1 = RandomVariable(dataNorm, edges)
-
-    data, edges = np.histogram(rv2, bins=STATIC_BINS2)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h2 = RandomVariable(dataNorm, edges)
-
-    max2 = h1.maxOfDistributionsFORM(h2)
-    # max2 = h1.maxOfDistributionsQUAD(h2)
-
-    plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
-    plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
-
-    plt.hist(max2.edges[:-1], max2.edges, weights=max2.bins, density="PDF")
-    plt.show()
-
-    _ = plt.hist(rv1, bins=2000, density='PDF', alpha=0.7)
-    _ = plt.hist(rv2, bins=1000, density='PDF', alpha=0.7)
-    _ = plt.hist(max, bins=2000, density='PDF', alpha=0.7)
-    plt.show()
-
-    actual = [max2.mean, max2.std]
-
-        # TESTING
-
-    np.testing.assert_almost_equal(desired, actual, decimal=dec)
-
-    return None
 
 def testConvolutionGaussShift(dec: int):
 
@@ -560,8 +509,181 @@ def testConvolutionNaive(dec: int):
 
     return None
 
+def testmaxOfDistributionsQUAD(dec: int):
+    mu1 = 21.98553396
+    sigma1 = 0.76804456
+
+    mu2 = 21.98483475
+    sigma2 = 0.76802585
+
+    numberOfSamples = 1000000
+    numberOfBins = 2000
+
+    STATIC_BINS1 = np.linspace(-20, 100, numberOfBins)
+    STATIC_BINS2 = np.linspace(-10, 107, numberOfBins)
 
 
+        # DESIRED
+
+    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
+    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
+
+    max = np.maximum(rv1, rv2)
+    desired = [np.mean(max), np.std(max)]
+
+       # ACTUAL
+
+    data, edges = np.histogram(rv1, bins=STATIC_BINS1)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h1 = RandomVariable(dataNorm, edges)
+
+    data, edges = np.histogram(rv2, bins=STATIC_BINS2)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h2 = RandomVariable(dataNorm, edges)
+
+    # max2 = h1.maxOfDistributionsFORM(h2)
+    max2 = h1.maxOfDistributionsQUAD(h2)
+
+    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
+    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
+
+    # plt.hist(max2.edges[:-1], max2.edges, weights=max2.bins, density="PDF")
+    # plt.show()
+
+    # _ = plt.hist(rv1, bins=2000, density='PDF', alpha=0.7)
+    # _ = plt.hist(rv2, bins=1000, density='PDF', alpha=0.7)
+    # _ = plt.hist(max, bins=2000, density='PDF', alpha=0.7)
+    # plt.show()
+
+    actual = [max2.mean, max2.std]
+
+        # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
+
+def testMAX_QUAD_FORMULA(dec: int):
+    mu1 = 12.98553396
+    sigma1 = 0.76804456
+
+    mu2 = 26.98483475
+    sigma2 = 4.802585
+
+    numberOfSamples = 1000000
+    numberOfBins = 2000
+
+    STATIC_BINS1 = np.linspace(-20, 100, numberOfBins)
+    STATIC_BINS2 = np.linspace(-10, 107, numberOfBins)
+
+    # DESIRED
+
+    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
+    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
+
+    max = np.maximum(rv1, rv2)
+    desired = [np.mean(max), np.std(max)]
+
+    # ACTUAL
+
+    data, edges = np.histogram(rv1, bins=STATIC_BINS1)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h1 = RandomVariable(dataNorm, edges)
+
+    data, edges = np.histogram(rv2, bins=STATIC_BINS2)
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+    h2 = RandomVariable(dataNorm, edges)
+
+    max2 = h1.maxOfDistributionsQUAD_FORMULA(h2)
+
+    actual = [max2.mean, max2.std]
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
+
+def testMAX_QUAD_FORMULA_UNIFIED(dec: int):
+
+    mu1 = 12.98553396
+    sigma1 = 4.76804456
+
+    mu2 = 13.98483475
+    sigma2 = 4.802585
+
+    interval = (-10, 50)
+
+    numberOfSamples = 2000000
+    numberOfBins = 200
+    numberOfUnions = 800
+
+    # DESIRED
+
+    rv1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
+    rv2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+
+    max1 = rv1.maxOfDistributionsFORM(rv2)
+    desired = [max1.mean, max1.std]
+
+    # ACTUAL
+
+    rv3 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv4 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+
+    max2 = rv3.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv4)
+    actual = [max2.mean, max2.std]
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
+
+
+def testMAX_QUAD_FORMULA_UNIFIED2(dec: int):
+
+    mu1 = 12.98553396
+    sigma1 = 4.76804456
+
+    mu2 = 13.98483475
+    sigma2 = 4.802585
+
+    mu3 = 20.98483475
+    sigma3 = 0.802585
+
+
+    interval = (-10, 50)
+
+    numberOfSamples = 2000000
+    numberOfBins = 200
+    numberOfUnions = 600
+
+    # DESIRED
+
+    rv1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
+    rv2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+    rv3 = histogramGenerator.get_gauss_bins(mu3, sigma3, numberOfBins, numberOfSamples, interval)
+
+    max1 = rv1.maxOfDistributionsFORM(rv2)
+    max1 = max1.maxOfDistributionsFORM(rv3)
+    desired = [max1.mean, max1.std]
+
+    # ACTUAL
+
+    rv4 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv5 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv6 = histogramGenerator.get_gauss_bins_UNIFIED(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnions)
+
+    max2 = rv4.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv5)
+    max2 = rv5.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv6)
+    actual = [max2.mean, max2.std]
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
 
 
 
@@ -587,9 +709,13 @@ if __name__ == "__main__":
 
     # testConvolutionUnion(dec=2)
     # testConvolutionUniformShift(dec=4)
-    testConvolutionGaussShift(dec=4)
+    # testConvolutionGaussShift(dec=4)
 
     # testConvolutionNaive(1)
+    # testMAX_QUAD_FORMULA(3)
+    # testMAX_QUAD_FORMULA_UNIFIED(3)
+
+    testMAX_QUAD_FORMULA_UNIFIED2(3)
 
 
 

@@ -19,13 +19,20 @@ class RandomVariable:
     """
 
 
-    def __init__(self, bins, edges):
+    def __init__(self, bins, edges, unified=False):
 
-        self.bins = np.array(bins)
-        self.edges = np.array(edges)
-        self.mean = self.calculateMean()
-        self.std = self.calculateSTD()
 
+        if (unified == True):
+            self.bins = np.array(bins)
+            self.edges = np.array(edges)
+            self.mean = self.calculateMean_UNIFIED()
+            self.std = self.calculateSTD_UNIFIED()
+
+        else:   # normal histogram
+            self.bins = np.array(bins)
+            self.edges = np.array(edges)
+            self.mean = self.calculateMean()
+            self.std = self.calculateSTD()
 
 
 
@@ -150,6 +157,87 @@ class RandomVariable:
         return RandomVariable(maximum, self.edges)
 
 
+    def maxOfDistributionsQUAD_FORMULA(self, secondVariable):
+        """
+        Maximum of 2 distribution functions using quadratic algorithm and simplified version - in formula
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class, elementwise maximum of 2 histograms
+        """
+
+        # unite
+        self.uniteEdges(secondVariable)
+
+        # get data
+        n = len(self.bins)
+
+        bins1 = self.bins
+        bins2 = secondVariable.bins
+
+
+        # prealloc
+        maximum = np.zeros(n, dtype=np.double)
+
+        # calc. maximum
+        for i in range(0, n):
+            for j in range(0, i + 1):
+
+                maximum[i] += bins1[i] * bins2[j]
+
+        for i in range(0, n):
+            for j in range(i + 1, n):
+
+                maximum[j] += bins1[i] * bins2[j]
+
+
+        # normalize
+        maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
+
+        return RandomVariable(maximum, self.edges)
+
+    def maxOfDistributionsQUAD_FORMULA_UNIFIED(self, secondVariable):
+        """
+        Maximum of 2 distribution functions using quadratic algorithm and simplified version - in formula
+        with unified bins - meaning each bin is represented by M 0/1-bins. M and number of bins is same for all variables
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class, elementwise maximum of 2 histograms
+        """
+
+        binMatrix1 = self.bins
+        binMatrix2 = secondVariable.bins
+
+        numberOfBins = binMatrix1.shape[0]
+        numberOfUnions = binMatrix1.shape[1]
+
+        # prealloc
+        maximum = np.zeros((numberOfBins, numberOfUnions))
+
+        # calc. maximum
+
+        # i >= j
+        for i in range(0, numberOfBins):
+            for j in range(0, i + 1):
+
+                for union in range(0, numberOfUnions):
+                    maximum[i, union] += binMatrix1[i, union] * binMatrix2[j, union]         # simple, non-vectorized
+
+                # maximum[i] += np.sum(np.multiply(binMatrix1[i, :], binMatrix2[j, :]))   # simple, same but vectorized
+
+
+        # i < j
+        for i in range(0, numberOfBins):
+            for j in range(i + 1, numberOfBins):
+
+                for union in range(0, numberOfUnions):                   # simple, non-vectorized
+                    maximum[j, union] += binMatrix1[i, union] * binMatrix2[j, union]
+
+                # maximum[j] += np.sum(np.multiply(binMatrix1[i, :], binMatrix2[j, :]))      # simple, same but vectorized
+
+
+        return RandomVariable(maximum, self.edges, unified=True)
 
     def convolutionOfTwoVarsNaiveFULL(self, secondVariable):
         """
@@ -411,6 +499,56 @@ class RandomVariable:
 
         midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
         variance = np.average(np.square(midPoints - self.mean), weights=self.bins)
+        return np.sqrt(variance)
+
+    def calculateMean_UNIFIED(self):
+        """
+        Function calculates sample mean of the random variable - represented as unified 0/1 bins
+        Calculation: weighted average of the frequencies, edges being the weights
+
+        :param self: random variable class
+        :returns mean: double value
+        """
+
+        binMatrix = self.bins
+        numberOfBins = binMatrix.shape[0]
+        numberOfUnions = binMatrix.shape[1]
+
+        estimatedBins = np.zeros(numberOfBins)
+
+            # calculate prob. of each bin
+        for bin in range(0, numberOfBins):
+            numberOfOnes = np.sum( binMatrix[bin, :] )
+            estimatedBins[bin] = numberOfOnes / numberOfUnions
+
+        midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])  # midpoints of the edges of hist.
+        mean = np.average(midPoints, weights=estimatedBins)
+
+        return mean
+
+
+    def calculateSTD_UNIFIED(self):
+        """
+        Function calculates sample std of the random variable - represented as unified 0/1 bins
+        Calculation: weighted average of the frequencies, edges being the weights
+
+        :param self: random variable class
+        :returns std: double value
+        """
+
+        binMatrix = self.bins
+        numberOfBins = binMatrix.shape[0]
+        numberOfUnions = binMatrix.shape[1]
+
+        estimatedBins = np.zeros(numberOfBins)
+
+        # calculate prob. of each bin
+        for bin in range(0, numberOfBins):
+            numberOfOnes = np.sum(binMatrix[bin, :])
+            estimatedBins[bin] = numberOfOnes / numberOfUnions
+
+        midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
+        variance = np.average(np.square(midPoints - self.mean), weights=estimatedBins)
         return np.sqrt(variance)
 
 
