@@ -615,8 +615,8 @@ def testMAX_QUAD_FORMULA_UNIFIED(dec: int):
     interval = (-10, 50)
 
     numberOfSamples = 2000000
-    numberOfBins = 200
-    numberOfUnions = 800
+    numberOfBins = 20
+    numberOfUnions = 40
 
     # DESIRED
 
@@ -634,11 +634,15 @@ def testMAX_QUAD_FORMULA_UNIFIED(dec: int):
     max2 = rv3.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv4)
     actual = [max2.mean, max2.std]
 
+    print(max2.bins)
+
     # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
+
+
 
 
 def testMAX_QUAD_FORMULA_UNIFIED2(dec: int):
@@ -686,6 +690,43 @@ def testMAX_QUAD_FORMULA_UNIFIED2(dec: int):
     return None
 
 
+def testMAX_Convolution_UNIFIED(dec: int):
+
+    mu1 = 22.98553396
+    sigma1 = 2.76804456
+
+    mu2 = 18.98483475
+    sigma2 = 2.802585
+
+    interval = (-10, 50)
+
+    numberOfSamples = 2000000
+    numberOfBins = 200
+    numberOfUnions = 500
+
+    # DESIRED
+
+    rv1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
+    rv2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+
+    con1 = rv1.convolutionOfTwoVarsShift(rv2)
+    desired = [con1.mean, con1.std]
+
+    # ACTUAL
+
+    rv3 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv4 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+
+    con2 = rv3.convolutionOfTwoVarsNaiveSAME_UNIFIED(rv4)
+    actual = [con2.mean, con2.std]
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
+
+
 
 if __name__ == "__main__":
 
@@ -713,9 +754,10 @@ if __name__ == "__main__":
 
     # testConvolutionNaive(1)
     # testMAX_QUAD_FORMULA(3)
-    # testMAX_QUAD_FORMULA_UNIFIED(3)
+    testMAX_QUAD_FORMULA_UNIFIED(3)
 
-    testMAX_QUAD_FORMULA_UNIFIED2(3)
+    # testMAX_QUAD_FORMULA_UNIFIED2(3)
+    # testMAX_Convolution_UNIFIED(4)
 
 
 

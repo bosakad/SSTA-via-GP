@@ -222,9 +222,15 @@ class RandomVariable:
             for j in range(0, i + 1):
 
                 for union in range(0, numberOfUnions):
-                    maximum[i, union] += binMatrix1[i, union] * binMatrix2[j, union]         # simple, non-vectorized
+                    # maximum[i, union] += binMatrix1[i, union] * binMatrix2[j, union]         # simple, non-vectorized
 
-                # maximum[i] += np.sum(np.multiply(binMatrix1[i, :], binMatrix2[j, :]))   # simple, same but vectorized
+                    for unionInd in range(0, numberOfUnions):
+                        if maximum[i, unionInd] == 0:
+                            maximum[i, unionInd] += binMatrix1[i, union] * binMatrix2[j, union]
+                            break
+
+
+                # maximum[i, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])   # simple - same but vectorized
 
 
         # i < j
@@ -232,12 +238,47 @@ class RandomVariable:
             for j in range(i + 1, numberOfBins):
 
                 for union in range(0, numberOfUnions):                   # simple, non-vectorized
-                    maximum[j, union] += binMatrix1[i, union] * binMatrix2[j, union]
+                    # maximum[j, union] += binMatrix1[i, union] * binMatrix2[j, union]
 
-                # maximum[j] += np.sum(np.multiply(binMatrix1[i, :], binMatrix2[j, :]))      # simple, same but vectorized
+                    for unionInd in range(0, numberOfUnions):
+                        if maximum[j, unionInd] == 0:
+                            maximum[j, unionInd] = binMatrix1[i, union] * binMatrix2[j, union]
+                            break
+
+                # maximum[j, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])      # simple, same but vectorized
 
 
         return RandomVariable(maximum, self.edges, unified=True)
+
+    def convolutionOfTwoVarsNaiveSAME_UNIFIED(self, secondVariable):
+        """
+        'SAME' Convolution of two independent random variables naively - using 2 for loops:
+            (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
+        with unified bins - meaning each bin is represented by M 0/1-bins. M and number of bins is same for all variables
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class of convolution
+        """
+
+        f = self.bins
+        g = secondVariable.bins
+
+        numberOfBins = f.shape[0]
+        numberOfUnions = f.shape[1]
+
+        convolution = np.zeros((numberOfBins, numberOfUnions))
+
+        for z in range(0, numberOfBins):
+            for k in range(0, z + 1):
+
+                for union in range(0, numberOfUnions):
+                    convolution[z, union] += f[k, union] * g[z - k, union]
+
+        # Deal With Edges
+        self.cutBins_UNIFIED(self.edges, convolution)
+
+        return RandomVariable(convolution, self.edges, unified=True)
 
     def convolutionOfTwoVarsNaiveFULL(self, secondVariable):
         """
@@ -446,6 +487,72 @@ class RandomVariable:
 
         return edges
 
+    @staticmethod
+    def cutBins_UNIFIED_Vectorized(edges, bins):
+        """
+        Cuts bins depending on edge[0]
+        if edge[0] < 0: cuts left bins and adds zeros to the end
+        if edge[0] > 0: cuts right bins and adds zeros to the beginning
+        Works for only unified random variable
+
+        :param edges: (1, n+1) numpy array of edges
+        :param bins: (n, m) numpy array of bins
+        :returns None
+        """
+
+        diff = edges[1] - edges[0]
+
+        if edges[0] > 0:  # cut bins
+
+            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
+            bins[numberOfBinsNeeded:, :] = bins[:-numberOfBinsNeeded, :]
+            bins[:numberOfBinsNeeded, :] = 0
+
+        elif edges[0] < 0:  # cut bins
+
+            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
+            bins[:-numberOfBinsNeeded, :] = bins[numberOfBinsNeeded:, :]
+            bins[-numberOfBinsNeeded:, :] = 0
+
+    @staticmethod
+    def cutBins_UNIFIED(edges, bins):
+        """
+        Cuts bins depending on edge[0]
+        if edge[0] < 0: cuts left bins and adds zeros to the end
+        if edge[0] > 0: cuts right bins and adds zeros to the beginning
+        Works for only unified random variable
+
+        :param edges: (1, n+1) numpy array of edges
+        :param bins: (n, m) numpy array of bins
+        :returns None
+        """
+
+        diff = edges[1] - edges[0]
+        numberOfUnions = bins.shape[1]
+        numberOfBins = bins.shape[0]
+
+        numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
+
+        if edges[0] > 0:  # cut bins
+
+            for i in range(numberOfBinsNeeded, numberOfBins):
+                for union in range(0, numberOfUnions):
+                    bins[i, union] = bins[i - numberOfBinsNeeded, union]
+
+            for i in range(0, numberOfBinsNeeded):
+                for union in range(0, numberOfUnions):
+                    bins[i, union] = 0
+
+
+        elif edges[0] < 0:  # cut bins
+
+            for i in range(numberOfBinsNeeded, numberOfBins):
+                for union in range(0, numberOfUnions):
+                    bins[i - numberOfBinsNeeded, union] = bins[i, union]
+
+            for i in range(numberOfBins - numberOfBinsNeeded, numberOfBins):
+                for union in range(0, numberOfUnions):
+                    bins[i, union] = 0
 
     @staticmethod
     def cutBins(edges, bins):
@@ -464,8 +571,8 @@ class RandomVariable:
         if edges[0] > 0:  # cut bins
 
             numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
-            bins[:numberOfBinsNeeded] = 0
             bins[numberOfBinsNeeded:] = bins[:-numberOfBinsNeeded]
+            bins[:numberOfBinsNeeded] = 0
 
         elif edges[0] < 0:  # cut bins
 

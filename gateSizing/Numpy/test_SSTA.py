@@ -193,7 +193,7 @@ def testSSTA_1(dec: int):
 def testSSTA_2(dec: int):
 
     numberOfSamples = 5000000
-    numberOfBins = 100
+    numberOfBins = 500
     distribution = 'Normal'
     binsInterval = (-5, 50)
 
@@ -253,11 +253,11 @@ def testSSTA_2(dec: int):
     # plt.hist(mc[-1], bins=numberOfBins, density='PDF', alpha=0.7)
     # plt.plot(delays[-1].edges[450:-445], density(delays[-1].edges[450:-445]))
 
-    plt.hist(delays[-1].edges[450:-446], delays[-1].edges[450:-445], weights=delays[-1].bins[450:-445], density="PDF")
-    plt.legend(['Monte Carlo', 'Histogram approximation'])
+    # plt.hist(delays[-1].edges[450:-446], delays[-1].edges[450:-445], weights=delays[-1].bins[450:-445], density="PDF")
+    # plt.legend(['Monte Carlo', 'Histogram approximation'])
 
-    plt.ylabel('PDF', size=14)
-    plt.xlabel('Time', size=14)
+    # plt.ylabel('PDF', size=14)
+    # plt.xlabel('Time', size=14)
 
     # plt.show()
 

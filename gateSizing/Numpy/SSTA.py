@@ -12,26 +12,27 @@ import cvxpyVariable
 
 
 
-def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
+def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unified=False) -> [Node]:
     """
     Compute circuit delay using PDFs algorithm
     Function executes the algorithm for finding out the PDF of a circuit delay.
 
     :param rootNodes: array of root nodes, [Node], Node includes next nodes and previous nodes
     :param cvxpy: Bool, true if cvxpy objects are used, false if just RandomVariables class is used
+    :param unified: Bool, true if unified (M 0/1-bin repr.) is used, false otherwise
     :return newDelays: array of new RVs
     """
 
     # pointer to a max and convolution functions
-    MaximumF = maxOfDistributionsCVXPY if cvxpy else maxOfDistributionsFORM
-    ConvolutionF = cvxpyVariable.convolutionCVXPY_CONSTANT if cvxpy else RandomVariable.convolutionOfTwoVarsShift
+    MaximumF = maxOfDistributionsCVXPY_UNIFIED if (cvxpy and unified) else maxOfDistributionsFORM
+    ConvolutionF = Convolution_UNIFIED if (cvxpy and unified) else RandomVariable.convolutionOfTwoVarsShift
 
     # init. data structures
     queue = Queue()
     sink = []
     newDelays = []
     closedList = set()
-    # AllConstr = []
+    AllConstr = []
 
     # put root nodes into Queue
     putIntoQueue(queue, rootNodes)
@@ -47,13 +48,13 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
         if tmpNode.prevDelays:                                      # get maximum + convolution
 
             if cvxpy:
-                # maxDelay, newConstraints = MaximumF(tmpNode.prevDelays)   # old code with constr.
-                # AllConstr.extend(newConstraints)
-                maxDelay = MaximumF(tmpNode.prevDelays)
+                maxDelay, newConstraints = MaximumF(tmpNode.prevDelays)   # old code with constr.
+                AllConstr.extend(newConstraints)
+                currentRandVar, newConstraints = ConvolutionF(currentRandVar, maxDelay)
+                AllConstr.extend(newConstraints)
             else:
                 maxDelay = MaximumF(tmpNode.prevDelays)
-
-            currentRandVar = ConvolutionF(currentRandVar, maxDelay)
+                currentRandVar = ConvolutionF(currentRandVar, maxDelay)
 
 
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
@@ -70,20 +71,28 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False) -> [Node]:
     sinkDelay = MaximumF(sink)
     newDelays.append(sinkDelay)
 
-    return newDelays
 
         # return dependent on cvxpy / numpy     # old code with constr, might of use in the future
-    # if cvxpy:
-    #     return newDelays, AllConstr
-    # else:
-    #     return newDelays
+    if cvxpy:
+        return newDelays, AllConstr
+    else:
+        return newDelays
 
 
 
+def Convolution_UNIFIED(x1: cvxpyVariable.RandomVariableCVXPY, x2: cvxpyVariable.RandomVariableCVXPY) -> cvxpyVariable.RandomVariableCVXPY:
+    """
+    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.
+
+    :param x1: RandomVariableCVXPY class
+    :param x2: RandomVariableCVXPY class
+    :return convolution: RandomVariableCVXPY class
+    """
+
+    return x1.convolution_UNIFIED_NEW_MAX(x2)
 
 
-
-def maxOfDistributionsCVXPY(delays: [{cp.Expression}]) -> cp.Variable:
+def maxOfDistributionsCVXPY_UNIFIED(delays: [cvxpyVariable.RandomVariableCVXPY]) -> cp.Variable:
     """
     Calculates maximum of an array of PDFs of cvxpy variable
 
@@ -93,7 +102,7 @@ def maxOfDistributionsCVXPY(delays: [{cp.Expression}]) -> cp.Variable:
 
     size = len(delays)
     for i in range(0, size - 1):
-        newRV = cvxpyVariable.maximumCVXPY_ELEMENTWISE(delays[i], delays[i + 1])
+        newRV = delays[i].maximum_QUAD_UNIFIED_NEW_MAX(delays[i + 1])
         delays[i + 1] = newRV
 
     maximum = delays[-1]
