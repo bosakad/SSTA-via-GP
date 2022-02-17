@@ -108,7 +108,6 @@ class RandomVariable:
         F1[0] = 0
         maximum = np.multiply(f1, F2) + np.multiply(f2, F1)
 
-
         maxDelay = RandomVariable(maximum, self.edges)
         return maxDelay
 

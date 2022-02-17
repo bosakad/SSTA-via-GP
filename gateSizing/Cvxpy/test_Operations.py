@@ -544,6 +544,102 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MIN(dec: int):
 
     return None
 
+def test_CVXPY_MAXIMUM_McCormick(dec: int):
+    """
+    Problem is formulated as minimization
+    """
+
+    mu1 = 22.98553396
+    sigma1 = 2.76804456
+
+    mu2 = 18.98483475
+    sigma2 = 2.802585
+
+    interval = (-5, 40)
+
+    numberOfSamples = 2000000
+    numberOfBins = 10
+    numberOfUnions = 5
+
+
+    # DESIRED
+
+    rv1 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv2 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+
+    test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
+    test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+
+    print(test1.bins)
+    print(test2.bins)
+
+    # max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNIFIED(rv2)
+    max1 = test1.maxOfDistributionsFORM(test2)
+    desired = [max1.mean, max1.std]
+
+    print(max1.bins)
+
+    # ACTUAL
+        # init
+    x1 = {}
+
+    for bin in range(0, numberOfBins):
+        x1[bin] = cp.Variable(nonneg=True)
+
+    x2 = {}
+
+    for bin in range(0, numberOfBins):
+        x2[bin] = cp.Variable(nonneg=True)
+
+    RV1 = RandomVariableCVXPY(x1, test1.edges)
+    RV2 = RandomVariableCVXPY(x2, test1.edges)
+
+        # GET obj. function and constr
+
+    maximum, constr = RV1.maximum_McCormick(RV2)
+    maximum = maximum.bins
+
+        # FORMULATE
+
+    # objective function
+    sum = 0
+    for bin in range(0, numberOfBins):
+        sum += maximum[bin]
+
+    # other constraints
+
+    for bin in range(0, numberOfBins):
+        constr.append( x1[bin] >= test1.bins[bin] )    # set lower constr.
+
+    for bin in range(0, numberOfBins):
+        constr.append( x2[bin] >= test2.bins[bin] )    # set lower constr.
+
+
+
+        # solve
+    objective = cp.Minimize( sum )
+    prob = cp.Problem(objective, constr)
+    prob.solve(verbose=False, solver=cp.MOSEK)
+
+        # PRINT OUT THE VALUES
+    print("Problem value: " + str(prob.value))
+
+    convBins = np.zeros(numberOfBins)
+    for bin in range(0, numberOfBins):
+        convBins[bin] = maximum[bin].value
+
+    edges = np.linspace(interval[0], interval[1], numberOfBins + 1)
+    maxRV = RandomVariable(convBins, edges)
+
+    print(maxRV.bins)
+
+    actual = [maxRV.mean, maxRV.std]
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
 
 
 if __name__ == "__main__":
@@ -552,6 +648,7 @@ if __name__ == "__main__":
     # test_CVXPY_MAX_UNIFIED_OLD(dec=5)
     # test_CVXPY_MAX_UNIFIED_NEW_AS_MAX(dec=5)
 
-    test_CVXPY_CONVOLUTION_UNIFIED_MAX(dec=5)
+    # test_CVXPY_CONVOLUTION_UNIFIED_MAX(dec=5)
+    test_CVXPY_MAXIMUM_McCormick(dec=5)
 
     print("All tests passed!")

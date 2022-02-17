@@ -48,6 +48,107 @@ class RandomVariableCVXPY:
 
         return RandomVariableCVXPY(convolution, self.edges)
 
+    def maximum_McCormick(self, secondVariable):
+        """
+        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+        using the 'quadratic' algorithm and McCormick envelope
+        IMPORTANT:
+                WORKS ONLY FOR MINIMIZATION PROBLEM
+
+        :param self: class RandomVariableCVXPY
+        :param secondVariable: class RandomVariableCVXPY
+        :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
+        :return MaxConstraints: python array with inequalities - for computing the maximum
+        """
+
+        x1 = self.bins
+        x2 = secondVariable.bins
+
+        numberOfBins = len(x1)
+
+        MaxConstraints = []
+
+        maximum = {}
+        # allocation of convolution dictionary
+        for i in range(0, numberOfBins):
+            maximum[i] = 0
+
+        # i >= j
+        for i in range(0, numberOfBins):
+            for j in range(0, i + 1):
+
+                # new variable - multiplication of x*y
+                slackMult = cp.Variable(nonneg=True)
+                maximum[i] += slackMult
+
+                # help constraints
+                x = x1[i]
+                y = x2[j]
+
+                # formulating bound-values
+                x_L = 0
+                x_U = 1
+                y_L = 0
+                y_U = 1
+
+                # McCormick constraints
+                # MaxConstraints.append( slackMult >= x_L*y + x*y_L - x_L*y_L )
+                # MaxConstraints.append( slackMult >= x_U*y + x*y_U - x_U*y_U )
+                # MaxConstraints.append( slackMult <= x_U*y + x*y_L - x_U*y_L )
+                # MaxConstraints.append( slackMult <= x*y_U + x_L*y - x_L*y_U )
+
+                MaxConstraints.append(slackMult >= 0)
+                MaxConstraints.append(slackMult >= y + x - 1)
+                MaxConstraints.append(slackMult <= y)
+                MaxConstraints.append(slackMult <= x)
+
+                # creating bound-constraints
+                # MaxConstraints.append( slackMult <= 1   ) # each bin can be max. 1 - normalized histogram
+                # MaxConstraints.append(         x <= 1   )  # each bin can be max. 1 - normalized histogram
+                # MaxConstraints.append(         x >= 0   )  # each bin can be max. 1 - normalized histogram
+                # MaxConstraints.append(         y <= 1   )  # each bin can be max. 1 - normalized histogram
+                # MaxConstraints.append(         y >= 0   )  # each bin can be max. 1 - normalized histogram
+
+        # i < j
+        for i in range(0, numberOfBins):
+            for j in range(i + 1, numberOfBins):
+
+                # new variable - multiplication of x*y
+                slackMult = cp.Variable(nonneg=True)
+                maximum[j] += slackMult
+
+                # help constraints
+                x = x1[i]
+                y = x2[j]
+
+                # formulating constraint-values
+                x_L = 0
+                x_U = 1
+                y_L = 0
+                y_U = 1
+
+                # McCormick constraints
+                # MaxConstraints.append(slackMult >= x_L * y + x * y_L - x_L * y_L)
+                # MaxConstraints.append(slackMult >= x_U * y + x * y_U - x_U * y_U)
+                # MaxConstraints.append(slackMult <= x_U * y + x * y_L - x_U * y_L)
+                # MaxConstraints.append(slackMult <= x * y_U + x_L * y - x_L * y_U)
+
+                MaxConstraints.append(slackMult >= 0)
+                MaxConstraints.append(slackMult >= y + x - 1)
+                MaxConstraints.append(slackMult <= y)
+                MaxConstraints.append(slackMult <= x)
+
+                # creating bound-constraints
+                # MaxConstraints.append(slackMult <= 1)  # each bin can be max. 1 - normalized histogram
+                # MaxConstraints.append(x <= 1)  # each bin can be max. 1 - normalized histogram
+                # MaxConstraints.append(x >= 0)  # each bin can be max. 1 - normalized histogram
+                # MaxConstraints.append(y <= 1)  # each bin can be max. 1 - normalized histogram
+                # MaxConstraints.append(y >= 0)  # each bin can be max. 1 - normalized histogram
+
+        maximumClass = RandomVariableCVXPY(maximum, self.edges)
+
+        return maximumClass, MaxConstraints
+
 
     def convolution_UNIFIED_NEW_MIN(self, secondVariable):
         """
