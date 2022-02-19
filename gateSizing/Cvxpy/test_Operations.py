@@ -11,7 +11,7 @@ from randomVariableHist import RandomVariable
 import histogramGenerator
 
 
-def test_CVXPY_MAX_UNIFIED_OLD(dec: int):
+def test_CVXPY_MAX_UNARY_OLD(dec: int):
 
     mu1 = 12.98553396
     sigma1 = 4.76804456
@@ -23,18 +23,18 @@ def test_CVXPY_MAX_UNIFIED_OLD(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 10
-    numberOfUnions = 10
+    numberOfUnaries = 10
 
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv2 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
     test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
 
-    # max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv2)
+    # max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
     max1 = test1.maxOfDistributionsFORM(test2)
     desired = [max1.mean, max1.std]
 
@@ -47,22 +47,22 @@ def test_CVXPY_MAX_UNIFIED_OLD(dec: int):
 
     for bin in range(0, numberOfBins):
         x1[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x1[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x1[bin])[unary] = cp.Variable(boolean=True)
 
     x2 = {}
 
     for bin in range(0, numberOfBins):
         x2[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x2[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x2[bin])[unary] = cp.Variable(boolean=True)
 
 
         # GET obj. function and constr
 
     RV1 = RandomVariableCVXPY(x1, rv1.edges)
     RV2 = RandomVariableCVXPY(x2, rv1.edges)
-    maximum, constr = RV1.maximum_QUAD_UNIFIED_OLD(RV2)
+    maximum, constr = RV1.maximum_QUAD_UNARY_OLD(RV2)
     maximum = maximum.bins
 
         # FORMULATE
@@ -70,18 +70,18 @@ def test_CVXPY_MAX_UNIFIED_OLD(dec: int):
     # objective function
     sum = 0
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            sum += (maximum[bin])[union]
+        for unary in range(0, numberOfUnaries):
+            sum += (maximum[bin])[unary]
 
     # other constraints
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x1[bin])[union] >= rv1.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x1[bin])[unary] >= rv1.bins[bin, unary] )    # set lower constr.
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x2[bin])[union] >= rv2.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x2[bin])[unary] >= rv2.bins[bin, unary] )    # set lower constr.
 
 
 
@@ -94,13 +94,13 @@ def test_CVXPY_MAX_UNIFIED_OLD(dec: int):
 
     print("Problem value: " + str(prob.value))
 
-    maxBins = np.zeros((numberOfBins, numberOfUnions))
+    maxBins = np.zeros((numberOfBins, numberOfUnaries))
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            maxBins[bin, union] = (maximum[bin])[union].value
+        for unary in range(0, numberOfUnaries):
+            maxBins[bin, unary] = (maximum[bin])[unary].value
 
     edges = np.linspace(interval[0], interval[1], numberOfBins + 1)
-    maxRV = RandomVariable(maxBins, edges, unified=True)
+    maxRV = RandomVariable(maxBins, edges, unary=True)
 
     print(maxRV.bins)
     actual = [maxRV.mean, maxRV.std]
@@ -112,7 +112,7 @@ def test_CVXPY_MAX_UNIFIED_OLD(dec: int):
     return None
 
 
-def test_CVXPY_MAX_UNIFIED_NEW_AS_MAX(dec: int):
+def test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec: int):
 
     mu1 = 12.98553396
     sigma1 = 4.76804456
@@ -124,18 +124,18 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MAX(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 10
-    numberOfUnions = 5
+    numberOfUnaries = 5
 
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv2 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
     test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
 
-    max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv2)
+    max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
     # max1 = test1.maxOfDistributionsFORM(test2)
     desired = [max1.mean, max1.std]
 
@@ -146,22 +146,22 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MAX(dec: int):
 
     for bin in range(0, numberOfBins):
         x1[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x1[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x1[bin])[unary] = cp.Variable(boolean=True)
 
     x2 = {}
 
     for bin in range(0, numberOfBins):
         x2[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x2[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x2[bin])[unary] = cp.Variable(boolean=True)
 
 
         # GET obj. function and constr
 
     RV1 = RandomVariableCVXPY(x1, rv1.edges)
     RV2 = RandomVariableCVXPY(x2, rv1.edges)
-    maximum, constr = RV1.maximum_QUAD_UNIFIED_NEW_MAX(RV2)
+    maximum, constr = RV1.maximum_QUAD_UNARY_NEW_MAX(RV2)
     maximum = maximum.bins
 
         # FORMULATE
@@ -169,18 +169,18 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MAX(dec: int):
     # objective function
     sum = 0
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            sum += (maximum[bin])[union]
+        for unary in range(0, numberOfUnaries):
+            sum += (maximum[bin])[unary]
 
     # other constraints
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x1[bin])[union] <= rv1.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x1[bin])[unary] <= rv1.bins[bin, unary] )    # set lower constr.
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x2[bin])[union] <= rv2.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x2[bin])[unary] <= rv2.bins[bin, unary] )    # set lower constr.
 
 
 
@@ -194,26 +194,26 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MAX(dec: int):
     print("Problem value: " + str(prob.value))
 
 
-    # x2_S = np.zeros((numberOfBins, numberOfUnions))
+    # x2_S = np.zeros((numberOfBins, numberOfUnaries))
     # for bin in range(0, numberOfBins):
-    #     for union in range(0, numberOfUnions):
-    #         x2_S[bin, union] = (x2[bin])[union].value
+    #     for unary in range(0, numberOfUnaries):
+    #         x2_S[bin, unary] = (x2[bin])[unary].value
     #
     #
-    # x1_S = np.zeros((numberOfBins, numberOfUnions))
+    # x1_S = np.zeros((numberOfBins, numberOfUnaries))
     # for bin in range(0, numberOfBins):
-    #     for union in range(0, numberOfUnions):
-    #         x1_S[bin, union] = (x1[bin])[union].value
+    #     for unary in range(0, numberOfUnaries):
+    #         x1_S[bin, unary] = (x1[bin])[unary].value
 
-    maxBins = np.zeros((numberOfBins, numberOfUnions))
+    maxBins = np.zeros((numberOfBins, numberOfUnaries))
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            maxBins[bin, union] = (maximum[bin])[union].value
+        for unary in range(0, numberOfUnaries):
+            maxBins[bin, unary] = (maximum[bin])[unary].value
 
     print(maxBins)
 
     edges = np.linspace(interval[0], interval[1], numberOfBins + 1)
-    maxRV = RandomVariable(maxBins, edges, unified=True)
+    maxRV = RandomVariable(maxBins, edges, unary=True)
 
 
 
@@ -225,7 +225,7 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MAX(dec: int):
 
     return None
 
-def test_CVXPY_MAX_UNIFIED_NEW_AS_MIN(dec: int):
+def test_CVXPY_MAX_UNARY_NEW_AS_MIN(dec: int):
 
     mu1 = 12.98553396
     sigma1 = 4.76804456
@@ -237,18 +237,18 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MIN(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 14
-    numberOfUnions = 25
+    numberOfUnaries = 25
 
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv2 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
     test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
 
-    # max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv2)
+    # max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
     max1 = test1.maxOfDistributionsFORM(test2)
     desired = [max1.mean, max1.std]
 
@@ -259,22 +259,22 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MIN(dec: int):
 
     for bin in range(0, numberOfBins):
         x1[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x1[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x1[bin])[unary] = cp.Variable(boolean=True)
 
     x2 = {}
 
     for bin in range(0, numberOfBins):
         x2[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x2[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x2[bin])[unary] = cp.Variable(boolean=True)
 
 
         # GET obj. function and constr
 
     RV1 = RandomVariableCVXPY(x1, rv1.edges)
     RV2 = RandomVariableCVXPY(x2, rv1.edges)
-    maximum, constr = RV1.maximum_QUAD_UNIFIED_NEW_MIN(RV2)
+    maximum, constr = RV1.maximum_QUAD_UNARY_NEW_MIN(RV2)
     maximum = maximum.bins
 
         # FORMULATE
@@ -282,18 +282,18 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MIN(dec: int):
     # objective function
     sum = 0
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            sum += (maximum[bin])[union]
+        for unary in range(0, numberOfUnaries):
+            sum += (maximum[bin])[unary]
 
     # other constraints
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x1[bin])[union] >= rv1.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x1[bin])[unary] >= rv1.bins[bin, unary] )    # set lower constr.
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x2[bin])[union] >= rv2.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x2[bin])[unary] >= rv2.bins[bin, unary] )    # set lower constr.
 
 
 
@@ -307,26 +307,26 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MIN(dec: int):
     print("Problem value: " + str(prob.value))
 
 
-    # x2_S = np.zeros((numberOfBins, numberOfUnions))
+    # x2_S = np.zeros((numberOfBins, numberOfUnaries))
     # for bin in range(0, numberOfBins):
-    #     for union in range(0, numberOfUnions):
-    #         x2_S[bin, union] = (x2[bin])[union].value
+    #     for unary in range(0, numberOfUnaries):
+    #         x2_S[bin, unary] = (x2[bin])[unary].value
     #
     #
-    # x1_S = np.zeros((numberOfBins, numberOfUnions))
+    # x1_S = np.zeros((numberOfBins, numberOfUnaries))
     # for bin in range(0, numberOfBins):
-    #     for union in range(0, numberOfUnions):
-    #         x1_S[bin, union] = (x1[bin])[union].value
+    #     for unary in range(0, numberOfUnaries):
+    #         x1_S[bin, unary] = (x1[bin])[unary].value
 
-    maxBins = np.zeros((numberOfBins, numberOfUnions))
+    maxBins = np.zeros((numberOfBins, numberOfUnaries))
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            maxBins[bin, union] = (maximum[bin])[union].value
+        for unary in range(0, numberOfUnaries):
+            maxBins[bin, unary] = (maximum[bin])[unary].value
 
     print(maxBins)
 
     edges = np.linspace(interval[0], interval[1], numberOfBins + 1)
-    maxRV = RandomVariable(maxBins, edges, unified=True)
+    maxRV = RandomVariable(maxBins, edges, unary=True)
 
 
 
@@ -339,7 +339,7 @@ def test_CVXPY_MAX_UNIFIED_NEW_AS_MIN(dec: int):
     return None
 
 
-def test_CVXPY_CONVOLUTION_UNIFIED_MAX(dec: int):
+def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
     """
     Problem is formulated as maximization
     """
@@ -354,18 +354,18 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MAX(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 15
-    numberOfUnions = 15
+    numberOfUnaries = 15
 
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv2 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
     test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
 
-    # max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNIFIED(rv2)
+    # max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNARY(rv2)
     max1 = test1.convolutionOfTwoVarsShift(test2)
     desired = [max1.mean, max1.std]
 
@@ -377,22 +377,22 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MAX(dec: int):
 
     for bin in range(0, numberOfBins):
         x1[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x1[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x1[bin])[unary] = cp.Variable(boolean=True)
 
     x2 = {}
 
     for bin in range(0, numberOfBins):
         x2[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x2[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x2[bin])[unary] = cp.Variable(boolean=True)
 
     RV1 = RandomVariableCVXPY(x1, rv1.edges)
     RV2 = RandomVariableCVXPY(x2, rv1.edges)
 
         # GET obj. function and constr
 
-    convolution, constr = RV1.convolution_UNIFIED_NEW_MAX(RV2)
+    convolution, constr = RV1.convolution_UNARY_NEW_MAX(RV2)
     convolution = convolution.bins
 
         # FORMULATE
@@ -400,18 +400,18 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MAX(dec: int):
     # objective function
     sum = 0
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            sum += (convolution[bin])[union]
+        for unary in range(0, numberOfUnaries):
+            sum += (convolution[bin])[unary]
 
     # other constraints
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x1[bin])[union] <= rv1.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x1[bin])[unary] <= rv1.bins[bin, unary] )    # set lower constr.
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x2[bin])[union] <= rv2.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x2[bin])[unary] <= rv2.bins[bin, unary] )    # set lower constr.
 
 
 
@@ -423,13 +423,13 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MAX(dec: int):
         # PRINT OUT THE VALUES
     print("Problem value: " + str(prob.value))
 
-    convBins = np.zeros((numberOfBins, numberOfUnions))
+    convBins = np.zeros((numberOfBins, numberOfUnaries))
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            convBins[bin, union] = (convolution[bin])[union].value
+        for unary in range(0, numberOfUnaries):
+            convBins[bin, unary] = (convolution[bin])[unary].value
 
     edges = np.linspace(interval[0], interval[1], numberOfBins + 1)
-    convRV = RandomVariable(convBins, edges, unified=True)
+    convRV = RandomVariable(convBins, edges, unary=True)
 
     print(convRV.bins)
 
@@ -442,7 +442,7 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MAX(dec: int):
     return None
 
 
-def test_CVXPY_CONVOLUTION_UNIFIED_MIN(dec: int):
+def test_CVXPY_CONVOLUTION_UNARY_MIN(dec: int):
     """
     Problem is formulated as maximization
     """
@@ -457,18 +457,18 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MIN(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 15
-    numberOfUnions = 5
+    numberOfUnaries = 5
 
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv2 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
     test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
 
-    # max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNIFIED(rv2)
+    # max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNARY(rv2)
     max1 = test1.convolutionOfTwoVarsShift(test2)
     desired = [max1.mean, max1.std]
 
@@ -480,22 +480,22 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MIN(dec: int):
 
     for bin in range(0, numberOfBins):
         x1[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x1[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x1[bin])[unary] = cp.Variable(boolean=True)
 
     x2 = {}
 
     for bin in range(0, numberOfBins):
         x2[bin] = {}
-        for union in range(0, numberOfUnions):
-            (x2[bin])[union] = cp.Variable(boolean=True)
+        for unary in range(0, numberOfUnaries):
+            (x2[bin])[unary] = cp.Variable(boolean=True)
 
     RV1 = RandomVariableCVXPY(x1, rv1.edges)
     RV2 = RandomVariableCVXPY(x2, rv1.edges)
 
         # GET obj. function and constr
 
-    convolution, constr = RV1.convolution_UNIFIED_NEW_MIN(RV2)
+    convolution, constr = RV1.convolution_UNARY_NEW_MIN(RV2)
     convolution = convolution.bins
 
         # FORMULATE
@@ -503,18 +503,18 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MIN(dec: int):
     # objective function
     sum = 0
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            sum += (convolution[bin])[union]
+        for unary in range(0, numberOfUnaries):
+            sum += (convolution[bin])[unary]
 
     # other constraints
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x1[bin])[union] >= rv1.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x1[bin])[unary] >= rv1.bins[bin, unary] )    # set lower constr.
 
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            constr.append( (x2[bin])[union] >= rv2.bins[bin, union] )    # set lower constr.
+        for unary in range(0, numberOfUnaries):
+            constr.append( (x2[bin])[unary] >= rv2.bins[bin, unary] )    # set lower constr.
 
 
 
@@ -526,13 +526,13 @@ def test_CVXPY_CONVOLUTION_UNIFIED_MIN(dec: int):
         # PRINT OUT THE VALUES
     print("Problem value: " + str(prob.value))
 
-    convBins = np.zeros((numberOfBins, numberOfUnions))
+    convBins = np.zeros((numberOfBins, numberOfUnaries))
     for bin in range(0, numberOfBins):
-        for union in range(0, numberOfUnions):
-            convBins[bin, union] = (convolution[bin])[union].value
+        for unary in range(0, numberOfUnaries):
+            convBins[bin, unary] = (convolution[bin])[unary].value
 
     edges = np.linspace(interval[0], interval[1], numberOfBins + 1)
-    convRV = RandomVariable(convBins, edges, unified=True)
+    convRV = RandomVariable(convBins, edges, unary=True)
 
     print(convRV.bins)
 
@@ -559,13 +559,9 @@ def test_CVXPY_MAXIMUM_McCormick(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 10
-    numberOfUnions = 5
 
 
     # DESIRED
-
-    rv1 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv2 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
 
     test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
@@ -573,7 +569,7 @@ def test_CVXPY_MAXIMUM_McCormick(dec: int):
     print(test1.bins)
     print(test2.bins)
 
-    # max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNIFIED(rv2)
+    # max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNARY(rv2)
     max1 = test1.maxOfDistributionsFORM(test2)
     desired = [max1.mean, max1.std]
 
@@ -591,8 +587,8 @@ def test_CVXPY_MAXIMUM_McCormick(dec: int):
     for bin in range(0, numberOfBins):
         x2[bin] = cp.Variable(nonneg=True)
 
-    RV1 = RandomVariableCVXPY(x1, test1.edges)
-    RV2 = RandomVariableCVXPY(x2, test1.edges)
+    RV1 = RandomVariableCVXPY(x1, test1.edges, test1.bins)
+    RV2 = RandomVariableCVXPY(x2, test1.edges, test2.bins)
 
         # GET obj. function and constr
 
@@ -607,13 +603,6 @@ def test_CVXPY_MAXIMUM_McCormick(dec: int):
         sum += maximum[bin]
 
     # other constraints
-
-    for bin in range(0, numberOfBins):
-        constr.append( x1[bin] >= test1.bins[bin] )    # set lower constr.
-
-    for bin in range(0, numberOfBins):
-        constr.append( x2[bin] >= test2.bins[bin] )    # set lower constr.
-
 
 
         # solve
@@ -641,14 +630,170 @@ def test_CVXPY_MAXIMUM_McCormick(dec: int):
 
     return None
 
+def test_CVXPY_CONVOLUTION_McCormick(dec: int):
+    """
+    Problem is formulated as minimization
+    """
+
+    mu1 = 22.98553396
+    sigma1 = 2.76804456
+
+    mu2 = 18.98483475
+    sigma2 = 2.802585
+
+    interval = (-5, 40)
+
+    numberOfSamples = 2000000
+    numberOfBins = 10
+
+
+    # DESIRED
+
+    test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
+    test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+
+    max1 = test1.convolutionOfTwoVarsShift(test2)
+    desired = [max1.mean, max1.std]
+
+    print(max1.bins)
+
+    # ACTUAL
+        # init
+    x1 = {}
+
+    for bin in range(0, numberOfBins):
+        x1[bin] = cp.Variable(nonneg=True)
+
+    x2 = {}
+
+    for bin in range(0, numberOfBins):
+        x2[bin] = cp.Variable(nonneg=True)
+
+    RV1 = RandomVariableCVXPY(x1, test1.edges, test1.bins)
+    RV2 = RandomVariableCVXPY(x2, test1.edges, test2.bins)
+
+        # GET obj. function and constr
+
+    maximum, constr = RV1.convolution_McCormick(RV2)
+    maximum = maximum.bins
+
+        # FORMULATE
+
+    # objective function
+    sum = 0
+    for bin in range(0, numberOfBins):
+        sum += maximum[bin]
+
+    # other constraints
+
+
+        # solve
+    objective = cp.Minimize( sum )
+    prob = cp.Problem(objective, constr)
+    prob.solve(verbose=False, solver=cp.MOSEK)
+
+        # PRINT OUT THE VALUES
+    print("Problem value: " + str(prob.value))
+
+    convBins = np.zeros(numberOfBins)
+    for bin in range(0, numberOfBins):
+        convBins[bin] = maximum[bin].value
+
+    edges = np.linspace(interval[0], interval[1], numberOfBins + 1)
+    maxRV = RandomVariable(convBins, edges)
+
+    print(maxRV.bins)
+
+    actual = [maxRV.mean, maxRV.std]
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
+
+def test_CVXPY_MULTIPLICATION_McCormick(dec: int):
+    """
+    Problem is formulated as minimization
+    """
+
+    x1 = 0.5
+    x2 = 0.5
+
+    desired = x1*x2
+
+    # actual
+
+    constr = []
+
+    x = cp.Variable(nonneg=True)
+    y = cp.Variable(nonneg=True)
+
+    slackMult = cp.Variable(nonneg=True)
+
+    # mccormick envelope
+
+    x_L = x1
+    x_U = 1
+    y_L = x2
+    y_U = 1
+
+
+    # McCormick constraints
+    constr.append(slackMult >= x_L * y + x * y_L - x_L * y_L)
+    constr.append(slackMult >= x_U * y + x * y_U - x_U * y_U)
+    constr.append(slackMult <= x_U * y + x * y_L - x_U * y_L)
+    constr.append(slackMult <= x * y_U + x_L * y - x_L * y_U)
+
+
+
+
+    # constr.append(slackMult >= x1 * y + x * x2 - x1 * x2)
+    # constr.append(slackMult >= x_U * y + x * y_U - x_U * y_U)
+    # constr.append(slackMult <= x_U * y + x * x2 - x_U * x2)
+    # constr.append(slackMult <= x * y_U + x1 * y - x1 * y_U)
+
+
+    constr.append(slackMult <= 1)
+    constr.append( x >= 0 )
+    constr.append( y >= 0 )
+    constr.append( x <= 1 )
+    constr.append( y <= 1 )
+
+    # FORMULATE
+
+    # other constraints
+
+    constr.append( x >= x1 )
+    constr.append( y >= x2 )
+
+        # solve
+    objective = cp.Minimize( slackMult )
+    prob = cp.Problem(objective, constr)
+    prob.solve(verbose=False, solver=cp.MOSEK)
+
+        # PRINT OUT THE VALUES
+    print(x.value)
+    print(y.value)
+
+
+    actual = prob.value
+
+    # TESTING
+
+    np.testing.assert_almost_equal(actual, desired, decimal=dec)
+
+    return None
 
 if __name__ == "__main__":
         # dec param is Desired precision
 
-    # test_CVXPY_MAX_UNIFIED_OLD(dec=5)
-    # test_CVXPY_MAX_UNIFIED_NEW_AS_MAX(dec=5)
+    # test_CVXPY_MAX_UNARY_OLD(dec=5)
+    # test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec=5)
 
-    # test_CVXPY_CONVOLUTION_UNIFIED_MAX(dec=5)
-    test_CVXPY_MAXIMUM_McCormick(dec=5)
+    # test_CVXPY_CONVOLUTION_UNARY_MAX(dec=5)
+    # test_CVXPY_MAXIMUM_McCormick(dec=5)
+    test_CVXPY_MULTIPLICATION_McCormick(5)
+    # test_CVXPY_CONVOLUTION_McCormick(5)
 
     print("All tests passed!")

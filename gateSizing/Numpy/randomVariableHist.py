@@ -19,14 +19,14 @@ class RandomVariable:
     """
 
 
-    def __init__(self, bins, edges, unified=False):
+    def __init__(self, bins, edges, unary=False):
 
 
-        if (unified == True):
+        if (unary == True):
             self.bins = np.array(bins)
             self.edges = np.array(edges)
-            self.mean = self.calculateMean_UNIFIED()
-            self.std = self.calculateSTD_UNIFIED()
+            self.mean = self.calculateMean_UNARY()
+            self.std = self.calculateSTD_UNARY()
 
         else:   # normal histogram
             self.bins = np.array(bins)
@@ -195,10 +195,10 @@ class RandomVariable:
 
         return RandomVariable(maximum, self.edges)
 
-    def maxOfDistributionsQUAD_FORMULA_UNIFIED(self, secondVariable):
+    def maxOfDistributionsQUAD_FORMULA_UNARY(self, secondVariable):
         """
         Maximum of 2 distribution functions using quadratic algorithm and simplified version - in formula
-        with unified bins - meaning each bin is represented by M 0/1-bins. M and number of bins is same for all variables
+        with unary bins - meaning each bin is represented by M 0/1-bins. M and number of bins is same for all variables
 
         :param self: random variable class
         :param secondVariable: random variable class
@@ -209,10 +209,10 @@ class RandomVariable:
         binMatrix2 = secondVariable.bins
 
         numberOfBins = binMatrix1.shape[0]
-        numberOfUnions = binMatrix1.shape[1]
+        numberOfUnaries = binMatrix1.shape[1]
 
         # prealloc
-        maximum = np.zeros((numberOfBins, numberOfUnions))
+        maximum = np.zeros((numberOfBins, numberOfUnaries))
 
         # calc. maximum
 
@@ -220,13 +220,13 @@ class RandomVariable:
         for i in range(0, numberOfBins):
             for j in range(0, i + 1):
 
-                for union in range(0, numberOfUnions):
-                    # maximum[i, union] += binMatrix1[i, union] * binMatrix2[j, union]         # simple, non-vectorized
+                for unary in range(0, numberOfUnaries):
+                    maximum[i, unary] += binMatrix1[i, unary] * binMatrix2[j, unary]         # simple, non-vectorized
 
-                    for unionInd in range(0, numberOfUnions):
-                        if maximum[i, unionInd] == 0:
-                            maximum[i, unionInd] += binMatrix1[i, union] * binMatrix2[j, union]
-                            break
+                    # for unaryInd in range(0, numberOfUnaries):
+                    #     if maximum[i, unaryInd] == 0:
+                    #         maximum[i, unaryInd] += binMatrix1[i, unary] * binMatrix2[j, unary]
+                    #         break
 
 
                 # maximum[i, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])   # simple - same but vectorized
@@ -236,24 +236,24 @@ class RandomVariable:
         for i in range(0, numberOfBins):
             for j in range(i + 1, numberOfBins):
 
-                for union in range(0, numberOfUnions):                   # simple, non-vectorized
-                    # maximum[j, union] += binMatrix1[i, union] * binMatrix2[j, union]
+                for unary in range(0, numberOfUnaries):                   # simple, non-vectorized
+                    # maximum[j, unary] += binMatrix1[i, unary] * binMatrix2[j, unary]
 
-                    for unionInd in range(0, numberOfUnions):
-                        if maximum[j, unionInd] == 0:
-                            maximum[j, unionInd] = binMatrix1[i, union] * binMatrix2[j, union]
+                    for unaryInd in range(0, numberOfUnaries):
+                        if maximum[j, unaryInd] == 0:
+                            maximum[j, unaryInd] = binMatrix1[i, unary] * binMatrix2[j, unary]
                             break
 
                 # maximum[j, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])      # simple, same but vectorized
 
 
-        return RandomVariable(maximum, self.edges, unified=True)
+        return RandomVariable(maximum, self.edges, unary=True)
 
-    def convolutionOfTwoVarsNaiveSAME_UNIFIED(self, secondVariable):
+    def convolutionOfTwoVarsNaiveSAME_UNARY(self, secondVariable):
         """
         'SAME' Convolution of two independent random variables naively - using 2 for loops:
             (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
-        with unified bins - meaning each bin is represented by M 0/1-bins. M and number of bins is same for all variables
+        with unary bins - meaning each bin is represented by M 0/1-bins. M and number of bins is same for all variables
 
         :param self: random variable class
         :param secondVariable: random variable class
@@ -264,20 +264,20 @@ class RandomVariable:
         g = secondVariable.bins
 
         numberOfBins = f.shape[0]
-        numberOfUnions = f.shape[1]
+        numberOfUnaries = f.shape[1]
 
-        convolution = np.zeros((numberOfBins, numberOfUnions))
+        convolution = np.zeros((numberOfBins, numberOfUnaries))
 
         for z in range(0, numberOfBins):
             for k in range(0, z + 1):
 
-                for union in range(0, numberOfUnions):
-                    convolution[z, union] += f[k, union] * g[z - k, union]
+                for unary in range(0, numberOfUnaries):
+                    convolution[z, unary] += f[k, unary] * g[z - k, unary]
 
         # Deal With Edges
-        self.cutBins_UNIFIED(self.edges, convolution)
+        self.cutBins_UNARY(self.edges, convolution)
 
-        return RandomVariable(convolution, self.edges, unified=True)
+        return RandomVariable(convolution, self.edges, unary=True)
 
     def convolutionOfTwoVarsNaiveFULL(self, secondVariable):
         """
@@ -487,12 +487,12 @@ class RandomVariable:
         return edges
 
     @staticmethod
-    def cutBins_UNIFIED_Vectorized(edges, bins):
+    def cutBins_UNARY_Vectorized(edges, bins):
         """
         Cuts bins depending on edge[0]
         if edge[0] < 0: cuts left bins and adds zeros to the end
         if edge[0] > 0: cuts right bins and adds zeros to the beginning
-        Works for only unified random variable
+        Works for only unary random variable
 
         :param edges: (1, n+1) numpy array of edges
         :param bins: (n, m) numpy array of bins
@@ -514,12 +514,12 @@ class RandomVariable:
             bins[-numberOfBinsNeeded:, :] = 0
 
     @staticmethod
-    def cutBins_UNIFIED(edges, bins):
+    def cutBins_UNARY(edges, bins):
         """
         Cuts bins depending on edge[0]
         if edge[0] < 0: cuts left bins and adds zeros to the end
         if edge[0] > 0: cuts right bins and adds zeros to the beginning
-        Works for only unified random variable
+        Works for only unary random variable
 
         :param edges: (1, n+1) numpy array of edges
         :param bins: (n, m) numpy array of bins
@@ -527,7 +527,7 @@ class RandomVariable:
         """
 
         diff = edges[1] - edges[0]
-        numberOfUnions = bins.shape[1]
+        numberOfUnaries = bins.shape[1]
         numberOfBins = bins.shape[0]
 
         numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
@@ -535,23 +535,23 @@ class RandomVariable:
         if edges[0] > 0:  # cut bins
 
             for i in range(numberOfBinsNeeded, numberOfBins):
-                for union in range(0, numberOfUnions):
-                    bins[i, union] = bins[i - numberOfBinsNeeded, union]
+                for unary in range(0, numberOfUnaries):
+                    bins[i, unary] = bins[i - numberOfBinsNeeded, unary]
 
             for i in range(0, numberOfBinsNeeded):
-                for union in range(0, numberOfUnions):
-                    bins[i, union] = 0
+                for unary in range(0, numberOfUnaries):
+                    bins[i, unary] = 0
 
 
         elif edges[0] < 0:  # cut bins
 
             for i in range(numberOfBinsNeeded, numberOfBins):
-                for union in range(0, numberOfUnions):
-                    bins[i - numberOfBinsNeeded, union] = bins[i, union]
+                for unary in range(0, numberOfUnaries):
+                    bins[i - numberOfBinsNeeded, unary] = bins[i, unary]
 
             for i in range(numberOfBins - numberOfBinsNeeded, numberOfBins):
-                for union in range(0, numberOfUnions):
-                    bins[i, union] = 0
+                for unary in range(0, numberOfUnaries):
+                    bins[i, unary] = 0
 
     @staticmethod
     def cutBins(edges, bins):
@@ -607,9 +607,9 @@ class RandomVariable:
         variance = np.average(np.square(midPoints - self.mean), weights=self.bins)
         return np.sqrt(variance)
 
-    def calculateMean_UNIFIED(self):
+    def calculateMean_UNARY(self):
         """
-        Function calculates sample mean of the random variable - represented as unified 0/1 bins
+        Function calculates sample mean of the random variable - represented as unary 0/1 bins
         Calculation: weighted average of the frequencies, edges being the weights
 
         :param self: random variable class
@@ -618,14 +618,14 @@ class RandomVariable:
 
         binMatrix = self.bins
         numberOfBins = binMatrix.shape[0]
-        numberOfUnions = binMatrix.shape[1]
+        numberOfUnaries = binMatrix.shape[1]
 
         estimatedBins = np.zeros(numberOfBins)
 
             # calculate prob. of each bin
         for bin in range(0, numberOfBins):
             numberOfOnes = np.sum( binMatrix[bin, :] )
-            estimatedBins[bin] = numberOfOnes / numberOfUnions
+            estimatedBins[bin] = numberOfOnes / numberOfUnaries
 
         midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])  # midpoints of the edges of hist.
         mean = np.average(midPoints, weights=estimatedBins)
@@ -633,9 +633,9 @@ class RandomVariable:
         return mean
 
 
-    def calculateSTD_UNIFIED(self):
+    def calculateSTD_UNARY(self):
         """
-        Function calculates sample std of the random variable - represented as unified 0/1 bins
+        Function calculates sample std of the random variable - represented as unary 0/1 bins
         Calculation: weighted average of the frequencies, edges being the weights
 
         :param self: random variable class
@@ -644,14 +644,14 @@ class RandomVariable:
 
         binMatrix = self.bins
         numberOfBins = binMatrix.shape[0]
-        numberOfUnions = binMatrix.shape[1]
+        numberOfUnaries = binMatrix.shape[1]
 
         estimatedBins = np.zeros(numberOfBins)
 
         # calculate prob. of each bin
         for bin in range(0, numberOfBins):
             numberOfOnes = np.sum(binMatrix[bin, :])
-            estimatedBins[bin] = numberOfOnes / numberOfUnions
+            estimatedBins[bin] = numberOfOnes / numberOfUnaries
 
         midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
         variance = np.average(np.square(midPoints - self.mean), weights=estimatedBins)

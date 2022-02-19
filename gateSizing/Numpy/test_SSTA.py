@@ -193,9 +193,9 @@ def testSSTA_1(dec: int):
 def testSSTA_2(dec: int):
 
     numberOfSamples = 5000000
-    numberOfBins = 500
+    numberOfBins = 30
     distribution = 'Normal'
-    binsInterval = (-5, 50)
+    binsInterval = (-2, 30)
 
         # DESIRED - monte carlo
 

@@ -604,7 +604,7 @@ def testMAX_QUAD_FORMULA(dec: int):
 
     return None
 
-def testMAX_QUAD_FORMULA_UNIFIED(dec: int):
+def testMAX_QUAD_FORMULA_UNARY(dec: int):
 
     mu1 = 12.98553396
     sigma1 = 4.76804456
@@ -616,7 +616,7 @@ def testMAX_QUAD_FORMULA_UNIFIED(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 20
-    numberOfUnions = 40
+    numberOfUnaries = 40
 
     # DESIRED
 
@@ -628,10 +628,10 @@ def testMAX_QUAD_FORMULA_UNIFIED(dec: int):
 
     # ACTUAL
 
-    rv3 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv4 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv3 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
-    max2 = rv3.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv4)
+    max2 = rv3.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)
     actual = [max2.mean, max2.std]
 
     print(max2.bins)
@@ -645,7 +645,7 @@ def testMAX_QUAD_FORMULA_UNIFIED(dec: int):
 
 
 
-def testMAX_QUAD_FORMULA_UNIFIED2(dec: int):
+def testMAX_QUAD_FORMULA_UNARY2(dec: int):
 
     mu1 = 12.98553396
     sigma1 = 4.76804456
@@ -661,7 +661,7 @@ def testMAX_QUAD_FORMULA_UNIFIED2(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 200
-    numberOfUnions = 600
+    numberOfUnaries = 600
 
     # DESIRED
 
@@ -675,12 +675,12 @@ def testMAX_QUAD_FORMULA_UNIFIED2(dec: int):
 
     # ACTUAL
 
-    rv4 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv5 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv6 = histogramGenerator.get_gauss_bins_UNIFIED(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv5 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv6 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
-    max2 = rv4.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv5)
-    max2 = rv5.maxOfDistributionsQUAD_FORMULA_UNIFIED(rv6)
+    max2 = rv4.maxOfDistributionsQUAD_FORMULA_UNARY(rv5)
+    max2 = rv5.maxOfDistributionsQUAD_FORMULA_UNARY(rv6)
     actual = [max2.mean, max2.std]
 
     # TESTING
@@ -690,7 +690,7 @@ def testMAX_QUAD_FORMULA_UNIFIED2(dec: int):
     return None
 
 
-def testMAX_Convolution_UNIFIED(dec: int):
+def testMAX_Convolution_UNARY(dec: int):
 
     mu1 = 22.98553396
     sigma1 = 2.76804456
@@ -702,7 +702,7 @@ def testMAX_Convolution_UNIFIED(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 200
-    numberOfUnions = 500
+    numberOfUnaries = 500
 
     # DESIRED
 
@@ -714,10 +714,10 @@ def testMAX_Convolution_UNIFIED(dec: int):
 
     # ACTUAL
 
-    rv3 = histogramGenerator.get_gauss_bins_UNIFIED(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnions)
-    rv4 = histogramGenerator.get_gauss_bins_UNIFIED(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnions)
+    rv3 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
-    con2 = rv3.convolutionOfTwoVarsNaiveSAME_UNIFIED(rv4)
+    con2 = rv3.convolutionOfTwoVarsNaiveSAME_UNARY(rv4)
     actual = [con2.mean, con2.std]
 
     # TESTING
@@ -754,7 +754,7 @@ if __name__ == "__main__":
 
     # testConvolutionNaive(1)
     # testMAX_QUAD_FORMULA(3)
-    testMAX_QUAD_FORMULA_UNIFIED(3)
+    testMAX_QUAD_FORMULA_UNARY(3)
 
     # testMAX_QUAD_FORMULA_UNIFIED2(3)
     # testMAX_Convolution_UNIFIED(4)

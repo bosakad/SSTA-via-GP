@@ -27,8 +27,8 @@ def get_gauss_bins(mu: float, sigma: float, numberOfBins: int, numberOfSamples: 
 
     return randomVar
 
-def get_gauss_bins_UNIFIED(mu: float, sigma: float, numberOfBins: int, numberOfSamples: int, binsInterval: tuple,
-                                                                    numberOfUnions: int) -> RandomVariable:
+def get_gauss_bins_UNARY(mu: float, sigma: float, numberOfBins: int, numberOfSamples: int, binsInterval: tuple,
+                         numberOfUnaries: int) -> RandomVariable:
     """
     Generates a randomly generated gaussian histogram with given mean and standard deviation.
     Each bin is represented by M 0/1-bins.
@@ -38,7 +38,7 @@ def get_gauss_bins_UNIFIED(mu: float, sigma: float, numberOfBins: int, numberOfS
     :param numberOfBins: -
     :param numberOfSamples: number of samples used for generating
     :param binsInterval: static bins interval - should be large enough
-    :param numberOfUnions: number of representative bins for each bin
+    :param numberOfUnaries: number of representative bins for each bin
     :return randomVar: new RV
     """
 
@@ -49,20 +49,20 @@ def get_gauss_bins_UNIFIED(mu: float, sigma: float, numberOfBins: int, numberOfS
     data, edges = np.histogram(s, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data))
 
-    finalBins = np.zeros((numberOfBins, numberOfUnions))
+    finalBins = np.zeros((numberOfBins, numberOfUnaries))
 
 
     for bin in range(0, numberOfBins):
 
-        numberOfOnes = int(math.floor(dataNorm[bin] * numberOfUnions))
+        numberOfOnes = int(math.floor(dataNorm[bin] * numberOfUnaries))
 
         finalBins[bin, :numberOfOnes] = 1
 
-        # for union in range(0, numberOfOnes):  # non-vectorized version
-        #     finalBins[bin, union] = 1
+        # for unary in range(0, numberOfOnes):  # non-vectorized version
+        #     finalBins[bin, unary] = 1
 
 
-    randomVar = RandomVariable(finalBins, edges, unified=True)
+    randomVar = RandomVariable(finalBins, edges, unary=True)
 
     return randomVar
 
