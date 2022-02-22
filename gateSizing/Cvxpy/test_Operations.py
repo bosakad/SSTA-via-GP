@@ -353,8 +353,8 @@ def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
     interval = (-5, 40)
 
     numberOfSamples = 2000000
-    numberOfBins = 15
-    numberOfUnaries = 15
+    numberOfBins = 10
+    numberOfUnaries = 5
 
 
     # DESIRED
@@ -413,7 +413,18 @@ def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
         for unary in range(0, numberOfUnaries):
             constr.append( (x2[bin])[unary] <= rv2.bins[bin, unary] )    # set lower constr.
 
+    # symmetry constraints
+    for bin in range(0, numberOfBins):
+        for unary in range(0, numberOfUnaries - 1):
+            constr.append((x2[bin])[unary] >= (x2[bin])[unary + 1])  # set lower constr.
 
+    for bin in range(0, numberOfBins):
+        for unary in range(0, numberOfUnaries - 1):
+            constr.append((x1[bin])[unary] >= (x1[bin])[unary + 1])  # set lower constr.
+
+    for bin in range(0, numberOfBins):
+        for unary in range(0, numberOfUnaries - 1):
+            constr.append((convolution[bin])[unary] >= (convolution[bin])[unary + 1])  # set lower constr.
 
         # solve
     objective = cp.Maximize( sum )
@@ -515,8 +526,6 @@ def test_CVXPY_CONVOLUTION_UNARY_MIN(dec: int):
     for bin in range(0, numberOfBins):
         for unary in range(0, numberOfUnaries):
             constr.append( (x2[bin])[unary] >= rv2.bins[bin, unary] )    # set lower constr.
-
-
 
         # solve
     objective = cp.Minimize( sum )
@@ -770,7 +779,7 @@ def test_CVXPY_MULTIPLICATION_McCormick(dec: int):
         # solve
     objective = cp.Minimize( slackMult )
     prob = cp.Problem(objective, constr)
-    prob.solve(verbose=False, solver=cp.MOSEK)
+    prob.solve(verbose=True, solver=cp.MOSEK)
 
         # PRINT OUT THE VALUES
     print(x.value)
@@ -791,9 +800,9 @@ if __name__ == "__main__":
     # test_CVXPY_MAX_UNARY_OLD(dec=5)
     # test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec=5)
 
-    # test_CVXPY_CONVOLUTION_UNARY_MAX(dec=5)
+    test_CVXPY_CONVOLUTION_UNARY_MAX(dec=5)
     # test_CVXPY_MAXIMUM_McCormick(dec=5)
-    test_CVXPY_MULTIPLICATION_McCormick(5)
+    # test_CVXPY_MULTIPLICATION_McCormick(5)
     # test_CVXPY_CONVOLUTION_McCormick(5)
 
     print("All tests passed!")

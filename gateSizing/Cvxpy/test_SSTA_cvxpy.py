@@ -1,10 +1,12 @@
 import cvxpy.atoms.affine.affine_atom
+import mosek
 import numpy as np
 import cvxpy as cp
 
 import sys
 # setting path
 from cvxpyVariable import RandomVariableCVXPY
+
 
 sys.path.append('../Numpy')
 
@@ -15,11 +17,11 @@ import networkx as nx
 from randomVariableHist import RandomVariable
 import matplotlib.pyplot as plt
 
+
 sys.path.append('../../montecarlo')
 
 from montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
 from queue import Queue
-
 
 
 def putTuplesIntoArray(rvs: [RandomVariable] = None, numbers: [float] = None):
@@ -116,7 +118,7 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
     # set objective
 
     sum = 0
-    for gate in range(0, numberOfGates):
+    for gate in range(0, numberOfGates + 1):
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
                sum += ((delays[gate].bins)[bin])[unary]
@@ -133,7 +135,7 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
 
     rvs = []
 
-    for gate in range(0, numberOfGates):    # construct RVs
+    for gate in range(0, numberOfGates + 1):    # construct RVs
 
         finalBins = np.zeros((numberOfBins, numberOfUnaries))
         for bin in range(0, numberOfBins):
@@ -144,7 +146,7 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
 
 
     print("\n APRX. VALUES: \n")
-    for i in range(0, numberOfGates):
+    for i in range(0, numberOfGates + 1):
         print( rvs[i].mean, rvs[i].std )
 
 
@@ -172,7 +174,7 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
 
 
     print("\n REAL VALUES: \n")
-    for i in range(0, numberOfGates):
+    for i in range(0, numberOfGates + 1):
         print( desired[i, 0], desired[i, 1] )
 
 
@@ -190,12 +192,14 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
     :return:
     """
 
+
+
     numberOfSamples = 2000000
 
     numberOfGates = 5
 
     numberOfBins = 10
-    numberOfUnaries = 10
+    numberOfUnaries = 5
 
     binsInterval = (-5, 40)
 
@@ -217,14 +221,14 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
     g1 = histogramGenerator.get_gauss_bins(10, 0.45, numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
     g2 = histogramGenerator.get_gauss_bins(12, 0.3, numberOfBins, numberOfSamples, binsInterval)  # g4 output - inputs: g3 g1
     g3 = histogramGenerator.get_gauss_bins(5, 2, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
-    g4 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
-    g5 = histogramGenerator.get_gauss_bins(5, 3, numberOfBins, numberOfSamples, binsInterval)
+    g4 = histogramGenerator.get_gauss_bins(5, 2, numberOfBins, numberOfSamples, binsInterval)
+    g5 = histogramGenerator.get_gauss_bins(5, 2, numberOfBins, numberOfSamples, binsInterval)
 
     g1U = histogramGenerator.get_gauss_bins_UNARY(10, 0.45, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
     g2U = histogramGenerator.get_gauss_bins_UNARY(12, 0.3, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
     g3U = histogramGenerator.get_gauss_bins_UNARY(5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g4U = histogramGenerator.get_gauss_bins_UNARY(5, 0.5, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g5U = histogramGenerator.get_gauss_bins_UNARY(5, 3, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
+    g4U = histogramGenerator.get_gauss_bins_UNARY(5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
+    g5U = histogramGenerator.get_gauss_bins_UNARY(5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
     generatedDistros = [g1U, g2U, g3U, g4U, g5U]
 
 
@@ -249,11 +253,10 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
             for unary in range(0, numberOfUnaries):
                 constraints.append( ((xs[gate])[bin])[unary] <= (generatedDistros[gate].bins[bin])[unary] )    # set lower constr.
 
-
     # set objective
 
     sum = 0
-    for gate in range(0, numberOfGates):
+    for gate in range(0, numberOfGates + 1):
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
                sum += ((delays[gate].bins)[bin])[unary]
@@ -261,8 +264,16 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
     # solve
     objective = cp.Maximize( sum )
     prob = cp.Problem(objective, constraints)
-    prob.solve(verbose=True, solver=cp.MOSEK)
 
+    # prob.solve(verbose=True, solver=cp.MOSEK,
+    #            mosek_params={'MSK_DPAR_MIO_TOL_REL_GAP': 0.01,              # relative gap
+    #                          'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200 }         # max time
+    #            )
+
+    prob.solve(verbose=True, solver=cp.GUROBI,
+                                MIPGAP = 0.01,                   # relative gap
+                                TimeLimit = 1200            # 'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}  # max time
+               )
 
 
     # print out the values
@@ -270,18 +281,18 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
 
     rvs = []
 
-    for gate in range(0, numberOfGates):    # construct RVs
+    for gate in range(0, numberOfGates + 1):    # construct RVs
 
         finalBins = np.zeros((numberOfBins, numberOfUnaries))
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
                 finalBins[bin, unary] = ((delays[gate].bins)[bin])[unary].value
 
-        rvs.append( RandomVariable(finalBins, generatedDistros[gate].edges, unary=True) )
+        rvs.append( RandomVariable(finalBins, generatedDistros[0].edges, unary=True) )
 
 
     print("\n APRX. VALUES: \n")
-    for i in range(0, numberOfGates):
+    for i in range(0, numberOfGates + 1):
         print( rvs[i].mean, rvs[i].std )
 
 
@@ -308,10 +319,39 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
         desired[i, 1] = delay.std
 
 
-    print("\n REAL VALUES: \n")
-    for i in range(0, numberOfGates):
+    print("\n NUMPY VALUES: \n")
+    for i in range(0, numberOfGates + 1):
         print( desired[i, 0], desired[i, 1] )
 
+    # monte carlo
+
+    adjacency = np.array([[0, 1, 1, 0, 0, 0, 0],
+                          [0, 0, 0, 1, 1, 0, 0],
+                          [0, 0, 0, 1, 0, 1, 0],
+                          [0, 0, 0, 0, 1, 1, 0],
+                          [0, 0, 0, 0, 0, 0, 1],
+                          [0, 0, 0, 0, 0, 0, 1],
+                          [0, 0, 0, 0, 0, 0, 0]])
+
+    G = nx.from_numpy_matrix(adjacency, create_using=nx.DiGraph())
+
+    list_of_inputs = get_inputs(adjacency)
+
+    unknown_nodes = get_unknown_nodes(G, list_of_inputs)
+    gate = [5, 2]
+
+    input_means = [0, 10, 12]
+    input_stds = [0, 0.45, 0.3]
+
+    inputs_simulation = preprocess(list_of_inputs, input_means, input_stds, unknown_nodes, gate, numberOfSamples,
+                                   'Normal')
+
+    mc = simulation(G, inputs_simulation, unknown_nodes, gate, numberOfSamples)
+
+    desired2 = putTuplesIntoArray(numbers=mc)
+
+    print("\nMONTE CARLO VALUES (GROUND-TRUTH):")
+    print(desired2)
 
         # test whole
     # np.testing.assert_almost_equal(desired, actual, decimal=dec, err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
@@ -327,7 +367,7 @@ def SSTA_CVXPY_McCormick(dec: int):
     """
 
     numberOfSamples = 2000000
-    numberOfGates = 5
+    numberOfGates = 6
 
     numberOfBins = 18
 
@@ -351,13 +391,15 @@ def SSTA_CVXPY_McCormick(dec: int):
     g3 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
     g4 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
     g5 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
-    generatedDistros = [g1, g2, g3, g4, g5]
+    g6 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
+    generatedDistros = [g1, g2, g3, g4, g5, g6]
 
     n1 = Node( RandomVariableCVXPY(xs[0], g1.edges, g1.bins) )
     n2 = Node( RandomVariableCVXPY(xs[1], g1.edges, g2.bins) )
     n3 = Node( RandomVariableCVXPY(xs[2], g1.edges, g3.bins) )
     n4 = Node( RandomVariableCVXPY(xs[3], g1.edges, g4.bins) )
     n5 = Node( RandomVariableCVXPY(xs[4], g1.edges, g5.bins) )
+    n6 = Node( RandomVariableCVXPY(xs[5], g1.edges, g6.bins) )
 
 
     # n1 = Node( RandomVariableCVXPY(xs[0], g1.edges) )
@@ -366,11 +408,15 @@ def SSTA_CVXPY_McCormick(dec: int):
     # n4 = Node( RandomVariableCVXPY(xs[3], g1.edges) )
     # n5 = Node( RandomVariableCVXPY(xs[4], g1.edges) )
 
+    # n1.setNextNodes([n3, n4])
+    # n2.setNextNodes([n3, n5])
+    # n3.setNextNodes([n4, n5])
 
     # set circuit design
     n1.setNextNodes([n3, n4])
-    n2.setNextNodes([n3, n5])
-    n3.setNextNodes([n4, n5])
+    n2.setNextNodes([n3, n5, n4])
+    n3.setNextNodes([n6, n5])
+    n4.setNextNodes([n6])
 
     # calculate delay with ssta
     delays, constraints = SSTA.calculateCircuitDelay([n1, n2], cvxpy=True, unary=False)
@@ -407,7 +453,6 @@ def SSTA_CVXPY_McCormick(dec: int):
         for bin in range(0, numberOfBins):
                 finalBins[bin] = (delays[gate].bins)[bin].value
 
-        print(finalBins)
         rvs.append( RandomVariable(finalBins, g1.edges, unary=False) )
 
 
@@ -423,11 +468,17 @@ def SSTA_CVXPY_McCormick(dec: int):
     n3 = Node(g3)
     n4 = Node(g4)
     n5 = Node(g5)
+    n6 = Node(g6)
 
     # set circuit design
+    # n1.setNextNodes([n3, n4])
+    # n2.setNextNodes([n3, n5])
+    # n3.setNextNodes([n4, n5])
     n1.setNextNodes([n3, n4])
-    n2.setNextNodes([n3, n5])
-    n3.setNextNodes([n4, n5])
+    n2.setNextNodes([n3, n5, n4])
+    n3.setNextNodes([n6, n5])
+    n4.setNextNodes([n6])
+
 
     delays = SSTA.calculateCircuitDelay([n1, n2], unary=False, cvxpy=False)
     desired = putTuplesIntoArray(rvs=delays)
@@ -479,6 +530,13 @@ def SSTA_CVXPY_McCormick(dec: int):
 
     return None
 
+
+def parserTester():
+
+    p = VerilogParser()
+    p.
+
+
 if __name__ == "__main__":
 
         # dec param is Desired precision
@@ -487,5 +545,6 @@ if __name__ == "__main__":
 
         # one has to change functions in SSTA to change MAX and MIN
     # SSTA_CVXPY_UNARY_AS_MAX(dec=5)
+    parserTester()
 
-    SSTA_CVXPY_McCormick(dec=5)
+    # SSTA_CVXPY_McCormick(dec=5)

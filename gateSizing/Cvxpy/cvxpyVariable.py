@@ -157,7 +157,8 @@ class RandomVariableCVXPY:
         rv1 = RandomVariableNumpy(lowerBounds1, self.edges)
         rv2 = RandomVariableNumpy(lowerBounds2, self.edges)
 
-        maximumClass = RandomVariableCVXPY(maximum, self.edges, rv1.maxOfDistributionsFORM(rv2).bins)
+        # maximumClass = RandomVariableCVXPY(maximum, self.edges)     # without exact comput.
+        maximumClass = RandomVariableCVXPY(maximum, self.edges, rv1.maxOfDistributionsFORM(rv2).bins) # with exact comput.
 
         return maximumClass, MaxConstraints
 
@@ -223,12 +224,14 @@ class RandomVariableCVXPY:
 
 
         # Deal With Edges
-        self.cutBins(self.edges, convolution)
+        self.cutBins(self.edges, convolution, mccormick=True)
 
         rv1 = RandomVariableNumpy(lowerBounds1, self.edges)
         rv2 = RandomVariableNumpy(lowerBounds2, self.edges)
 
+        # convClass = RandomVariableCVXPY(convolution, self.edges)
         convClass = RandomVariableCVXPY(convolution, self.edges, rv1.convolutionOfTwoVarsShift(rv2).bins)
+
 
         return convClass, ConvConstraints
 
@@ -359,6 +362,14 @@ class RandomVariableCVXPY:
 
             ConvConstraints.append(sumOfNewVariables <= sumOfMultiplications[i])
             ConvConstraints.append(sumOfNewVariables <= numberOfUnaries)
+
+        # symmetry constraints
+
+        for bin in range(0, numberOfBins):
+            for unary in range(0, numberOfUnaries - 1):
+                ConvConstraints.append(
+                    (convolution[bin])[unary] >= (convolution[bin])[unary + 1])  # set lower constr.
+
 
         convolutionClass = RandomVariableCVXPY(convolution, self.edges)
 
@@ -492,6 +503,13 @@ class RandomVariableCVXPY:
 
             MaxConstraints.append(  sumOfNewVariables <= sumOfMultiplications[i]    )     # as a max. problem
             MaxConstraints.append(  sumOfNewVariables <= numberOfUnaries             )
+
+        # symmetry constraints
+        for bin in range(0, numberOfBins):
+            for unary in range(0, numberOfUnaries - 1):
+                MaxConstraints.append(
+                    (maximum[bin])[unary] >= (maximum[bin])[unary + 1])  # set lower constr.
+
 
 
         maximumClass = RandomVariableCVXPY(maximum, self.edges)
@@ -680,7 +698,7 @@ class RandomVariableCVXPY:
         return maximumClass, MaxConstraints
 
     @staticmethod
-    def cutBins(edges: np.array, bins: {cp.Expression}):
+    def cutBins(edges: np.array, bins: {cp.Expression}, mccormick=False):
         """
         Cuts bins depending on edge[0]
         if edge[0] < 0: cuts left bins and adds zeros to the end
@@ -703,8 +721,10 @@ class RandomVariableCVXPY:
                 bins[i] = bins[i - numberOfBinsNeeded]
 
             for i in range(0, numberOfBinsNeeded):
-                    # bins[i] = 0
+                if mccormick:
                     bins[i] = cp.Variable(nonneg=True)
+                else:
+                    bins[i] = 0
 
         elif edges[0] < 0:  # cut bins
 
@@ -712,8 +732,10 @@ class RandomVariableCVXPY:
                 bins[i - numberOfBinsNeeded] = bins[i]
 
             for i in range(numberOfBins - numberOfBinsNeeded, numberOfBins):
-                    # bins[i] = 0
+                if mccormick:
                     bins[i] = cp.Variable(nonneg=True)
+                else:
+                    bins[i] = 0
 
     @staticmethod
     def cutBins_UNARY(edges: np.array, bins: {cp.Expression}):
