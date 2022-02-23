@@ -1,6 +1,5 @@
 import math
 
-import cvxpy as cp
 import numpy as np
 import scipy.stats
 

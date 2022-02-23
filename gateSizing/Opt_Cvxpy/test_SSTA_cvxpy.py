@@ -1,26 +1,17 @@
-import cvxpy.atoms.affine.affine_atom
-import mosek
 import numpy as np
 import cvxpy as cp
+from gateSizing.node import Node
 
-import sys
 # setting path
 from cvxpyVariable import RandomVariableCVXPY
 
-
-sys.path.append('../Numpy')
-
-from node import Node
-import histogramGenerator
-import SSTA
+from gateSizing import histogramGenerator
+from gateSizing import SSTA
 import networkx as nx
-from randomVariableHist import RandomVariable
+from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable
 import matplotlib.pyplot as plt
 
-
-sys.path.append('../../montecarlo')
-
-from montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
+from  examples_monteCarlo.montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
 from queue import Queue
 
 
@@ -198,8 +189,8 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
 
     numberOfGates = 5
 
-    numberOfBins = 10
-    numberOfUnaries = 5
+    numberOfBins = 80
+    numberOfUnaries = 200
 
     binsInterval = (-5, 40)
 
@@ -531,11 +522,6 @@ def SSTA_CVXPY_McCormick(dec: int):
     return None
 
 
-def parserTester():
-
-    p = VerilogParser()
-    p.
-
 
 if __name__ == "__main__":
 
@@ -544,7 +530,6 @@ if __name__ == "__main__":
     # SSTA_CVXPY_UNARY_AS_MIN(dec=5)
 
         # one has to change functions in SSTA to change MAX and MIN
-    # SSTA_CVXPY_UNARY_AS_MAX(dec=5)
-    parserTester()
+    SSTA_CVXPY_UNARY_AS_MAX(dec=5)
 
     # SSTA_CVXPY_McCormick(dec=5)

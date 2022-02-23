@@ -1,7 +1,6 @@
 import numpy as np
 import cvxpy as cp
-import SSTA
-import mosek
+
 
 
 def computeInputCapacitance(alphas, betas, x):
@@ -115,6 +114,38 @@ def computeTotalArea(gateScales, x):
     return area
 
 
+def getDelaySSTA():
+    """
+    Just a test function
+    :return delay: array of delays for each gate
+    :return constr: constraints for the delays
+    """
+
+    numberOfBins = 10
+    numberOfUnaries = 10
+
+    xs = {}
+
+    # create a variable as a dict.
+    for gate in range(0, numberOfGates):
+        xs[gate] = {}
+        for bin in range(0, numberOfBins):
+            (xs[gate])[bin] = {}
+            for unary in range(0, numberOfUnaries):
+                ((xs[gate])[bin])[unary] = cp.Variable(boolean=True)
+
+
+    sum = 0
+    for gate in range(0, numberOfGates):
+        for bin in range(0, numberOfBins):
+            for unary in range(0, numberOfUnaries):
+               sum += ((xs[gate])[bin])[unary]
+
+    print(sum)
+
+    return sum, []
+
+
 def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, maxArea, maxPower, loadCapacitances,
                   numberOfGates, delaysRVs=None):
     # defining variable
@@ -128,7 +159,8 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
 
     pathDelays = getPathDelays(gateDelays)
     circuitDelay = getMaximumDelay(pathDelays)
-    # circuitDelay = cp.sum( cp.multiply(x, delaysRVs) )
+
+    # circuitDelay, otherConstr = getDelaySSTA()
 
 
     # computing the constraints

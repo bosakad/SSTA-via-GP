@@ -1,11 +1,9 @@
 import cvxpy as cp
 import math
 import numpy as np
-import sys
 
-sys.path.append('../Numpy')
-import histogramGenerator
-from randomVariableHist import RandomVariable as RandomVariableNumpy
+from gateSizing import histogramGenerator
+from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable as RandomVariableNumpy
 
 
 class RandomVariableCVXPY:

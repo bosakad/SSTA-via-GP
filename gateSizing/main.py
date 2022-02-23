@@ -4,9 +4,9 @@ import numpy as np
 import histogramGenerator
 from node import Node
 import SSTA
-import optimizeGatesSimple
+import gateSizing.optimizeGatesSimple
 import matplotlib.pyplot as plt
-from randomVariableHist import RandomVariable
+from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable
 
 """
 Script main.py is used as a main method for circuit optimization.

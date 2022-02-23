@@ -1,14 +1,13 @@
 from queue import Queue
 
-from randomVariableHist import RandomVariable
+from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable
 from node import Node
 import cvxpy as cp
 
 import sys
 # setting path
-sys.path.append('../Cvxpy')
 
-import cvxpyVariable
+from gateSizing.Opt_Cvxpy.cvxpyVariable import RandomVariableCVXPY as cvxpyVariable
 
 
 

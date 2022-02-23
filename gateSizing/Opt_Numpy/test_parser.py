@@ -1,5 +1,4 @@
 import parser
-import sys
 import numpy as np
 
 

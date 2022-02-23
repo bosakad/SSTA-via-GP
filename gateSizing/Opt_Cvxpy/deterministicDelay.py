@@ -2,8 +2,7 @@ import cvxpy as cp
 import sys
 import numpy as np
 
-sys.path.append('../Numpy')
-from node import Node
+from gateSizing.node import Node
 from queue import Queue
 
 def FindMaxDelayGates():

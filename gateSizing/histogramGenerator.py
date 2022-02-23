@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-from randomVariableHist import RandomVariable
+from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable
 
 
 def get_gauss_bins(mu: float, sigma: float, numberOfBins: int, numberOfSamples: int, binsInterval: tuple) -> RandomVariable:

@@ -1,14 +1,10 @@
-
 import numpy as np
-import sys
 
 from cvxpyVariable import RandomVariableCVXPY
 import cvxpy as cp
 
-sys.path.append('../Numpy')
-
-from randomVariableHist import RandomVariable
-import histogramGenerator
+from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable
+from gateSizing import histogramGenerator
 
 
 def test_CVXPY_MAX_UNARY_OLD(dec: int):

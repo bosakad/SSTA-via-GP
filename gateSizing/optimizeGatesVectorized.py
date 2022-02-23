@@ -1,6 +1,5 @@
 import numpy as np
 import cvxpy as cp
-import mosek
 
         # IMPORTANT FOR JAKUB: commented code outside of functions is code from dmytro (see google collab)
 

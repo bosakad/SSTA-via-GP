@@ -122,10 +122,10 @@ def main():
 
 	results = get_moments_from_simulations(nodes_simulation)
 
-	print(
-		tabulate(results, headers=["Mean", "std"]
-		)
-		)
+	# print(
+	# 	tabulate(results, headers=["Mean", "std"]
+	# 	)
+	# 	)
 
 
 
