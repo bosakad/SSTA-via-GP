@@ -2,7 +2,7 @@ import cvxpy as cp
 import sys
 import numpy as np
 
-from gateSizing.node import Node
+from Main.node import Node
 from queue import Queue
 
 def FindMaxDelayGates():

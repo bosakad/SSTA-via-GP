@@ -2,8 +2,7 @@ import cvxpy as cp
 import math
 import numpy as np
 
-from gateSizing import histogramGenerator
-from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable as RandomVariableNumpy
+from randomVariableHist_Numpy import RandomVariable as RandomVariableNumpy
 
 
 class RandomVariableCVXPY:

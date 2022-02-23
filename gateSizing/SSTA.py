@@ -1,14 +1,10 @@
 from queue import Queue
 
-from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable
-from node import Node
+from randomVariableHist_Numpy import RandomVariable
+from Main.node import Node
 import cvxpy as cp
 
-import sys
-# setting path
-
-from gateSizing.Opt_Cvxpy.cvxpyVariable import RandomVariableCVXPY as cvxpyVariable
-
+import cvxpyVariable
 
 
 def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False) -> [Node]:

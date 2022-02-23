@@ -3,8 +3,8 @@ import numpy as np
 from cvxpyVariable import RandomVariableCVXPY
 import cvxpy as cp
 
-from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable
-from gateSizing import histogramGenerator
+from randomVariableHist_Numpy import RandomVariable
+import histogramGenerator
 
 
 def test_CVXPY_MAX_UNARY_OLD(dec: int):

@@ -1,18 +1,16 @@
 import numpy as np
 import cvxpy as cp
-from gateSizing.node import Node
 
-# setting path
+from Main.node import Node
+
 from cvxpyVariable import RandomVariableCVXPY
 
-from gateSizing import histogramGenerator
-from gateSizing import SSTA
+import histogramGenerator
+import SSTA
 import networkx as nx
-from gateSizing.Opt_Numpy.randomVariableHist import RandomVariable
-import matplotlib.pyplot as plt
+from randomVariableHist_Numpy import RandomVariable
 
-from  examples_monteCarlo.montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
-from queue import Queue
+from examples_monteCarlo.montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
 
 
 def putTuplesIntoArray(rvs: [RandomVariable] = None, numbers: [float] = None):
@@ -189,8 +187,8 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
 
     numberOfGates = 5
 
-    numberOfBins = 80
-    numberOfUnaries = 200
+    numberOfBins = 10
+    numberOfUnaries = 5
 
     binsInterval = (-5, 40)
 

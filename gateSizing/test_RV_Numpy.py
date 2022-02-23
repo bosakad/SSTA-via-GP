@@ -1,7 +1,7 @@
 import numpy
 import numpy as np
-from gateSizing import histogramGenerator
-from randomVariableHist import RandomVariable
+import histogramGenerator
+from randomVariableHist_Numpy import RandomVariable
 import matplotlib.pyplot as plt
 
 

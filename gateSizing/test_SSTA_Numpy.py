@@ -1,12 +1,11 @@
 import numpy as np
 
-from gateSizing.node import Node
-from gateSizing import histogramGenerator
-from gateSizing import SSTA
+from Main.node import Node
+import histogramGenerator
+import SSTA
 import networkx as nx
-from randomVariableHist import RandomVariable
+from randomVariableHist_Numpy import RandomVariable
 import matplotlib.pyplot as plt
-import scipy.stats as stats
 
 from examples_monteCarlo.montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
 
