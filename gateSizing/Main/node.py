@@ -17,6 +17,8 @@ class Node:
     def setNextNodes(self, nextNodes):
         self.nextNodes = nextNodes
 
+    def appendNextNode(self, nextNodes):
+        self.nextNodes.extend(nextNodes)
 
     def setPrevDelays(self, prevDelays):
         self.prevDelays = prevDelays

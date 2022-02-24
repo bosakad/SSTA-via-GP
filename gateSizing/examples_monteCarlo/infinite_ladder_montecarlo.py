@@ -33,7 +33,7 @@ def MonteCarlo_inputs(input_means, input_stds, n_samples, distribution):
 		# get the data for input nodes
 		for i in range(len(input_means)):
 			montecarlo[i] = np.random.normal(input_means[i], input_stds[i], n_samples)
-	        
+
 	if distribution == 'LogNormal':
 	    # get the data for input nodes
 	    for i in range(len(input_means)):
@@ -122,10 +122,10 @@ def main():
 
 	results = get_moments_from_simulations(nodes_simulation)
 
-	# print(
-	# 	tabulate(results, headers=["Mean", "std"]
-	# 	)
-	# 	)
+	print(
+		tabulate(results, headers=["Mean", "std"]
+		)
+		)
 
 
 
