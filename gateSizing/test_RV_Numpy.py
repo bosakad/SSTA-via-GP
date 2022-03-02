@@ -2,7 +2,7 @@ import numpy
 import numpy as np
 import histogramGenerator
 from randomVariableHist_Numpy import RandomVariable
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 
@@ -616,7 +616,7 @@ def testMAX_QUAD_FORMULA_UNARY(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 20
-    numberOfUnaries = 40
+    numberOfUnaries = 800
 
     # DESIRED
 
@@ -633,8 +633,6 @@ def testMAX_QUAD_FORMULA_UNARY(dec: int):
 
     max2 = rv3.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)
     actual = [max2.mean, max2.std]
-
-    print(max2.bins)
 
     # TESTING
 
@@ -690,7 +688,7 @@ def testMAX_QUAD_FORMULA_UNARY2(dec: int):
     return None
 
 
-def testMAX_Convolution_UNARY(dec: int):
+def test_Convolution_UNARY(dec: int):
 
     mu1 = 22.98553396
     sigma1 = 2.76804456
@@ -701,8 +699,8 @@ def testMAX_Convolution_UNARY(dec: int):
     interval = (-10, 50)
 
     numberOfSamples = 2000000
-    numberOfBins = 200
-    numberOfUnaries = 500
+    numberOfBins = 20
+    numberOfUnaries = 800
 
     # DESIRED
 
@@ -754,11 +752,10 @@ if __name__ == "__main__":
 
     # testConvolutionNaive(1)
     # testMAX_QUAD_FORMULA(3)
-    testMAX_QUAD_FORMULA_UNARY(3)
+    # testMAX_QUAD_FORMULA_UNARY(3)
+    test_Convolution_UNARY(3)
 
-    # testMAX_QUAD_FORMULA_UNIFIED2(3)
-    # testMAX_Convolution_UNIFIED(4)
-
+    # testMAX_Convolution_UNARY(2)
 
 
     print("All tests passed!")

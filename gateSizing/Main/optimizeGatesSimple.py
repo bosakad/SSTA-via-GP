@@ -142,8 +142,10 @@ def getDelaySSTA():
                sum += ((xs[gate])[bin])[unary]
 
     print(sum)
+    obj = cp.Variable(pos=True)
+    constr = [ obj >= sum ]
 
-    return sum, []
+    return obj, constr
 
 
 def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, maxArea, maxPower, loadCapacitances,
@@ -160,7 +162,7 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
     pathDelays = getPathDelays(gateDelays)
     circuitDelay = getMaximumDelay(pathDelays)
 
-    # circuitDelay, otherConstr = getDelaySSTA()
+    # circuitDelay, otherConstr = getDelaySSTA() # test
 
 
     # computing the constraints
@@ -171,6 +173,7 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
     # formulating GGP
 
     constraints = [totalPower <= maxPower, totalArea <= maxArea]
+    # constraints.extend(otherConstr)   # test
     objective = cp.Minimize(circuitDelay)
 
     prob = cp.Problem(objective, constraints)

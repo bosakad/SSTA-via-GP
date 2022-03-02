@@ -219,8 +219,9 @@ class RandomVariable:
         for i in range(0, numberOfBins):
             for j in range(0, i + 1):
 
-                for unary in range(0, numberOfUnaries):
-                    maximum[i, unary] += binMatrix1[i, unary] * binMatrix2[j, unary]         # simple, non-vectorized
+                for unary in range(0, numberOfUnaries):              # simple, non-vectorized
+                    for unary2 in range(0, numberOfUnaries):
+                        maximum[i, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]         # simple, non-vectorized
 
                     # for unaryInd in range(0, numberOfUnaries):
                     #     if maximum[i, unaryInd] == 0:
@@ -236,12 +237,13 @@ class RandomVariable:
             for j in range(i + 1, numberOfBins):
 
                 for unary in range(0, numberOfUnaries):                   # simple, non-vectorized
-                    # maximum[j, unary] += binMatrix1[i, unary] * binMatrix2[j, unary]
+                    for unary2 in range(0, numberOfUnaries):
+                        maximum[j, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]
 
-                    for unaryInd in range(0, numberOfUnaries):
-                        if maximum[j, unaryInd] == 0:
-                            maximum[j, unaryInd] = binMatrix1[i, unary] * binMatrix2[j, unary]
-                            break
+                    # for unaryInd in range(0, numberOfUnaries):
+                    #     if maximum[j, unaryInd] == 0:
+                    #         maximum[j, unaryInd] = binMatrix1[i, unary] * binMatrix2[j, unary]
+                    #         break
 
                 # maximum[j, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])      # simple, same but vectorized
 
@@ -271,7 +273,8 @@ class RandomVariable:
             for k in range(0, z + 1):
 
                 for unary in range(0, numberOfUnaries):
-                    convolution[z, unary] += f[k, unary] * g[z - k, unary]
+                    for unary2 in range(0, numberOfUnaries):
+                      convolution[z, unary] += f[k, unary] * g[z - k, unary2]
 
         # Deal With Edges
         self.cutBins_UNARY(self.edges, convolution)

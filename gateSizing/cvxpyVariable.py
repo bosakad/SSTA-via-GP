@@ -298,7 +298,7 @@ class RandomVariableCVXPY:
 
         return convolutionClass, ConvConstraints
 
-    def convolution_UNARY_NEW_MAX(self, secondVariable):
+    def convolution_UNARY_NEW_MAX(self, secondVariable, precise=False):
         """
         Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
         using the unary representation of bins - M 0/1-bins for each bin.
@@ -332,17 +332,32 @@ class RandomVariableCVXPY:
 
                 for unary in range(0, numberOfUnaries):
 
-                    # new variable - multiplication of x*y
-                    slackMult = cp.Variable(boolean=True)
-                    sumOfMultiplications[z] += slackMult
+                    if precise:
+                        for unary2 in range(0, numberOfUnaries):
+                            # new variable - multiplication of x*y
+                            slackMult = cp.Variable(boolean=True)
+                            sumOfMultiplications[z] += slackMult
 
-                    # help constraints
-                    x = (x1[k])[unary]
-                    y = (x2[z-k])[unary]
+                            # help constraints
+                            x = (x1[k])[unary]
+                            y = (x2[z - k])[unary2]
 
-                    ConvConstraints.append( slackMult <= x          )
-                    ConvConstraints.append( slackMult <= y          )
-                    ConvConstraints.append( slackMult >= x + y - 1  )
+                            ConvConstraints.append(slackMult <= x)
+                            ConvConstraints.append(slackMult <= y)
+                            ConvConstraints.append(slackMult >= x + y - 1)
+                    else:
+                        # new variable - multiplication of x*y
+                        slackMult = cp.Variable(boolean=True)
+                        sumOfMultiplications[z] += slackMult
+
+                        # help constraints
+                        x = (x1[k])[unary]
+                        y = (x2[z - k])[unary]
+
+                        ConvConstraints.append(slackMult <= x)
+                        ConvConstraints.append(slackMult <= y)
+                        ConvConstraints.append(slackMult >= x + y - 1)
+
 
 
         # cut edges
@@ -362,10 +377,10 @@ class RandomVariableCVXPY:
 
         # symmetry constraints
 
-        for bin in range(0, numberOfBins):
-            for unary in range(0, numberOfUnaries - 1):
-                ConvConstraints.append(
-                    (convolution[bin])[unary] >= (convolution[bin])[unary + 1])  # set lower constr.
+        # for bin in range(0, numberOfBins):
+        #     for unary in range(0, numberOfUnaries - 1):
+        #         ConvConstraints.append(
+        #             (convolution[bin])[unary] >= (convolution[bin])[unary + 1])  # set lower constr.
 
 
         convolutionClass = RandomVariableCVXPY(convolution, self.edges)
@@ -425,7 +440,7 @@ class RandomVariableCVXPY:
 
         return convolutionClass, ConvConstraints
 
-    def maximum_QUAD_UNARY_NEW_MAX(self, secondVariable):
+    def maximum_QUAD_UNARY_NEW_MAX(self, secondVariable, precise=False):
         """
         Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
         using the 'quadratic' algorithm and unary representation of bins - M 0/1-bins for each bin.
@@ -440,6 +455,7 @@ class RandomVariableCVXPY:
 
         x1 = self.bins
         x2 = secondVariable.bins
+
 
         numberOfBins = len(x1.values())
         numberOfUnaries = len(x1[0].values())
@@ -457,17 +473,32 @@ class RandomVariableCVXPY:
 
                 for unary in range(0, numberOfUnaries):
 
-                    # new variable - multiplication of x*y
-                    slackMult = cp.Variable(boolean=True)
-                    sumOfMultiplications[i] += slackMult
+                    if precise:
+                        for unary2 in range(0, numberOfUnaries):
+                            # new variable - multiplication of x*y
+                            slackMult = cp.Variable(boolean=True)
+                            sumOfMultiplications[i] += slackMult
 
-                    # help constraints
-                    x = (x1[i])[unary]
-                    y = (x2[j])[unary]
+                            # help constraints
+                            x = (x1[i])[unary]
+                            y = (x2[j])[unary2]
 
-                    MaxConstraints.append(  slackMult <= x          )
-                    MaxConstraints.append(  slackMult <= y          )
-                    MaxConstraints.append(  slackMult >= x + y - 1  )      # driving constr.
+                            MaxConstraints.append(slackMult <= x)
+                            MaxConstraints.append(slackMult <= y)
+                            MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
+                    else:
+                        # new variable - multiplication of x*y
+                        slackMult = cp.Variable(boolean=True)
+                        sumOfMultiplications[i] += slackMult
+
+                        # help constraints
+                        x = (x1[i])[unary]
+                        y = (x2[j])[unary]
+
+                        MaxConstraints.append(slackMult <= x)
+                        MaxConstraints.append(slackMult <= y)
+                        MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
+
 
 
         # i < j
@@ -475,19 +506,31 @@ class RandomVariableCVXPY:
             for j in range(i+1, numberOfBins):
 
                 for unary in range(0, numberOfUnaries):
+                    if precise:
+                        for unary2 in range(0, numberOfUnaries):
+                            # new variable - multiplication of x*y
+                            slackMult = cp.Variable(boolean=True)
+                            sumOfMultiplications[j] += slackMult
 
-                    # new variable - multiplication of x*y
-                    slackMult = cp.Variable(boolean=True)
-                    sumOfMultiplications[j] += slackMult
+                            # help constraints
+                            x = (x1[i])[unary]
+                            y = (x2[j])[unary2]
 
-                    # help constraints
-                    x = (x1[i])[unary]
-                    y = (x2[j])[unary]
+                            MaxConstraints.append(slackMult <= x)
+                            MaxConstraints.append(slackMult <= y)
+                            MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
+                    else:
+                        # new variable - multiplication of x*y
+                        slackMult = cp.Variable(boolean=True)
+                        sumOfMultiplications[j] += slackMult
 
-                    MaxConstraints.append(  slackMult <= x          )
-                    MaxConstraints.append(  slackMult <= y          )
-                    MaxConstraints.append(  slackMult >= x + y - 1  )  # driving constr.
+                        # help constraints
+                        x = (x1[i])[unary]
+                        y = (x2[j])[unary]
 
+                        MaxConstraints.append(slackMult <= x)
+                        MaxConstraints.append(slackMult <= y)
+                        MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
 
         maximum = {}
         # introducing constraint for maximum
@@ -502,10 +545,10 @@ class RandomVariableCVXPY:
             MaxConstraints.append(  sumOfNewVariables <= numberOfUnaries             )
 
         # symmetry constraints
-        for bin in range(0, numberOfBins):
-            for unary in range(0, numberOfUnaries - 1):
-                MaxConstraints.append(
-                    (maximum[bin])[unary] >= (maximum[bin])[unary + 1])  # set lower constr.
+        # for bin in range(0, numberOfBins):
+        #     for unary in range(0, numberOfUnaries - 1):
+        #         MaxConstraints.append(
+        #             (maximum[bin])[unary] >= (maximum[bin])[unary + 1])  # set lower constr.
 
 
 

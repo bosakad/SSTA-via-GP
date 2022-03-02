@@ -131,9 +131,11 @@ def test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec: int):
     test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
 
-    max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
-    # max1 = test1.maxOfDistributionsFORM(test2)
+    # max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
+    max1 = test1.maxOfDistributionsFORM(test2)
     desired = [max1.mean, max1.std]
+
+    print(desired)
 
     # ACTUAL
 
@@ -157,7 +159,7 @@ def test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec: int):
 
     RV1 = RandomVariableCVXPY(x1, rv1.edges)
     RV2 = RandomVariableCVXPY(x2, rv1.edges)
-    maximum, constr = RV1.maximum_QUAD_UNARY_NEW_MAX(RV2)
+    maximum, constr = RV1.maximum_QUAD_UNARY_NEW_MAX(RV2, precise=False)
     maximum = maximum.bins
 
         # FORMULATE
@@ -206,7 +208,6 @@ def test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec: int):
         for unary in range(0, numberOfUnaries):
             maxBins[bin, unary] = (maximum[bin])[unary].value
 
-    print(maxBins)
 
     edges = np.linspace(interval[0], interval[1], numberOfBins + 1)
     maxRV = RandomVariable(maxBins, edges, unary=True)
@@ -214,6 +215,7 @@ def test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec: int):
 
 
     actual = [maxRV.mean, maxRV.std]
+    print(actual)
 
     # TESTING
 
@@ -350,7 +352,7 @@ def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 10
-    numberOfUnaries = 5
+    numberOfUnaries = 12
 
 
     # DESIRED
@@ -364,8 +366,8 @@ def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
     # max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNARY(rv2)
     max1 = test1.convolutionOfTwoVarsShift(test2)
     desired = [max1.mean, max1.std]
-
-    print(max1.bins)
+    #
+    print(desired)
 
     # ACTUAL
         # init
@@ -388,7 +390,7 @@ def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
 
         # GET obj. function and constr
 
-    convolution, constr = RV1.convolution_UNARY_NEW_MAX(RV2)
+    convolution, constr = RV1.convolution_UNARY_NEW_MAX(RV2, precise=True)
     convolution = convolution.bins
 
         # FORMULATE
@@ -410,17 +412,17 @@ def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
             constr.append( (x2[bin])[unary] <= rv2.bins[bin, unary] )    # set lower constr.
 
     # symmetry constraints
-    for bin in range(0, numberOfBins):
-        for unary in range(0, numberOfUnaries - 1):
-            constr.append((x2[bin])[unary] >= (x2[bin])[unary + 1])  # set lower constr.
+    # for bin in range(0, numberOfBins):
+    #     for unary in range(0, numberOfUnaries - 1):
+    #         constr.append((x2[bin])[unary] >= (x2[bin])[unary + 1])  # set lower constr.
+    #
+    # for bin in range(0, numberOfBins):
+    #     for unary in range(0, numberOfUnaries - 1):
+    #         constr.append((x1[bin])[unary] >= (x1[bin])[unary + 1])  # set lower constr.
 
-    for bin in range(0, numberOfBins):
-        for unary in range(0, numberOfUnaries - 1):
-            constr.append((x1[bin])[unary] >= (x1[bin])[unary + 1])  # set lower constr.
-
-    for bin in range(0, numberOfBins):
-        for unary in range(0, numberOfUnaries - 1):
-            constr.append((convolution[bin])[unary] >= (convolution[bin])[unary + 1])  # set lower constr.
+    # for bin in range(0, numberOfBins):
+    #     for unary in range(0, numberOfUnaries - 1):
+    #         constr.append((convolution[bin])[unary] >= (convolution[bin])[unary + 1])  # set lower constr.
 
         # solve
     objective = cp.Maximize( sum )

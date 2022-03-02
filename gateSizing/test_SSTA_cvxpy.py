@@ -187,8 +187,8 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
 
     numberOfGates = 5
 
-    numberOfBins = 10
-    numberOfUnaries = 5
+    numberOfBins = 15
+    numberOfUnaries = 10
 
     binsInterval = (-5, 40)
 

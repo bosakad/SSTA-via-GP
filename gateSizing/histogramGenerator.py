@@ -49,12 +49,14 @@ def get_gauss_bins_UNARY(mu: float, sigma: float, numberOfBins: int, numberOfSam
     data, edges = np.histogram(s, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data))
 
+    # print(dataNorm)
+
     finalBins = np.zeros((numberOfBins, numberOfUnaries))
 
 
     for bin in range(0, numberOfBins):
 
-        numberOfOnes = int(math.floor(dataNorm[bin] * numberOfUnaries))
+        numberOfOnes = math.floor(dataNorm[bin] * numberOfUnaries)
 
         finalBins[bin, :numberOfOnes] = 1
 

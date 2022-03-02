@@ -5,7 +5,7 @@ import histogramGenerator
 import SSTA
 import networkx as nx
 from randomVariableHist_Numpy import RandomVariable
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 from examples_monteCarlo.montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
 
