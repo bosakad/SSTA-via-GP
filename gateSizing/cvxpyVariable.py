@@ -298,7 +298,7 @@ class RandomVariableCVXPY:
 
         return convolutionClass, ConvConstraints
 
-    def convolution_UNARY_NEW_MAX(self, secondVariable, precise=False):
+    def convolution_UNARY_NEW_MAX(self, secondVariable, precise=False, withSymmetryConstr=False):
         """
         Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
         using the unary representation of bins - M 0/1-bins for each bin.
@@ -376,11 +376,12 @@ class RandomVariableCVXPY:
             ConvConstraints.append(sumOfNewVariables <= numberOfUnaries)
 
         # symmetry constraints
+        if withSymmetryConstr:
+            for bin in range(0, numberOfBins):
+                for unary in range(0, numberOfUnaries - 1):
+                    ConvConstraints.append(
+                        (convolution[bin])[unary] >= (convolution[bin])[unary + 1])  # set lower constr.
 
-        # for bin in range(0, numberOfBins):
-        #     for unary in range(0, numberOfUnaries - 1):
-        #         ConvConstraints.append(
-        #             (convolution[bin])[unary] >= (convolution[bin])[unary + 1])  # set lower constr.
 
 
         convolutionClass = RandomVariableCVXPY(convolution, self.edges)
@@ -440,7 +441,7 @@ class RandomVariableCVXPY:
 
         return convolutionClass, ConvConstraints
 
-    def maximum_QUAD_UNARY_NEW_MAX(self, secondVariable, precise=False):
+    def maximum_QUAD_UNARY_NEW_MAX(self, secondVariable, precise=False, withSymmetryConstr=False):
         """
         Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
         using the 'quadratic' algorithm and unary representation of bins - M 0/1-bins for each bin.
@@ -545,10 +546,13 @@ class RandomVariableCVXPY:
             MaxConstraints.append(  sumOfNewVariables <= numberOfUnaries             )
 
         # symmetry constraints
-        # for bin in range(0, numberOfBins):
-        #     for unary in range(0, numberOfUnaries - 1):
-        #         MaxConstraints.append(
-        #             (maximum[bin])[unary] >= (maximum[bin])[unary + 1])  # set lower constr.
+        if withSymmetryConstr:
+            for bin in range(0, numberOfBins):
+                for unary in range(0, numberOfUnaries - 1):
+                    MaxConstraints.append(
+                        (maximum[bin])[unary] >= (maximum[bin])[unary + 1])  # set lower constr.
+
+
 
 
 

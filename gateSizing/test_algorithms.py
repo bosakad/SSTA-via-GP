@@ -9,12 +9,12 @@ import numpy as np
 def testAlgorithms():
 
         # number of testing
-    numberOfIterations = 4
+    numberOfIterations = 3
     step = 2
 
     numberOfGatesStart = 10
-    numberOfBins = 10
-    numberOfUnaries = 10
+    numberOfBins = 5
+    numberOfUnaries = 2
 
     interval = (-8, 35)
 
@@ -24,39 +24,6 @@ def testAlgorithms():
     rvs_MonteCarlo = np.zeros((numberOfIterations, 2))
 
     results = {}
-
-
-
-    print("NON-PRECISE\n\n")
-        # test non-precise
-    for iter in range(0, numberOfIterations):
-        print(str(iter) + ". iteration: \n\n")
-
-            # calculating
-        numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval, precise=False)
-
-            # saving values
-        rvs_nonPrecise[iter, 0] = lastGate[0]
-        rvs_nonPrecise[iter, 1] = lastGate[1]
-        results[(numGates, False)] = (numNonZeros, ObjVal)
-
-        # print results
-    print("\n\n" + str(results))
-
-    print("PRECISE\n\n")
-        # test precise
-    for iter in range(0, numberOfIterations):
-        print("\n\n" + str(iter) + ". iteration: \n\n")
-
-        numGates = numberOfGatesStart + iter*step
-        numNonZeros, ObjVal, lastGate = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval, precise=True)
-
-        # saving values
-        rvs_Precise[iter, 0] = lastGate[0]
-        rvs_Precise[iter, 1] = lastGate[1]
-        results[(numGates, True)] = (numNonZeros, ObjVal)
-
 
     # MonteCarlo
     for iter in range(0, numberOfIterations):
@@ -70,19 +37,59 @@ def testAlgorithms():
         rvs_MonteCarlo[iter, 1] = lastGate[1]
 
 
-    print("\nNON-PRECISE:\n")
+    print("NO SYMMETRY\n\n")
+        # test non-precise
+    for iter in range(0, numberOfIterations):
+        print(str(iter) + ". iteration: \n\n")
+
+            # calculating
+        numGates = numberOfGatesStart + iter * step
+        numNonZeros, ObjVal, lastGate = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
+                                                                 precise=False, withSymmetryConstr=False)
+
+            # saving values
+        rvs_nonPrecise[iter, 0] = lastGate[0]
+        rvs_nonPrecise[iter, 1] = lastGate[1]
+
+        error = np.sum(np.abs( rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :] ))
+        results[(numGates, False)] = (numNonZeros, ObjVal, error)
+
+        # print results
+    print("\n\n" + str(results))
+
+    print("SYMMETRY\n\n")
+        # test precise
+    for iter in range(0, numberOfIterations):
+        print("\n\n" + str(iter) + ". iteration: \n\n")
+
+        numGates = numberOfGatesStart + iter*step
+        numNonZeros, ObjVal, lastGate = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
+                                                                 precise=False, withSymmetryConstr=True)
+
+        # saving values
+        rvs_Precise[iter, 0] = lastGate[0]
+        rvs_Precise[iter, 1] = lastGate[1]
+
+        error = np.sum(np.abs( rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :] ))
+        results[(numGates, True)] = (numNonZeros, ObjVal, error)
+
+
+
+
+
+    print("\nNON-symmetry:\n")
     print(rvs_nonPrecise)
 
-    print("\nPRECISE:\n")
+    print("\nsymmetry:\n")
     print(rvs_Precise)
 
     print("\nGROUND-TRUTH:\n")
     print(rvs_MonteCarlo)
 
-    print("\nNON-PRECISE DIFF:\n")
+    print("\n no symmetry DIFF:\n")
     print(np.abs(rvs_nonPrecise - rvs_MonteCarlo))
 
-    print("\nPRECISE DIFF:\n")
+    print("\nsymmetry DIFF:\n")
     print(np.abs(rvs_Precise - rvs_MonteCarlo) )
 
 

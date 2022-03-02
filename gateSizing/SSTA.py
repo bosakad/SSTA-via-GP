@@ -7,7 +7,7 @@ import cvxpy as cp
 import cvxpyVariable
 
 
-def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, precise=False) -> [Node]:
+def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, precise=False, withSymmetryConstr=False) -> [Node]:
     """
     Compute circuit delay using PDFs algorithm
     Function executes the algorithm for finding out the PDF of a circuit delay.
@@ -19,11 +19,11 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, precise=F
     """
 
     # pointer to a max and convolution functions
-    if cvxpy and unary:       MaximumF = maxOfDistributionsCVXPY_UNARY(precise)
+    if cvxpy and unary:       MaximumF = maxOfDistributionsCVXPY_UNARY(precise, withSymmetryConstr)
     elif cvxpy and not unary: MaximumF = maxOfDistributionsCVXPY_McCormick
     elif not cvxpy and unary: MaximumF = maxOfDistributionsUNARY
     else:                     MaximumF = maxOfDistributionsFORM
-    if cvxpy and unary:       ConvolutionF = Convolution_UNARY(precise)
+    if cvxpy and unary:       ConvolutionF = Convolution_UNARY(precise, withSymmetryConstr)
     elif cvxpy and not unary: ConvolutionF = Convolution_McCormick
     elif not cvxpy and unary: ConvolutionF = RandomVariable.convolutionOfTwoVarsNaiveSAME_UNARY
     else:                     ConvolutionF = RandomVariable.convolutionOfTwoVarsShift
@@ -93,7 +93,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, precise=F
 
 
 
-def Convolution_UNARY(precise=False):
+def Convolution_UNARY(precise=False, withSymmetryConstr=False):
     """
     Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.
 
@@ -103,7 +103,7 @@ def Convolution_UNARY(precise=False):
     """
 
     def convolutionF(x1: cvxpyVariable.RandomVariableCVXPY, x2: cvxpyVariable.RandomVariableCVXPY):
-        return x1.convolution_UNARY_NEW_MAX(x2, precise=precise)
+        return x1.convolution_UNARY_NEW_MAX(x2, precise=precise, withSymmetryConstr=withSymmetryConstr)
 
     return convolutionF
 
@@ -119,7 +119,7 @@ def Convolution_McCormick(x1: cvxpyVariable.RandomVariableCVXPY,
 
     return x1.convolution_McCormick(x2)
 
-def maxOfDistributionsCVXPY_UNARY(precise=False) -> cp.Variable:
+def maxOfDistributionsCVXPY_UNARY(precise=False, withSymmetryConstr=False) -> cp.Variable:
     """
     Calculates maximum of an array of PDFs of cvxpy variable
 
@@ -131,7 +131,7 @@ def maxOfDistributionsCVXPY_UNARY(precise=False) -> cp.Variable:
     def maximumF(delays: [cvxpyVariable.RandomVariableCVXPY]):
         size = len(delays)
         for i in range(0, size - 1):
-            newRV = delays[i].maximum_QUAD_UNARY_NEW_MAX(delays[i + 1], precise=precise)
+            newRV = delays[i].maximum_QUAD_UNARY_NEW_MAX(delays[i + 1], precise=precise, withSymmetryConstr=withSymmetryConstr)
             delays[i + 1] = newRV
 
         maximum = delays[-1]

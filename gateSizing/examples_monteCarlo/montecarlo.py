@@ -184,11 +184,11 @@ def main():
     # print(f'The mean delay is {np.mean(maxdelay)}')
     # print(f'The std of a delay is {np.std(maxdelay)}')
 
-    _ = plt.hist(maxdelay, bins=2000, density='PDF', alpha=0.7)
-    plt.ylabel('PDF of delay', size=14)
-    plt.xlabel('time', size=14)
-    plt.title('Histogram of the MAX delay', size=16)
-    plt.show()
+    # _ = plt.hist(maxdelay, bins=2000, density='PDF', alpha=0.7)
+    # plt.ylabel('PDF of delay', size=14)
+    # plt.xlabel('time', size=14)
+    # plt.title('Histogram of the MAX delay', size=16)
+    # plt.show()
 
 
 if __name__ == "__main__":
