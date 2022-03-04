@@ -56,11 +56,11 @@ def plotNonzeros():
         ax.label_outer()
 
     # set legend
-    axs[0].legend(["Precise", "Less-Precise"])
-    axs[1].legend(["Precise", "Less-Precise"])
+    axs[0].legend(["Without constraints", "With constraints"])
+    axs[1].legend(["Without constraints", "With constraints"])
 
-    plt.show()
-
+    # plt.show()
+    plt.savefig("../Inputs/scaling.jpeg", dpi=500)
 
 if __name__ == "__main__":
     plotNonzeros()

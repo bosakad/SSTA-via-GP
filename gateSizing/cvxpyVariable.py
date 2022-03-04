@@ -533,6 +533,7 @@ class RandomVariableCVXPY:
                         MaxConstraints.append(slackMult <= y)
                         MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
 
+
         maximum = {}
         # introducing constraint for maximum
         for i in range(0, numberOfBins):
