@@ -441,6 +441,113 @@ class RandomVariableCVXPY:
 
         return convolutionClass, ConvConstraints
 
+    def maximum_FORM_UNARY_NEW_MAX(self, secondVariable, precise=False, withSymmetryConstr=False):
+        """
+        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+        using the 'formula' algorithm and unary representation of bins - M 0/1-bins for each bin.
+        IMPORTANT:
+                WORKS ONLY FOR MAXIMIZATION PROBLEM
+
+        :param self: class RandomVariableCVXPY
+        :param secondVariable: class RandomVariableCVXPY
+        :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
+        :return MaxConstraints: python array with inequalities - for computing the maximum
+        """
+
+        f1 = self.bins
+        f2 = secondVariable.bins
+
+        numberOfBins = len(f1.values())
+        numberOfUnaries = len(f1[0].values())
+
+        MaxConstraints = []
+
+        # allocation of help cumsum and help maximum
+        F1_HelpSum = {}
+        F2_HelpSum = {}
+        maximumHelpSum = {}
+        for i in range(0, numberOfBins):
+            F1_HelpSum[i] = 0
+            F2_HelpSum[i] = 0
+            maximumHelpSum[i] = 0
+
+        # formulating the cumsum
+
+        for unary in range(0, numberOfUnaries):     # set the first array
+            F1_HelpSum[0] = f1[0][unary]
+            F2_HelpSum[0] = f2[0][unary]
+
+
+            # compute cumsum using dynamic programming
+        for bin in range(1, numberOfBins):
+            F1_HelpSum[bin] = F1_HelpSum[bin - 1]
+            F2_HelpSum[bin] = F2_HelpSum[bin - 1]
+            for unary in range(0, numberOfUnaries):
+                F1_HelpSum[bin] += f1[bin][unary]
+                F2_HelpSum[bin] += f2[bin][unary]
+
+            # set cumsum constraints
+        F1 = {}
+        F2 = {}
+        
+        for i in range(0, numberOfBins):
+            F1[i] = {}
+            F2[i] = {}
+            F1_newVariablesSum = 0
+            F2_newVariablesSum = 0
+            for unary in range(0, numberOfUnaries):
+                (F1[i])[unary] = cp.Variable(boolean=True)
+                (F2[i])[unary] = cp.Variable(boolean=True)
+                F1_newVariablesSum += (F1[i])[unary]
+                F2_newVariablesSum += (F2[i])[unary]
+
+            MaxConstraints.append(F1_newVariablesSum <= F1_HelpSum[i])  # as a max. problem
+            MaxConstraints.append(F1_newVariablesSum <= numberOfUnaries)
+
+            MaxConstraints.append(F2_newVariablesSum <= F2_HelpSum[i])  # as a max. problem
+            MaxConstraints.append(F2_newVariablesSum <= numberOfUnaries)
+
+        # computing the maximum
+
+
+        for bin in range(0, numberOfBins):
+            for unary in range(0, numberOfUnaries):
+
+                slackMult1 = cp.Variable(boolean=True)
+                slackMult2 = cp.Variable(boolean=True)
+
+                maximumHelpSum[bin] += slackMult1 + slackMult2
+
+                x1 = f1[bin][unary]
+                y1 = F2[bin][unary]
+                x2 = f2[bin][unary]
+                y2 = F1[bin][unary]
+
+                # multiplication constraints
+                MaxConstraints.append(slackMult1 <= x1)
+                MaxConstraints.append(slackMult1 <= y1)
+                MaxConstraints.append(slackMult1 >= x1 + y1 - 1)  # driving constr.
+
+                MaxConstraints.append(slackMult2 <= x2)
+                MaxConstraints.append(slackMult2 <= y2)
+                MaxConstraints.append(slackMult2 >= x2 + y2 - 1)  # driving constr.
+
+        # introducing constraint for maximum
+        maximum = {}
+        for i in range(0, numberOfBins):
+            maximum[i] = {}
+            max_newVariablesSum = 0
+            for unary in range(0, numberOfUnaries):
+                (maximum[i])[unary] = cp.Variable(boolean=True)
+                max_newVariablesSum += (maximum[i])[unary]
+
+            MaxConstraints.append(max_newVariablesSum <= maximumHelpSum[i])  # as a max. problem
+            MaxConstraints.append(max_newVariablesSum <= numberOfUnaries)
+
+        maximumClass = RandomVariableCVXPY(maximum, self.edges)
+
+        return maximumClass, MaxConstraints
+
     def maximum_QUAD_UNARY_NEW_MAX(self, secondVariable, precise=False, withSymmetryConstr=False):
         """
         Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
@@ -456,7 +563,6 @@ class RandomVariableCVXPY:
 
         x1 = self.bins
         x2 = secondVariable.bins
-
 
         numberOfBins = len(x1.values())
         numberOfUnaries = len(x1[0].values())

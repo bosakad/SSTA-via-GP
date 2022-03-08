@@ -71,6 +71,45 @@ class RandomVariable:
         maxDelay = RandomVariable(maxBins, self.edges)
         return maxDelay
 
+    def maxOfDistributionsFORM_UNARY(self, secondVariable):
+        """
+        Maximum of 2 distribution functions using formula using binary notation
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :return maxDelay: random variable class, elementwise maximum of 2 histograms
+        """
+        self.uniteEdges(secondVariable)
+        f1 = self.bins
+        f2 = secondVariable.bins
+
+        numberOfBins, numberOfUnaries = self.bins.shape
+        maximum = np.zeros((numberOfBins, numberOfUnaries))
+
+            # compute cumsum
+        F1 = np.zeros((numberOfBins, numberOfUnaries))
+        F2 = np.zeros((numberOfBins, numberOfUnaries))
+
+            # set the first array
+        for unary in range(0, numberOfUnaries):
+            F1[0, unary] = f1[0, unary]
+            F2[0, unary] = f2[0, unary]
+
+            # compute cumsum using dynamic programming
+        for bin in range(1, numberOfBins):
+        #     F2[bin, :] = np.sum(f2[:bin+1], axis=0)   # vectorized
+        #     F1[bin, :] = np.sum(f1[:bin+1], axis=0)
+            for unary in range(0, numberOfUnaries):
+                F1[bin, unary] = F1[bin - 1, unary] + f1[bin, unary]
+                F2[bin, unary] = F2[bin - 1, unary] + f2[bin, unary]
+
+
+        for bin in range(0, numberOfBins):
+            for unary in range(0, numberOfUnaries):
+
+                maximum[bin, unary] = f1[bin, unary] * F2[bin, unary] + f2[bin, unary] * F1[bin, unary]
+
+        return RandomVariable(maximum, self.edges, unary=True)
 
     def maxOfDistributionsFORM(self, secondVariable):
         """
@@ -81,7 +120,7 @@ class RandomVariable:
         :return maxDelay: random variable class, elementwise maximum of 2 histograms
         """
 
-        # n = self.bins.shape
+        # n = self.bins.shapemax1 = h3.maxOfDistributionsQUAD(h4)
         # diff = self.edges[1] - self.edges[0]
         # f1 = f1 / (np.sum(f1) * (self.edges[1] - self.edges[0]))
         # f2 = f2 / (np.sum(f2) * (self.edges[1] - self.edges[0]))
@@ -219,11 +258,12 @@ class RandomVariable:
         for i in range(0, numberOfBins):
             for j in range(0, i + 1):
 
-                for unary in range(0, numberOfUnaries):              # simple, non-vectorized
-                    for unary2 in range(0, numberOfUnaries):
-                        maximum[i, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]         # simple, non-vectorized
+                # for unary in range(0, numberOfUnaries):              # simple, non-vectorized
+                #     for unary2 in range(0, numberOfUnaries):
+                #         maximum[i, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]         # simple, non-vectorized
+                maximum[i, :] += binMatrix1[i, :] * binMatrix2[j, :]         # simple, non-vectorized
 
-                    # for unaryInd in range(0, numberOfUnaries):
+        # for unaryInd in range(0, numberOfUnaries):
                     #     if maximum[i, unaryInd] == 0:
                     #         maximum[i, unaryInd] += binMatrix1[i, unary] * binMatrix2[j, unary]
                     #         break
@@ -236,9 +276,10 @@ class RandomVariable:
         for i in range(0, numberOfBins):
             for j in range(i + 1, numberOfBins):
 
-                for unary in range(0, numberOfUnaries):                   # simple, non-vectorized
-                    for unary2 in range(0, numberOfUnaries):
-                        maximum[j, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]
+                # for unary in range(0, numberOfUnaries):                   # simple, non-vectorized
+                #     for unary2 in range(0, numberOfUnaries):
+                #         maximum[j, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]
+                maximum[j, :] += binMatrix1[i, :] * binMatrix2[j, :]
 
                     # for unaryInd in range(0, numberOfUnaries):
                     #     if maximum[j, unaryInd] == 0:
@@ -247,6 +288,7 @@ class RandomVariable:
 
                 # maximum[j, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])      # simple, same but vectorized
 
+        maximum = self.unarize(maximum)
 
         return RandomVariable(maximum, self.edges, unary=True)
 
@@ -272,9 +314,12 @@ class RandomVariable:
         for z in range(0, numberOfBins):
             for k in range(0, z + 1):
 
-                for unary in range(0, numberOfUnaries):
-                    for unary2 in range(0, numberOfUnaries):
-                      convolution[z, unary] += f[k, unary] * g[z - k, unary2]
+                # for unary in range(0, numberOfUnaries):
+                    # for unary2 in range(0, numberOfUnaries):
+                  # convolution[z, unary] += f[k, unary] * g [z - k, unary]
+                convolution[z, :] += f[k, :] * g[z - k, :]
+
+        convolution = self.unarize(convolution)
 
         # Deal With Edges
         self.cutBins_UNARY(self.edges, convolution)
@@ -459,6 +504,26 @@ class RandomVariable:
 
         return None
 
+    @staticmethod
+    def unarize(bins):
+        """
+            Make a non unarized histogram in the unary form
+        """
+
+
+        numberOfBins, numberOfUnaries = bins.shape
+        newBins = np.zeros((numberOfBins, numberOfUnaries))
+
+        for bin in range(0, numberOfBins):
+
+            sum = int(np.sum(bins[bin, :]))
+
+            if sum >= numberOfUnaries:
+                newBins[bin, :] = 1
+            else:
+                newBins[bin, :sum] = 1
+
+        return newBins
 
     @staticmethod
     def uniteEdgesNaive(edges1, edges2, convolution, g):
@@ -623,11 +688,12 @@ class RandomVariable:
         numberOfUnaries = binMatrix.shape[1]
 
         estimatedBins = np.zeros(numberOfBins)
+        norm = np.sum(binMatrix)
 
             # calculate prob. of each bin
         for bin in range(0, numberOfBins):
             numberOfOnes = np.sum( binMatrix[bin, :] )
-            estimatedBins[bin] = numberOfOnes / numberOfUnaries
+            estimatedBins[bin] = numberOfOnes / norm
 
         midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])  # midpoints of the edges of hist.
         mean = np.average(midPoints, weights=estimatedBins)
@@ -650,10 +716,12 @@ class RandomVariable:
 
         estimatedBins = np.zeros(numberOfBins)
 
+        norm = np.sum(binMatrix)
+
         # calculate prob. of each bin
         for bin in range(0, numberOfBins):
             numberOfOnes = np.sum(binMatrix[bin, :])
-            estimatedBins[bin] = numberOfOnes / numberOfUnaries
+            estimatedBins[bin] = numberOfOnes / norm
 
         midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
         variance = np.average(np.square(midPoints - self.mean), weights=estimatedBins)

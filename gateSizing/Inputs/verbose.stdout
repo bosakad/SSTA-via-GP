@@ -1,19 +1,19 @@
 NO SYMMETRY
 
 
-0. iteration: 
+0. iteration:
 
 
 ===============================================================================
-                                     CVXPY                                     
-                                    v1.1.18                                    
+                                     CVXPY
+                                    v1.1.18
 ===============================================================================
 (CVXPY) Mar 06 04:58:01 PM: Your problem has 497200 variables, 1349680 constraints, and 0 parameters.
 (CVXPY) Mar 06 04:58:30 PM: It is compliant with the following grammars: DCP, DQCP
 (CVXPY) Mar 06 04:58:30 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
 (CVXPY) Mar 06 04:58:30 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
 -------------------------------------------------------------------------------
-                                  Compilation                                  
+                                  Compilation
 -------------------------------------------------------------------------------
 (CVXPY) Mar 06 04:59:14 PM: Compiling problem (target solver=GUROBI).
 (CVXPY) Mar 06 04:59:14 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
@@ -24,7 +24,7 @@ NO SYMMETRY
 (CVXPY) Mar 06 07:23:06 PM: Applying reduction GUROBI
 (CVXPY) Mar 06 07:23:14 PM: Finished problem compilation (took 8.684e+03 seconds).
 -------------------------------------------------------------------------------
-                                Numerical solver                               
+                                Numerical solver
 -------------------------------------------------------------------------------
 (CVXPY) Mar 06 07:23:14 PM: Invoking solver GUROBI  to obtain a solution.
 Using license file /mnt/appl/software/Gurobi/9.1.2-GCCcore-10.2.0/gurobi.lic
@@ -70,20 +70,20 @@ Root relaxation: objective -6.885000e+03, 15318 iterations, 0.27 seconds
 Explored 0 nodes (21373 simplex iterations) in 1.58 seconds
 Thread count was 32 (of 128 available processors)
 
-Solution count 2: -6885 0 
+Solution count 2: -6885 0
 No other solutions better than -6885
 
 Optimal solution found (tolerance 1.00e-02)
 Best objective -6.885000000000e+03, best bound -6.885000000000e+03, gap 0.0000%
 -------------------------------------------------------------------------------
-                                    Summary                                    
+                                    Summary
 -------------------------------------------------------------------------------
 (CVXPY) Mar 06 07:23:29 PM: Problem status: optimal
 (CVXPY) Mar 06 07:23:29 PM: Optimal value: 6.885e+03
 (CVXPY) Mar 06 07:23:29 PM: Compilation took 8.684e+03 seconds
 (CVXPY) Mar 06 07:23:29 PM: Solver (including time spent in interface) took 9.195e+00 seconds
 
- APRX. VALUES: 
+ APRX. VALUES:
 
 7.336666666666666 1.7095166633356407
 8.037244897959182 2.416852621300317
@@ -121,19 +121,19 @@ Best objective -6.885000000000e+03, best bound -6.885000000000e+03, gap 0.0000%
 16.018150684931502 7.191650640265552
 15.907805429864252 7.2515561321490205
 16.872549019607842 6.689770788927031
-1. iteration: 
+1. iteration:
 
 
 ===============================================================================
-                                     CVXPY                                     
-                                    v1.1.18                                    
+                                     CVXPY
+                                    v1.1.18
 ===============================================================================
 (CVXPY) Mar 06 07:26:14 PM: Your problem has 524800 variables, 1424640 constraints, and 0 parameters.
 (CVXPY) Mar 06 07:26:45 PM: It is compliant with the following grammars: DCP, DQCP
 (CVXPY) Mar 06 07:26:45 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
 (CVXPY) Mar 06 07:26:45 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
 -------------------------------------------------------------------------------
-                                  Compilation                                  
+                                  Compilation
 -------------------------------------------------------------------------------
 (CVXPY) Mar 06 07:27:32 PM: Compiling problem (target solver=GUROBI).
 (CVXPY) Mar 06 07:27:32 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
@@ -144,7 +144,7 @@ Best objective -6.885000000000e+03, best bound -6.885000000000e+03, gap 0.0000%
 (CVXPY) Mar 06 10:01:43 PM: Applying reduction GUROBI
 (CVXPY) Mar 06 10:01:52 PM: Finished problem compilation (took 9.307e+03 seconds).
 -------------------------------------------------------------------------------
-                                Numerical solver                               
+                                Numerical solver
 -------------------------------------------------------------------------------
 (CVXPY) Mar 06 10:01:52 PM: Invoking solver GUROBI  to obtain a solution.
 Parameter OutputFlag unchanged
@@ -189,20 +189,20 @@ H    0     0                    -7358.000000 -9068.0000  23.2%     -    1s
 Explored 0 nodes (22758 simplex iterations) in 1.64 seconds
 Thread count was 32 (of 128 available processors)
 
-Solution count 2: -7358 0 
+Solution count 2: -7358 0
 No other solutions better than -7358
 
 Optimal solution found (tolerance 1.00e-02)
 Best objective -7.358000000000e+03, best bound -7.358000000000e+03, gap 0.0000%
 -------------------------------------------------------------------------------
-                                    Summary                                    
+                                    Summary
 -------------------------------------------------------------------------------
 (CVXPY) Mar 06 10:02:07 PM: Problem status: optimal
 (CVXPY) Mar 06 10:02:07 PM: Optimal value: 7.358e+03
 (CVXPY) Mar 06 10:02:07 PM: Compilation took 9.307e+03 seconds
 (CVXPY) Mar 06 10:02:07 PM: Solver (including time spent in interface) took 9.665e+00 seconds
 
- APRX. VALUES: 
+ APRX. VALUES:
 
 7.049999999999999 1.6055941866822054
 7.91421568627451 2.4552527469730374
@@ -242,19 +242,19 @@ Best objective -7.358000000000e+03, best bound -7.358000000000e+03, gap 0.0000%
 16.5706937799043 6.8892576819728255
 16.35152582159624 7.007287497379387
 16.1875 7.095392104765625
-2. iteration: 
+2. iteration:
 
 
 ===============================================================================
-                                     CVXPY                                     
-                                    v1.1.18                                    
+                                     CVXPY
+                                    v1.1.18
 ===============================================================================
 (CVXPY) Mar 06 10:04:49 PM: Your problem has 552400 variables, 1499600 constraints, and 0 parameters.
 (CVXPY) Mar 06 10:05:20 PM: It is compliant with the following grammars: DCP, DQCP
 (CVXPY) Mar 06 10:05:20 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
 (CVXPY) Mar 06 10:05:20 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
 -------------------------------------------------------------------------------
-                                  Compilation                                  
+                                  Compilation
 -------------------------------------------------------------------------------
 (CVXPY) Mar 06 10:06:11 PM: Compiling problem (target solver=GUROBI).
 (CVXPY) Mar 06 10:06:11 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
@@ -265,7 +265,7 @@ Best objective -7.358000000000e+03, best bound -7.358000000000e+03, gap 0.0000%
 (CVXPY) Mar 07 12:58:54 AM: Applying reduction GUROBI
 (CVXPY) Mar 07 12:59:03 AM: Finished problem compilation (took 1.042e+04 seconds).
 -------------------------------------------------------------------------------
-                                Numerical solver                               
+                                Numerical solver
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 12:59:03 AM: Invoking solver GUROBI  to obtain a solution.
 Parameter OutputFlag unchanged
@@ -310,20 +310,20 @@ H    0     0                    -7822.000000 -9629.0000  23.1%     -    1s
 Explored 0 nodes (23502 simplex iterations) in 1.80 seconds
 Thread count was 32 (of 128 available processors)
 
-Solution count 2: -7822 0 
+Solution count 2: -7822 0
 No other solutions better than -7822
 
 Optimal solution found (tolerance 1.00e-02)
 Best objective -7.822000000000e+03, best bound -7.822000000000e+03, gap 0.0000%
 -------------------------------------------------------------------------------
-                                    Summary                                    
+                                    Summary
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 12:59:19 AM: Problem status: optimal
 (CVXPY) Mar 07 12:59:19 AM: Optimal value: 7.822e+03
 (CVXPY) Mar 07 12:59:19 AM: Compilation took 1.042e+04 seconds
 (CVXPY) Mar 07 12:59:19 AM: Solver (including time spent in interface) took 1.053e+01 seconds
 
- APRX. VALUES: 
+ APRX. VALUES:
 
 7.429411764705882 1.6257743696583675
 8.04956140350877 2.381399463366939
@@ -365,19 +365,19 @@ Best objective -7.822000000000e+03, best bound -7.822000000000e+03, gap 0.0000%
 16.044495412844032 7.218167905398808
 15.962727272727273 7.222012393822716
 15.853378378378379 7.280306713237552
-3. iteration: 
+3. iteration:
 
 
 ===============================================================================
-                                     CVXPY                                     
-                                    v1.1.18                                    
+                                     CVXPY
+                                    v1.1.18
 ===============================================================================
 (CVXPY) Mar 07 01:02:22 AM: Your problem has 580000 variables, 1574560 constraints, and 0 parameters.
 (CVXPY) Mar 07 01:02:55 AM: It is compliant with the following grammars: DCP, DQCP
 (CVXPY) Mar 07 01:02:55 AM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
 (CVXPY) Mar 07 01:02:55 AM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
 -------------------------------------------------------------------------------
-                                  Compilation                                  
+                                  Compilation
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 01:03:48 AM: Compiling problem (target solver=GUROBI).
 (CVXPY) Mar 07 01:03:48 AM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
@@ -388,7 +388,7 @@ Best objective -7.822000000000e+03, best bound -7.822000000000e+03, gap 0.0000%
 (CVXPY) Mar 07 04:20:36 AM: Applying reduction GUROBI
 (CVXPY) Mar 07 04:20:46 AM: Finished problem compilation (took 1.187e+04 seconds).
 -------------------------------------------------------------------------------
-                                Numerical solver                               
+                                Numerical solver
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 04:20:46 AM: Invoking solver GUROBI  to obtain a solution.
 Parameter OutputFlag unchanged
@@ -432,20 +432,20 @@ Root relaxation: objective -8.290000e+03, 17401 iterations, 0.31 seconds
 Explored 0 nodes (24745 simplex iterations) in 1.92 seconds
 Thread count was 32 (of 128 available processors)
 
-Solution count 2: -8290 0 
+Solution count 2: -8290 0
 No other solutions better than -8290
 
 Optimal solution found (tolerance 1.00e-02)
 Best objective -8.290000000000e+03, best bound -8.290000000000e+03, gap 0.0000%
 -------------------------------------------------------------------------------
-                                    Summary                                    
+                                    Summary
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 04:21:04 AM: Problem status: optimal
 (CVXPY) Mar 07 04:21:04 AM: Optimal value: 8.290e+03
 (CVXPY) Mar 07 04:21:04 AM: Compilation took 1.187e+04 seconds
 (CVXPY) Mar 07 04:21:04 AM: Solver (including time spent in interface) took 1.094e+01 seconds
 
- APRX. VALUES: 
+ APRX. VALUES:
 
 7.408333333333332 1.645640092222875
 8.04956140350877 2.381399463366939
@@ -489,19 +489,19 @@ Best objective -8.290000000000e+03, best bound -8.290000000000e+03, gap 0.0000%
 15.388260869565215 7.565741451738605
 16.872549019607842 6.689770788927031
 16.68345410628019 6.824995869940535
-4. iteration: 
+4. iteration:
 
 
 ===============================================================================
-                                     CVXPY                                     
-                                    v1.1.18                                    
+                                     CVXPY
+                                    v1.1.18
 ===============================================================================
 (CVXPY) Mar 07 04:24:06 AM: Your problem has 607600 variables, 1649520 constraints, and 0 parameters.
 (CVXPY) Mar 07 04:24:41 AM: It is compliant with the following grammars: DCP, DQCP
 (CVXPY) Mar 07 04:24:41 AM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
 (CVXPY) Mar 07 04:24:41 AM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
 -------------------------------------------------------------------------------
-                                  Compilation                                  
+                                  Compilation
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 04:25:37 AM: Compiling problem (target solver=GUROBI).
 (CVXPY) Mar 07 04:25:37 AM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
@@ -512,7 +512,7 @@ Best objective -8.290000000000e+03, best bound -8.290000000000e+03, gap 0.0000%
 (CVXPY) Mar 07 08:10:21 AM: Applying reduction GUROBI
 (CVXPY) Mar 07 08:10:31 AM: Finished problem compilation (took 1.355e+04 seconds).
 -------------------------------------------------------------------------------
-                                Numerical solver                               
+                                Numerical solver
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 08:10:31 AM: Invoking solver GUROBI  to obtain a solution.
 Parameter OutputFlag unchanged
@@ -557,20 +557,20 @@ H    0     0                    -8697.000000 -10708.000  23.1%     -    1s
 Explored 0 nodes (25883 simplex iterations) in 2.07 seconds
 Thread count was 32 (of 128 available processors)
 
-Solution count 2: -8697 0 
+Solution count 2: -8697 0
 No other solutions better than -8697
 
 Optimal solution found (tolerance 1.00e-02)
 Best objective -8.697000000000e+03, best bound -8.697000000000e+03, gap 0.0000%
 -------------------------------------------------------------------------------
-                                    Summary                                    
+                                    Summary
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 08:10:49 AM: Problem status: optimal
 (CVXPY) Mar 07 08:10:49 AM: Optimal value: 8.697e+03
 (CVXPY) Mar 07 08:10:49 AM: Compilation took 1.355e+04 seconds
 (CVXPY) Mar 07 08:10:49 AM: Solver (including time spent in interface) took 1.168e+01 seconds
 
- APRX. VALUES: 
+ APRX. VALUES:
 
 7.468055555555555 1.5879823317034953
 7.968636363636364 2.385506512737714
@@ -616,19 +616,19 @@ Best objective -8.697000000000e+03, best bound -8.697000000000e+03, gap 0.0000%
 16.074082568807338 7.160444932780659
 15.611946902654868 7.440165152250042
 15.388260869565215 7.565741451738605
-5. iteration: 
+5. iteration:
 
 
 ===============================================================================
-                                     CVXPY                                     
-                                    v1.1.18                                    
+                                     CVXPY
+                                    v1.1.18
 ===============================================================================
 (CVXPY) Mar 07 08:14:04 AM: Your problem has 635200 variables, 1724480 constraints, and 0 parameters.
 (CVXPY) Mar 07 08:14:41 AM: It is compliant with the following grammars: DCP, DQCP
 (CVXPY) Mar 07 08:14:41 AM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
 (CVXPY) Mar 07 08:14:41 AM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
 -------------------------------------------------------------------------------
-                                  Compilation                                  
+                                  Compilation
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 08:15:39 AM: Compiling problem (target solver=GUROBI).
 (CVXPY) Mar 07 08:15:39 AM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
@@ -639,7 +639,7 @@ Best objective -8.697000000000e+03, best bound -8.697000000000e+03, gap 0.0000%
 (CVXPY) Mar 07 12:19:43 PM: Applying reduction GUROBI
 (CVXPY) Mar 07 12:19:54 PM: Finished problem compilation (took 1.471e+04 seconds).
 -------------------------------------------------------------------------------
-                                Numerical solver                               
+                                Numerical solver
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 12:19:54 PM: Invoking solver GUROBI  to obtain a solution.
 Parameter OutputFlag unchanged
@@ -684,20 +684,20 @@ H    0     0                    -9169.000000 -11271.000  22.9%     -    1s
 Explored 0 nodes (29311 simplex iterations) in 2.16 seconds
 Thread count was 32 (of 128 available processors)
 
-Solution count 2: -9169 0 
+Solution count 2: -9169 0
 No other solutions better than -9169
 
 Optimal solution found (tolerance 1.00e-02)
 Best objective -9.169000000000e+03, best bound -9.169000000000e+03, gap 0.0000%
 -------------------------------------------------------------------------------
-                                    Summary                                    
+                                    Summary
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 12:20:13 PM: Problem status: optimal
 (CVXPY) Mar 07 12:20:13 PM: Optimal value: 9.169e+03
 (CVXPY) Mar 07 12:20:13 PM: Compilation took 1.471e+04 seconds
 (CVXPY) Mar 07 12:20:13 PM: Solver (including time spent in interface) took 1.230e+01 seconds
 
- APRX. VALUES: 
+ APRX. VALUES:
 
 7.502631578947367 1.552574151480333
 7.968636363636364 2.385506512737714
@@ -753,19 +753,19 @@ SYMMETRY
 
 
 
-0. iteration: 
+0. iteration:
 
 
 ===============================================================================
-                                     CVXPY                                     
-                                    v1.1.18                                    
+                                     CVXPY
+                                    v1.1.18
 ===============================================================================
 (CVXPY) Mar 07 12:22:32 PM: Your problem has 497200 variables, 1377040 constraints, and 0 parameters.
 (CVXPY) Mar 07 12:23:02 PM: It is compliant with the following grammars: DCP, DQCP
 (CVXPY) Mar 07 12:23:02 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
 (CVXPY) Mar 07 12:23:02 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
 -------------------------------------------------------------------------------
-                                  Compilation                                  
+                                  Compilation
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 12:23:49 PM: Compiling problem (target solver=GUROBI).
 (CVXPY) Mar 07 12:23:49 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
@@ -776,7 +776,7 @@ SYMMETRY
 (CVXPY) Mar 07 02:18:45 PM: Applying reduction GUROBI
 (CVXPY) Mar 07 02:18:54 PM: Finished problem compilation (took 6.952e+03 seconds).
 -------------------------------------------------------------------------------
-                                Numerical solver                               
+                                Numerical solver
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 02:18:54 PM: Invoking solver GUROBI  to obtain a solution.
 Parameter OutputFlag unchanged
@@ -824,20 +824,20 @@ H    0     0                    -6885.000000 -6888.0000  0.04%     -    2s
 Explored 0 nodes (17868 simplex iterations) in 2.24 seconds
 Thread count was 32 (of 128 available processors)
 
-Solution count 2: -6885 0 
+Solution count 2: -6885 0
 No other solutions better than -6885
 
 Optimal solution found (tolerance 1.00e-02)
 Best objective -6.885000000000e+03, best bound -6.885000000000e+03, gap 0.0000%
 -------------------------------------------------------------------------------
-                                    Summary                                    
+                                    Summary
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 02:19:10 PM: Problem status: optimal
 (CVXPY) Mar 07 02:19:10 PM: Optimal value: 6.885e+03
 (CVXPY) Mar 07 02:19:10 PM: Compilation took 6.952e+03 seconds
 (CVXPY) Mar 07 02:19:10 PM: Solver (including time spent in interface) took 1.035e+01 seconds
 
- APRX. VALUES: 
+ APRX. VALUES:
 
 7.336666666666666 1.7095166633356407
 8.037244897959182 2.416852621300317
@@ -877,19 +877,19 @@ Best objective -6.885000000000e+03, best bound -6.885000000000e+03, gap 0.0000%
 16.872549019607842 6.689770788927031
 
 
-1. iteration: 
+1. iteration:
 
 
 ===============================================================================
-                                     CVXPY                                     
-                                    v1.1.18                                    
+                                     CVXPY
+                                    v1.1.18
 ===============================================================================
 (CVXPY) Mar 07 02:22:03 PM: Your problem has 524800 variables, 1453520 constraints, and 0 parameters.
 (CVXPY) Mar 07 02:22:34 PM: It is compliant with the following grammars: DCP, DQCP
 (CVXPY) Mar 07 02:22:34 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
 (CVXPY) Mar 07 02:22:34 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
 -------------------------------------------------------------------------------
-                                  Compilation                                  
+                                  Compilation
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 02:23:24 PM: Compiling problem (target solver=GUROBI).
 (CVXPY) Mar 07 02:23:24 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
@@ -900,7 +900,7 @@ Best objective -6.885000000000e+03, best bound -6.885000000000e+03, gap 0.0000%
 (CVXPY) Mar 07 04:24:09 PM: Applying reduction GUROBI
 (CVXPY) Mar 07 04:24:18 PM: Finished problem compilation (took 7.304e+03 seconds).
 -------------------------------------------------------------------------------
-                                Numerical solver                               
+                                Numerical solver
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 04:24:18 PM: Invoking solver GUROBI  to obtain a solution.
 Parameter OutputFlag unchanged
@@ -948,20 +948,20 @@ H    0     0                    -7358.000000 -7362.0000  0.05%     -    2s
 Explored 0 nodes (19336 simplex iterations) in 2.40 seconds
 Thread count was 32 (of 128 available processors)
 
-Solution count 2: -7358 0 
+Solution count 2: -7358 0
 No other solutions better than -7358
 
 Optimal solution found (tolerance 1.00e-02)
 Best objective -7.358000000000e+03, best bound -7.358000000000e+03, gap 0.0000%
 -------------------------------------------------------------------------------
-                                    Summary                                    
+                                    Summary
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 04:24:35 PM: Problem status: optimal
 (CVXPY) Mar 07 04:24:35 PM: Optimal value: 7.358e+03
 (CVXPY) Mar 07 04:24:35 PM: Compilation took 7.304e+03 seconds
 (CVXPY) Mar 07 04:24:35 PM: Solver (including time spent in interface) took 1.077e+01 seconds
 
- APRX. VALUES: 
+ APRX. VALUES:
 
 7.049999999999999 1.6055941866822054
 7.91421568627451 2.4552527469730374
@@ -1003,19 +1003,19 @@ Best objective -7.358000000000e+03, best bound -7.358000000000e+03, gap 0.0000%
 16.1875 7.095392104765625
 
 
-2. iteration: 
+2. iteration:
 
 
 ===============================================================================
-                                     CVXPY                                     
-                                    v1.1.18                                    
+                                     CVXPY
+                                    v1.1.18
 ===============================================================================
 (CVXPY) Mar 07 04:27:35 PM: Your problem has 552400 variables, 1530000 constraints, and 0 parameters.
 (CVXPY) Mar 07 04:28:08 PM: It is compliant with the following grammars: DCP, DQCP
 (CVXPY) Mar 07 04:28:08 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
 (CVXPY) Mar 07 04:28:08 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
 -------------------------------------------------------------------------------
-                                  Compilation                                  
+                                  Compilation
 -------------------------------------------------------------------------------
 (CVXPY) Mar 07 04:29:00 PM: Compiling problem (target solver=GUROBI).
 (CVXPY) Mar 07 04:29:00 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI

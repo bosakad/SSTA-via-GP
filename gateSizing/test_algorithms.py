@@ -1,6 +1,7 @@
 import test_infiniteLadder
 import numpy as np
 
+
 """
     This Module includes functions that test infiniteLadder on on 2 algorithms and dependant on number of gates.
     Indicator is number of nonzero constraints dependant on number of gates
@@ -27,7 +28,6 @@ def testAlgorithms():
 
     # MonteCarlo
     for iter in range(0, numberOfIterations):
-        print("\n\n" + str(iter) + ". iteration: \n\n")
 
         numGates = numberOfGatesStart + iter * step
         lastGate = test_infiniteLadder.MonteCarlo(numGates)
@@ -51,8 +51,8 @@ def testAlgorithms():
         rvs_nonPrecise[iter, 0] = lastGate[0]
         rvs_nonPrecise[iter, 1] = lastGate[1]
 
-        error = np.sum(np.abs( rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :] ))
-        results[(numGates, False)] = (numNonZeros, ObjVal, error)
+        error = np.abs( rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :] )
+        results[(numGates, False)] = (numNonZeros, ObjVal, error[0], error[1])
 
         # print results
     print("\n\n" + str(results))
@@ -70,8 +70,8 @@ def testAlgorithms():
         rvs_Precise[iter, 0] = lastGate[0]
         rvs_Precise[iter, 1] = lastGate[1]
 
-        error = np.sum(np.abs( rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :] ))
-        results[(numGates, True)] = (numNonZeros, ObjVal, error)
+        error = np.abs( rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :] )
+        results[(numGates, True)] = (numNonZeros, ObjVal, error[0], error[1])
 
 
 
@@ -98,6 +98,36 @@ def testAlgorithms():
 
 
 
+#     np.testing.assert_almost_equal(desired, actual, decimal=5)
+
+def computeMAPE(n_bins, n_unaries, start, function):
+
+    MAPE_mean = np.zeros((n_bins, n_unaries))
+    MAPE_std = np.zeros((n_bins, n_unaries))
+
+    jump = 2
+
+    for bins in range(0, n_bins):
+        for unaries in range(0, n_unaries):
+            actual, desired = function(start + jump*bins, start + jump*unaries)
+
+            print('bins:' + str(start + jump*bins))
+            print('unaries: ' + str(start + jump*unaries))
+            print(actual)
+            print(desired)
+
+            curMAPE = 100 * np.abs((actual - desired) / desired)
+
+            print(curMAPE)
+    
+            MAPE_mean[bins, unaries] = curMAPE[0]
+            MAPE_std[bins, unaries] = curMAPE[1]
+
+
+    return MAPE_mean, MAPE_std
+
 if __name__ == "__main__":
 
     testAlgorithms()
+
+

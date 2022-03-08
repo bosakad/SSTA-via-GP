@@ -29,14 +29,13 @@ def computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates):
 
     cload = [None] * numberOfGates
 
-    cload[0] = inputCapacitance[3]
-    cload[1] = inputCapacitance[3] + inputCapacitance[4]
-    cload[2] = inputCapacitance[4] + inputCapacitance[6]
-    cload[3] = inputCapacitance[5] + inputCapacitance[6]
-    cload[4] = inputCapacitance[6]
+    cload[0] = inputCapacitance[4]
+    cload[1] = inputCapacitance[2] + inputCapacitance[3]
+    cload[2] = inputCapacitance[5]
+    cload[3] = inputCapacitance[4] + inputCapacitance[5]
 
-    cload[5] = loadCapacitances[0]
-    cload[6] = loadCapacitances[1]
+    cload[4] = loadCapacitances[0]
+    cload[5] = loadCapacitances[1]
 
     return cp.hstack(cload)  # concatenation
 
@@ -64,13 +63,21 @@ def getPathDelays(gateDelays):
     :param gateDelays: (1, n) cvxpy variable of delays
     :return cload: (1, m) cvxpy array of all delay paths
     """
-    delays = [gateDelays[0] + gateDelays[3] + gateDelays[5],
-              gateDelays[0] + gateDelays[3] + gateDelays[6],
+    # delays = [gateDelays[0] + gateDelays[3] + gateDelays[5],
+    #           gateDelays[0] + gateDelays[3] + gateDelays[6],
+    #           gateDelays[1] + gateDelays[3] + gateDelays[5],
+    #           gateDelays[1] + gateDelays[3] + gateDelays[6],
+    #           gateDelays[1] + gateDelays[4] + gateDelays[6],
+    #           gateDelays[2] + gateDelays[4] + gateDelays[5],
+    #           gateDelays[2] + gateDelays[6]]
+
+    delays = [gateDelays[0] + gateDelays[4],
+              gateDelays[1] + gateDelays[3] + gateDelays[4],
               gateDelays[1] + gateDelays[3] + gateDelays[5],
-              gateDelays[1] + gateDelays[3] + gateDelays[6],
-              gateDelays[1] + gateDelays[4] + gateDelays[6],
-              gateDelays[2] + gateDelays[4] + gateDelays[5],
-              gateDelays[2] + gateDelays[6]]
+              gateDelays[3] + gateDelays[4],
+              gateDelays[3] + gateDelays[5],
+              gateDelays[1] + gateDelays[2] + gateDelays[5],
+              gateDelays[2] + gateDelays[5]]
 
     return cp.hstack(delays)
 
@@ -188,11 +195,14 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
 
 # hard coded example
 
-numberOfGates = 7
-# numberOfGates = 5
+numberOfGates = 6
+# numberOfGates = 7
 
-f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5, 2.5])
-e = np.array([1, 2, 1, 1.5, 1.5, 1, 0.2])
+# f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5, 2.5])
+# e = np.array([1, 2, 1, 1.5, 1.5, 1, 0.2])
+
+f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
+e = np.array([1, 2, 1, 1.5, 1.5, 1])
 Cout6 = 7
 Cout7 = 5
 

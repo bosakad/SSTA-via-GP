@@ -59,8 +59,6 @@ def get_gauss_bins_UNARY(mu: float, sigma: float, numberOfBins: int, numberOfSam
     data, edges = np.histogram(s, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data))
 
-    # print(dataNorm)
-
     finalBins = np.zeros((numberOfBins, numberOfUnaries))
 
 
@@ -72,7 +70,6 @@ def get_gauss_bins_UNARY(mu: float, sigma: float, numberOfBins: int, numberOfSam
 
         # for unary in range(0, numberOfOnes):  # non-vectorized version
         #     finalBins[bin, unary] = 1
-
 
     randomVar = RandomVariable(finalBins, edges, unary=True)
 
@@ -88,7 +85,7 @@ def get_Histogram_from_UNARY(unaryHist):
 
     numberOfBins, numberOfUnaries = unaryHist.bins.shape
 
-    norm = numberOfBins*numberOfUnaries
+    norm = np.sum(unaryHist.bins)
 
     resultBins = np.zeros(numberOfBins)
 

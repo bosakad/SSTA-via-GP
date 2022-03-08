@@ -193,6 +193,54 @@ def testConvolutionGaussShift(dec: int):
     return None
 
 
+def testMAX_UNARY(dec: int):
+    mu1 = 12
+    sigma1 = 2
+
+    mu2 = 6
+    sigma2 = 3
+
+    numberOfSamples = 20000000
+    numberOfBins = 10
+    numberOfUnaries = 10
+
+    interval = (-5, 20)
+
+    # DESIRED
+
+    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
+    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
+
+    max1 = np.maximum(rv1, rv2)
+    desired = [np.mean(max1), np.std(max1)]
+
+
+    h3 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
+    h4 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+    # max1 = h3.maxOfDistributionsQUAD(h4)
+
+    # desired = [max1.mean, max1.std]
+
+
+    # ACTUAL
+
+    # histogram1
+    h1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    h2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+
+    # max2 = h3.maxOfDistributionsQUAD_FORMULA(h4)
+    # max2 = h3.maxOfDistributionsQUAD(h4)
+    max2 = h1.maxOfDistributionsQUAD_FORMULA_UNARY(h2)
+
+    actual = [max2.mean, max2.std]
+
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
+
 def testUniteEdgesNormal(dec: int):
 
     mu1 = 12
@@ -379,23 +427,23 @@ def testMeanGauss(dec: int):
 
     mu = 1
     sigma = 0.5
-    numberOfSamples = 10000
+    numberOfSamples = 2000000
     numberOfBins = 50
+    numberOfUnaries = numberOfBins**2
 
-    STATIC_BINS = np.linspace(-10, 10, numberOfBins)
+    interval = (-10, 10)
 
         # DESIRED
 
     rv1 = np.random.normal(mu, sigma, numberOfSamples)
-    desired = np.mean(rv1)
+    desired = np.std(rv1)
 
         # ACTUAL
 
-    data, edges = np.histogram(rv1, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h1 = RandomVariable(dataNorm, edges)
+    h1 = histogramGenerator.get_gauss_bins_UNARY(mu, sigma, numberOfBins, numberOfSamples, interval
+                                                 , numberOfUnaries)
 
-    actual = h1.mean
+    actual = h1.std
 
         # TESTING
 
@@ -609,14 +657,14 @@ def testMAX_QUAD_FORMULA_UNARY(dec: int):
     mu1 = 12.98553396
     sigma1 = 4.76804456
 
-    mu2 = 13.98483475
+    mu2 = 13.984834752020
     sigma2 = 4.802585
 
     interval = (-10, 50)
 
     numberOfSamples = 2000000
-    numberOfBins = 20
-    numberOfUnaries = 800
+    numberOfBins = 1000
+    numberOfUnaries = 1000
 
     # DESIRED
 
@@ -696,11 +744,11 @@ def test_Convolution_UNARY(dec: int):
     mu2 = 18.98483475
     sigma2 = 2.802585
 
-    interval = (-10, 50)
+    interval = (-2, 50)
 
     numberOfSamples = 2000000
-    numberOfBins = 20
-    numberOfUnaries = 800
+    numberOfBins = 50
+    numberOfUnaries = 12
 
     # DESIRED
 
@@ -753,9 +801,11 @@ if __name__ == "__main__":
     # testConvolutionNaive(1)
     # testMAX_QUAD_FORMULA(3)
     # testMAX_QUAD_FORMULA_UNARY(3)
-    test_Convolution_UNARY(3)
+    # test_Convolution_UNARY(3)
 
-    # testMAX_Convolution_UNARY(2)
+    testMAX_UNARY(5)
+
+    # test_Convolution_UNARY(2)
 
 
     print("All tests passed!")

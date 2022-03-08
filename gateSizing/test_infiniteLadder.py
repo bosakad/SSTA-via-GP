@@ -238,17 +238,19 @@ def MonteCarlo(numberOfGates=10):
 
 
 
-def mainNumpy():
+def LadderNumpy(number_of_nodes=10, numberOfBins=100, numberOfUnaries=100, interval=(-8, 20)):
 
 
     # parse command line arguments
-    number_of_nodes = 10
+    # number_of_nodes = 1
     n_samples = 2000000
     seed = 0
 
-    numberOfBins = 10
-    numberOfUnaries = 5
-    interval = (-8, 35)
+    print('here')
+
+    # numberOfBins = 1000
+    # numberOfUnaries = numberOfBins*10
+    # interval = (-8, 20)
 
     gateParams = [0.0, 1.0]
 
@@ -380,10 +382,14 @@ def mainNumpy():
                  )
     )
 
+    return desired
+
+
 if __name__ == "__main__":
         # dec param is Desired precision
 
-    main()
-    # mainNumpy()
+    # main()
+    LadderNumpy()
+
 
     # print("All tests passed!")
