@@ -201,8 +201,8 @@ def testMAX_UNARY(dec: int):
     sigma2 = 3
 
     numberOfSamples = 20000000
-    numberOfBins = 10
-    numberOfUnaries = 10
+    numberOfBins = 100
+    numberOfUnaries = 100
 
     interval = (-5, 20)
 
@@ -213,14 +213,15 @@ def testMAX_UNARY(dec: int):
 
     max1 = np.maximum(rv1, rv2)
     desired = [np.mean(max1), np.std(max1)]
+    print(desired)
 
 
     h3 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     h4 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
-    # max1 = h3.maxOfDistributionsQUAD(h4)
+    max1 = h3.maxOfDistributionsFORM(h4)
 
-    # desired = [max1.mean, max1.std]
-
+    desired = [max1.mean, max1.std]
+    print(desired)
 
     # ACTUAL
 
@@ -228,11 +229,13 @@ def testMAX_UNARY(dec: int):
     h1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
     h2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
+
     # max2 = h3.maxOfDistributionsQUAD_FORMULA(h4)
     # max2 = h3.maxOfDistributionsQUAD(h4)
     max2 = h1.maxOfDistributionsQUAD_FORMULA_UNARY(h2)
 
     actual = [max2.mean, max2.std]
+    print(actual)
 
 
     # TESTING
@@ -437,6 +440,7 @@ def testMeanGauss(dec: int):
 
     rv1 = np.random.normal(mu, sigma, numberOfSamples)
     desired = np.std(rv1)
+    # desired = np.mean(rv1)
 
         # ACTUAL
 
@@ -444,7 +448,10 @@ def testMeanGauss(dec: int):
                                                  , numberOfUnaries)
 
     actual = h1.std
+    # actual = h1.mean
 
+    print(desired)
+    print(actual)
         # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)

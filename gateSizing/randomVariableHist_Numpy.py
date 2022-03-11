@@ -120,31 +120,38 @@ class RandomVariable:
         :return maxDelay: random variable class, elementwise maximum of 2 histograms
         """
 
-        # n = self.bins.shapemax1 = h3.maxOfDistributionsQUAD(h4)
-        # diff = self.edges[1] - self.edges[0]
-        # f1 = f1 / (np.sum(f1) * (self.edges[1] - self.edges[0]))
-        # f2 = f2 / (np.sum(f2) * (self.edges[1] - self.edges[0]))
-        # maximum = np.zeros(n)
-        # for i in range(0, n):
-        #     F2 = np.sum(f2[:i+1])
-        #     F1 = np.sum(f1[:i])                 # only for discrete - not to count with 1 number twice
-        #     maximum[i] = f1[i] * F2 + f2[i] * F1
-
-        # normalize
-        # maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
 
         # unite
         self.uniteEdges(secondVariable)
         f1 = self.bins
         f2 = secondVariable.bins
 
-        # vectorized code from above
-        F2 = np.cumsum(f2)
-        F1 = np.cumsum(f1)
 
-        F1[1:] = F1[:-1]
-        F1[0] = 0
-        maximum = np.multiply(f1, F2) + np.multiply(f2, F1)
+        n = self.bins.shape[0]
+
+        f1 = f1 / (np.sum(f1) * (self.edges[1] - self.edges[0]))
+        f2 = f2 / (np.sum(f2) * (self.edges[1] - self.edges[0]))
+        maximum = np.zeros(n)
+        for i in range(0, n):
+            F2 = np.sum(f2[:i+1])
+            F1 = np.sum(f1[:i])                 # only for discrete - not to count with 1 number twice
+            maximum[i] = f1[i] * F2 + f2[i] * F1
+
+        # normalize
+        maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
+
+        # unite
+        # self.uniteEdges(secondVariable)
+        # f1 = self.bins
+        # f2 = secondVariable.bins
+        #
+        # # vectorized code from above
+        # F2 = np.cumsum(f2)
+        # F1 = np.cumsum(f1)
+        #
+        # F1[1:] = F1[:-1]
+        # F1[0] = 0
+        # maximum = np.multiply(f1, F2) + np.multiply(f2, F1)
 
         maxDelay = RandomVariable(maximum, self.edges)
         return maxDelay
@@ -216,16 +223,31 @@ class RandomVariable:
         # prealloc
         maximum = np.zeros(n, dtype=np.double)
 
-        # calc. maximum
         for i in range(0, n):
             for j in range(0, i + 1):
 
                 maximum[i] += bins1[i] * bins2[j]
 
-        for i in range(0, n):
-            for j in range(i + 1, n):
+                if i != j:
+                    maximum[i] += bins1[j] * bins2[i]
 
-                maximum[j] += bins1[i] * bins2[j]
+
+
+        # for i in range(0, n):
+        #     for j in range(0, i + 1):
+        #
+        #         maximum[i] += bins1[j] * bins2[i]
+
+        # calc. maximum
+        # for i in range(0, n):
+        #     for j in range(0, i + 1):
+        #
+        #         maximum[i] += bins1[i] * bins2[j]
+        #
+        # for i in range(0, n):
+        #     for j in range(i + 1, n):
+        #
+        #         maximum[j] += bins1[i] * bins2[j]
 
 
         # normalize
@@ -254,7 +276,7 @@ class RandomVariable:
 
         # calc. maximum
 
-        # i >= j
+
         for i in range(0, numberOfBins):
             for j in range(0, i + 1):
 
@@ -262,6 +284,12 @@ class RandomVariable:
                 #     for unary2 in range(0, numberOfUnaries):
                 #         maximum[i, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]         # simple, non-vectorized
                 maximum[i, :] += binMatrix1[i, :] * binMatrix2[j, :]         # simple, non-vectorized
+
+                if i != j:
+                    # for unary3 in range(0, numberOfUnaries):  # simple, non-vectorized
+                    #     for unary4 in range(0, numberOfUnaries):
+                    #         maximum[i, unary3] += binMatrix1[j, unary3] * binMatrix2[i, unary4]
+                    maximum[i, :] += binMatrix1[j, :] * binMatrix2[i, :]
 
         # for unaryInd in range(0, numberOfUnaries):
                     #     if maximum[i, unaryInd] == 0:
@@ -273,13 +301,13 @@ class RandomVariable:
 
 
         # i < j
-        for i in range(0, numberOfBins):
-            for j in range(i + 1, numberOfBins):
+        # for i in range(0, numberOfBins):
+        #     for j in range(i + 1, numberOfBins):
 
                 # for unary in range(0, numberOfUnaries):                   # simple, non-vectorized
                 #     for unary2 in range(0, numberOfUnaries):
                 #         maximum[j, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]
-                maximum[j, :] += binMatrix1[i, :] * binMatrix2[j, :]
+                # maximum[j, :] += binMatrix1[i, :] * binMatrix2[j, :]
 
                     # for unaryInd in range(0, numberOfUnaries):
                     #     if maximum[j, unaryInd] == 0:
@@ -315,11 +343,11 @@ class RandomVariable:
             for k in range(0, z + 1):
 
                 # for unary in range(0, numberOfUnaries):
-                    # for unary2 in range(0, numberOfUnaries):
-                  # convolution[z, unary] += f[k, unary] * g [z - k, unary]
+                #     for unary2 in range(0, numberOfUnaries):
+                #         convolution[z, unary] += f[k, unary] * g [z - k, unary2]
                 convolution[z, :] += f[k, :] * g[z - k, :]
 
-        convolution = self.unarize(convolution)
+        # convolution = self.unarize(convolution)
 
         # Deal With Edges
         self.cutBins_UNARY(self.edges, convolution)
@@ -685,10 +713,9 @@ class RandomVariable:
 
         binMatrix = self.bins
         numberOfBins = binMatrix.shape[0]
-        numberOfUnaries = binMatrix.shape[1]
 
         estimatedBins = np.zeros(numberOfBins)
-        norm = np.sum(binMatrix)
+        norm = np.sum(binMatrix) * (self.edges[1] - self.edges[0])
 
             # calculate prob. of each bin
         for bin in range(0, numberOfBins):
@@ -712,11 +739,10 @@ class RandomVariable:
 
         binMatrix = self.bins
         numberOfBins = binMatrix.shape[0]
-        numberOfUnaries = binMatrix.shape[1]
 
         estimatedBins = np.zeros(numberOfBins)
 
-        norm = np.sum(binMatrix)
+        norm = np.sum(binMatrix) * (self.edges[1] - self.edges[0])
 
         # calculate prob. of each bin
         for bin in range(0, numberOfBins):

@@ -9,13 +9,13 @@ def main():
 
     sigma = 1
     mu = 2
-    # distr = "Gauss"
-    distr = "LogNormal"
+    distr = "Gauss"
+    # distr = "LogNormal"
 
-    numberOfBins = 20
+    numberOfBins = 50
     numberOfUnaries = 100
     numberOfSamples = 1000000
-    interval = (-2, 10)
+    interval = (-10, 10)
 
     constraints = []
 
@@ -63,6 +63,12 @@ def main():
     # plot the results
     plt.hist(normalGeneratedHist.edges[:-1], normalGeneratedHist.edges, weights=normalGeneratedHist.bins, color='blue')
     plt.hist(Aprx_normalHist.edges[:-1], Aprx_normalHist.edges, weights=Aprx_normalHist.bins, color='orange')
+
+    gauss = lambda x: 1 / np.sqrt(2 * np.pi) / sigma * np.exp(-(x - mu) ** 2 / 2 / sigma ** 2)
+    xdata = np.linspace(interval[0], interval[1], 200)
+    ydata = gauss(xdata)
+
+    plt.plot(xdata, ydata)
 
     plt.show()
 

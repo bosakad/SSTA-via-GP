@@ -580,64 +580,51 @@ class RandomVariableCVXPY:
 
                 for unary in range(0, numberOfUnaries):
 
-                    if precise:
-                        for unary2 in range(0, numberOfUnaries):
-                            # new variable - multiplication of x*y
-                            slackMult = cp.Variable(boolean=True)
-                            sumOfMultiplications[i] += slackMult
+                    # new variable - multiplication of x*y
+                    slackMult = cp.Variable(boolean=True)
+                    sumOfMultiplications[i] += slackMult
 
-                            # help constraints
-                            x = (x1[i])[unary]
-                            y = (x2[j])[unary2]
+                    # help constraints
+                    x = (x1[i])[unary]
+                    y = (x2[j])[unary]
 
-                            MaxConstraints.append(slackMult <= x)
-                            MaxConstraints.append(slackMult <= y)
-                            MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
-                    else:
+                    MaxConstraints.append(slackMult <= x)
+                    MaxConstraints.append(slackMult <= y)
+                    MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
+
+                    if i != j:
+
                         # new variable - multiplication of x*y
-                        slackMult = cp.Variable(boolean=True)
-                        sumOfMultiplications[i] += slackMult
+                        slackMult2 = cp.Variable(boolean=True)
+                        sumOfMultiplications[i] += slackMult2
 
                         # help constraints
-                        x = (x1[i])[unary]
-                        y = (x2[j])[unary]
+                        x = (x1[j])[unary]
+                        y = (x2[i])[unary]
 
-                        MaxConstraints.append(slackMult <= x)
-                        MaxConstraints.append(slackMult <= y)
-                        MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
+                        MaxConstraints.append(slackMult2 <= x)
+                        MaxConstraints.append(slackMult2 <= y)
+                        MaxConstraints.append(slackMult2 >= x + y - 1)  # driving constr.
 
 
-
+        # old version
         # i < j
-        for i in range(0, numberOfBins):
-            for j in range(i+1, numberOfBins):
-
-                for unary in range(0, numberOfUnaries):
-                    if precise:
-                        for unary2 in range(0, numberOfUnaries):
-                            # new variable - multiplication of x*y
-                            slackMult = cp.Variable(boolean=True)
-                            sumOfMultiplications[j] += slackMult
-
-                            # help constraints
-                            x = (x1[i])[unary]
-                            y = (x2[j])[unary2]
-
-                            MaxConstraints.append(slackMult <= x)
-                            MaxConstraints.append(slackMult <= y)
-                            MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
-                    else:
-                        # new variable - multiplication of x*y
-                        slackMult = cp.Variable(boolean=True)
-                        sumOfMultiplications[j] += slackMult
-
-                        # help constraints
-                        x = (x1[i])[unary]
-                        y = (x2[j])[unary]
-
-                        MaxConstraints.append(slackMult <= x)
-                        MaxConstraints.append(slackMult <= y)
-                        MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
+        # for i in range(0, numberOfBins):
+        #     for j in range(i+1, numberOfBins):
+        #
+        #         for unary in range(0, numberOfUnaries):
+        #
+        #             # new variable - multiplication of x*y
+        #             slackMult = cp.Variable(boolean=True)
+        #             sumOfMultiplications[j] += slackMult
+        #
+        #             # help constraints
+        #             x = (x1[i])[unary]
+        #             y = (x2[j])[unary]
+        #
+        #             MaxConstraints.append(slackMult <= x)
+        #             MaxConstraints.append(slackMult <= y)
+        #             MaxConstraints.append(slackMult >= x + y - 1)  # driving constr.
 
 
         maximum = {}

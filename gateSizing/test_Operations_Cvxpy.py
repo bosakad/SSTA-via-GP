@@ -228,13 +228,13 @@ def test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec: int):
     sigma1 = 4.76804456
 
     mu2 = 25.98483475
-    sigma2 = 41.802585
+    sigma2 = 3.802585
 
-    interval = (-10, 50)
+    interval = (-10, 40)
 
     numberOfSamples = 2000000
-    numberOfBins = 12
-    numberOfUnaries = 20
+    numberOfBins = 10
+    numberOfUnaries = 10
 
 
     # DESIRED
