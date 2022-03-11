@@ -347,7 +347,7 @@ class RandomVariable:
                 #         convolution[z, unary] += f[k, unary] * g [z - k, unary2]
                 convolution[z, :] += f[k, :] * g[z - k, :]
 
-        # convolution = self.unarize(convolution)
+        convolution = self.unarize(convolution)
 
         # Deal With Edges
         self.cutBins_UNARY(self.edges, convolution)
