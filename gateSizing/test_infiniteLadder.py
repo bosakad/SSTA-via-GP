@@ -238,15 +238,13 @@ def MonteCarlo(numberOfGates=10):
 
 
 
-def LadderNumpy(number_of_nodes=10, numberOfBins=100, numberOfUnaries=100, interval=(-8, 20)):
+def LadderNumpy(number_of_nodes=1, numberOfBins=10, numberOfUnaries=10, interval=(-8, 20)):
 
 
     # parse command line arguments
     # number_of_nodes = 1
     n_samples = 2000000
     seed = 0
-
-    print('here')
 
     # numberOfBins = 1000
     # numberOfUnaries = numberOfBins*10

@@ -280,16 +280,18 @@ class RandomVariable:
         for i in range(0, numberOfBins):
             for j in range(0, i + 1):
 
-                # for unary in range(0, numberOfUnaries):              # simple, non-vectorized
-                #     for unary2 in range(0, numberOfUnaries):
-                #         maximum[i, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]         # simple, non-vectorized
-                maximum[i, :] += binMatrix1[i, :] * binMatrix2[j, :]         # simple, non-vectorized
+                for unary in range(0, numberOfUnaries):              # simple, non-vectorized
+                    for unary2 in range(0, numberOfUnaries):
+                        maximum[i, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]         # simple, non-vectorized
 
-                if i != j:
+                        if i != j:
+                            maximum[i, unary] += binMatrix1[j, unary] * binMatrix2[i, unary2]
+
+                    # maximum[i, :] += binMatrix1[i, :] * binMatrix2[j, :]         # simple, non-vectorized
+
                     # for unary3 in range(0, numberOfUnaries):  # simple, non-vectorized
                     #     for unary4 in range(0, numberOfUnaries):
-                    #         maximum[i, unary3] += binMatrix1[j, unary3] * binMatrix2[i, unary4]
-                    maximum[i, :] += binMatrix1[j, :] * binMatrix2[i, :]
+                    # maximum[i, :] += binMatrix1[j, :] * binMatrix2[i, :]
 
         # for unaryInd in range(0, numberOfUnaries):
                     #     if maximum[i, unaryInd] == 0:
@@ -316,7 +318,8 @@ class RandomVariable:
 
                 # maximum[j, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])      # simple, same but vectorized
 
-        maximum = self.unarize(maximum)
+        # maximum = self.unarizeCut(maximum)
+        maximum = self.unarizeDivide(maximum)
 
         return RandomVariable(maximum, self.edges, unary=True)
 
@@ -342,15 +345,23 @@ class RandomVariable:
         for z in range(0, numberOfBins):
             for k in range(0, z + 1):
 
-                # for unary in range(0, numberOfUnaries):
-                #     for unary2 in range(0, numberOfUnaries):
-                #         convolution[z, unary] += f[k, unary] * g [z - k, unary2]
-                convolution[z, :] += f[k, :] * g[z - k, :]
+                for unary in range(0, numberOfUnaries):
+                    # convolution[z, unary] += f[k, unary] * g[z - k, unary]
 
-        convolution = self.unarize(convolution)
+                    for unary2 in range(0, numberOfUnaries):
+                        convolution[z, unary] += f[k, unary] * g [z - k, unary2]
+                # convolution[z, :] += f[k, :] * g[z - k, :]
+
+
+        # print(np.sum(convolution))
+
+        # convolution = self.unarizeCut(convolution)
+        convolution = self.unarizeDivide(convolution)
+        # print(np.sum(convolution))
 
         # Deal With Edges
         self.cutBins_UNARY(self.edges, convolution)
+
 
         return RandomVariable(convolution, self.edges, unary=True)
 
@@ -532,8 +543,39 @@ class RandomVariable:
 
         return None
 
+
     @staticmethod
-    def unarize(bins):
+    def unarizeDivide(bins):
+        """
+            Make a non unarized histogram in the unary form, divides the numbers
+        """
+
+        numberOfBins, numberOfUnaries = bins.shape
+
+        # find divider
+
+        sum = np.sum(bins, axis=1)
+        maximum = np.max(sum)
+
+            # no need to do anything
+        if maximum <= numberOfUnaries:
+            return bins
+
+        divider = np.ceil(maximum / numberOfUnaries)
+
+        bins = bins / divider
+        doableSum = np.sum(bins, axis=1)
+        # doableSum = np.ceil(np.sum(bins, axis=1)).astype(int)
+
+        newBins = np.zeros((numberOfBins, numberOfUnaries))
+
+        for bin in range(0, numberOfBins):
+            newBins[bin, :round(doableSum[bin])] = 1
+
+        return newBins
+
+    @staticmethod
+    def unarizeCut(bins):
         """
             Make a non unarized histogram in the unary form
         """
@@ -550,6 +592,7 @@ class RandomVariable:
                 newBins[bin, :] = 1
             else:
                 newBins[bin, :sum] = 1
+
 
         return newBins
 
