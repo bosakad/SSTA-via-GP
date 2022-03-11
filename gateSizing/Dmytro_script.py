@@ -9,8 +9,8 @@ def main():
 
     sigma = 1
     mu = 2
-    # distr = "Gauss"
-    distr = "LogNormal"
+    distr = "Gauss"
+    # distr = "LogNormal"
 
     numberOfBins = 20
     numberOfUnaries = 100
@@ -60,7 +60,12 @@ def main():
         # get generated values
     normalGeneratedHist = histogramGenerator.get_Histogram_from_UNARY(g)
 
+    gauss = lambda x: 1/np.sqrt(2*np.pi)/sigma * np.exp(-(x-mu)**2/2/sigma**2)
+    xdata = np.linspace(interval[0],interval[1],200)
+    ydata = gauss(xdata)
+
     # plot the results
+    # plt.plot(xdata,ydata)
     plt.hist(normalGeneratedHist.edges[:-1], normalGeneratedHist.edges, weights=normalGeneratedHist.bins, color='blue')
     plt.hist(Aprx_normalHist.edges[:-1], Aprx_normalHist.edges, weights=Aprx_normalHist.bins, color='orange')
 
@@ -68,5 +73,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
