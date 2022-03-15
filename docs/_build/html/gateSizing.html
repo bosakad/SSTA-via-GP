@@ -205,13 +205,14 @@ no errors appeared.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.SSTA.Convolution_UNARY">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">Convolution_UNARY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#Convolution_UNARY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.Convolution_UNARY" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">Convolution_UNARY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#Convolution_UNARY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.Convolution_UNARY" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x1</strong> – RandomVariableCVXPY class</p></li>
 <li><p><strong>x2</strong> – RandomVariableCVXPY class</p></li>
+<li><p><strong>withSymmetryConstr</strong> – boolean, whether symmetry constraints should be used</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return convolution</dt>
@@ -255,7 +256,7 @@ Function executes the algorithm for finding out the PDF of a circuit delay.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.SSTA.maxOfDistributionsCVXPY_UNARY">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">maxOfDistributionsCVXPY_UNARY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.variable.Variable</span></span></span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#maxOfDistributionsCVXPY_UNARY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.maxOfDistributionsCVXPY_UNARY" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">maxOfDistributionsCVXPY_UNARY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.variable.Variable</span></span></span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#maxOfDistributionsCVXPY_UNARY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.maxOfDistributionsCVXPY_UNARY" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates maximum of an array of PDFs of cvxpy variable</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -378,8 +379,32 @@ using the ‘quadratic’ algorithm and McCormick envelopes
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_DIVIDE_MIN">
-<span class="sig-name descname"><span class="pre">convolution_UNARY_DIVIDE_MIN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.convolution_UNARY_DIVIDE_MIN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_DIVIDE_MIN" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_CUT">
+<span class="sig-name descname"><span class="pre">convolution_UNARY_CUT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.convolution_UNARY_CUT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_CUT" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the information
+cutting. Maximization is always feasible, minimization is not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
+<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
+<li><p><strong>asMin</strong> – boolean, true for minimization problem, false for maximization problem</p></li>
+<li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return convolutionClass</dt>
+<dd class="field-even"><p>class RandomVariableCVXPY with cvxpy slack variables</p>
+</dd>
+<dt class="field-odd">Return ConvConstraints</dt>
+<dd class="field-odd"><p>python array with inequalities - for computing the convolution</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_DIVIDE">
+<span class="sig-name descname"><span class="pre">convolution_UNARY_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.convolution_UNARY_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_DIVIDE" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
 using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
 .. important:: WORKS ONLY FOR MINIMIZATION PROBLEM</p>
@@ -388,53 +413,8 @@ using the unary representation of bins - M 0/1-bins for each bin. Unarization is
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
 <li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
+<li><p><strong>asMin</strong> – boolean, true for minimization problem, false for maximization problem</p></li>
 <li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return convolutionClass</dt>
-<dd class="field-even"><p>class RandomVariableCVXPY with cvxpy slack variables</p>
-</dd>
-<dt class="field-odd">Return ConvConstraints</dt>
-<dd class="field-odd"><p>python array with inequalities - for computing the convolution</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_MAX">
-<span class="sig-name descname"><span class="pre">convolution_UNARY_MAX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.convolution_UNARY_MAX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_MAX" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the information
-cutting.
-.. important:: WORKS ONLY FOR MAXIMIZATION PROBLEM</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return convolutionClass</dt>
-<dd class="field-even"><p>class RandomVariableCVXPY with cvxpy slack variables</p>
-</dd>
-<dt class="field-odd">Return ConvConstraints</dt>
-<dd class="field-odd"><p>python array with inequalities - for computing the convolution</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_MIN">
-<span class="sig-name descname"><span class="pre">convolution_UNARY_MIN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.convolution_UNARY_MIN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_MIN" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-using the UNARY representation of bins - M 0/1-bins for each bin. Unarization is not kept.
-.. important:: WORKS ONLY FOR MINIMIZATION PROBLEM</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return convolutionClass</dt>
@@ -584,18 +564,18 @@ using the ‘quadratic’ algorithm and McCormick envelopes
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_DIVIDE_MIN">
-<span class="sig-name descname"><span class="pre">maximum_QUAD_UNARY_DIVIDE_MIN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.maximum_QUAD_UNARY_DIVIDE_MIN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_DIVIDE_MIN" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_CUT">
+<span class="sig-name descname"><span class="pre">maximum_QUAD_UNARY_CUT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.maximum_QUAD_UNARY_CUT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_CUT" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
 using the ‘quadratic’ algorithm and unary representation of bins - M 0/1-bins for each bin.
-Unarization is kept using the divison.
-.. important:: WORKS ONLY FOR MAXIMIZATION PROBLEM</p>
+Unarization is kept using the information cutting. Maximization is always feasible, minimization is not.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
+<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY
+:param withSymmetryConstr: boolean whether a symmetry constraints should be included</p></li>
+<li><p><strong>asMin</strong> – boolean, true for minimization problem, false for maximization problem</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return maximumClass</dt>
@@ -608,41 +588,18 @@ Unarization is kept using the divison.
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_MAX">
-<span class="sig-name descname"><span class="pre">maximum_QUAD_UNARY_MAX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.maximum_QUAD_UNARY_MAX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_MAX" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_DIVIDE">
+<span class="sig-name descname"><span class="pre">maximum_QUAD_UNARY_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.maximum_QUAD_UNARY_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_DIVIDE" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
 using the ‘quadratic’ algorithm and unary representation of bins - M 0/1-bins for each bin.
-Unarization is kept using the information cutting.
-.. important:: WORKS ONLY FOR MAXIMIZATION PROBLEM</p>
+Unarization is kept using the divison.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
 <li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
+<li><p><strong>asMin</strong> – boolean, true for minimization problem, false for maximization problem</p></li>
 <li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return maximumClass</dt>
-<dd class="field-even"><p>class RandomVariableCVXPY with cvxpy slack variables (1, 1)</p>
-</dd>
-<dt class="field-odd">Return MaxConstraints</dt>
-<dd class="field-odd"><p>python array with inequalities - for computing the maximum</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_MIN">
-<span class="sig-name descname"><span class="pre">maximum_QUAD_UNARY_MIN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.maximum_QUAD_UNARY_MIN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_QUAD_UNARY_MIN" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-using the ‘quadratic’ algorithm and unary representation of bins - M 0/1-bins for each bin.
-Unarization is not kept.
-.. important:: WORKS ONLY FOR MINIMIZATION PROBLEM</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return maximumClass</dt>
@@ -1491,23 +1448,6 @@ Works for only unary random variable</p>
 <dt class="sig sig-object py" id="src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsFORM">
 <span class="sig-name descname"><span class="pre">maxOfDistributionsFORM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/randomVariableHist_Numpy.html#RandomVariable.maxOfDistributionsFORM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsFORM" title="Permalink to this definition"></a></dt>
 <dd><p>Maximum of 2 distribution functions using formula</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – random variable class</p></li>
-<li><p><strong>secondVariable</strong> – random variable class</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return maxDelay</dt>
-<dd class="field-even"><p>random variable class, maximum of 2 histograms</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsFORM_UNARY">
-<span class="sig-name descname"><span class="pre">maxOfDistributionsFORM_UNARY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/randomVariableHist_Numpy.html#RandomVariable.maxOfDistributionsFORM_UNARY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsFORM_UNARY" title="Permalink to this definition"></a></dt>
-<dd><p>Maximum of 2 distribution functions using formula using unary notation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

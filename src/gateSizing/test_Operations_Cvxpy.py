@@ -349,7 +349,7 @@ def test_CVXPY_MAX_UNARY_NEW_AS_MIN(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 10
-    numberOfUnaries = 8
+    numberOfUnaries = 10
 
 
     # DESIRED
@@ -389,7 +389,7 @@ def test_CVXPY_MAX_UNARY_NEW_AS_MIN(dec: int):
 
     RV1 = RandomVariableCVXPY(x1, rv1.edges)
     RV2 = RandomVariableCVXPY(x2, rv1.edges)
-    maximum, constr = RV1.maximum_QUAD_UNARY_DIVIDE_MIN(RV2)
+    maximum, constr = RV1.maximum_QUAD_UNARY_CUT(RV2, asMin=False)
     maximum = maximum.bins
 
         # FORMULATE
@@ -404,16 +404,16 @@ def test_CVXPY_MAX_UNARY_NEW_AS_MIN(dec: int):
 
     for bin in range(0, numberOfBins):
         for unary in range(0, numberOfUnaries):
-            constr.append( (x1[bin])[unary] >= rv1.bins[bin, unary] )    # set lower constr.
+            constr.append( (x1[bin])[unary] <= rv1.bins[bin, unary] )    # set lower constr.
 
     for bin in range(0, numberOfBins):
         for unary in range(0, numberOfUnaries):
-            constr.append( (x2[bin])[unary] >= rv2.bins[bin, unary] )    # set lower constr.
+            constr.append( (x2[bin])[unary] <= rv2.bins[bin, unary] )    # set lower constr.
 
 
 
         # solve
-    objective = cp.Minimize( sum )
+    objective = cp.Maximize( sum )
     prob = cp.Problem(objective, constr)
     prob.solve(verbose=False, solver=cp.MOSEK)
 
@@ -585,8 +585,8 @@ def test_CVXPY_CONVOLUTION_UNARY_MIN(dec: int):
     interval = (-5, 10)
 
     numberOfSamples = 2000000
-    numberOfBins = 10
-    numberOfUnaries = 20
+    numberOfBins = 8
+    numberOfUnaries = 8
 
 
     # DESIRED
@@ -597,7 +597,7 @@ def test_CVXPY_CONVOLUTION_UNARY_MIN(dec: int):
     test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
 
-    max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNARY(rv2)
+    max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
     # max1 = test1.convolutionOfTwoVarsShift(test2)
     desired = [max1.mean, max1.std]
 
@@ -625,7 +625,7 @@ def test_CVXPY_CONVOLUTION_UNARY_MIN(dec: int):
 
         # GET obj. function and constr
 
-    convolution, constr = RV1.convolution_UNARY_DIVIDE_MIN(RV2)
+    convolution, constr = RV1.maximum_QUAD_UNARY_DIVIDE(RV2, asMin=False)
     convolution = convolution.bins
 
         # FORMULATE
@@ -640,16 +640,16 @@ def test_CVXPY_CONVOLUTION_UNARY_MIN(dec: int):
 
     for bin in range(0, numberOfBins):
         for unary in range(0, numberOfUnaries):
-            constr.append( (x1[bin])[unary] >= rv1.bins[bin, unary] )    # set lower constr.
+            constr.append( (x1[bin])[unary] <= rv1.bins[bin, unary] )    # set lower constr.
 
     for bin in range(0, numberOfBins):
         for unary in range(0, numberOfUnaries):
-            constr.append( (x2[bin])[unary] >= rv2.bins[bin, unary] )    # set lower constr.
+            constr.append( (x2[bin])[unary] <= rv2.bins[bin, unary] )    # set lower constr.
 
         # solve
-    objective = cp.Minimize( sum )
+    objective = cp.Maximize( sum )
     prob = cp.Problem(objective, constr)
-    prob.solve(verbose=False, solver=cp.MOSEK)
+    prob.solve(verbose=True, solver=cp.MOSEK)
 
         # PRINT OUT THE VALUES
     print("Problem value: " + str(prob.value))

@@ -46,10 +46,10 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
 
     numberOfGates = 5
 
-    numberOfBins = 12
-    numberOfUnaries = 10
+    numberOfBins = 8
+    numberOfUnaries = 12
 
-    binsInterval = (-5, 40)
+    binsInterval = (0, 40)
 
     # create cvxpy variable
 
@@ -124,7 +124,7 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
 
     rvs = []
 
-    for gate in range(0, numberOfGates + 1):    # construct RVs
+    for gate in range(0, numberOfGates):    # construct RVs
 
         finalBins = np.zeros((numberOfBins, numberOfUnaries))
         for bin in range(0, numberOfBins):
@@ -135,24 +135,24 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
 
 
     print("\n APRX. VALUES: \n")
-    for i in range(0, numberOfGates + 1):
+    for i in range(0, numberOfGates):
         print( rvs[i].mean, rvs[i].std )
 
 
     # calculate with numpy
 
-    n1 = Node(g1)
-    n2 = Node(g2)
-    n3 = Node(g3)
-    n4 = Node(g4)
-    n5 = Node(g5)
+    n1 = Node(g1U)
+    n2 = Node(g2U)
+    n3 = Node(g3U)
+    n4 = Node(g4U)
+    n5 = Node(g5U)
 
     # set circuit design
     n1.setNextNodes([n3, n4])
     n2.setNextNodes([n3, n5])
     n3.setNextNodes([n4, n5])
 
-    delays = SSTA.calculateCircuitDelay([n1, n2])
+    delays = SSTA.calculateCircuitDelay([n1, n2], unary=True)
 
     desired = np.zeros((len(delays), 2))
     size = len(delays)
@@ -163,7 +163,7 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
 
 
     print("\n REAL VALUES: \n")
-    for i in range(0, numberOfGates + 1):
+    for i in range(0, numberOfGates):
         print( desired[i, 0], desired[i, 1] )
 
 
@@ -525,9 +525,9 @@ if __name__ == "__main__":
 
         # dec param is Desired precision
 
-    # SSTA_CVXPY_UNARY_AS_MIN(dec=5)
+    SSTA_CVXPY_UNARY_AS_MIN(dec=5)
 
         # one has to change functions in SSTA to change MAX and MIN
-    SSTA_CVXPY_UNARY_AS_MAX(dec=5)
+    # SSTA_CVXPY_UNARY_AS_MAX(dec=5)
 
     # SSTA_CVXPY_McCormick(dec=5)

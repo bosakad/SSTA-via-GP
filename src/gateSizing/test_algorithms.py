@@ -10,14 +10,14 @@ import numpy as np
 def testAlgorithms():
 
         # number of testing
-    numberOfIterations = 3
+    numberOfIterations = 2
     step = 2
 
-    numberOfGatesStart = 10
+    numberOfGatesStart = 1
     numberOfBins = 5
-    numberOfUnaries = 2
+    numberOfUnaries = 10
 
-    interval = (-8, 35)
+    interval = (0, 35)
 
         # for saving values of the last gates and calculating error
     rvs_nonPrecise = np.zeros((numberOfIterations, 2))
@@ -45,14 +45,22 @@ def testAlgorithms():
             # calculating
         numGates = numberOfGatesStart + iter * step
         numNonZeros, ObjVal, lastGate = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
-                                                                 precise=False, withSymmetryConstr=False)
+                                                                withSymmetryConstr=False)
 
             # saving values
         rvs_nonPrecise[iter, 0] = lastGate[0]
         rvs_nonPrecise[iter, 1] = lastGate[1]
 
-        error = np.abs( rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :] )
-        results[(numGates, False)] = (numNonZeros, ObjVal, error[0], error[1])
+        MAPE = 100*np.abs( np.divide(rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]) )
+
+        if iter != 0:
+            prevError = np.zeros(2)
+            prevError[0] = results[(numGates - step, False)][2]
+            prevError[1] = results[(numGates - step, False)][3]
+
+            MAPE = ((MAPE + prevError) * iter) / (iter+1)
+
+        results[(numGates, False)] = (numNonZeros, ObjVal, MAPE[0], MAPE[1])
 
         # print results
     print("\n\n" + str(results))
@@ -64,14 +72,22 @@ def testAlgorithms():
 
         numGates = numberOfGatesStart + iter*step
         numNonZeros, ObjVal, lastGate = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
-                                                                 precise=False, withSymmetryConstr=True)
+                                                                 withSymmetryConstr=True)
 
         # saving values
         rvs_Precise[iter, 0] = lastGate[0]
         rvs_Precise[iter, 1] = lastGate[1]
 
-        error = np.abs( rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :] )
-        results[(numGates, True)] = (numNonZeros, ObjVal, error[0], error[1])
+        MAPE = 100*np.abs( np.divide( rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :] , rvs_MonteCarlo[iter, :]))
+
+        if iter != 0:
+            prevError = np.zeros(2)
+            prevError[0] = results[(numGates - step, True)][2]
+            prevError[1] = results[(numGates - step, True)][3]
+
+            MAPE = ((MAPE + prevError) * iter) / (iter + 1)
+
+        results[(numGates, True)] = (numNonZeros, ObjVal, MAPE[0], MAPE[1])
 
 
 
@@ -86,11 +102,11 @@ def testAlgorithms():
     print("\nGROUND-TRUTH:\n")
     print(rvs_MonteCarlo)
 
-    print("\n no symmetry DIFF:\n")
-    print(np.abs(rvs_nonPrecise - rvs_MonteCarlo))
+    print("\n no symmetry MAPE:\n")
+    print(100*np.abs(np.divide(rvs_nonPrecise - rvs_MonteCarlo, rvs_MonteCarlo)))
 
-    print("\nsymmetry DIFF:\n")
-    print(np.abs(rvs_Precise - rvs_MonteCarlo) )
+    print("\nsymmetry MAPE:\n")
+    print(100*np.abs(np.divide(rvs_Precise - rvs_MonteCarlo, rvs_MonteCarlo)))
 
 
         # print results

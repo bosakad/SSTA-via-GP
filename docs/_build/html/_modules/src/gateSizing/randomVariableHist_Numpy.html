@@ -133,45 +133,6 @@
         <span class="n">maxDelay</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maxBins</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">maxDelay</span></div>
 
-<div class="viewcode-block" id="RandomVariable.maxOfDistributionsFORM_UNARY"><a class="viewcode-back" href="../../../index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsFORM_UNARY">[docs]</a>    <span class="k">def</span> <span class="nf">maxOfDistributionsFORM_UNARY</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Maximum of 2 distribution functions using formula using unary notation</span>
-
-<span class="sd">        :param self: random variable class</span>
-<span class="sd">        :param secondVariable: random variable class</span>
-<span class="sd">        :return maxDelay: random variable class, maximum of 2 histograms</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">uniteEdges</span><span class="p">(</span><span class="n">secondVariable</span><span class="p">)</span>
-        <span class="n">f1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
-        <span class="n">f2</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
-
-        <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">shape</span>
-        <span class="n">maximum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
-
-            <span class="c1"># compute cumsum</span>
-        <span class="n">F1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
-        <span class="n">F2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
-
-            <span class="c1"># set the first array</span>
-        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
-            <span class="n">F1</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">f1</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span>
-            <span class="n">F2</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">f2</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span>
-
-            <span class="c1"># compute cumsum using dynamic programming</span>
-        <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
-        <span class="c1">#     F2[bin, :] = np.sum(f2[:bin+1], axis=0)   # vectorized</span>
-        <span class="c1">#     F1[bin, :] = np.sum(f1[:bin+1], axis=0)</span>
-            <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
-                <span class="n">F1</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">F1</span><span class="p">[</span><span class="nb">bin</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">+</span> <span class="n">f1</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span>
-                <span class="n">F2</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">F2</span><span class="p">[</span><span class="nb">bin</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">+</span> <span class="n">f2</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span>
-
-
-        <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
-
-                <span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">f1</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">*</span> <span class="n">F2</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">+</span> <span class="n">f2</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">*</span> <span class="n">F1</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RandomVariable.maxOfDistributionsFORM"><a class="viewcode-back" href="../../../index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsFORM">[docs]</a>    <span class="k">def</span> <span class="nf">maxOfDistributionsFORM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -673,10 +634,11 @@
 
             <span class="c1"># technique with maximum possible</span>
         <span class="k">if</span> <span class="n">convolution</span><span class="p">:</span>
-            <span class="n">divisor</span> <span class="o">=</span> <span class="n">numberOfUnaries</span>     <span class="c1"># N**2 / N</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="n">numberOfUnaries</span>
         <span class="k">else</span><span class="p">:</span>   <span class="c1"># maximum</span>
-            <span class="n">divisor</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.7</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">numberOfUnaries</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">numberOfUnaries</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">numberOfUnaries</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">numberOfUnaries</span>
             <span class="c1"># divisor = numberOfUnaries * numberOfBins</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span> <span class="o">/</span> <span class="n">divisor</span>
 
 

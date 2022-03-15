@@ -70,45 +70,6 @@ class RandomVariable:
         maxDelay = RandomVariable(maxBins, self.edges)
         return maxDelay
 
-    def maxOfDistributionsFORM_UNARY(self, secondVariable):
-        """
-        Maximum of 2 distribution functions using formula using unary notation
-
-        :param self: random variable class
-        :param secondVariable: random variable class
-        :return maxDelay: random variable class, maximum of 2 histograms
-        """
-        self.uniteEdges(secondVariable)
-        f1 = self.bins
-        f2 = secondVariable.bins
-
-        numberOfBins, numberOfUnaries = self.bins.shape
-        maximum = np.zeros((numberOfBins, numberOfUnaries))
-
-            # compute cumsum
-        F1 = np.zeros((numberOfBins, numberOfUnaries))
-        F2 = np.zeros((numberOfBins, numberOfUnaries))
-
-            # set the first array
-        for unary in range(0, numberOfUnaries):
-            F1[0, unary] = f1[0, unary]
-            F2[0, unary] = f2[0, unary]
-
-            # compute cumsum using dynamic programming
-        for bin in range(1, numberOfBins):
-        #     F2[bin, :] = np.sum(f2[:bin+1], axis=0)   # vectorized
-        #     F1[bin, :] = np.sum(f1[:bin+1], axis=0)
-            for unary in range(0, numberOfUnaries):
-                F1[bin, unary] = F1[bin - 1, unary] + f1[bin, unary]
-                F2[bin, unary] = F2[bin - 1, unary] + f2[bin, unary]
-
-
-        for bin in range(0, numberOfBins):
-            for unary in range(0, numberOfUnaries):
-
-                maximum[bin, unary] = f1[bin, unary] * F2[bin, unary] + f2[bin, unary] * F1[bin, unary]
-
-        return RandomVariable(maximum, self.edges, unary=True)
 
     def maxOfDistributionsFORM(self, secondVariable):
         """
@@ -610,10 +571,11 @@ class RandomVariable:
 
             # technique with maximum possible
         if convolution:
-            divisor = numberOfUnaries     # N**2 / N
+            divisor = numberOfUnaries
         else:   # maximum
-            divisor = (1.7*2*numberOfUnaries**2 - 2*numberOfUnaries + 1) / numberOfUnaries
+            divisor = (2*numberOfUnaries**2 - 2*numberOfUnaries + 1) / numberOfUnaries
             # divisor = numberOfUnaries * numberOfBins
+            divisor = 2
         bins = bins / divisor
 
 

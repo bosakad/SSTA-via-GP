@@ -13,7 +13,7 @@ from test_SSTA_Numpy import putTuplesIntoArray
 from examples_monteCarlo.infinite_ladder_montecarlo import MonteCarlo_inputs, MonteCarlo_nodes, get_moments_from_simulations
 
 
-def main(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-8, 35), precise=False, withSymmetryConstr=False):
+def main(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-8, 35), withSymmetryConstr=False):
 
     """
         Computes SSTA using unary encoding, can be computed in a 'precise' or non-precise way
@@ -99,7 +99,7 @@ def main(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-8, 35
         node.setNextNodes([generatedNodes[i + 1]])
 
     delays, newConstr = SSTA.calculateCircuitDelay(startingNodes, cvxpy=True, unary=True,
-                                                   precise=precise, withSymmetryConstr=withSymmetryConstr)
+                                                withSymmetryConstr=withSymmetryConstr)
     delays = delays[numberOfGates + 1:]
 
     constraints.extend(newConstr)

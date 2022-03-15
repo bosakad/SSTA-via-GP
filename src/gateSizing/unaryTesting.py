@@ -191,196 +191,196 @@ def LadderNumpy(numberOfBins=100, numberOfUnaries=100, number_of_nodes=1, interv
 
 
 
+if __name__ == "__main__":
 
+    # compute MAPE heatmap for Convolution - takes a long time to compute
 
-# compute MAPE heatmap for Convolution - takes a long time to compute
+    bins = 2
+    unaries = 2
+    start = 10
 
-bins = 2
-unaries = 2
-start = 10
+    meanMAPE, stdMAPE = computeMAPE(bins, unaries, start, testConvolution)
 
-meanMAPE, stdMAPE = computeMAPE(bins, unaries, start, testConvolution)
+    meanMAPE = np.flip(meanMAPE, 0)
+    meanMAPE = np.around(meanMAPE, 2)
 
-meanMAPE = np.flip(meanMAPE, 0)
-meanMAPE = np.around(meanMAPE, 2)
+    stdMAPE = np.around(stdMAPE, 2)
+    stdMAPE = np.flip(stdMAPE, 0)
 
-stdMAPE = np.around(stdMAPE, 2)
-stdMAPE = np.flip(stdMAPE, 0)
+    # plot heatmap
 
-# plot heatmap
+    # fig, ax = plt.subplots(figsize=(13, 13), dpi=80)
 
-# fig, ax = plt.subplots(figsize=(13, 13), dpi=80)
+    im = plt.imshow(meanMAPE)
 
-im = plt.imshow(meanMAPE)
+    # for i in range(0, meanMAPE.shape[0], ):
+    #     for j in range(meanMAPE.shape[1]):
+    #         text = ax.text(j, i, meanMAPE[i, j],
+    #                        ha="center", va="center", color="w")
 
-# for i in range(0, meanMAPE.shape[0], ):
-#     for j in range(meanMAPE.shape[1]):
-#         text = ax.text(j, i, meanMAPE[i, j],
-#                        ha="center", va="center", color="w")
+    locs, labels = plt.xticks()  # Get the current locations and labels.
+    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
 
-locs, labels = plt.xticks()  # Get the current locations and labels.
-plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
+    plt.xlabel('Number of unary variables')
+    plt.ylabel('Number of bins')
+    plt.title('Convolution, MAPE of mean')
 
-plt.xlabel('Number of unary variables')
-plt.ylabel('Number of bins')
-plt.title('Convolution, MAPE of mean')
+    pc = plt.colorbar()
 
-pc = plt.colorbar()
+    plt.savefig("Convolution_meanHeatMap.jpeg", dpi=300)
+    #plt.show()
+    pc.remove()
 
-plt.savefig("Convolution_meanHeatMap.jpeg", dpi=300)
-#plt.show()
-pc.remove()
 
+    # fig, ax = plt.subplots(figsize=(13, 13), dpi=80)
+    im = plt.imshow(stdMAPE)
 
-# fig, ax = plt.subplots(figsize=(13, 13), dpi=80)
-im = plt.imshow(stdMAPE)
+    # for i in range(0, stdMAPE.shape[0], ):
+    #     for j in range(stdMAPE.shape[1]):
+    #         text = ax.text(j, i, stdMAPE[i, j],
+    #                        ha="center", va="center", color="w")
 
-# for i in range(0, stdMAPE.shape[0], ):
-#     for j in range(stdMAPE.shape[1]):
-#         text = ax.text(j, i, stdMAPE[i, j],
-#                        ha="center", va="center", color="w")
+    locs, labels = plt.xticks()  # Get the current locations and labels.
+    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
 
-locs, labels = plt.xticks()  # Get the current locations and labels.
-plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
 
 
+    plt.xlabel('Number of unary variables')
+    plt.ylabel('Number of bins')
+    plt.title('Convolution, MAPE of std')
 
-plt.xlabel('Number of unary variables')
-plt.ylabel('Number of bins')
-plt.title('Convolution, MAPE of std')
 
+    pc = plt.colorbar()
+    plt.savefig("Convolution_stdHeatMap.jpeg", dpi=300)
+    #plt.show()
+    pc.remove()
 
-pc = plt.colorbar()
-plt.savefig("Convolution_stdHeatMap.jpeg", dpi=300)
-#plt.show()
-pc.remove()
 
+    # compute MAPE heatmap for MAXIMUM - takes a long time to compute
 
-# compute MAPE heatmap for MAXIMUM - takes a long time to compute
 
+    bins = 2
+    unaries = 2
+    start = 10
 
-bins = 2
-unaries = 2
-start = 10
+    meanMAPE, stdMAPE = computeMAPE(bins, unaries, start, testMax)
 
-meanMAPE, stdMAPE = computeMAPE(bins, unaries, start, testMax)
+    meanMAPE = np.around(meanMAPE, 2)
+    meanMAPE = np.flip(meanMAPE, 0)
 
-meanMAPE = np.around(meanMAPE, 2)
-meanMAPE = np.flip(meanMAPE, 0)
+    stdMAPE = np.around(stdMAPE, 2)
+    stdMAPE = np.flip(stdMAPE, 0)
 
-stdMAPE = np.around(stdMAPE, 2)
-stdMAPE = np.flip(stdMAPE, 0)
+    # plot heatmap
 
-# plot heatmap
+    # fig, ax = plt.subplots(figsize=(13, 13), dpi=300)
 
-# fig, ax = plt.subplots(figsize=(13, 13), dpi=300)
+    im = plt.imshow(meanMAPE)
 
-im = plt.imshow(meanMAPE)
+    # for i in range(0, meanMAPE.shape[0], ):
+    #     for j in range(meanMAPE.shape[1]):
+    #         text = ax.text(j, i, meanMAPE[i, j],
+    #                        ha="center", va="center", color="w")
 
-# for i in range(0, meanMAPE.shape[0], ):
-#     for j in range(meanMAPE.shape[1]):
-#         text = ax.text(j, i, meanMAPE[i, j],
-#                        ha="center", va="center", color="w")
+    locs, labels = plt.xticks()  # Get the current locations and labels.
+    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
 
-locs, labels = plt.xticks()  # Get the current locations and labels.
-plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
 
+    plt.xlabel('Number of unary variables')
+    plt.ylabel('Number of bins')
+    plt.title('MAX, MAPE of mean')
 
-plt.xlabel('Number of unary variables')
-plt.ylabel('Number of bins')
-plt.title('MAX, MAPE of mean')
 
+    pc = plt.colorbar()
+    plt.savefig("Max_meanHeatMap.jpeg", dpi=300)
+    #plt.show()
+    pc.remove()
 
-pc = plt.colorbar()
-plt.savefig("Max_meanHeatMap.jpeg", dpi=300)
-#plt.show()
-pc.remove()
 
+    # fig, ax = plt.subplots(figsize=(13, 13), dpi=80)
+    im = plt.imshow(stdMAPE)
 
-# fig, ax = plt.subplots(figsize=(13, 13), dpi=80)
-im = plt.imshow(stdMAPE)
+    # for i in range(0, stdMAPE.shape[0], ):
+    #     for j in range(stdMAPE.shape[1]):
+    #         text = ax.text(j, i, stdMAPE[i, j],
+    #                        ha="center", va="center", color="w")
 
-# for i in range(0, stdMAPE.shape[0], ):
-#     for j in range(stdMAPE.shape[1]):
-#         text = ax.text(j, i, stdMAPE[i, j],
-#                        ha="center", va="center", color="w")
+    locs, labels = plt.xticks()  # Get the current locations and labels.
+    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
 
-locs, labels = plt.xticks()  # Get the current locations and labels.
-plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
+    plt.xlabel('Number of unary variables')
+    plt.ylabel('Number of bins')
+    plt.title('MAX, MAPE of std')
 
-plt.xlabel('Number of unary variables')
-plt.ylabel('Number of bins')
-plt.title('MAX, MAPE of std')
 
+    pc = plt.colorbar()
+    plt.savefig("Max_stdHeatMap.jpeg", dpi=300)
+    # plt.show()
+    pc.remove()
 
-pc = plt.colorbar()
-plt.savefig("Max_stdHeatMap.jpeg", dpi=100)
-# plt.show()
-pc.remove()
+    # compute MAPE heatmap for infinite ladder - takes a long time to compute
 
-# compute MAPE heatmap for infinite ladder - takes a long time to compute
+    bins = 2
+    unaries = 2
+    start = 5
 
-bins = 2
-unaries = 2
-start = 5
+    meanMAPE, stdMAPE = computeMAPE(bins, unaries, start, LadderNumpy)
 
-meanMAPE, stdMAPE = computeMAPE(bins, unaries, start, LadderNumpy)
+    meanMAPE = np.around(meanMAPE, 2)
+    meanMAPE = np.flip(meanMAPE, 0)
 
-meanMAPE = np.around(meanMAPE, 2)
-meanMAPE = np.flip(meanMAPE, 0)
+    stdMAPE = np.around(stdMAPE, 2)
+    stdMAPE = np.flip(stdMAPE, 0)
 
-stdMAPE = np.around(stdMAPE, 2)
-stdMAPE = np.flip(stdMAPE, 0)
+    # plot heatmap
 
-# plot heatmap
+    # fig, ax = plt.subplots(figsize=(15, 15), dpi=80)
 
-# fig, ax = plt.subplots(figsize=(15, 15), dpi=80)
+    im = plt.imshow(meanMAPE)
 
-im = plt.imshow(meanMAPE)
+    # for i in range(0, meanMAPE.shape[0], ):
+    #     for j in range(meanMAPE.shape[1]):
+    #         text = ax.text(j, i, meanMAPE[i, j],
+    #                        ha="center", va="center", color="w")
 
-# for i in range(0, meanMAPE.shape[0], ):
-#     for j in range(meanMAPE.shape[1]):
-#         text = ax.text(j, i, meanMAPE[i, j],
-#                        ha="center", va="center", color="w")
+    locs, labels = plt.xticks()  # Get the current locations and labels.
+    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
 
-locs, labels = plt.xticks()  # Get the current locations and labels.
-plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
 
+    plt.xlabel('Number of unary variables')
+    plt.ylabel('Number of bins')
+    plt.title('SSTA, MAPE of mean')
 
-plt.xlabel('Number of unary variables')
-plt.ylabel('Number of bins')
-plt.title('SSTA, MAPE of mean')
 
+    pc = plt.colorbar()
+    plt.savefig("Ladder_meanHeatMap.jpeg", dpi=300)
+    #plt.show()
+    pc.remove()
 
-pc = plt.colorbar()
-plt.savefig("Ladder_meanHeatMap.jpeg", dpi=300)
-#plt.show()
-pc.remove()
 
+    # fig, ax = plt.subplots(figsize=(15, 15), dpi=80)
+    im = plt.imshow(stdMAPE)
 
-# fig, ax = plt.subplots(figsize=(15, 15), dpi=80)
-im = plt.imshow(stdMAPE)
+    # for i in range(0, stdMAPE.shape[0], ):
+    #     for j in range(stdMAPE.shape[1]):
+    #         text = ax.text(j, i, stdMAPE[i, j],
+    #                        ha="center", va="center", color="w")
 
-# for i in range(0, stdMAPE.shape[0], ):
-#     for j in range(stdMAPE.shape[1]):
-#         text = ax.text(j, i, stdMAPE[i, j],
-#                        ha="center", va="center", color="w")
+    locs, labels = plt.xticks()  # Get the current locations and labels.
+    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
 
-locs, labels = plt.xticks()  # Get the current locations and labels.
-plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
+    plt.xlabel('Number of unary variables')
+    plt.ylabel('Number of bins')
+    plt.title('SSTA, MAPE of std')
 
-plt.xlabel('Number of unary variables')
-plt.ylabel('Number of bins')
-plt.title('SSTA, MAPE of std')
 
-
-pc = plt.colorbar()
-plt.savefig("Ladder_stdHeatMap.jpeg", dpi=300)
-#plt.show()
-pc.remove()
+    pc = plt.colorbar()
+    plt.savefig("Ladder_stdHeatMap.jpeg", dpi=300)
+    #plt.show()
+    pc.remove()
