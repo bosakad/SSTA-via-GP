@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.gateSizing.optimizeGatesVectorized &mdash; Gate Sizing  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Gate Sizing
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Gate Sizing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>src.gateSizing.optimizeGatesVectorized</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.gateSizing.optimizeGatesVectorized</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
+
+
+<span class="c1"># Aout = np.where(A&lt;=0, 0, A)</span>
+<span class="c1"># Ain  = np.where(A&gt;=0, 0, 1)</span>
+
+<span class="c1"># # optimization variables</span>
+<span class="c1"># x = cp.Variable(m, pos=True)         # sizes</span>
+<span class="c1"># t = cp.Variable(m, pos=True)         # arrival times</span>
+
+<span class="c1"># input capacitance is an affine function of sizes</span>
+<span class="c1"># cin = alpha + beta*x</span>
+
+
+<div class="viewcode-block" id="computeIncidenceMatrices"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeIncidenceMatrices">[docs]</a><span class="k">def</span> <span class="nf">computeIncidenceMatrices</span><span class="p">(</span><span class="n">A</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get standard cell-edge incidence matrix of the circuit</span>
+
+<span class="sd">    :param A: (m, n) numpy array</span>
+<span class="sd">    :return tuple(Ain, Aout) of edge-outgoing and edge-incoming part</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Aout</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">Ain</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">A</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+
+
+    <span class="k">return</span> <span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span>
+
+    <span class="c1"># AoutParam = cp.Variable(Aout.shape, pos=True)</span>
+    <span class="c1"># AoutParam = cp.Parameter(Aout.shape, pos=True)</span>
+    <span class="c1"># AoutParam.value = Aout</span>
+    <span class="c1"># AoutParam = cp.Constant(Aout)</span>
+
+    <span class="c1"># AinParam = cp.expressions.constants.Constant(cp.bmat(Ain))</span>
+    <span class="c1"># AinParam.value = Ain</span>
+    <span class="c1"># AinParam = cp.Parameter(shape=Ain.shape, pos=True)</span>
+    <span class="c1"># AinParam.value = Ain</span>
+    <span class="c1"># AinParam = cp.Constant(Ain)</span>
+
+
+    <span class="c1"># AinParam = cp.Variable(Ain.shape, pos=True)</span>
+
+    <span class="k">return</span> <span class="n">AoutParam</span><span class="p">,</span> <span class="n">AinParam</span></div>
+
+    <span class="c1"># return cp.bmat(Aout), cp.bmat(Ain)</span>
+
+
+
+<div class="viewcode-block" id="computeInputCapacitance"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeInputCapacitance">[docs]</a><span class="k">def</span> <span class="nf">computeInputCapacitance</span><span class="p">(</span><span class="n">alphas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">betas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate input capacitance as affine function ... alpha + beta * x</span>
+
+<span class="sd">    :param alphas: array of alphas</span>
+<span class="sd">    :param betas: array of betas</span>
+<span class="sd">    :param x: cvxpy variable (1, n)</span>
+<span class="sd">    :return inputCap: (1, n) array of input capacitances</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">inputCap</span> <span class="o">=</span> <span class="n">alphas</span> <span class="o">+</span> <span class="n">cp</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">betas</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">inputCap</span></div>
+
+
+<span class="c1">#</span>
+<span class="c1"># given by Fout = Aout*Ain&#39;</span>
+<span class="c1"># cload = (Aout @ Ain.T) * cin</span>
+
+
+
+<div class="viewcode-block" id="computeLoadCapacitance"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeLoadCapacitance">[docs]</a><span class="k">def</span> <span class="nf">computeLoadCapacitance</span><span class="p">(</span><span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">inputCapacitance</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load capacitance is computed as a sum of a fanout.</span>
+
+<span class="sd">    :param Aout: (m, n) output matrix</span>
+<span class="sd">    :param Ain: (m, n) input matrix</span>
+<span class="sd">    :param inputCapacitance: (1, n) cvxpy variable of input capacitance</span>
+<span class="sd">    :return cloadMat: (m, n) load capacitance matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Fout</span> <span class="o">=</span> <span class="n">Aout</span> <span class="o">@</span> <span class="n">Ain</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">cloadMat</span> <span class="o">=</span> <span class="n">Fout</span> <span class="o">@</span> <span class="n">inputCapacitance</span>
+
+    <span class="c1"># print(cloadMat)</span>
+    <span class="k">return</span> <span class="n">cloadMat</span>
+
+    <span class="n">cload</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="mi">7</span><span class="p">)</span>
+
+    <span class="n">cload</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloadMat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">cload</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloadMat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">cload</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloadMat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">cload</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloadMat</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">cload</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloadMat</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="n">cload</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cout6</span>
+    <span class="n">cload</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cout7</span>
+
+    <span class="c1">#return cload</span>
+    <span class="c1"># return inputCapacitance</span>
+    <span class="k">return</span> <span class="n">cp</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">cload</span><span class="p">)</span></div>
+    <span class="c1"># return cp.bmat(cload)</span>
+
+<span class="c1"># Create an array of constraints</span>
+<span class="c1"># constr_cload = []</span>
+<span class="c1"># # Make your requirement a constraint</span>
+<span class="c1"># constr_cload.append(cload[5]==Cout6)</span>
+<span class="c1"># constr_cload.append(cload[6]==Cout7)</span>
+
+
+<span class="c1"># delay is the product of its driving resistance R = gamma/x and cload</span>
+<span class="c1"># d = cload * gamma/x</span>
+
+
+<div class="viewcode-block" id="computeGateDelays"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeGateDelays">[docs]</a><span class="k">def</span> <span class="nf">computeGateDelays</span><span class="p">(</span><span class="n">capLoad</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">,</span> <span class="n">gammas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load capacitance is computed as a sum of a fanout.</span>
+
+<span class="sd">    :param Aout: (m, n) output matrix</span>
+<span class="sd">    :param Ain: (m, n) input matrix</span>
+<span class="sd">    :param inputCapacitance: (1, n) cvxpy variable of input capacitance</span>
+<span class="sd">    :return cloadMat: (m, n) load capacitance matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cloadTimesGamma</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">capLoad</span><span class="p">,</span> <span class="n">gammas</span><span class="p">)</span>
+    <span class="n">gateDelays</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">cloadTimesGamma</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gateDelays</span></div>
+
+
+<span class="c1"># total power</span>
+<span class="c1"># power = (f*e) * x</span>
+<span class="c1">#</span>
+<span class="c1"># # total area</span>
+<span class="c1"># area = a * x</span>
+<span class="c1">#</span>
+<span class="c1"># # constraints</span>
+<span class="c1"># constr_x = x &gt;= 1 # all sizes greater than 1 (normalized)</span>
+<span class="c1">#</span>
+<span class="c1"># # create timing constraints</span>
+<span class="c1"># # these constraints enforce t_j + d_j &lt;= t_i over all gates j that drive gate i</span>
+<span class="c1"># constr_timing = Aout.T*t + Ain.T*d &lt;= Ain.T*t</span>
+<span class="c1"># # for gates with inputs not connected to other gates we enforce d_i &lt;= t_i</span>
+<span class="c1"># input_timing  = d[0:2] &lt;= t[0:2]</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># # objective is the upper bound on the overall delay</span>
+<span class="c1"># # and that is the max of arrival times for output gates 6 and 7</span>
+<span class="c1"># D = cp.atoms.elementwise.maximum.maximum(t[5],t[6])</span>
+<span class="c1">#</span>
+<span class="c1"># # collect all the constraints</span>
+<span class="c1"># constraints = [power &lt;= Pmax, area &lt;= Amax, constr_timing, input_timing, constr_x] + constr_cload</span>
+
+
+<span class="c1"># formulate the GP problem and solve it</span>
+<span class="c1"># objective = cp.Minimize(D)</span>
+<span class="c1">#</span>
+<span class="c1"># problem = cp.Problem(objective, constraints)</span>
+<span class="c1"># problem.solve(gp=True)</span>
+
+
+<div class="viewcode-block" id="getConstrCload"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.getConstrCload">[docs]</a><span class="k">def</span> <span class="nf">getConstrCload</span><span class="p">(</span><span class="n">capLoad</span><span class="p">,</span> <span class="n">loadCapacitances</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function gets capacitance load constraint.</span>
+<span class="sd">    Load capacitances of end gates are given, cannot set due</span>
+<span class="sd">    to cvxpy expression - it is set as an constraint instead.</span>
+
+<span class="sd">    :param capLoad: (1, n) cvxpy variable of capacitance load</span>
+<span class="sd">    :param loadCapacitances: (1, m) array of load capacitances of output gates</span>
+<span class="sd">    :return constr_cload: (1, m) load cap. constr.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">constr_cload</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">constr_cload</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">capLoad</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="n">loadCapacitances</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">constr_cload</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">capLoad</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="n">loadCapacitances</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">constr_cload</span></div>
+
+
+
+<div class="viewcode-block" id="getConstrTiming"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.getConstrTiming">[docs]</a><span class="k">def</span> <span class="nf">getConstrTiming</span><span class="p">(</span><span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">gateDelays</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Timing constraints.</span>
+<span class="sd">        Aout&#39; * t + Ain&#39; * gateDelays &lt;= Ain&#39; * t</span>
+<span class="sd">    These constraints enforce t_j + d_j &lt;= t_i</span>
+<span class="sd">    over all gates j that drive gate i.</span>
+
+<span class="sd">    For gates with inputs not connected to other gates we enforce d_i &lt;= t_i</span>
+
+<span class="sd">    :param Aout: (n, m) cvxpy variable of capacitance load</span>
+<span class="sd">    :param Ain: (n, m) array of load capacitances of output gates</span>
+<span class="sd">    :param gateDelays: (1, m) array of load capacitances of output gates</span>
+<span class="sd">    :param t: (1, m) of cvxpy variable of timing</span>
+<span class="sd">    :return constr_cload: (1, m) load cap. constr.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">constr_timing</span> <span class="o">=</span> <span class="n">Aout</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">t</span> <span class="o">+</span> <span class="n">Ain</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">gateDelays</span> <span class="o">&lt;=</span> <span class="n">Ain</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">t</span>
+
+    <span class="n">input_timing</span> <span class="o">=</span> <span class="n">getInputTimingConstr</span><span class="p">(</span><span class="n">gateDelays</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">constr_timing</span> <span class="p">,</span> <span class="n">input_timing</span></div>
+
+
+
+<div class="viewcode-block" id="getInputTimingConstr"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.getInputTimingConstr">[docs]</a><span class="k">def</span> <span class="nf">getInputTimingConstr</span><span class="p">(</span><span class="n">gateDelays</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get timing constraints for gate delays</span>
+
+<span class="sd">    :param gateDelays: (1, n) cvxpy variable of gate delays</span>
+<span class="sd">    :param t: (1, n) cvxpy variable of timing</span>
+<span class="sd">    :return timing_constr: (1, n) cvxpy expression of timing constr.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">constr1</span> <span class="o">=</span> <span class="n">gateDelays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">constr2</span> <span class="o">=</span> <span class="n">gateDelays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">timing_constr</span> <span class="o">=</span> <span class="p">[</span><span class="n">constr1</span><span class="p">,</span> <span class="n">constr2</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">timing_constr</span></div>
+
+
+<div class="viewcode-block" id="getMaximumDelay"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.getMaximumDelay">[docs]</a><span class="k">def</span> <span class="nf">getMaximumDelay</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get maximum delay - that is the upper bound</span>
+<span class="sd">    on the overall delay and that is the max of</span>
+<span class="sd">    arrival times for output gates</span>
+
+<span class="sd">    :param t: (1, n) cvxpy variable of timing</span>
+<span class="sd">    :return circuitDelay: (1, n) cvxpy expression of circuit delay</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">varsToMin</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">t</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="mi">6</span><span class="p">]])</span>
+    <span class="n">circuitDelay</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">varsToMin</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">circuitDelay</span></div>
+
+
+<div class="viewcode-block" id="computeTotalPower"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeTotalPower">[docs]</a><span class="k">def</span> <span class="nf">computeTotalPower</span><span class="p">(</span><span class="n">frequencies</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">energyLoss</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute total power as sum_i ( f_i * e_i * x_i )</span>
+
+<span class="sd">    :param frequencies: (1, n) numpy array of gate frequencies</span>
+<span class="sd">    :param energyLoss: (1, n) numpy array of energy loss of each gate</span>
+<span class="sd">    :param x: (1, n) cvxpy variable</span>
+<span class="sd">    :return circuitDelay: (1, n) cvxpy expression of circuit delay</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">power</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">multiply</span><span class="p">((</span><span class="n">cp</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">x</span><span class="p">)),</span> <span class="n">energyLoss</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">power</span></div>
+
+
+<div class="viewcode-block" id="computeTotalArea"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeTotalArea">[docs]</a><span class="k">def</span> <span class="nf">computeTotalArea</span><span class="p">(</span><span class="n">gateScales</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute total area as sum_i ( gateScale_i * x_i )</span>
+
+<span class="sd">    :param gateScales: (1, n) numpy array of unit scaling factor of gate i</span>
+<span class="sd">    :param x: (1, n) cvxpy variable</span>
+<span class="sd">    :return area: Double, total area</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">area</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">gateScales</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">area</span></div>
+
+
+
+
+<div class="viewcode-block" id="optimizeGates"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.optimizeGates">[docs]</a><span class="k">def</span> <span class="nf">optimizeGates</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">energyLoss</span><span class="p">,</span> <span class="n">gateScales</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">betas</span><span class="p">,</span> <span class="n">gammas</span><span class="p">,</span> <span class="n">maxArea</span><span class="p">,</span> <span class="n">maxPower</span><span class="p">,</span>
+                  <span class="n">loadCapacitances</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">numberOfCells</span><span class="p">):</span>
+    <span class="c1"># optimization variables</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">numberOfCells</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># sizes</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">numberOfCells</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># arrival times</span>
+
+    <span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span> <span class="o">=</span> <span class="n">computeIncidenceMatrices</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+    <span class="c1"># alphasParam = cp.Parameter(alphas.shape, pos=True)</span>
+    <span class="c1"># alphasParam.value = alphas</span>
+    <span class="n">alphasParam</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">alphas</span><span class="p">)</span>
+
+    <span class="c1"># betasParam = cp.Parameter(betas.shape, pos=True)</span>
+    <span class="c1"># betasParam.value = betas</span>
+    <span class="n">betasParam</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">betas</span><span class="p">)</span>
+
+    <span class="c1"># gammasParam = cp.Parameter(gammas.shape, pos=True)</span>
+    <span class="c1"># gammasParam.value = gammas</span>
+    <span class="n">gammasParam</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Constant</span><span class="p">(</span><span class="n">gammas</span><span class="p">)</span>
+
+    <span class="n">inputCap</span> <span class="o">=</span> <span class="n">computeInputCapacitance</span><span class="p">(</span><span class="n">alphasParam</span><span class="p">,</span> <span class="n">betasParam</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">computedLCapacitance</span> <span class="o">=</span> <span class="n">computeLoadCapacitance</span><span class="p">(</span><span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">inputCap</span><span class="p">)</span>
+
+    <span class="c1"># computedLCapacitance = x</span>
+    <span class="n">gateDelays</span> <span class="o">=</span> <span class="n">computeGateDelays</span><span class="p">(</span><span class="n">computedLCapacitance</span><span class="p">,</span> <span class="n">gammasParam</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">maxDelay</span> <span class="o">=</span> <span class="n">getMaximumDelay</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="n">totalPower</span> <span class="o">=</span> <span class="n">computeTotalPower</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">energyLoss</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">totalArea</span> <span class="o">=</span> <span class="n">computeTotalArea</span><span class="p">(</span><span class="n">gateScales</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># get constraints</span>
+
+    <span class="n">cloadConstr</span> <span class="o">=</span> <span class="n">getConstrCload</span><span class="p">(</span><span class="n">computedLCapacitance</span><span class="p">,</span> <span class="n">loadCapacitances</span><span class="p">)</span>
+    <span class="n">timingConstr</span><span class="p">,</span> <span class="n">inputTimingConstr</span> <span class="o">=</span> <span class="n">getConstrTiming</span><span class="p">(</span><span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">gateDelays</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">x</span>   <span class="p">)</span>
+
+    <span class="n">posX</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">1</span>  <span class="c1"># all sizes greater than 1 (normalized)expr</span>
+
+
+    <span class="c1"># formulate the GGP</span>
+
+
+    <span class="c1"># constraints = [totalPower &lt;= maxPower, totalArea &lt;= maxArea, timingConstr, posX] + inputTimingConstr</span>
+    <span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span><span class="n">totalPower</span> <span class="o">&lt;=</span> <span class="n">maxPower</span><span class="p">,</span> <span class="n">totalArea</span> <span class="o">&lt;=</span> <span class="n">maxArea</span><span class="p">,</span> <span class="n">posX</span><span class="p">,</span> <span class="n">timingConstr</span><span class="p">]</span> <span class="o">+</span> <span class="n">inputTimingConstr</span>
+
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="n">maxDelay</span><span class="p">)</span>
+
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constraints</span><span class="p">)</span>
+
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">gp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sizing params: &quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">prob</span><span class="o">.</span><span class="n">value</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># IMPORTANT FOR JAKUB: commented code outside of functions is code from dmytro (see google collab)</span>
+
+    <span class="n">numberOfCells</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># number of cells</span>
+    <span class="n">numberOfEdges</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># number of edges</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfCells</span><span class="p">,</span> <span class="n">numberOfEdges</span><span class="p">))</span>
+
+    <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">6</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">6</span><span class="p">][</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">A</span><span class="p">[</span><span class="mi">6</span><span class="p">][</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># problem constants</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="n">Cout6</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">Cout7</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">numberOfCells</span><span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">numberOfCells</span><span class="p">)</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">numberOfCells</span><span class="p">)</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">numberOfCells</span><span class="p">)</span>
+
+    <span class="c1"># maximum area and power specification</span>
+    <span class="n">Amax</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">Pmax</span> <span class="o">=</span> <span class="mi">50</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">optimizeGates</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">Amax</span><span class="p">,</span> <span class="n">Pmax</span><span class="p">,</span> <span class="p">[</span><span class="n">Cout6</span><span class="p">,</span> <span class="n">Cout7</span><span class="p">],</span> <span class="n">A</span><span class="p">,</span> <span class="n">numberOfCells</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Adam Bosak.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

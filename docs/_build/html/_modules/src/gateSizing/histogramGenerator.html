@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.gateSizing.histogramGenerator &mdash; Gate Sizing  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Gate Sizing
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Gate Sizing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>src.gateSizing.histogramGenerator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.gateSizing.histogramGenerator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">randomVariableHist_Numpy</span> <span class="kn">import</span> <span class="n">RandomVariable</span>
+
+
+<div class="viewcode-block" id="get_gauss_bins"><a class="viewcode-back" href="../../../index.html#src.gateSizing.histogramGenerator.get_gauss_bins">[docs]</a><span class="k">def</span> <span class="nf">get_gauss_bins</span><span class="p">(</span><span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">binsInterval</span><span class="p">:</span> <span class="nb">tuple</span>
+                                                                            <span class="p">,</span> <span class="n">distr</span><span class="o">=</span><span class="s2">&quot;Gauss&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RandomVariable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a randomly generated gaussian histogram with given mean and standard deviation.</span>
+
+<span class="sd">    :param mu: mean</span>
+<span class="sd">    :param sigma: std</span>
+<span class="sd">    :param numberOfBins: -</span>
+<span class="sd">    :param numberOfSamples: number of samples used for generating</span>
+<span class="sd">    :param binsInterval: static bins interval - should be large enough</span>
+<span class="sd">    :param distr: string - &quot;Gauss&quot; / &quot;LogNormal&quot;</span>
+<span class="sd">    :return randomVar: new RV</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">distr</span> <span class="o">==</span> <span class="s2">&quot;Gauss&quot;</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">distr</span> <span class="o">==</span> <span class="s2">&quot;LogNormal&quot;</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">lognormal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">)</span>
+
+
+    <span class="n">STATIC_BINS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">binsInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">binsInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">STATIC_BINS</span><span class="p">)</span>
+    <span class="n">dataNorm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+    <span class="n">randomVar</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">dataNorm</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">randomVar</span></div>
+
+<div class="viewcode-block" id="get_gauss_bins_UNARY"><a class="viewcode-back" href="../../../index.html#src.gateSizing.histogramGenerator.get_gauss_bins_UNARY">[docs]</a><span class="k">def</span> <span class="nf">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">binsInterval</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
+                         <span class="n">numberOfUnaries</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">distr</span><span class="o">=</span><span class="s2">&quot;Gauss&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RandomVariable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a randomly generated gaussian histogram with given mean and standard deviation.</span>
+<span class="sd">    Each bin is represented by M 0/1-bins.</span>
+
+<span class="sd">    :param mu: mean</span>
+<span class="sd">    :param sigma: std</span>
+<span class="sd">    :param numberOfBins: -</span>
+<span class="sd">    :param numberOfSamples: number of samples used for generating</span>
+<span class="sd">    :param binsInterval: static bins interval - should be large enough</span>
+<span class="sd">    :param numberOfUnaries: number of representative bins for each bin</span>
+<span class="sd">    :param distr: string - &quot;Gauss&quot; / &quot;LogNormal&quot;</span>
+<span class="sd">    :return randomVar: new RV</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">distr</span> <span class="o">==</span> <span class="s2">&quot;Gauss&quot;</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">distr</span> <span class="o">==</span> <span class="s2">&quot;LogNormal&quot;</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">lognormal</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">)</span>
+
+    <span class="n">STATIC_BINS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">binsInterval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">binsInterval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">STATIC_BINS</span><span class="p">)</span>
+    <span class="n">dataNorm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">)</span>
+
+
+        <span class="c1">#testing</span>
+    <span class="c1"># import matplotlib.pyplot as plt</span>
+    <span class="c1"># plt.hist(edges[:-1], edges, weights=dataNorm)</span>
+
+    <span class="n">finalBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+
+        <span class="n">numberOfOnes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">dataNorm</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+        <span class="c1"># numberOfOnes = math.floor(round(dataNorm[bin] * numberOfUnaries))</span>
+
+        <span class="n">finalBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:</span><span class="n">numberOfOnes</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># for unary in range(0, numberOfOnes):  # non-vectorized version</span>
+        <span class="c1">#     finalBins[bin, unary] = 1</span>
+
+    <span class="n">randomVar</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">finalBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># testing</span>
+    <span class="c1"># rv = get_Histogram_from_UNARY(randomVar)</span>
+    <span class="c1"># plt.hist(rv.edges[:-1], rv.edges, weights=rv.bins)</span>
+
+    <span class="k">return</span> <span class="n">randomVar</span></div>
+
+
+<div class="viewcode-block" id="get_Histogram_from_UNARY"><a class="viewcode-back" href="../../../index.html#src.gateSizing.histogramGenerator.get_Histogram_from_UNARY">[docs]</a><span class="k">def</span> <span class="nf">get_Histogram_from_UNARY</span><span class="p">(</span><span class="n">unaryHist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param unaryHist: unary encoded histogram, dtype = RV</span>
+<span class="sd">    :return result: normal bin approximation derived from unary encoded histogram</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="n">unaryHist</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">unaryHist</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">unaryHist</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">unaryHist</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">resultBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberOfBins</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">resultBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">unaryHist</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:])</span> <span class="o">/</span> <span class="n">norm</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">resultBins</span><span class="p">,</span> <span class="n">unaryHist</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Adam Bosak.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

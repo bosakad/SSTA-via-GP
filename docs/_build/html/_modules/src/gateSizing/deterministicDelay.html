@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.gateSizing.deterministicDelay &mdash; Gate Sizing  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Gate Sizing
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Gate Sizing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>src.gateSizing.deterministicDelay</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.gateSizing.deterministicDelay</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">node</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+
+<div class="viewcode-block" id="FindMaxDelayGates"><a class="viewcode-back" href="../../../index.html#src.gateSizing.deterministicDelay.FindMaxDelayGates">[docs]</a><span class="k">def</span> <span class="nf">FindMaxDelayGates</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes maximum possible path. CVXPY variables as gates</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># define cvxpy variable for each gate</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">((</span><span class="mi">7</span><span class="p">,),</span> <span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">source</span> <span class="o">=</span> <span class="n">Node</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="n">Node</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="n">Node</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+    <span class="n">n3</span> <span class="o">=</span> <span class="n">Node</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+    <span class="n">n4</span> <span class="o">=</span> <span class="n">Node</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="mi">4</span><span class="p">]])</span>
+    <span class="n">n5</span> <span class="o">=</span> <span class="n">Node</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="mi">5</span><span class="p">]])</span>
+    <span class="n">sink</span> <span class="o">=</span> <span class="n">Node</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">path</span><span class="p">[</span><span class="mi">6</span><span class="p">]])</span>
+
+    <span class="c1"># set circuit design</span>
+    <span class="n">n1</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">])</span>
+    <span class="n">n2</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">n3</span><span class="p">,</span> <span class="n">n5</span><span class="p">])</span>
+    <span class="n">n3</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">])</span>
+
+    <span class="c1"># set sink and source</span>
+    <span class="n">n4</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">sink</span><span class="p">])</span>
+    <span class="n">n5</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">sink</span><span class="p">])</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">])</span>
+
+    <span class="c1"># set constraints for fan-out</span>
+
+    <span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+    <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">closedList</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="n">constr</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+
+        <span class="n">currentGate</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">nextNodes</span> <span class="o">=</span> <span class="n">currentGate</span><span class="o">.</span><span class="n">nextNodes</span>
+        <span class="n">prevNodes</span> <span class="o">=</span> <span class="n">currentGate</span><span class="o">.</span><span class="n">prevDelays</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nextNodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>          <span class="c1"># reached sink</span>
+            <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">prevGate</span> <span class="ow">in</span> <span class="n">prevNodes</span><span class="p">:</span>
+                <span class="nb">sum</span> <span class="o">+=</span> <span class="n">prevGate</span><span class="o">.</span><span class="n">randVar</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">sum</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="p">)</span>       <span class="c1"># only 1 edge into the sink</span>
+            <span class="k">continue</span>
+
+
+        <span class="c1"># compute fanout</span>
+        <span class="n">fanout</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">nextGate</span> <span class="ow">in</span> <span class="n">nextNodes</span><span class="p">:</span>
+            <span class="n">fanout</span> <span class="o">+=</span> <span class="n">nextGate</span><span class="o">.</span><span class="n">randVar</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c1"># add prev gates</span>
+            <span class="n">nextGate</span><span class="o">.</span><span class="n">appendPrevDelays</span><span class="p">(</span><span class="n">currentGate</span><span class="p">)</span>
+
+            <span class="c1"># update queue</span>
+            <span class="k">if</span> <span class="n">nextGate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">closedList</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">nextGate</span><span class="p">)</span>
+                <span class="n">closedList</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nextGate</span><span class="p">)</span>
+
+        <span class="c1"># only 1 path can be chosen</span>
+        <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">fanout</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prevNodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>     <span class="c1"># reached source</span>
+
+
+        <span class="n">gateCost</span> <span class="o">=</span> <span class="n">currentGate</span><span class="o">.</span><span class="n">randVar</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># compute fanin</span>
+        <span class="n">fanin</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">prevGate</span> <span class="ow">in</span> <span class="n">prevNodes</span><span class="p">:</span>
+            <span class="n">fanin</span> <span class="o">+=</span> <span class="n">prevGate</span><span class="o">.</span><span class="n">randVar</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+
+        <span class="c1"># set driving constraint</span>
+        <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">fanin</span> <span class="o">-</span> <span class="n">gateCost</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">)</span>
+
+
+    <span class="c1"># formulate LP</span>
+
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Maximize</span><span class="p">(</span> <span class="n">cp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span> <span class="n">cp</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+
+
+    <span class="c1"># solve</span>
+    <span class="n">problem</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+
+    <span class="c1"># print out values</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;prob value: &quot;</span><span class="p">,</span> <span class="n">problem</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;path: &quot;</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FindMaxDelayEdges"><a class="viewcode-back" href="../../../index.html#src.gateSizing.deterministicDelay.FindMaxDelayEdges">[docs]</a><span class="k">def</span> <span class="nf">FindMaxDelayEdges</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes maximum possible path. CVXPY variables as edges</span>
+<span class="sd">    :param: Source of the graph - Node class</span>
+<span class="sd">    :return: integer, maximum delay</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="c1"># set constraints for fan-out</span>
+
+    <span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+    <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="n">closedList</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="n">circuitDelay</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">constr</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">variables</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+
+        <span class="n">currentGate</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="n">nextNodes</span> <span class="o">=</span> <span class="n">currentGate</span><span class="o">.</span><span class="n">nextNodes</span>
+        <span class="n">prevEdges</span> <span class="o">=</span> <span class="n">currentGate</span><span class="o">.</span><span class="n">prevDelays</span>
+
+        <span class="n">numOfNextNodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nextNodes</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">numOfNextNodes</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>          <span class="c1"># reached sink</span>
+            <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">prevEdge</span> <span class="ow">in</span> <span class="n">prevEdges</span><span class="p">:</span>
+                <span class="nb">sum</span> <span class="o">+=</span> <span class="n">prevEdge</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">sum</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="p">)</span>       <span class="c1"># only 1 edge into the sink</span>
+            <span class="k">continue</span>
+
+
+        <span class="c1"># compute fanout</span>
+        <span class="n">fanout</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">nextGate</span> <span class="ow">in</span> <span class="n">nextNodes</span><span class="p">:</span>
+
+            <span class="n">edge</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="p">),</span> <span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+
+            <span class="n">fanout</span> <span class="o">+=</span> <span class="n">edge</span>
+
+            <span class="n">delay</span> <span class="o">=</span> <span class="n">nextGate</span><span class="o">.</span><span class="n">randVar</span>
+
+            <span class="c1"># add to objective</span>
+            <span class="n">circuitDelay</span> <span class="o">+=</span> <span class="n">edge</span> <span class="o">*</span> <span class="n">delay</span>
+
+            <span class="c1"># add prev gates</span>
+            <span class="n">nextGate</span><span class="o">.</span><span class="n">appendPrevDelays</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+
+
+            <span class="c1"># update queue</span>
+            <span class="k">if</span> <span class="n">nextGate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">closedList</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">nextGate</span><span class="p">)</span>
+                <span class="n">closedList</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nextGate</span><span class="p">)</span>
+
+        <span class="c1"># only 1 path can be chosen</span>
+        <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">fanout</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prevEdges</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">continue</span>     <span class="c1"># reached source</span>
+
+        <span class="c1"># compute fanin</span>
+        <span class="n">fanin</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">prevEdge</span> <span class="ow">in</span> <span class="n">prevEdges</span><span class="p">:</span>
+            <span class="n">fanin</span> <span class="o">+=</span> <span class="n">prevEdge</span>
+
+
+        <span class="c1"># set driving constraint</span>
+        <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">fanin</span> <span class="o">-</span> <span class="n">fanout</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">)</span>
+
+
+    <span class="c1"># formulate LP</span>
+
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Maximize</span><span class="p">(</span> <span class="n">circuitDelay</span> <span class="p">)</span>
+
+    <span class="c1"># solve</span>
+    <span class="n">problem</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">problem</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+
+    <span class="c1"># print out values</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;prob value: &quot;</span><span class="p">,</span> <span class="n">problem</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;path: </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">variable</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">problem</span><span class="o">.</span><span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="putIntoQueue"><a class="viewcode-back" href="../../../index.html#src.gateSizing.deterministicDelay.putIntoQueue">[docs]</a><span class="k">def</span> <span class="nf">putIntoQueue</span><span class="p">(</span><span class="n">queue</span><span class="p">:</span> <span class="n">Queue</span><span class="p">,</span> <span class="nb">list</span><span class="p">:</span> <span class="p">[</span><span class="n">Node</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function puts list into queue.</span>
+
+<span class="sd">    :param queue: Queue</span>
+<span class="sd">    :return list: array of Node class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+
+
+
+<span class="c1"># call function</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="n">source</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">n1</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">n2</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">n3</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">n4</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">n5</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">sink</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># set circuit design</span>
+    <span class="n">n1</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">n3</span><span class="p">,</span> <span class="n">n4</span><span class="p">])</span>
+    <span class="n">n2</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">n3</span><span class="p">,</span> <span class="n">n5</span><span class="p">])</span>
+    <span class="n">n3</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">n4</span><span class="p">,</span> <span class="n">n5</span><span class="p">])</span>
+
+    <span class="c1"># set sink and source</span>
+    <span class="n">n4</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">sink</span><span class="p">])</span>
+    <span class="n">n5</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">sink</span><span class="p">])</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">setNextNodes</span><span class="p">([</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">])</span>
+
+    <span class="c1"># call the function</span>
+    <span class="n">FindMaxDelayEdges</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Adam Bosak.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
