@@ -38,6 +38,8 @@
               <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">gateSizing package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#gatesizing-test-mosekoperations-module">gateSizing.test_mosekOperations module</a></li>
+<li><a class="reference internal" href="#module-src.gateSizing.mosekVariable">gateSizing.mosekVariable module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.Dmytro_script">gateSizing.Dmytro_script module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.Parser_Matrix">gateSizing.Parser_Matrix module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.Plotter">gateSizing.Plotter module</a></li>
@@ -93,6 +95,84 @@
 <h1>gateSizing package<a class="headerlink" href="#gatesizing-package" title="Permalink to this headline"></a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</div>
+<div class="section" id="gatesizing-test-mosekoperations-module">
+<h2>gateSizing.test_mosekOperations module<a class="headerlink" href="#gatesizing-test-mosekoperations-module" title="Permalink to this headline"></a></h2>
+<span class="target" id="module-src.gateSizing.test_mosekOperations"></span><dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.test_mosekOperations.streamprinter">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_mosekOperations.</span></span><span class="sig-name descname"><span class="pre">streamprinter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_mosekOperations.html#streamprinter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_mosekOperations.streamprinter" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.test_mosekOperations.testConvolution_MAX">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_mosekOperations.</span></span><span class="sig-name descname"><span class="pre">testConvolution_MAX</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_mosekOperations.html#testConvolution_MAX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_mosekOperations.testConvolution_MAX" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-src.gateSizing.mosekVariable">
+<span id="gatesizing-mosekvariable-module"></span><h2>gateSizing.mosekVariable module<a class="headerlink" href="#module-src.gateSizing.mosekVariable" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.gateSizing.mosekVariable.</span></span><span class="sig-name descname"><span class="pre">RandomVariableMOSEK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class representing a random variable given by histogram represented as MOSEK variable.
+Information about each variable is kept by their indices.</p>
+<dl class="simple">
+<dt>Class includes:</dt><dd><p>bins: numpy list of lists of integer indices to MOSEK variable list
+edges: len n+1 of histogram edges, dtype: 1-D np.array</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_DIVIDE">
+<span class="sig-name descname"><span class="pre">convolution_UNARY_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.convolution_UNARY_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_DIVIDE" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates convolution of 2 PDFs of random variable. Works only for 2 identical edges. Is computed
+using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
+Is in MOSEK environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
+<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
+<li><p><strong>asMin</strong> – boolean, true for minimization problem, false for maximization problem</p></li>
+<li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return convolutionClass</dt>
+<dd class="field-even"><p>class RandomVariableCVXPY with cvxpy slack variables</p>
+</dd>
+<dt class="field-odd">Return ConvConstraints</dt>
+<dd class="field-odd"><p>python array with inequalities - for computing the convolution</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_QUAD_UNARY_DIVIDE">
+<span class="sig-name descname"><span class="pre">maximum_QUAD_UNARY_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.maximum_QUAD_UNARY_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_QUAD_UNARY_DIVIDE" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+using the ‘quadratic’ algorithm and unary representation of bins - M 0/1-bins for each bin.
+Unarization is kept using the divison.
+Is in MOSEK environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
+<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
+<li><p><strong>asMin</strong> – boolean, true for minimization problem, false for maximization problem</p></li>
+<li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return maximumClass</dt>
+<dd class="field-even"><p>class RandomVariableCVXPY with cvxpy slack variables (1, 1)</p>
+</dd>
+<dt class="field-odd">Return MaxConstraints</dt>
+<dd class="field-odd"><p>python array with inequalities - for computing the maximum</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-src.gateSizing.Dmytro_script">
 <span id="gatesizing-dmytro-script-module"></span><h2>gateSizing.Dmytro_script module<a class="headerlink" href="#module-src.gateSizing.Dmytro_script" title="Permalink to this headline"></a></h2>
@@ -353,7 +433,7 @@ Using formula - look up function maxOfDistributionsFORM</p>
 <dl class="simple">
 <dt>Class includes:</dt><dd><p>bins: len n of frequencies, dictionary of dictionary with cvxpy variables (1, 1)
 edges: len n+1 of histogram edges, dtype: 1-D np.array
-lowerBounds: numpy array of lowerbounds values</p>
+lowerBounds: numpy array of lowerbounds values, not a mandatory atribute</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -406,8 +486,7 @@ cutting. Maximization is always feasible, minimization is not.</p>
 <dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_DIVIDE">
 <span class="sig-name descname"><span class="pre">convolution_UNARY_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.convolution_UNARY_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_UNARY_DIVIDE" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
-.. important:: WORKS ONLY FOR MINIMIZATION PROBLEM</p>
+using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

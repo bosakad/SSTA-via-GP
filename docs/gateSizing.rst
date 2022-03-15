@@ -4,6 +4,24 @@ gateSizing package
 Submodules
 ----------
 
+gateSizing.test\_mosekOperations module
+--------------------------------
+
+.. automodule:: src.gateSizing.test_mosekOperations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+gateSizing.mosekVariable module
+--------------------------------
+
+.. automodule:: src.gateSizing.mosekVariable
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 gateSizing.Dmytro\_script module
 --------------------------------
 

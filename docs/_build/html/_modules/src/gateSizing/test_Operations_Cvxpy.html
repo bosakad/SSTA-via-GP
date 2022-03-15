@@ -571,7 +571,7 @@
 
         <span class="c1"># GET obj. function and constr</span>
 
-    <span class="n">convolution</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">convolution_UNARY_NEW_MAX</span><span class="p">(</span><span class="n">RV2</span><span class="p">)</span>
+    <span class="n">convolution</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">convolution_UNARY_DIVIDE</span><span class="p">(</span><span class="n">RV2</span><span class="p">)</span>
     <span class="n">convolution</span> <span class="o">=</span> <span class="n">convolution</span><span class="o">.</span><span class="n">bins</span>
 
         <span class="c1"># FORMULATE</span>
@@ -580,7 +580,12 @@
     <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
-            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">convolution</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
 
     <span class="c1"># other constraints</span>
 
@@ -608,7 +613,7 @@
         <span class="c1"># solve</span>
     <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Maximize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
     <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
-    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
 
         <span class="c1"># PRINT OUT THE VALUES</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
@@ -648,8 +653,8 @@
     <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 
     <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
-    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">8</span>
-    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">50</span>
 
 
     <span class="c1"># DESIRED</span>
@@ -698,6 +703,7 @@
     <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
             <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">convolution</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
 
     <span class="c1"># other constraints</span>
 
@@ -983,8 +989,8 @@
     <span class="c1"># test_CVXPY_MAX_UNARY_OLD(dec=5)</span>
     <span class="c1"># test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec=</span>
     <span class="c1"># test_CVXPY_MAX_UNARY_NEW_AS_MIN(dec=5)</span>
-    <span class="n">test_CVXPY_CONVOLUTION_UNARY_MIN</span><span class="p">(</span><span class="n">dec</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-    <span class="c1"># test_CVXPY_CONVOLUTION_UNARY_MAX(dec=5)</span>
+    <span class="c1"># test_CVXPY_CONVOLUTION_UNARY_MIN(dec=5)</span>
+    <span class="n">test_CVXPY_CONVOLUTION_UNARY_MAX</span><span class="p">(</span><span class="n">dec</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
     <span class="c1"># test_CVXPY_MAXIMUM_McCormick(dec=5)</span>
     <span class="c1"># test_CVXPY_MULTIPLICATION_McCormick(5)</span>
     <span class="c1"># test_CVXPY_CONVOLUTION_McCormick(5)</span>

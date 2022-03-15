@@ -627,18 +627,20 @@
         <span class="c1"># old version - does not work with cvxpy</span>
         <span class="c1"># sum = np.sum(bins, axis=1)</span>
         <span class="c1"># maximum = np.max(sum)</span>
-        <span class="c1"># norm = numberOfUnaries / maximum</span>
+        <span class="c1"># norm =  maximum / numberOfUnaries</span>
         <span class="c1"># bins = bins * norm    # non-unarized version</span>
-
+        <span class="c1"># print(convolution)</span>
+        <span class="c1"># print(norm)</span>
 
 
             <span class="c1"># technique with maximum possible</span>
         <span class="k">if</span> <span class="n">convolution</span><span class="p">:</span>
             <span class="n">divisor</span> <span class="o">=</span> <span class="n">numberOfUnaries</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">28</span>
         <span class="k">else</span><span class="p">:</span>   <span class="c1"># maximum</span>
-            <span class="n">divisor</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">numberOfUnaries</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">numberOfUnaries</span>
+            <span class="c1"># divisor = (2*numberOfUnaries**2 - 2*numberOfUnaries + 1) / numberOfUnaries</span>
             <span class="c1"># divisor = numberOfUnaries * numberOfBins</span>
-            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">28</span>
         <span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span> <span class="o">/</span> <span class="n">divisor</span>
 
 

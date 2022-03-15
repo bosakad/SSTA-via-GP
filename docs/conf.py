@@ -75,4 +75,4 @@ suppress_warnings = ['app.add_node',
                      'epub.unknown_project_files'
 			]
 
-autodoc_mock_imports = ["randomVariableHist_Numpy", "histogramGenerator", "test_infiniteLadder", "parser", "node", "cvxpyVariable"]
+autodoc_mock_imports = ["randomVariableHist_Numpy", "histogramGenerator", "test_infiniteLadder", "parser", "node", "cvxpyVariable", "mosekVariable"]

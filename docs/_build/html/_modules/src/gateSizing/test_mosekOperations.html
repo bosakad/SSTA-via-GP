@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.gateSizing.test_mosekOperations &mdash; Gate Sizing  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Gate Sizing
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Gate Sizing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>src.gateSizing.test_mosekOperations</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.gateSizing.test_mosekOperations</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">mosek</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">histogramGenerator</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">mosekVariable</span> <span class="kn">import</span> <span class="n">RandomVariableMOSEK</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  This module tests mosek maximum and convolution operations.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="c1"># Define a stream printer to grab output from MOSEK</span>
+<div class="viewcode-block" id="streamprinter"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_mosekOperations.streamprinter">[docs]</a><span class="k">def</span> <span class="nf">streamprinter</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="testConvolution_MAX"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_mosekOperations.testConvolution_MAX">[docs]</a><span class="k">def</span> <span class="nf">testConvolution_MAX</span><span class="p">():</span>
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">2.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">2.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">3.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">1.802585</span>
+    <span class="n">numberOfGates</span> <span class="o">=</span> <span class="mi">2</span>
+
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">17</span>
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maxOfDistributionsQUAD_FORMULA_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span>
+    <span class="c1"># max1 = test1.convolutionOfTwoVarsShift(test2)</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">max1</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="c1"># Make a MOSEK environment</span>
+    <span class="k">with</span> <span class="n">mosek</span><span class="o">.</span><span class="n">Env</span><span class="p">()</span> <span class="k">as</span> <span class="n">env</span><span class="p">:</span>
+        <span class="c1"># Attach a printer to the environment</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+        <span class="c1"># Create a task</span>
+        <span class="k">with</span> <span class="n">env</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">task</span><span class="p">:</span>
+            <span class="c1"># Attach a printer to the task</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+            <span class="n">numberVariablesRVs</span> <span class="o">=</span> <span class="n">numberOfGates</span><span class="o">*</span><span class="n">numberOfBins</span> <span class="o">*</span> <span class="n">numberOfUnaries</span>
+
+            <span class="c1"># The constraints will initially have no bounds.</span>
+            <span class="c1"># task.appendcons(numberVariablesRVs)</span>
+            <span class="c1"># The variables will initially be fixed at zero (x=0).</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">numberVariablesRVs</span><span class="p">)</span>
+
+            <span class="c1"># set variables to be boolean</span>
+            <span class="n">rvIndices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberVariablesRVs</span><span class="p">))</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putvartypelist</span><span class="p">(</span><span class="n">rvIndices</span><span class="p">,</span>
+                                <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">variabletype</span><span class="o">.</span><span class="n">type_int</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberVariablesRVs</span><span class="p">)</span>
+
+
+
+            <span class="n">bins1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+            <span class="n">bins2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+
+            <span class="n">gates</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv1</span><span class="p">,</span> <span class="n">rv2</span><span class="p">]</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins1</span><span class="p">,</span> <span class="n">bins2</span><span class="p">]</span>
+
+            <span class="c1"># set objective function</span>
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfGates</span><span class="p">):</span>
+                <span class="n">currentBins</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">generatedRV</span> <span class="o">=</span> <span class="n">gates</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+
+                        <span class="n">variableIndex</span> <span class="o">=</span> <span class="n">gate</span><span class="o">*</span><span class="n">numberOfBins</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="nb">bin</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putcj</span><span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="c1"># Set the bounds on variable</span>
+                        <span class="c1"># 0 &lt;= x_j &lt;= 1</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putvarbound</span><span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">generatedRV</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">])</span>
+
+                            <span class="c1"># save index to the bins</span>
+                        <span class="n">currentBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">variableIndex</span>
+
+
+
+
+            <span class="c1"># todo: set create 2 random variables and perform convolution</span>
+
+            <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+            <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+
+            <span class="n">convolution</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">convolution_UNARY_DIVIDE</span><span class="p">(</span><span class="n">RV2</span><span class="p">)</span>
+            <span class="c1"># convolution = convolution.bins</span>
+
+                <span class="c1"># solve problem</span>
+
+            <span class="c1"># Input the objective sense (minimize/maximize)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putobjsense</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">objsense</span><span class="o">.</span><span class="n">maximize</span><span class="p">)</span>
+
+            <span class="c1"># Solve the problem</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+            <span class="c1"># Print a summary containing information</span>
+            <span class="c1"># about the solution for debugging purposes</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">solutionsummary</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">prosta</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">getprosta</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">)</span>
+            <span class="n">solsta</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">getsolsta</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">)</span>
+
+            <span class="c1"># Output a solution</span>
+            <span class="n">xx</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberVariablesRVs</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">getxx</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">,</span> <span class="n">xx</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">solsta</span> <span class="ow">in</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">integer_optimal</span><span class="p">]:</span>
+                <span class="k">pass</span>
+                <span class="c1"># print(&quot;Optimal solution: %s&quot; % xx)</span>
+            <span class="k">elif</span> <span class="n">solsta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">prim_feas</span><span class="p">:</span>
+                <span class="k">pass</span>
+                <span class="c1"># print(&quot;Feasible solution: %s&quot; % xx)</span>
+            <span class="k">elif</span> <span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">unknown</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">prim_infeas_or_unbounded</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status Infeasible or unbounded.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">prim_infeas</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status Infeasible.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">unkown</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status unkown.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Other problem status.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Other solution status&quot;</span><span class="p">)</span>
+
+
+
+
+            <span class="c1"># FORMULATE</span>
+
+            <span class="c1"># RV1 = RandomVariableCVXPY(x1, rv1.edges)</span>
+            <span class="c1"># RV2 = RandomVariableCVXPY(x2, rv1.edges)</span>
+
+            <span class="c1"># GET obj. function and constr</span>
+
+            <span class="c1"># convolution, constr = RV1.maximum_QUAD_UNARY_DIVIDE(RV2, asMin=False)</span>
+            <span class="c1"># convolution = convolution.bins</span>
+
+            <span class="c1"># objective function</span>
+            <span class="c1"># sum = 0</span>
+            <span class="c1"># for bin in range(0, numberOfBins):</span>
+            <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+            <span class="c1">#         sum += (convolution[bin])[unary]</span>
+            <span class="c1">#</span>
+            <span class="c1"># # other constraints</span>
+            <span class="c1">#</span>
+            <span class="c1"># for bin in range(0, numberOfBins):</span>
+            <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+            <span class="c1">#         constr.append((x1[bin])[unary] &lt;= rv1.bins[bin, unary])  # set lower constr.</span>
+            <span class="c1">#</span>
+            <span class="c1"># for bin in range(0, numberOfBins):</span>
+            <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+            <span class="c1">#         constr.append((x2[bin])[unary] &lt;= rv2.bins[bin, unary])  # set lower constr.</span>
+
+
+
+
+                <span class="c1"># solve</span>
+            <span class="c1"># objective = cp.Maximize(sum)</span>
+            <span class="c1"># prob = cp.Problem(objective, constr)</span>
+            <span class="c1"># prob.solve(verbose=True, solver=cp.MOSEK)</span>
+
+            <span class="c1"># PRINT OUT THE VALUES</span>
+            <span class="c1"># print(&quot;Problem value: &quot; + str(prob.value))</span>
+            <span class="c1">#</span>
+            <span class="c1"># convBins = np.zeros((numberOfBins, numberOfUnaries))</span>
+            <span class="c1"># for bin in range(0, numberOfBins):</span>
+            <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+            <span class="c1">#         convBins[bin, unary] = (convolution[bin])[unary].value</span>
+            <span class="c1">#</span>
+            <span class="c1"># edges = np.linspace(interval[0], interval[1], numberOfBins + 1)</span>
+            <span class="c1"># convRV = RandomVariable(convBins, edges, unary=True)</span>
+            <span class="c1">#</span>
+            <span class="c1"># print(convRV.bins)</span>
+            <span class="c1">#</span>
+            <span class="c1"># actual = [convRV.mean, convRV.std]</span>
+            <span class="c1"># print(actual)</span>
+            <span class="c1">#</span>
+            <span class="c1"># # TESTING</span>
+            <span class="c1">#</span>
+            <span class="c1"># np.testing.assert_almost_equal(desired, actual, decimal=dec)</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">testConvolution_MAX</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Adam Bosak.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
