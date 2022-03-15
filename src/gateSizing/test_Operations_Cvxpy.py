@@ -508,7 +508,7 @@ def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
 
         # GET obj. function and constr
 
-    convolution, constr = RV1.convolution_UNARY_NEW_MAX(RV2)
+    convolution, constr = RV1.convolution_UNARY_DIVIDE(RV2)
     convolution = convolution.bins
 
         # FORMULATE
@@ -517,7 +517,12 @@ def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
     sum = 0
     for bin in range(0, numberOfBins):
         for unary in range(0, numberOfUnaries):
-            sum += (convolution[bin])[unary]
+            sum += (x1[bin])[unary]
+
+    for bin in range(0, numberOfBins):
+        for unary in range(0, numberOfUnaries):
+            sum += (x2[bin])[unary]
+
 
     # other constraints
 
@@ -545,7 +550,7 @@ def test_CVXPY_CONVOLUTION_UNARY_MAX(dec: int):
         # solve
     objective = cp.Maximize( sum )
     prob = cp.Problem(objective, constr)
-    prob.solve(verbose=False, solver=cp.MOSEK)
+    prob.solve(verbose=True, solver=cp.MOSEK)
 
         # PRINT OUT THE VALUES
     print("Problem value: " + str(prob.value))
@@ -585,8 +590,8 @@ def test_CVXPY_CONVOLUTION_UNARY_MIN(dec: int):
     interval = (-5, 10)
 
     numberOfSamples = 2000000
-    numberOfBins = 8
-    numberOfUnaries = 8
+    numberOfBins = 50
+    numberOfUnaries = 50
 
 
     # DESIRED
@@ -635,6 +640,7 @@ def test_CVXPY_CONVOLUTION_UNARY_MIN(dec: int):
     for bin in range(0, numberOfBins):
         for unary in range(0, numberOfUnaries):
             sum += (convolution[bin])[unary]
+
 
     # other constraints
 
@@ -920,8 +926,8 @@ if __name__ == "__main__":
     # test_CVXPY_MAX_UNARY_OLD(dec=5)
     # test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec=
     # test_CVXPY_MAX_UNARY_NEW_AS_MIN(dec=5)
-    test_CVXPY_CONVOLUTION_UNARY_MIN(dec=5)
-    # test_CVXPY_CONVOLUTION_UNARY_MAX(dec=5)
+    # test_CVXPY_CONVOLUTION_UNARY_MIN(dec=5)
+    test_CVXPY_CONVOLUTION_UNARY_MAX(dec=5)
     # test_CVXPY_MAXIMUM_McCormick(dec=5)
     # test_CVXPY_MULTIPLICATION_McCormick(5)
     # test_CVXPY_CONVOLUTION_McCormick(5)

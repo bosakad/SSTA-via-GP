@@ -14,7 +14,7 @@ def testAlgorithms():
     step = 2
 
     numberOfGatesStart = 1
-    numberOfBins = 5
+    numberOfBins = 10
     numberOfUnaries = 10
 
     interval = (0, 35)
@@ -44,9 +44,9 @@ def testAlgorithms():
 
             # calculating
         numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
+        numNonZeros, ObjVal, lastGate, time = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
                                                                 withSymmetryConstr=False)
-
+        print(time)
             # saving values
         rvs_nonPrecise[iter, 0] = lastGate[0]
         rvs_nonPrecise[iter, 1] = lastGate[1]
@@ -60,7 +60,7 @@ def testAlgorithms():
 
             MAPE = ((MAPE + prevError) * iter) / (iter+1)
 
-        results[(numGates, False)] = (numNonZeros, ObjVal, MAPE[0], MAPE[1])
+        results[(numGates, False)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1])
 
         # print results
     print("\n\n" + str(results))
@@ -71,7 +71,7 @@ def testAlgorithms():
         print("\n\n" + str(iter) + ". iteration: \n\n")
 
         numGates = numberOfGatesStart + iter*step
-        numNonZeros, ObjVal, lastGate = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
+        numNonZeros, ObjVal, lastGate, time = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
                                                                  withSymmetryConstr=True)
 
         # saving values
@@ -87,7 +87,7 @@ def testAlgorithms():
 
             MAPE = ((MAPE + prevError) * iter) / (iter + 1)
 
-        results[(numGates, True)] = (numNonZeros, ObjVal, MAPE[0], MAPE[1])
+        results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1])
 
 
 

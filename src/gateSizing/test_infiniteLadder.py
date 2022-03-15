@@ -124,6 +124,7 @@ def main(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-8, 35
 
     num_nonZeros = prob.solver_stats.extra_stats.getAttr("NumNZs")
     ObjVal = prob.solver_stats.extra_stats.getAttr("ObjVal")
+    time = prob.solver_stats.extra_stats.getAttr("Runtime")
 
 
     # print out the values
@@ -146,7 +147,7 @@ def main(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-8, 35
 
     lastGate = (rvs[-1].mean, rvs[-1].std)
 
-    return (num_nonZeros, ObjVal, lastGate)
+    return (num_nonZeros, ObjVal, lastGate, time)
 
     # # NUMPY
     #

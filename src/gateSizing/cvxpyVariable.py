@@ -13,7 +13,7 @@ class RandomVariableCVXPY:
     Class includes:
         bins: len n of frequencies, dictionary of dictionary with cvxpy variables (1, 1)
         edges: len n+1 of histogram edges, dtype: 1-D np.array
-        lowerBounds: numpy array of lowerbounds values
+        lowerBounds: numpy array of lowerbounds values, not a mandatory atribute
     """
 
 
@@ -238,8 +238,6 @@ class RandomVariableCVXPY:
     def convolution_UNARY_DIVIDE(self, secondVariable, withSymmetryConstr=False, asMin=False):
         """ Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
         using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
-        IMPORTANT:
-                    WORKS ONLY FOR MINIMIZATION PROBLEM
 
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
@@ -334,6 +332,7 @@ class RandomVariableCVXPY:
         #         ConvConstraints.append(slackMult <= y)
         #         ConvConstraints.append(slackMult >= x + y - 1)
 
+        divisor = 28
 
         # introducing constraint for convolution
         convolution = {}
@@ -346,11 +345,11 @@ class RandomVariableCVXPY:
 
             if asMin:
                 # ConvConstraints.append(sumOfNewVariables >= finalUpperBound[i])
-                ConvConstraints.append(sumOfNewVariables >= sumOfMultiplications[i] / numberOfUnaries)    # as a min possible
+                ConvConstraints.append(sumOfNewVariables >= sumOfMultiplications[i] / divisor)    # as a min possible
             elif not asMin:
 
                 ceil = 0.999    # max possible for the solver not to round the number
-                ConvConstraints.append(sumOfNewVariables <= sumOfMultiplications[i] / numberOfUnaries + ceil)  # as a max possible
+                ConvConstraints.append(sumOfNewVariables <= sumOfMultiplications[i] / divisor + ceil)  # as a max possible
                 ConvConstraints.append(sumOfNewVariables <= numberOfUnaries)
 
         # symmetry constraints
@@ -430,7 +429,7 @@ class RandomVariableCVXPY:
 
 
         # divisor = np.ceil((2*numberOfUnaries**2 - 2*numberOfUnaries + 1) / numberOfUnaries)
-        divisor = 2
+        divisor = 28
 
         # introducing constraint for maximum
         maximum = {}

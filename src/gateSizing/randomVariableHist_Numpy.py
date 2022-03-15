@@ -564,18 +564,20 @@ class RandomVariable:
         # old version - does not work with cvxpy
         # sum = np.sum(bins, axis=1)
         # maximum = np.max(sum)
-        # norm = numberOfUnaries / maximum
+        # norm =  maximum / numberOfUnaries
         # bins = bins * norm    # non-unarized version
-
+        # print(convolution)
+        # print(norm)
 
 
             # technique with maximum possible
         if convolution:
             divisor = numberOfUnaries
+            divisor = 28
         else:   # maximum
-            divisor = (2*numberOfUnaries**2 - 2*numberOfUnaries + 1) / numberOfUnaries
+            # divisor = (2*numberOfUnaries**2 - 2*numberOfUnaries + 1) / numberOfUnaries
             # divisor = numberOfUnaries * numberOfBins
-            divisor = 2
+            divisor = 28
         bins = bins / divisor
 
 
