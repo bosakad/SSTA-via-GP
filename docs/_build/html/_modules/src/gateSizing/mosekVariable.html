@@ -61,7 +61,8 @@
            <div itemprop="articleBody">
              
   <h1>Source code for src.gateSizing.mosekVariable</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">mosek</span>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">mosek</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -80,49 +81,723 @@
 <span class="sd">    Class includes:</span>
 <span class="sd">      bins: numpy list of lists of integer indices to MOSEK variable list</span>
 <span class="sd">      edges: len n+1 of histogram edges, dtype: 1-D np.array</span>
+<span class="sd">      task: mosek.Task</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">edges</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">edges</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">mosek</span><span class="o">.</span><span class="n">Task</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">task</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inf</span> <span class="o">=</span> <span class="mf">0.0</span>   <span class="c1"># symbolic purposes</span>
 
 
 
-
-<div class="viewcode-block" id="RandomVariableMOSEK.convolution_UNARY_DIVIDE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_DIVIDE">[docs]</a>    <span class="k">def</span> <span class="nf">convolution_UNARY_DIVIDE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">asMin</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE">[docs]</a>    <span class="k">def</span> <span class="nf">convolution_UNARY_MAX_DIVIDE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Calculates convolution of 2 PDFs of random variable. Works only for 2 identical edges. Is computed</span>
 <span class="sd">        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.</span>
-<span class="sd">        Is in MOSEK environment.</span>
+<span class="sd">        Is in MOSEK environment. Works only for maximization task.</span>
 
-<span class="sd">        :param self: class RandomVariableCVXPY</span>
-<span class="sd">        :param secondVariable: class RandomVariableCVXPY</span>
-<span class="sd">        :param asMin: boolean, true for minimization problem, false for maximization problem</span>
+<span class="sd">        :param self: class RandomVariableMOSEK</span>
+<span class="sd">        :param secondVariable: class RandomVariableMOSEK</span>
+<span class="sd">        :param curNofVariables: current number of MOSEK variables - to know the indices</span>
+<span class="sd">        :param curNofConstr: current number of MOSEK constraints - to know the indices</span>
 <span class="sd">        :param withSymmetryConstr: boolean whether a symmetry constraints should be included</span>
-<span class="sd">        :return convolutionClass:  class RandomVariableCVXPY with cvxpy slack variables</span>
-<span class="sd">        :return ConvConstraints: python array with inequalities - for computing the convolution</span>
+<span class="sd">        :return convolutionClass:  class RandomVariableMOSEK with cvxpy slack variables</span>
+<span class="sd">        :return newNofVariables: integer, new total number of MOSEK variables</span>
+<span class="sd">        :return newNofConstr: integer, new total number of MOSEK constraints</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ahoj&#39;</span><span class="p">)</span>
+            <span class="c1"># get data</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span>
+        <span class="n">newNofVariables</span> <span class="o">=</span> <span class="n">curNofVariables</span>
 
-        <span class="k">return</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="RandomVariableMOSEK.maximum_QUAD_UNARY_DIVIDE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_QUAD_UNARY_DIVIDE">[docs]</a>    <span class="k">def</span> <span class="nf">maximum_QUAD_UNARY_DIVIDE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">asMin</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="c1"># create slack multiplications</span>
+        <span class="n">nSlackMult</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">numberOfBins</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">numberOfBins</span><span class="p">)</span><span class="o">*</span><span class="n">numberOfUnaries</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">slackMult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nSlackMult</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nSlackMult</span>
+
+            <span class="c1"># create convolution variables</span>
+        <span class="n">nConvolutions</span> <span class="o">=</span> <span class="n">numberOfBins</span><span class="o">*</span><span class="n">numberOfUnaries</span>
+        <span class="n">convolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nConvolutions</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nConvolutions</span>
+        <span class="n">newVariables</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">convolution</span><span class="p">,</span> <span class="p">(</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>  <span class="c1"># reshape bins</span>
+
+            <span class="c1"># append variables</span>
+        <span class="n">numberToCreate</span> <span class="o">=</span> <span class="n">nSlackMult</span> <span class="o">+</span> <span class="n">nConvolutions</span>
+        <span class="n">varsToCreateExtended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span><span class="p">,</span> <span class="n">convolution</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">numberToCreate</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">putvartypelist</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">variabletype</span><span class="o">.</span><span class="n">type_int</span><span class="p">]</span><span class="o">*</span><span class="n">numberToCreate</span><span class="p">)</span>  <span class="c1"># integer</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">putvarboundlist</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">]</span><span class="o">*</span> <span class="n">numberToCreate</span><span class="p">,</span>
+                                                        <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span><span class="o">*</span><span class="n">numberToCreate</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span><span class="o">*</span><span class="n">numberToCreate</span><span class="p">)</span>   <span class="c1"># binary</span>
+
+            <span class="c1"># convolution</span>
+
+        <span class="c1"># allocate for storing the sum of multiplications</span>
+        <span class="n">sumOfMultiplications</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># append sumOfMultiplications constraints</span>
+        <span class="k">if</span> <span class="n">withSymmetryConstr</span><span class="p">:</span>
+            <span class="n">symN</span> <span class="o">=</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">numberOfBins</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">symN</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">nSlackMult</span> <span class="o">+</span> <span class="n">symN</span><span class="p">)</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">numberOfBins</span>
+
+
+        <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+            <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+                <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">unary2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+
+                            <span class="c1"># constraints for sum of multiplications</span>
+                        <span class="n">indexToSlack</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">z</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">z</span><span class="p">)</span><span class="o">*</span><span class="n">numberOfUnaries</span><span class="o">**</span><span class="mi">2</span>
+                                       <span class="o">+</span> <span class="n">k</span><span class="o">*</span><span class="n">numberOfUnaries</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">unary</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary2</span><span class="p">)</span>
+                        <span class="n">curSlackMult</span> <span class="o">=</span> <span class="n">slackMult</span><span class="p">[</span><span class="n">indexToSlack</span><span class="p">]</span>
+
+                        <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">z</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curSlackMult</span><span class="p">]))</span>
+
+                                <span class="c1"># help constraints</span>
+                        <span class="n">xIndex</span> <span class="o">=</span> <span class="n">x1</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span>
+                        <span class="n">yIndex</span> <span class="o">=</span> <span class="n">x2</span><span class="p">[</span><span class="n">z</span> <span class="o">-</span> <span class="n">k</span><span class="p">,</span> <span class="n">unary2</span><span class="p">]</span>
+
+
+                            <span class="c1"># slackMult &lt;= x</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                            <span class="c1"># slackMult &lt;= y</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                            <span class="c1">#slackMult &gt;= x + y - 1</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cutBins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">sumOfMultiplications</span><span class="p">)</span>
+
+        <span class="n">ceil</span> <span class="o">=</span> <span class="mf">0.999</span>
+        <span class="n">division</span> <span class="o">=</span> <span class="n">numberOfUnaries</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">curNofConstr</span>
+
+        <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">newVariables</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">sumOfMultiplicationsRow</span> <span class="o">=</span> <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="nb">bin</span><span class="p">][:]</span>
+
+                <span class="c1"># sumOfNewVariables &lt;= sumOfMultiplications[i] / divisor + ceil</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfUnaries</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sumOfMultiplicationsRow</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span><span class="o">*</span><span class="n">sumOfMultiplicationsRow</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">sumOfMultiplicationsRow</span><span class="p">,</span>
+                                                                        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">division</span><span class="p">]</span><span class="o">*</span><span class="n">sumOfMultiplicationsRow</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">ceil</span><span class="p">)</span>
+
+                <span class="c1"># sumOfNewVariables &lt;= numberOfUnaries</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+        <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">curNofConstr</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nSlackMult</span>
+
+
+        <span class="k">if</span> <span class="n">withSymmetryConstr</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">offset</span> <span class="o">=</span> <span class="nb">bin</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">unary</span>
+
+                    <span class="c1"># (maximum[bin])[unary] &gt;= (maximum[bin])[unary + 1])</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">newVariables</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">newVariables</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+            <span class="n">newNofConstr</span> <span class="o">+=</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+
+
+        <span class="n">convolutionClass</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">newVariables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">convolutionClass</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span></div>
+
+<div class="viewcode-block" id="RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE_VECTORIZED"><a class="viewcode-back" href="../../../index.html#src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE_VECTORIZED">[docs]</a>    <span class="k">def</span> <span class="nf">convolution_UNARY_MAX_DIVIDE_VECTORIZED</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculates convolution of 2 PDFs of random variable. Works only for 2 identical edges. Is computed</span>
+<span class="sd">        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.</span>
+<span class="sd">        Is in MOSEK environment. Does not work</span>
+
+<span class="sd">        :param self: class RandomVariableMOSEK</span>
+<span class="sd">        :param secondVariable: class RandomVariableMOSEK</span>
+<span class="sd">        :param curNofVariables: current number of MOSEK variables - to know the indices</span>
+<span class="sd">        :param curNofConstr: current number of MOSEK constraints - to know the indices</span>
+<span class="sd">        :param withSymmetryConstr: boolean whether a symmetry constraints should be included</span>
+<span class="sd">        :return convolutionClass:  class RandomVariableMOSEK with cvxpy slack variables</span>
+<span class="sd">        :return newNofVariables: integer, new total number of MOSEK variables</span>
+<span class="sd">        :return newNofConstr: integer, new total number of MOSEK constraints</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get data</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span>
+        <span class="n">newNofVariables</span> <span class="o">=</span> <span class="n">curNofVariables</span>
+
+        <span class="c1"># create slack multiplications</span>
+        <span class="n">nSlackMult</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">numberOfBins</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">slackMult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nSlackMult</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nSlackMult</span>
+
+        <span class="c1"># create convolution variables</span>
+        <span class="n">nConvolutions</span> <span class="o">=</span> <span class="n">numberOfBins</span> <span class="o">*</span> <span class="n">numberOfUnaries</span>
+        <span class="n">convolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nConvolutions</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nConvolutions</span>
+        <span class="n">convolutionBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">convolution</span><span class="p">,</span> <span class="p">(</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>  <span class="c1"># reshape bins</span>
+
+        <span class="c1"># append variables</span>
+        <span class="n">numberToCreate</span> <span class="o">=</span> <span class="n">nSlackMult</span> <span class="o">+</span> <span class="n">nConvolutions</span>
+        <span class="n">varsToCreateExtended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span><span class="p">,</span> <span class="n">convolution</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">numberToCreate</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">putvartypelist</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">variabletype</span><span class="o">.</span><span class="n">type_int</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">)</span>  <span class="c1"># integer</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">putvarboundlist</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">,</span>
+                             <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">)</span>  <span class="c1"># binary</span>
+
+        <span class="c1"># convolution</span>
+
+            <span class="c1"># allocate dict for sum of multiplications</span>
+        <span class="n">sumOfMultiplications</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># append constraints</span>
+        <span class="k">if</span> <span class="n">withSymmetryConstr</span><span class="p">:</span>
+            <span class="n">symN</span> <span class="o">=</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">numberOfBins</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">symN</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nSlackMult</span> <span class="o">+</span> <span class="n">symN</span><span class="p">)</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">curNofConstr</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+
+
+        <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+            <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+                <span class="n">unary</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+                <span class="n">unary</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">unary</span><span class="p">,</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+                <span class="n">unary2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+                <span class="n">unary2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">unary2</span><span class="p">,</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+                <span class="c1"># constraints for sum of multiplications</span>
+                <span class="n">indexToSlack</span> <span class="o">=</span> <span class="p">((</span><span class="n">z</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span>
+                                   <span class="o">+</span> <span class="n">k</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">unary</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">curSlackMult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">slackMult</span><span class="p">[</span><span class="n">indexToSlack</span><span class="p">])</span>
+
+                <span class="c1"># task.putaij(z, curSlackMult, - 1 / division)</span>
+                <span class="n">indexToSlack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">indexToSlack</span><span class="p">)</span>
+                <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">z</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curSlackMult</span><span class="p">]))</span>
+
+                <span class="c1"># help constraints</span>
+                <span class="n">xIndex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">unary</span><span class="p">])</span>
+                <span class="n">yIndex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="n">z</span> <span class="o">-</span> <span class="n">k</span><span class="p">,</span> <span class="n">unary2</span><span class="p">])</span>
+
+                <span class="n">numberOfElements</span> <span class="o">=</span> <span class="n">indexToSlack</span><span class="o">.</span><span class="n">size</span>
+
+                <span class="c1"># slackMult &lt;= x</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="n">task</span><span class="o">.</span><span class="n">putconboundlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span>
+                                                <span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="c1"># slackMult &lt;= y</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="n">task</span><span class="o">.</span><span class="n">putconboundlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span>
+                                                        <span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="c1"># slackMult &gt;= x + y - 1</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="n">task</span><span class="o">.</span><span class="n">putconboundlist</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span>
+                                                        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cutBins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">sumOfMultiplications</span><span class="p">)</span>
+
+        <span class="n">ceil</span> <span class="o">=</span> <span class="mf">0.999</span>
+        <span class="n">division</span> <span class="o">=</span> <span class="n">numberOfUnaries</span>
+
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">curNofConstr</span>
+
+        <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">convolutionBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">sumOfMultiplicationsRow</span> <span class="o">=</span> <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="nb">bin</span><span class="p">][:]</span>
+
+            <span class="n">nSums</span> <span class="o">=</span> <span class="n">sumOfMultiplicationsRow</span><span class="o">.</span><span class="n">size</span>
+
+            <span class="c1"># sumOfNewVariables &lt;= sumOfMultiplications[i] / divisor + ceil</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sumOfMultiplicationsRow</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="o">*</span> <span class="n">nSums</span><span class="p">,</span> <span class="n">sumOfMultiplicationsRow</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">division</span><span class="p">]</span> <span class="o">*</span> <span class="n">nSums</span><span class="p">)</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">ceil</span><span class="p">)</span>
+
+            <span class="c1"># sumOfNewVariables &lt;= numberOfUnaries</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+        <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">curNofConstr</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">nSlackMult</span>
+
+        <span class="k">if</span> <span class="n">withSymmetryConstr</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">offset</span> <span class="o">=</span> <span class="nb">bin</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">unary</span>
+
+                    <span class="c1"># (maximum[bin])[unary] &gt;= (maximum[bin])[unary + 1])</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">convolutionBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">convolutionBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+            <span class="n">newNofConstr</span> <span class="o">+=</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+
+
+        <span class="n">convolutionClass</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">convolutionBins</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">convolutionClass</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span></div>
+
+<div class="viewcode-block" id="RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE">[docs]</a>    <span class="k">def</span> <span class="nf">maximum_UNARY_MAX_DIVIDE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed</span>
 <span class="sd">        using the &#39;quadratic&#39; algorithm and unary representation of bins - M 0/1-bins for each bin.</span>
 <span class="sd">        Unarization is kept using the divison.</span>
 <span class="sd">        Is in MOSEK environment.</span>
 
-<span class="sd">        :param self: class RandomVariableCVXPY</span>
-<span class="sd">        :param secondVariable: class RandomVariableCVXPY</span>
-<span class="sd">        :param asMin: boolean, true for minimization problem, false for maximization problem</span>
+<span class="sd">        :param self: class RandomVariableMOSEK</span>
+<span class="sd">        :param secondVariable: class RandomVariableMOSEK</span>
+<span class="sd">        :param curNofVariables: current number of MOSEK variables - to know the indices</span>
+<span class="sd">        :param curNofConstr: current number of MOSEK constraints - to know the indices</span>
 <span class="sd">        :param withSymmetryConstr: boolean whether a symmetry constraints should be included</span>
-<span class="sd">        :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)</span>
-<span class="sd">        :return MaxConstraints: python array with inequalities - for computing the maximum</span>
+
+<span class="sd">        :return maximumClass: class RandomVariableMOSEK with cvxpy slack variables (1, 1)</span>
+<span class="sd">        :return newNofVariables: integer, new total number of MOSEK variables</span>
+<span class="sd">        :return newNofConstr: integer, new total number of MOSEK constraints</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="kc">None</span></div></div>
+        <span class="c1"># get data</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span>
+        <span class="n">newNofVariables</span> <span class="o">=</span> <span class="n">curNofVariables</span>
+
+
+        <span class="c1"># create slack multiplications</span>
+        <span class="n">nSlackMult</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">numberOfBins</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">slackMult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nSlackMult</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nSlackMult</span>
+
+        <span class="c1"># create second slack multiplications</span>
+        <span class="n">nSlackMult2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">numberOfBins</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">numberOfBins</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="p">)</span>
+        <span class="n">slackMult2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nSlackMult2</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nSlackMult2</span>
+
+        <span class="c1"># create convolution variables</span>
+        <span class="n">nMaximums</span> <span class="o">=</span> <span class="n">numberOfBins</span> <span class="o">*</span> <span class="n">numberOfUnaries</span>
+        <span class="n">maximum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nMaximums</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nMaximums</span>
+        <span class="n">maximumBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="p">(</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>  <span class="c1"># reshape bins</span>
+
+
+        <span class="c1"># append variables</span>
+        <span class="n">numberToCreate</span> <span class="o">=</span> <span class="n">nSlackMult</span> <span class="o">+</span> <span class="n">nSlackMult2</span> <span class="o">+</span> <span class="n">nMaximums</span>
+        <span class="n">varsToCreateExtended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span><span class="p">,</span> <span class="n">maximum</span><span class="p">)</span>
+        <span class="n">varsToCreateExtended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="n">slackMult2</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">numberToCreate</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">putvartypelist</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">variabletype</span><span class="o">.</span><span class="n">type_int</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">)</span>  <span class="c1"># integer</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">putvarboundlist</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">,</span>
+                             <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">)</span>  <span class="c1"># binary</span>
+
+
+        <span class="c1"># allocate dict for sum of multiplications</span>
+        <span class="n">sumOfMultiplications</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># append constraints</span>
+        <span class="k">if</span> <span class="n">withSymmetryConstr</span><span class="p">:</span>
+            <span class="n">symN</span> <span class="o">=</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">numberOfBins</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">symN</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">nSlackMult</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">nSlackMult2</span> <span class="o">+</span> <span class="n">symN</span><span class="p">)</span>
+
+            <span class="c1"># set offsets</span>
+        <span class="n">constrOffset</span> <span class="o">=</span> <span class="n">curNofConstr</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+        <span class="n">constrOffset2</span> <span class="o">=</span> <span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">nSlackMult</span>
+
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+            <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+                <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">unary2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+
+                        <span class="c1"># constraints for sum of multiplications</span>
+                        <span class="n">indexToSlack</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">i</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span>
+                                           <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">unary</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary2</span><span class="p">)</span>
+                        <span class="n">curSlackMult</span> <span class="o">=</span> <span class="n">slackMult</span><span class="p">[</span><span class="n">indexToSlack</span><span class="p">]</span>
+
+                        <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curSlackMult</span><span class="p">]))</span>
+
+                        <span class="c1"># help constraints</span>
+                        <span class="n">xIndex</span> <span class="o">=</span> <span class="n">x1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span>
+                        <span class="n">yIndex</span> <span class="o">=</span> <span class="n">x2</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">unary2</span><span class="p">]</span>
+
+                        <span class="c1"># slackMult &lt;= x</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                        <span class="c1"># slackMult &lt;= y</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                        <span class="c1"># slackMult &gt;= x + y - 1</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                            <span class="c1"># constraints for sum of multiplications</span>
+                            <span class="c1"># print(slackMult2Offset)</span>
+                            <span class="n">indexToSlack</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span>
+                                               <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">unary</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary2</span><span class="p">)</span>
+                            <span class="n">curSlackMult</span> <span class="o">=</span> <span class="n">slackMult2</span><span class="p">[</span><span class="n">indexToSlack</span><span class="p">]</span>
+
+
+                            <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curSlackMult</span><span class="p">]))</span>
+
+                            <span class="c1"># help constraints</span>
+                            <span class="n">xIndex</span> <span class="o">=</span> <span class="n">x1</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span>
+                            <span class="n">yIndex</span> <span class="o">=</span> <span class="n">x2</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">unary2</span><span class="p">]</span>
+
+                            <span class="c1"># slackMult &lt;= x</span>
+                            <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                            <span class="c1"># slackMult &lt;= y</span>
+                            <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+                            <span class="c1"># slackMult &gt;= x + y - 1</span>
+                            <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+
+        <span class="n">division</span> <span class="o">=</span> <span class="n">numberOfUnaries</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">ceil</span> <span class="o">=</span> <span class="mf">0.999</span>
+
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">curNofConstr</span>
+
+        <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">maximumBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">sumOfMultiplicationsRow</span> <span class="o">=</span> <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="nb">bin</span><span class="p">][:]</span>
+
+            <span class="n">nSums</span> <span class="o">=</span> <span class="n">sumOfMultiplicationsRow</span><span class="o">.</span><span class="n">size</span>
+
+            <span class="c1"># sumOfNewVariables &lt;= sumOfMultiplications[i] / divisor + ceil</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nSums</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="o">*</span> <span class="n">nSums</span><span class="p">,</span> <span class="n">sumOfMultiplicationsRow</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">division</span><span class="p">]</span> <span class="o">*</span> <span class="n">nSums</span><span class="p">)</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">ceil</span><span class="p">)</span>
+
+            <span class="c1"># sumOfNewVariables &lt;= numberOfUnaries</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+
+
+        <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">curNofConstr</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span><span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span><span class="n">nSlackMult</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">nSlackMult2</span>
+
+        <span class="k">if</span> <span class="n">withSymmetryConstr</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">offset</span> <span class="o">=</span> <span class="nb">bin</span><span class="o">*</span><span class="p">(</span><span class="n">numberOfUnaries</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">unary</span>
+
+                        <span class="c1">#(maximum[bin])[unary] &gt;= (maximum[bin])[unary + 1])</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">maximumBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">maximumBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+
+            <span class="n">newNofConstr</span> <span class="o">+=</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">numberOfBins</span>
+
+
+        <span class="n">maximumClass</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">maximumBins</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">maximumClass</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span></div>
+
+<div class="viewcode-block" id="RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE_VECTORIZED"><a class="viewcode-back" href="../../../index.html#src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE_VECTORIZED">[docs]</a>    <span class="k">def</span> <span class="nf">maximum_UNARY_MAX_DIVIDE_VECTORIZED</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Calculates maximum of 2 PDFs of random variable. Works only for 2 identical edges. Is computed</span>
+<span class="sd">        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.</span>
+<span class="sd">        Is in MOSEK environment.</span>
+
+<span class="sd">        :param self: class RandomVariableMOSEK</span>
+<span class="sd">        :param secondVariable: class RandomVariableMOSEK</span>
+<span class="sd">        :param curNofVariables: current number of MOSEK variables - to know the indices</span>
+<span class="sd">        :param curNofConstr: current number of MOSEK constraints - to know the indices</span>
+<span class="sd">        :param withSymmetryConstr: boolean whether a symmetry constraints should be included</span>
+<span class="sd">        :return maximumClass:  class RandomVariableMOSEK with cvxpy slack variables</span>
+<span class="sd">        :return newNofVariables: integer, new total number of MOSEK variables</span>
+<span class="sd">        :return newNofConstr: integer, new total number of MOSEK constraints</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get data</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">x2</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="n">x1</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span>
+        <span class="n">newNofVariables</span> <span class="o">=</span> <span class="n">curNofVariables</span>
+
+        <span class="c1"># create slack multiplications</span>
+        <span class="n">nSlackMult</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">numberOfBins</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">slackMult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nSlackMult</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nSlackMult</span>
+
+        <span class="c1"># create second slack multiplications</span>
+        <span class="n">nSlackMult2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="n">numberOfBins</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">numberOfBins</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">slackMult2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nSlackMult2</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nSlackMult2</span>
+
+        <span class="c1"># create convolution variables</span>
+        <span class="n">nMaximums</span> <span class="o">=</span> <span class="n">numberOfBins</span> <span class="o">*</span> <span class="n">numberOfUnaries</span>
+        <span class="n">maximum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="n">nMaximums</span><span class="p">))</span>
+        <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="n">nMaximums</span>
+        <span class="n">maximumBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="p">(</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>  <span class="c1"># reshape bins</span>
+
+        <span class="c1"># append variables</span>
+        <span class="n">numberToCreate</span> <span class="o">=</span> <span class="n">nSlackMult</span> <span class="o">+</span> <span class="n">nSlackMult2</span> <span class="o">+</span> <span class="n">nMaximums</span>
+        <span class="n">varsToCreateExtended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span><span class="p">,</span> <span class="n">maximum</span><span class="p">)</span>
+        <span class="n">varsToCreateExtended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="n">slackMult2</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">numberToCreate</span><span class="p">)</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">putvartypelist</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">variabletype</span><span class="o">.</span><span class="n">type_int</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">)</span>  <span class="c1"># integer</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">putvarboundlist</span><span class="p">(</span><span class="n">varsToCreateExtended</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">,</span>
+                             <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberToCreate</span><span class="p">)</span>  <span class="c1"># binary</span>
+
+        <span class="c1"># allocate dict for sum of multiplications</span>
+        <span class="n">sumOfMultiplications</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># append sumOfMultiplications constraints</span>
+        <span class="k">if</span> <span class="n">withSymmetryConstr</span><span class="p">:</span>
+            <span class="n">symN</span> <span class="o">=</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">numberOfBins</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">symN</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nSlackMult</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nSlackMult2</span> <span class="o">+</span> <span class="n">symN</span><span class="p">)</span>
+
+        <span class="c1"># set offsets</span>
+        <span class="n">constrOffset</span> <span class="o">=</span> <span class="n">curNofConstr</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+        <span class="n">constrOffset2</span> <span class="o">=</span> <span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nSlackMult</span>
+
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+            <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+                <span class="n">unary</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+                <span class="n">unary</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">unary</span><span class="p">,</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+                <span class="n">unary2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+                <span class="n">unary2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">unary2</span><span class="p">,</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+                <span class="c1"># constraints for sum of multiplications</span>
+                <span class="n">indexToSlack</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span>
+                                   <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">unary</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">curSlackMult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">slackMult</span><span class="p">[</span><span class="n">indexToSlack</span><span class="p">])</span>
+
+                <span class="n">indexToSlack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">indexToSlack</span><span class="p">)</span>
+                <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curSlackMult</span><span class="p">]))</span>
+
+                <span class="c1"># help constraints</span>
+                <span class="n">xIndex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">unary</span><span class="p">])</span>
+                <span class="n">yIndex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">unary2</span><span class="p">])</span>
+
+                <span class="n">numberOfElements</span> <span class="o">=</span> <span class="n">indexToSlack</span><span class="o">.</span><span class="n">size</span>
+
+                <span class="c1"># slackMult &lt;= x</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="n">task</span><span class="o">.</span><span class="n">putconboundlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span>
+                                                <span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="c1"># slackMult &lt;= y</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="n">task</span><span class="o">.</span><span class="n">putconboundlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span>
+                                                        <span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="c1"># slackMult &gt;= x + y - 1</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="n">task</span><span class="o">.</span><span class="n">putconboundlist</span><span class="p">(</span><span class="n">constrOffset</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span>
+                                                        <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span><span class="o">*</span><span class="n">numberOfElements</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+
+                    <span class="c1"># constraints for sum of multiplications</span>
+                    <span class="n">indexToSlack</span> <span class="o">=</span> <span class="p">(((</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span>
+                                           <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">unary</span> <span class="o">*</span> <span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+                    <span class="n">curSlackMult</span> <span class="o">=</span> <span class="n">slackMult2</span><span class="p">[</span><span class="n">indexToSlack</span><span class="p">]</span>
+
+                    <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curSlackMult</span><span class="p">]))</span>
+                    <span class="n">curSlackMult</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">slackMult2</span><span class="p">[</span><span class="n">indexToSlack</span><span class="p">])</span>
+
+                    <span class="n">indexToSlack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">indexToSlack</span><span class="p">)</span>
+                    <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">curSlackMult</span><span class="p">]))</span>
+
+                    <span class="c1"># help constraints</span>
+                    <span class="n">xIndex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">unary</span><span class="p">])</span>
+                    <span class="n">yIndex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">unary2</span><span class="p">])</span>
+
+                    <span class="n">numberOfElements</span> <span class="o">=</span> <span class="n">indexToSlack</span><span class="o">.</span><span class="n">size</span>
+
+                    <span class="c1"># slackMult &lt;= x</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconboundlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span>
+                                         <span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+
+                    <span class="c1"># slackMult &lt;= y</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconboundlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">,</span>
+                                         <span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+
+                    <span class="c1"># slackMult &gt;= x + y - 1</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">yIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">xIndex</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">curSlackMult</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconboundlist</span><span class="p">(</span><span class="n">constrOffset2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">indexToSlack</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">,</span>
+                                         <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfElements</span><span class="p">)</span>
+
+
+
+        <span class="n">division</span> <span class="o">=</span> <span class="n">numberOfUnaries</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">ceil</span> <span class="o">=</span> <span class="mf">0.999</span>
+
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">curNofConstr</span>
+
+        <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">maximumBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">sumOfMultiplicationsRow</span> <span class="o">=</span> <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="nb">bin</span><span class="p">][:]</span>
+
+            <span class="n">nSums</span> <span class="o">=</span> <span class="n">sumOfMultiplicationsRow</span><span class="o">.</span><span class="n">size</span>
+
+            <span class="c1"># sumOfNewVariables &lt;= sumOfMultiplications[i] / divisor + ceil</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nSums</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">]</span> <span class="o">*</span> <span class="n">nSums</span><span class="p">,</span> <span class="n">sumOfMultiplicationsRow</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">division</span><span class="p">]</span> <span class="o">*</span> <span class="n">nSums</span><span class="p">)</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">ceil</span><span class="p">)</span>
+
+            <span class="c1"># sumOfNewVariables &lt;= numberOfUnaries</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="nb">bin</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+
+
+        <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">curNofConstr</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nSlackMult</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">nSlackMult2</span>
+
+        <span class="k">if</span> <span class="n">withSymmetryConstr</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">offset</span> <span class="o">=</span> <span class="nb">bin</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">unary</span>
+
+                    <span class="c1"># (maximum[bin])[unary] &gt;= (maximum[bin])[unary + 1])</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">maximumBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">maximumBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+            <span class="n">newNofConstr</span> <span class="o">+=</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+
+
+        <span class="n">maximumClass</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">maximumBins</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">maximumClass</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span></div>
+
+
+<div class="viewcode-block" id="RandomVariableMOSEK.cutBins"><a class="viewcode-back" href="../../../index.html#src.gateSizing.mosekVariable.RandomVariableMOSEK.cutBins">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">cutBins</span><span class="p">(</span><span class="n">edges</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">bins</span><span class="p">:</span> <span class="p">{}):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cuts bins depending on edge[0]</span>
+<span class="sd">        if edge[0] &lt; 0: cuts left bins and adds zeros to the end</span>
+<span class="sd">        if edge[0] &gt; 0: cuts right bins and adds zeros to the beginning</span>
+<span class="sd">        Works for only unary random variable</span>
+
+<span class="sd">        :param edges: (1, n+1) numpy array of edges</span>
+<span class="sd">        :param bins: dictionary of dictionray of cp.Variables (1,1)</span>
+<span class="sd">        :returns None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">numberOfBins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="n">numberOfBinsNeeded</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">diff</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># cut bins</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfBinsNeeded</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                <span class="n">bins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">numberOfBinsNeeded</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBinsNeeded</span><span class="p">):</span>
+                <span class="n">bins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># cut bins</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfBinsNeeded</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                <span class="n">bins</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">numberOfBinsNeeded</span><span class="p">]</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfBins</span> <span class="o">-</span> <span class="n">numberOfBinsNeeded</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                <span class="n">bins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div></div>
 
 
 
@@ -131,35 +806,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-
-  <span class="c1"># call the main function</span>
-  <span class="k">try</span><span class="p">:</span>
-      <span class="n">main</span><span class="p">()</span>
-  <span class="k">except</span> <span class="n">mosek</span><span class="o">.</span><span class="n">MosekException</span> <span class="k">as</span> <span class="n">msg</span><span class="p">:</span>
-      <span class="c1">#print &quot;ERROR: %s&quot; % str(code)</span>
-      <span class="k">if</span> <span class="n">msg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-          <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
-          <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-  <span class="k">except</span><span class="p">:</span>
-      <span class="kn">import</span> <span class="nn">traceback</span>
-      <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
-      <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 
            </div>

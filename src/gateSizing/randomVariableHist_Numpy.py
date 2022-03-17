@@ -258,26 +258,8 @@ class RandomVariable:
                 if i != j:
                     maximum[i, :] += binMatrix1[j, :] * np.sum(binMatrix2[i, :])
 
-                    # maximum[i, :] += binMatrix1[i, :] * binMatrix2[j, :]         # old-vectorized
 
-
-                # maximum[i, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])   # simple - same but vectorized
-
-
-        # i < j
-        # for i in range(0, numberOfBins):
-        #     for j in range(i + 1, numberOfBins):
-
-                # for unary in range(0, numberOfUnaries):                   # simple, non-vectorized
-                #     for unary2 in range(0, numberOfUnaries):
-                #         maximum[j, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]
-                # maximum[j, :] += binMatrix1[i, :] * binMatrix2[j, :]
-
-                # maximum[j, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])      # simple, same but vectorized
-
-        # maximum = self.unarizeCut(maximum)
         maximum = self.unarizeDivide(maximum, convolution=False)
-        # maximum = self.unarizeDivide_for_CVXPY(maximum)
 
         return RandomVariable(maximum, self.edges, unary=True)
 
@@ -319,13 +301,10 @@ class RandomVariable:
 
 
             # unarize
-        # convolution = self.unarizeCut(convolution)
         convolution = self.unarizeDivide(convolution, convolution=True)
-        # convolution = self.unarizeDivide_for_CVXPY(convolution)
 
         # Deal With Edges
         self.cutBins(self.edges, convolution)
-
 
         return RandomVariable(convolution, self.edges, unary=True)
 
@@ -572,14 +551,13 @@ class RandomVariable:
 
             # technique with maximum possible
         if convolution:
+            # divisor = numberOfUnaries
             divisor = numberOfUnaries
-            divisor = 28
         else:   # maximum
             # divisor = (2*numberOfUnaries**2 - 2*numberOfUnaries + 1) / numberOfUnaries
             # divisor = numberOfUnaries * numberOfBins
-            divisor = 28
+            divisor = numberOfUnaries**2
         bins = bins / divisor
-
 
 
         doableSum = np.ceil(np.sum(bins, axis=1)).astype(int)

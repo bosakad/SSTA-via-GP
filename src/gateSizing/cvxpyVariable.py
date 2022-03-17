@@ -267,9 +267,8 @@ class RandomVariableCVXPY:
             for k in range(0, z + 1):
 
                 for unary in range(0, numberOfUnaries):
-
-                    # if precise:
                     for unary2 in range(0, numberOfUnaries):
+
                         # new variable - multiplication of x*y
                         slackMult = cp.Variable(boolean=True)
                         sumOfMultiplications[z] += slackMult
@@ -332,7 +331,7 @@ class RandomVariableCVXPY:
         #         ConvConstraints.append(slackMult <= y)
         #         ConvConstraints.append(slackMult >= x + y - 1)
 
-        divisor = 28
+        divisor = 2
 
         # introducing constraint for convolution
         convolution = {}

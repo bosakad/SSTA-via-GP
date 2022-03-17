@@ -321,26 +321,8 @@
                 <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
                     <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">binMatrix1</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">binMatrix2</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span>
 
-                    <span class="c1"># maximum[i, :] += binMatrix1[i, :] * binMatrix2[j, :]         # old-vectorized</span>
 
-
-                <span class="c1"># maximum[i, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])   # simple - same but vectorized</span>
-
-
-        <span class="c1"># i &lt; j</span>
-        <span class="c1"># for i in range(0, numberOfBins):</span>
-        <span class="c1">#     for j in range(i + 1, numberOfBins):</span>
-
-                <span class="c1"># for unary in range(0, numberOfUnaries):                   # simple, non-vectorized</span>
-                <span class="c1">#     for unary2 in range(0, numberOfUnaries):</span>
-                <span class="c1">#         maximum[j, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]</span>
-                <span class="c1"># maximum[j, :] += binMatrix1[i, :] * binMatrix2[j, :]</span>
-
-                <span class="c1"># maximum[j, :] += np.multiply(binMatrix1[i, :], binMatrix2[j, :])      # simple, same but vectorized</span>
-
-        <span class="c1"># maximum = self.unarizeCut(maximum)</span>
         <span class="n">maximum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unarizeDivide</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="n">convolution</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="c1"># maximum = self.unarizeDivide_for_CVXPY(maximum)</span>
 
         <span class="k">return</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
@@ -382,13 +364,10 @@
 
 
             <span class="c1"># unarize</span>
-        <span class="c1"># convolution = self.unarizeCut(convolution)</span>
         <span class="n">convolution</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unarizeDivide</span><span class="p">(</span><span class="n">convolution</span><span class="p">,</span> <span class="n">convolution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="c1"># convolution = self.unarizeDivide_for_CVXPY(convolution)</span>
 
         <span class="c1"># Deal With Edges</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cutBins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">convolution</span><span class="p">)</span>
-
 
         <span class="k">return</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">convolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
@@ -635,14 +614,13 @@
 
             <span class="c1"># technique with maximum possible</span>
         <span class="k">if</span> <span class="n">convolution</span><span class="p">:</span>
+            <span class="c1"># divisor = numberOfUnaries</span>
             <span class="n">divisor</span> <span class="o">=</span> <span class="n">numberOfUnaries</span>
-            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">28</span>
         <span class="k">else</span><span class="p">:</span>   <span class="c1"># maximum</span>
             <span class="c1"># divisor = (2*numberOfUnaries**2 - 2*numberOfUnaries + 1) / numberOfUnaries</span>
             <span class="c1"># divisor = numberOfUnaries * numberOfBins</span>
-            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">28</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="n">numberOfUnaries</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span> <span class="o">/</span> <span class="n">divisor</span>
-
 
 
         <span class="n">doableSum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>

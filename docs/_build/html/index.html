@@ -110,7 +110,17 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.test_mosekOperations.testConvolution_MAX">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_mosekOperations.</span></span><span class="sig-name descname"><span class="pre">testConvolution_MAX</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_mosekOperations.html#testConvolution_MAX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_mosekOperations.testConvolution_MAX" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_mosekOperations.</span></span><span class="sig-name descname"><span class="pre">testConvolution_MAX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_mosekOperations.html#testConvolution_MAX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_mosekOperations.testConvolution_MAX" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.test_mosekOperations.testMaximum_MAX">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_mosekOperations.</span></span><span class="sig-name descname"><span class="pre">testMaximum_MAX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_mosekOperations.html#testMaximum_MAX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_mosekOperations.testMaximum_MAX" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.test_mosekOperations.testMaximum_MAX_CONV">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_mosekOperations.</span></span><span class="sig-name descname"><span class="pre">testMaximum_MAX_CONV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_mosekOperations.html#testMaximum_MAX_CONV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_mosekOperations.testMaximum_MAX_CONV" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </div>
@@ -118,42 +128,93 @@
 <span id="gatesizing-mosekvariable-module"></span><h2>gateSizing.mosekVariable module<a class="headerlink" href="#module-src.gateSizing.mosekVariable" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.gateSizing.mosekVariable.</span></span><span class="sig-name descname"><span class="pre">RandomVariableMOSEK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.gateSizing.mosekVariable.</span></span><span class="sig-name descname"><span class="pre">RandomVariableMOSEK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">mosek.Task</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class representing a random variable given by histogram represented as MOSEK variable.
 Information about each variable is kept by their indices.</p>
 <dl class="simple">
 <dt>Class includes:</dt><dd><p>bins: numpy list of lists of integer indices to MOSEK variable list
-edges: len n+1 of histogram edges, dtype: 1-D np.array</p>
+edges: len n+1 of histogram edges, dtype: 1-D np.array
+task: mosek.Task</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_DIVIDE">
-<span class="sig-name descname"><span class="pre">convolution_UNARY_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.convolution_UNARY_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_DIVIDE" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE">
+<span class="sig-name descname"><span class="pre">convolution_UNARY_MAX_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofVariables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofConstr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates convolution of 2 PDFs of random variable. Works only for 2 identical edges. Is computed
 using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
-Is in MOSEK environment.</p>
+Is in MOSEK environment. Works only for maximization task.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>asMin</strong> – boolean, true for minimization problem, false for maximization problem</p></li>
+<li><p><strong>self</strong> – class RandomVariableMOSEK</p></li>
+<li><p><strong>secondVariable</strong> – class RandomVariableMOSEK</p></li>
+<li><p><strong>curNofVariables</strong> – current number of MOSEK variables - to know the indices</p></li>
+<li><p><strong>curNofConstr</strong> – current number of MOSEK constraints - to know the indices</p></li>
 <li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return convolutionClass</dt>
-<dd class="field-even"><p>class RandomVariableCVXPY with cvxpy slack variables</p>
+<dd class="field-even"><p>class RandomVariableMOSEK with cvxpy slack variables</p>
 </dd>
-<dt class="field-odd">Return ConvConstraints</dt>
-<dd class="field-odd"><p>python array with inequalities - for computing the convolution</p>
+<dt class="field-odd">Return newNofVariables</dt>
+<dd class="field-odd"><p>integer, new total number of MOSEK variables</p>
+</dd>
+<dt class="field-even">Return newNofConstr</dt>
+<dd class="field-even"><p>integer, new total number of MOSEK constraints</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_QUAD_UNARY_DIVIDE">
-<span class="sig-name descname"><span class="pre">maximum_QUAD_UNARY_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">asMin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.maximum_QUAD_UNARY_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_QUAD_UNARY_DIVIDE" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE_VECTORIZED">
+<span class="sig-name descname"><span class="pre">convolution_UNARY_MAX_DIVIDE_VECTORIZED</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofVariables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofConstr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE_VECTORIZED"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.convolution_UNARY_MAX_DIVIDE_VECTORIZED" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates convolution of 2 PDFs of random variable. Works only for 2 identical edges. Is computed
+using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
+Is in MOSEK environment. Does not work</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – class RandomVariableMOSEK</p></li>
+<li><p><strong>secondVariable</strong> – class RandomVariableMOSEK</p></li>
+<li><p><strong>curNofVariables</strong> – current number of MOSEK variables - to know the indices</p></li>
+<li><p><strong>curNofConstr</strong> – current number of MOSEK constraints - to know the indices</p></li>
+<li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return convolutionClass</dt>
+<dd class="field-even"><p>class RandomVariableMOSEK with cvxpy slack variables</p>
+</dd>
+<dt class="field-odd">Return newNofVariables</dt>
+<dd class="field-odd"><p>integer, new total number of MOSEK variables</p>
+</dd>
+<dt class="field-even">Return newNofConstr</dt>
+<dd class="field-even"><p>integer, new total number of MOSEK constraints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.cutBins">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cutBins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.cutBins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.cutBins" title="Permalink to this definition"></a></dt>
+<dd><p>Cuts bins depending on edge[0]
+if edge[0] &lt; 0: cuts left bins and adds zeros to the end
+if edge[0] &gt; 0: cuts right bins and adds zeros to the beginning
+Works for only unary random variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edges</strong> – (1, n+1) numpy array of edges</p></li>
+<li><p><strong>bins</strong> – dictionary of dictionray of cp.Variables (1,1)</p></li>
+</ul>
+</dd>
+</dl>
+<p>:returns None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE">
+<span class="sig-name descname"><span class="pre">maximum_UNARY_MAX_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofVariables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofConstr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
 using the ‘quadratic’ algorithm and unary representation of bins - M 0/1-bins for each bin.
 Unarization is kept using the divison.
@@ -161,17 +222,49 @@ Is in MOSEK environment.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>secondVariable</strong> – class RandomVariableCVXPY</p></li>
-<li><p><strong>asMin</strong> – boolean, true for minimization problem, false for maximization problem</p></li>
+<li><p><strong>self</strong> – class RandomVariableMOSEK</p></li>
+<li><p><strong>secondVariable</strong> – class RandomVariableMOSEK</p></li>
+<li><p><strong>curNofVariables</strong> – current number of MOSEK variables - to know the indices</p></li>
+<li><p><strong>curNofConstr</strong> – current number of MOSEK constraints - to know the indices</p></li>
 <li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return maximumClass</dt>
-<dd class="field-even"><p>class RandomVariableCVXPY with cvxpy slack variables (1, 1)</p>
+<dd class="field-even"><p>class RandomVariableMOSEK with cvxpy slack variables (1, 1)</p>
 </dd>
-<dt class="field-odd">Return MaxConstraints</dt>
-<dd class="field-odd"><p>python array with inequalities - for computing the maximum</p>
+<dt class="field-odd">Return newNofVariables</dt>
+<dd class="field-odd"><p>integer, new total number of MOSEK variables</p>
+</dd>
+<dt class="field-even">Return newNofConstr</dt>
+<dd class="field-even"><p>integer, new total number of MOSEK constraints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE_VECTORIZED">
+<span class="sig-name descname"><span class="pre">maximum_UNARY_MAX_DIVIDE_VECTORIZED</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofVariables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofConstr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE_VECTORIZED"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE_VECTORIZED" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates maximum of 2 PDFs of random variable. Works only for 2 identical edges. Is computed
+using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
+Is in MOSEK environment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – class RandomVariableMOSEK</p></li>
+<li><p><strong>secondVariable</strong> – class RandomVariableMOSEK</p></li>
+<li><p><strong>curNofVariables</strong> – current number of MOSEK variables - to know the indices</p></li>
+<li><p><strong>curNofConstr</strong> – current number of MOSEK constraints - to know the indices</p></li>
+<li><p><strong>withSymmetryConstr</strong> – boolean whether a symmetry constraints should be included</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return maximumClass</dt>
+<dd class="field-even"><p>class RandomVariableMOSEK with cvxpy slack variables</p>
+</dd>
+<dt class="field-odd">Return newNofVariables</dt>
+<dd class="field-odd"><p>integer, new total number of MOSEK variables</p>
+</dd>
+<dt class="field-even">Return newNofConstr</dt>
+<dd class="field-even"><p>integer, new total number of MOSEK constraints</p>
 </dd>
 </dl>
 </dd></dl>
@@ -307,6 +400,36 @@ no errors appeared.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.SSTA.Convolution_UNARY_MOSEK">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">Convolution_UNARY_MOSEK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#Convolution_UNARY_MOSEK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.Convolution_UNARY_MOSEK" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x1</strong> – RandomVariableMOSEK class</p></li>
+<li><p><strong>x2</strong> – RandomVariableMOSEK class</p></li>
+<li><p><strong>withSymmetryConstr</strong> – boolean, whether symmetry constraints should be used</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return curNofVariables</dt>
+<dd class="field-even"><p>current number of variables</p>
+</dd>
+<dt class="field-odd">Return curNofVariables</dt>
+<dd class="field-odd"><p>current number of constraints</p>
+</dd>
+<dt class="field-even">Return convolution</dt>
+<dd class="field-even"><p>RandomVariableMOSEK class</p>
+</dd>
+<dt class="field-odd">Return curNofVariables</dt>
+<dd class="field-odd"><p>new number of variables</p>
+</dd>
+<dt class="field-even">Return curNofVariables</dt>
+<dd class="field-even"><p>new number of constraints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.SSTA.calculateCircuitDelay">
 <span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">calculateCircuitDelay</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#calculateCircuitDelay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.calculateCircuitDelay" title="Permalink to this definition"></a></dt>
 <dd><p>Compute circuit delay using PDFs algorithm
@@ -315,9 +438,16 @@ Function executes the algorithm for finding out the PDF of a circuit delay.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>rootNodes</strong> – array of root nodes, [Node], Node includes next nodes and previous nodes</p></li>
+<li><p><strong>curNofVariables</strong> – current number of MOSEK variables</p></li>
 <li><p><strong>cvxpy</strong> – Bool, true if cvxpy objects are used, false if just RandomVariables class is used</p></li>
 <li><p><strong>unary</strong> – Bool, true if unary (M 0/1-bin repr.) is used, false otherwise</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return newConstr</dt>
+<dd class="field-even"><p>new constraints for CVXPY(optional)</p>
+</dd>
+<dt class="field-odd">Return newNofVariables</dt>
+<dd class="field-odd"><p>new number of MOSEK variables(optional)</p>
 </dd>
 <dt class="field-even">Return newDelays</dt>
 <dd class="field-even"><p>array of new RVs</p>
@@ -379,6 +509,32 @@ Using formula - look up function maxOfDistributionsFORM</p>
 </dd>
 <dt class="field-even">Return maximum</dt>
 <dd class="field-even"><p>RandomVariable - maximum delay</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.SSTA.maxOfDistributionsMOSEK_UNARY">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">maxOfDistributionsMOSEK_UNARY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.variable.Variable</span></span></span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#maxOfDistributionsMOSEK_UNARY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.maxOfDistributionsMOSEK_UNARY" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates maximum of an array of PDFs of cvxpy variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>delays</strong> – array of cvxpy variables (n, m), n gates, m bins</p>
+</dd>
+<dt class="field-even">Return curNofVariables</dt>
+<dd class="field-even"><p>current number of variables</p>
+</dd>
+<dt class="field-odd">Return curNofVariables</dt>
+<dd class="field-odd"><p>current number of constraints</p>
+</dd>
+<dt class="field-even">Return maximum</dt>
+<dd class="field-even"><p>mosek variable (1, m)</p>
+</dd>
+<dt class="field-odd">Return curNofVariables</dt>
+<dd class="field-odd"><p>new number of variables</p>
+</dd>
+<dt class="field-even">Return curNofVariables</dt>
+<dd class="field-even"><p>new number of constraints</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1815,6 +1971,11 @@ Edges are considered to have the same difference and same length.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.test_algorithms.testAlgorithms">
 <span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_algorithms.</span></span><span class="sig-name descname"><span class="pre">testAlgorithms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_algorithms.html#testAlgorithms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_algorithms.testAlgorithms" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.test_algorithms.testAlgorithms_MOSEK">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_algorithms.</span></span><span class="sig-name descname"><span class="pre">testAlgorithms_MOSEK</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_algorithms.html#testAlgorithms_MOSEK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_algorithms.testAlgorithms_MOSEK" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </div>

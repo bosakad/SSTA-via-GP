@@ -330,9 +330,8 @@
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
 
                 <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
-
-                    <span class="c1"># if precise:</span>
                     <span class="k">for</span> <span class="n">unary2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+
                         <span class="c1"># new variable - multiplication of x*y</span>
                         <span class="n">slackMult</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                         <span class="n">sumOfMultiplications</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">+=</span> <span class="n">slackMult</span>
@@ -395,7 +394,7 @@
         <span class="c1">#         ConvConstraints.append(slackMult &lt;= y)</span>
         <span class="c1">#         ConvConstraints.append(slackMult &gt;= x + y - 1)</span>
 
-        <span class="n">divisor</span> <span class="o">=</span> <span class="mi">28</span>
+        <span class="n">divisor</span> <span class="o">=</span> <span class="mi">2</span>
 
         <span class="c1"># introducing constraint for convolution</span>
         <span class="n">convolution</span> <span class="o">=</span> <span class="p">{}</span>
