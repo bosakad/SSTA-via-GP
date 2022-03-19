@@ -299,12 +299,12 @@ class RandomVariable:
                 convolution[z, :] += f[k, :] * np.sum(g [z - k, :])
 
 
+        # Deal With Edges
+        self.cutBins(self.edges, convolution)
 
             # unarize
         convolution = self.unarizeDivide(convolution, convolution=True)
 
-        # Deal With Edges
-        self.cutBins(self.edges, convolution)
 
         return RandomVariable(convolution, self.edges, unary=True)
 
@@ -552,15 +552,15 @@ class RandomVariable:
             # technique with maximum possible
         if convolution:
             # divisor = numberOfUnaries
-            divisor = numberOfUnaries
+            divisor = numberOfUnaries*numberOfBins / 30
         else:   # maximum
-            # divisor = (2*numberOfUnaries**2 - 2*numberOfUnaries + 1) / numberOfUnaries
-            # divisor = numberOfUnaries * numberOfBins
-            divisor = numberOfUnaries**2
+            # divisor = numberOfBins*numberOfUnaries / 10
+            divisor = numberOfBins*numberOfUnaries / 22
         bins = bins / divisor
 
 
-        doableSum = np.ceil(np.sum(bins, axis=1)).astype(int)
+        # doableSum = np.ceil(np.sum(bins, axis=1)).astype(int)
+        doableSum = np.sum(bins, axis=1)
 
         newBins = np.zeros((numberOfBins, numberOfUnaries))
 

@@ -133,7 +133,7 @@ def Convolution_UNARY_MOSEK(withSymmetryConstr=False):
     """
 
     def convolutionF(x1: RandomVariableMOSEK, x2: RandomVariableMOSEK, curNofVariables, curNofConstr):
-        return x1.convolution_UNARY_MAX_DIVIDE_VECTORIZED(x2, curNofVariables, curNofConstr, withSymmetryConstr=withSymmetryConstr)
+        return x1.convolution_UNARY_MAX_DIVIDE(x2, curNofVariables, curNofConstr, withSymmetryConstr=withSymmetryConstr)
 
     return convolutionF
 

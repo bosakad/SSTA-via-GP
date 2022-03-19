@@ -38,9 +38,9 @@ def parseVerbose(verboseFile):
     return np.array(nonZeros)
 
 def plotNonzeros():
-    file = open("../Inputs/testParsing.txt")    # file with 1 line - dictionary
+    file = open("Inputs.outputs/testParsing.txt")    # file with 1 line - dictionary
     verbose = "../Inputs/verbose.stdout"        # file with verbose text, should be complex problem - so there is 'Presolved'
-    readFromVerbose = True
+    readFromVerbose = False
 
     line = file.readline()
 
@@ -51,7 +51,8 @@ def plotNonzeros():
     zerosNoConstr = np.array([])
     errorWithConstr = np.array([])
     errorNoConstr = np.array([])
-
+    timeWithConstr = np.array([])
+    timeNoConstr = np.array([])
 
     if readFromVerbose:
         nonZ = parseVerbose(verbose)
@@ -66,13 +67,16 @@ def plotNonzeros():
         if WithConstr:
             if not readFromVerbose:
                 zerosWithConstr = np.append(zerosWithConstr, results[(gateNum, WithConstr)][0])
-            errorWithConstr = np.append(errorWithConstr, results[(gateNum, WithConstr)][2])
+            timeWithConstr = np.append(timeWithConstr, results[(gateNum, WithConstr)][2])
             errorWithConstr = np.append(errorWithConstr, results[(gateNum, WithConstr)][3])
+            errorWithConstr = np.append(errorWithConstr, results[(gateNum, WithConstr)][4])
         else:
             if not readFromVerbose:
                 zerosNoConstr = np.append(zerosNoConstr, results[(gateNum, WithConstr)][0])
-            errorNoConstr = np.append(errorNoConstr, results[(gateNum, WithConstr)][2])
+
+            timeNoConstr = np.append(timeNoConstr, results[(gateNum, WithConstr)][2])
             errorNoConstr = np.append(errorNoConstr, results[(gateNum, WithConstr)][3])
+            errorNoConstr = np.append(errorNoConstr, results[(gateNum, WithConstr)][4])
 
         if gateNum not in Gates:
             Gates = np.append(Gates, gateNum)
@@ -81,31 +85,38 @@ def plotNonzeros():
     errorNoConstr = errorNoConstr.reshape((len(errorNoConstr)//2, 2))
     errorWithConstr = errorWithConstr.reshape((len(errorWithConstr)//2, 2))
 
+    print(timeNoConstr)
+    print(timeWithConstr)
+
     print(errorNoConstr)
-    print(zerosNoConstr)
-    print(Gates)
+    print(errorWithConstr)
 
     # set histograms
-    fig, axs = plt.subplots(3, 1)
-    # axs[0].hist(zerosWithConstr, bins=Gates, color='blue', edgecolor='black')
-    # axs[0].hist(Gates, Gates, weights=zerosNoConstr, color='orange', edgecolor='black')
-    # axs[0].plot(Gates, zerosWithConstr, color='blue')
+    fig, axs = plt.subplots(4, 1)
+
+        # nonzeros
+    axs[0].plot(Gates, zerosWithConstr, color='blue')
     axs[0].plot(Gates, zerosNoConstr, color='orange')
-    # axs[0].scatter(Gates, zerosWithConstr, color='blue')
+    axs[0].scatter(Gates, zerosWithConstr, color='blue')
     axs[0].scatter(Gates, zerosNoConstr, color='orange')
 
-    # axs[1].plot(Gates, errorWithConstr[:, 0], color='blue')
+        # error mean
+    axs[1].plot(Gates, errorWithConstr[:, 0], color='blue')
     axs[1].plot(Gates, errorNoConstr[:, 0], color='orange')
-    # axs[1].scatter(Gates, errorWithConstr[:, 0], color='blue')
+    axs[1].scatter(Gates, errorWithConstr[:, 0], color='blue')
     axs[1].scatter(Gates, errorNoConstr[:, 0], color='orange')
-    # axs[1].hist(Gates, Gates, weights=errorWithConstr[:, 0], color='blue', edgecolor='black')
-    # axs[1].hist(Gates, Gates, weights=errorNoConstr[:, 0], color='orange', edgecolor='black')
-    # axs[2].hist(Gates, Gates, weights=errorWithConstr[:, 1], color='blue')
-    # axs[2].hist(Gates, Gates, weights=errorNoConstr[:, 1], color='orange')
-    # axs[2].scatter(Gates, errorWithConstr[:, 1], color='blue')
+
+        # error std
+    axs[2].scatter(Gates, errorWithConstr[:, 1], color='blue')
     axs[2].scatter(Gates, errorNoConstr[:, 1], color='orange')
-    # axs[2].plot(Gates, errorWithConstr[:, 1], color='blue')
+    axs[2].plot(Gates, errorWithConstr[:, 1], color='blue')
     axs[2].plot(Gates, errorNoConstr[:, 1], color='orange')
+
+        # time
+    axs[3].scatter(Gates, timeWithConstr, color='blue')
+    axs[3].scatter(Gates, timeNoConstr, color='orange')
+    axs[3].plot(Gates, timeWithConstr, color='blue')
+    axs[3].plot(Gates, timeNoConstr, color='orange')
 
     for ax in axs.flat:
         ax.set(xlabel='Number Of Gates')
@@ -124,7 +135,7 @@ def plotNonzeros():
     axs[2].legend(["With constraints", "Without constraints"])
 
     # plt.show()
-    plt.savefig("../Inputs/scaling.jpeg", dpi=500)
+    plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)
 
 if __name__ == "__main__":
     plotNonzeros()

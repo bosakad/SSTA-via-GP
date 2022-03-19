@@ -18,19 +18,21 @@ def streamprinter(text):
 
 
 def testConvolution_MAX(dec = 3):
-    mu1 = 5.3
+    mu1 = 7
     sigma1 = 2
 
-    mu2 = 3.98483475
-    sigma2 = 1.4
+    mu2 = 10
+    sigma2 = 1
+
+
     numberOfGates = 2
 
 
-    interval = (-5, 10)
+    interval = (-5, 40)
 
     numberOfSamples = 2000000
-    numberOfBins = 30
-    numberOfUnaries = 30
+    numberOfBins = 31
+    numberOfUnaries = 33
 
     # DESIRED
 
@@ -97,7 +99,7 @@ def testConvolution_MAX(dec = 3):
             RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
             RV2 = RandomVariableMOSEK(bins2, rv1.edges, task)
 
-            convolution, newNofVariables, newNofConstr = RV1.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs, 0
+            convolution, newNofVariables, newNofConstr = RV1.convolution_UNARY_MAX_DIVIDE(RV2, numberVariablesRVs, 0
                                                                                                      ,withSymmetryConstr=True)
             convolutionConCat = convolution.bins
 
@@ -162,11 +164,11 @@ def testMaximum_MAX(dec = 3):
     numberOfGates = 2
 
 
-    interval = (-2, 10)
+    interval = (-5, 10)
 
     numberOfSamples = 2000000
-    numberOfBins = 35
-    numberOfUnaries = 32
+    numberOfBins = 20
+    numberOfUnaries = 20
 
     # DESIRED
 
@@ -233,7 +235,7 @@ def testMaximum_MAX(dec = 3):
             RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
             RV2 = RandomVariableMOSEK(bins2, rv1.edges, task)
 
-            maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE(RV2, numberVariablesRVs,
+            maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs,
                                                                                              0, withSymmetryConstr=True)
             maximumConCat = maximum.bins
 
@@ -315,12 +317,14 @@ def testMaximum_MAX_CONV(dec = 3):
     rv3 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
     rv4 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
+    print(rv1.bins)
+    print(rv2.bins)
     max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
-    conv = max1.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
-    conv = conv.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)
-    conv = conv.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
+    # conv = max1.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
+    # conv = conv.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)
+    # conv = conv.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
     # max1 = test1.convolutionOfTwoVarsShift(test2)
-    desired = [conv.mean, conv.std]
+    desired = [max1.mean, max1.std]
 
     # print(desired)
     # print(max1.bins)
@@ -381,17 +385,17 @@ def testMaximum_MAX_CONV(dec = 3):
             RV3 = RandomVariableMOSEK(bins3, rv1.edges, task)
             RV4 = RandomVariableMOSEK(bins4, rv1.edges, task)
 
-            maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs,
+            maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE(RV2, numberVariablesRVs,
                                                                                              0, withSymmetryConstr=True)
 
-            maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,
-                                                                                  newNofConstr, withSymmetryConstr=True)
-
-            maximum, newNofVariables, newNofConstr = maximum.maximum_UNARY_MAX_DIVIDE(RV4, newNofVariables,
-                                                                                  newNofConstr, withSymmetryConstr=True)
-
-            maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,
-                                                                                  newNofConstr, withSymmetryConstr=True)
+            # maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,
+            #                                                                       newNofConstr, withSymmetryConstr=True)
+            #
+            # maximum, newNofVariables, newNofConstr = maximum.maximum_UNARY_MAX_DIVIDE(RV4, newNofVariables,
+            #                                                                       newNofConstr, withSymmetryConstr=True)
+            #
+            # maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,
+            #                                                                       newNofConstr, withSymmetryConstr=True)
 
             maximumConCat = maximum.bins
 
@@ -450,9 +454,9 @@ def testMaximum_MAX_CONV(dec = 3):
 
 if __name__ == "__main__":
     # testConvolution_MAX(dec=8)
-    # testMaximum_MAX(dec=8)
+    testMaximum_MAX(dec=8)
 
-    testMaximum_MAX_CONV(dec=8)
+    # testMaximum_MAX_CONV(dec=8)
 
 
 

@@ -123,7 +123,7 @@ def testAlgorithms_MOSEK():
     numberOfBins = 10
     numberOfUnaries = 10
 
-    interval = (0, 35)
+    interval = (-5, 20)
 
     # for saving values of the last gates and calculating error
     rvs_nonPrecise = np.zeros((numberOfIterations, 2))

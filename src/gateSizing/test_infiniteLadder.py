@@ -15,6 +15,7 @@ from mosekVariable import RandomVariableMOSEK
 from examples_monteCarlo.infinite_ladder_montecarlo import MonteCarlo_inputs, MonteCarlo_nodes, get_moments_from_simulations
 
 import mosek
+from mosek import *
 
 def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-8, 35), withSymmetryConstr=False):
 
@@ -564,7 +565,7 @@ def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=
     return (num_nonZeros, ObjVal, lastGate, time)
 
 
-def LadderMOSEK_test(number_of_nodes=1, numberOfBins=14, numberOfUnaries=14, interval=(-2, 18)):
+def LadderMOSEK_test(number_of_nodes=3, numberOfBins=12, numberOfUnaries=12, interval=(-5, 18)):
 
 
     # parse command line arguments
@@ -694,6 +695,8 @@ def LadderMOSEK_test(number_of_nodes=1, numberOfBins=14, numberOfUnaries=14, int
 
             # Input the objective sense (minimize/maximize)
             task.putobjsense(mosek.objsense.maximize)
+                # set mip gap to 1%
+            task.putdouparam(dparam.mio_tol_rel_gap, 1.0e-2)
 
             # Solve the problem
             task.optimize()

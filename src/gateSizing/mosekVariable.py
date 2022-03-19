@@ -85,7 +85,7 @@ class RandomVariableMOSEK:
             symN = 0
 
         task.appendcons(2*numberOfBins + 3*nSlackMult + symN)
-        offset = 2*numberOfBins
+        offset = curNofConstr + 2*numberOfBins
 
 
         for z in range(0, numberOfBins):
@@ -129,8 +129,8 @@ class RandomVariableMOSEK:
 
         self.cutBins(self.edges, sumOfMultiplications)
 
-        ceil = 0.999
-        division = numberOfUnaries
+        round = 0.5
+        division = numberOfUnaries*numberOfBins / 30
         offset = curNofConstr
 
         for bin in range(0, numberOfBins):
@@ -143,15 +143,16 @@ class RandomVariableMOSEK:
                 task.putaijlist([bin + offset]*sumOfMultiplicationsRow.size, sumOfMultiplicationsRow,
                                                                         [-1/division]*sumOfMultiplicationsRow.size)
 
-            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, ceil)
+            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, round)
 
                 # sumOfNewVariables <= numberOfUnaries
             task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
 
             task.putconbound(bin + offset + numberOfBins, mosek.boundkey.up, -self.inf, numberOfUnaries)
 
-        newNofConstr = curNofConstr + 2 * numberOfBins + 3 * nSlackMult
 
+
+        newNofConstr = curNofConstr + 2 * numberOfBins + 3 * nSlackMult
 
         if withSymmetryConstr:
 
@@ -278,8 +279,8 @@ class RandomVariableMOSEK:
 
         self.cutBins(self.edges, sumOfMultiplications)
 
-        ceil = 0.999
-        division = numberOfUnaries
+        round = 0.5
+        division = numberOfUnaries*numberOfBins / 30
 
         offset = curNofConstr
 
@@ -294,7 +295,7 @@ class RandomVariableMOSEK:
             if sumOfMultiplicationsRow.size != 0:
                 task.putaijlist([bin + offset] * nSums, sumOfMultiplicationsRow, [-1/division] * nSums)
 
-            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, ceil)
+            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, round)
 
             # sumOfNewVariables <= numberOfUnaries
             task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
@@ -461,8 +462,8 @@ class RandomVariableMOSEK:
                             task.putconbound(constrOffset2 + 3 * indexToSlack + 2, mosek.boundkey.lo, -1, self.inf)
 
 
-        division = numberOfUnaries**2
-        ceil = 0.999
+        division = numberOfBins*numberOfUnaries / 22
+        round = 0.5
 
         offset = curNofConstr
 
@@ -477,7 +478,7 @@ class RandomVariableMOSEK:
             if nSums != 0:
                 task.putaijlist([bin + offset] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
 
-            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, ceil)
+            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, round)
 
             # sumOfNewVariables <= numberOfUnaries
             task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
@@ -580,7 +581,7 @@ class RandomVariableMOSEK:
 
                 # constraints for sum of multiplications
                 indexToSlack = ((i / 2) * (1 + i) * numberOfUnaries ** 2
-                                   + i * numberOfUnaries ** 2 + unary * numberOfUnaries + unary2).astype(int)
+                                   + j * numberOfUnaries ** 2 + unary * numberOfUnaries + unary2).astype(int)
                 curSlackMult = np.concatenate(slackMult[indexToSlack])
 
                 indexToSlack = np.concatenate(indexToSlack)
@@ -657,8 +658,10 @@ class RandomVariableMOSEK:
 
 
 
-        division = numberOfUnaries**2
-        ceil = 0.999
+
+
+        division = numberOfBins*numberOfUnaries / 22
+        round = 0.5
 
         offset = curNofConstr
 
@@ -673,7 +676,7 @@ class RandomVariableMOSEK:
             if nSums != 0:
                 task.putaijlist([bin + offset] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
 
-            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, ceil)
+            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, round)
 
             # sumOfNewVariables <= numberOfUnaries
             task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
