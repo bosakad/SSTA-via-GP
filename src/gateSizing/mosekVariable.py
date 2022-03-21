@@ -687,7 +687,6 @@ class RandomVariableMOSEK:
         newNofConstr = curNofConstr + 2 * numberOfBins + 3 * nSlackMult + 3 * nSlackMult2
 
         if withSymmetryConstr:
-
             for bin in range(0, numberOfBins):
                 for unary in range(0, numberOfUnaries - 1):
                     offset = bin * (numberOfUnaries - 1) + unary

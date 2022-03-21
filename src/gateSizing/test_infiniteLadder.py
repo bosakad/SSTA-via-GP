@@ -14,6 +14,8 @@ from mosekVariable import RandomVariableMOSEK
 
 from examples_monteCarlo.infinite_ladder_montecarlo import MonteCarlo_inputs, MonteCarlo_nodes, get_moments_from_simulations
 
+import matplotlib.pyplot as plt
+
 import mosek
 from mosek import *
 
@@ -510,7 +512,7 @@ def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=
 
             delays, newNofVariables = SSTA.calculateCircuitDelay(startingNodes, cvxpy=False, unary=True,
                                                                  curNofVariables=numberVariablesRVs,
-                                                                 withSymmetryConstr=True)
+                                                                 withSymmetryConstr=withSymmetryConstr)
             delays = delays[number_of_nodes + 1:]
 
             # setting objective
@@ -523,6 +525,10 @@ def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=
 
             # Input the objective sense (minimize/maximize)
             task.putobjsense(mosek.objsense.maximize)
+            # set mip gap to 1%
+            task.putdouparam(dparam.mio_tol_rel_gap, 1.0e-2)
+
+
 
             # Solve the problem
             task.optimize()
@@ -562,10 +568,15 @@ def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=
             ObjVal = task.getdouinf(mosek.dinfitem.mio_obj_int)
             num_nonZeros = task.getlintinf(mosek.liinfitem.mio_presolved_anz)
 
-    return (num_nonZeros, ObjVal, lastGate, time)
+
+            task.analyzeproblem(mosek.streamtype.log)
+            numConstr = task.getintinf(iinfitem.ana_pro_num_con)
+            numVariables = task.getintinf(iinfitem.ana_pro_num_var)
+
+    return (num_nonZeros, ObjVal, lastGate, time, numVariables, numConstr)
 
 
-def LadderMOSEK_test(number_of_nodes=3, numberOfBins=12, numberOfUnaries=12, interval=(-5, 18)):
+def LadderMOSEK_test(number_of_nodes=1, numberOfBins=26, numberOfUnaries=35, interval=(-5, 18)):
 
 
     # parse command line arguments
@@ -729,6 +740,7 @@ def LadderMOSEK_test(number_of_nodes=3, numberOfBins=12, numberOfUnaries=12, int
             for i in range(0, number_of_nodes):
                 print(rvs[i].mean, rvs[i].std)
 
+
     # ---------------------------- numpy ----------------------------------
 
 
@@ -771,7 +783,7 @@ def LadderMOSEK_test(number_of_nodes=3, numberOfBins=12, numberOfUnaries=12, int
 
     delays = delays[number_of_nodes + 1:]
 
-    rvs = []
+    rvs2 = []
 
     for gate in range(0, number_of_nodes):  # construct RVs
 
@@ -780,15 +792,25 @@ def LadderMOSEK_test(number_of_nodes=3, numberOfBins=12, numberOfUnaries=12, int
             for unary in range(0, numberOfUnaries):
                 finalBins[bin, unary] = ((delays[gate].bins)[bin])[unary]
 
-        rvs.append(RandomVariable(finalBins, generatedNodes[0].randVar.edges, unary=True))
+        rvs2.append(RandomVariable(finalBins, generatedNodes[0].randVar.edges, unary=True))
 
 
     print("\n NUMPY UNARY VALUES: \n")
     for i in range(0, number_of_nodes):
-        print(rvs[i].mean, rvs[i].std)
+        print(rvs2[i].mean, rvs2[i].std)
 
+        # print
 
+    # plot
+    rvMOSEK = histogramGenerator.get_Histogram_from_UNARY(rvs[0])
+    rvNump = histogramGenerator.get_Histogram_from_UNARY(rvs2[0])
 
+    print(rvMOSEK.bins.shape)
+    print(rvMOSEK.edges.shape)
+
+    plt.hist(rvMOSEK.edges[:-1], rvMOSEK.edges, weights=rvMOSEK.bins, density="PDF", color='blue')
+    plt.hist(rvNump.edges[:-1], rvNump.edges, weights=rvNump.bins, density="PDF",alpha=0.2, color='orange')
+    plt.show()
 
     # ------------------- monte carlo ----------------------------------
 

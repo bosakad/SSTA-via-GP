@@ -10,8 +10,8 @@ import numpy as np
 def testAlgorithms():
 
         # number of testing
-    numberOfIterations = 2
-    step = 2
+    numberOfIterations = 1
+    step = 1
 
     numberOfGatesStart = 1
     numberOfBins = 10
@@ -36,6 +36,31 @@ def testAlgorithms():
         rvs_MonteCarlo[iter, 0] = lastGate[0]
         rvs_MonteCarlo[iter, 1] = lastGate[1]
 
+
+    print("SYMMETRY\n\n")
+    # test precise
+    for iter in range(0, numberOfIterations):
+        print("\n\n" + str(iter) + ". iteration: \n\n")
+
+        numGates = numberOfGatesStart + iter * step
+        numNonZeros, ObjVal, lastGate, time = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins,
+                                                                       interval,
+                                                                       withSymmetryConstr=True)
+
+        # saving values
+        rvs_Precise[iter, 0] = lastGate[0]
+        rvs_Precise[iter, 1] = lastGate[1]
+
+        MAPE = 100 * np.abs(np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))
+
+        if iter != 0:
+            prevError = np.zeros(2)
+            prevError[0] = results[(numGates - step, True)][2]
+            prevError[1] = results[(numGates - step, True)][3]
+
+            MAPE = ((MAPE + prevError) * iter) / (iter + 1)
+
+        results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1])
 
     print("NO SYMMETRY\n\n")
         # test non-precise
@@ -65,29 +90,6 @@ def testAlgorithms():
         # print results
     print("\n\n" + str(results))
 
-    print("SYMMETRY\n\n")
-        # test precise
-    for iter in range(0, numberOfIterations):
-        print("\n\n" + str(iter) + ". iteration: \n\n")
-
-        numGates = numberOfGatesStart + iter*step
-        numNonZeros, ObjVal, lastGate, time = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
-                                                                 withSymmetryConstr=True)
-
-        # saving values
-        rvs_Precise[iter, 0] = lastGate[0]
-        rvs_Precise[iter, 1] = lastGate[1]
-
-        MAPE = 100*np.abs( np.divide( rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :] , rvs_MonteCarlo[iter, :]))
-
-        if iter != 0:
-            prevError = np.zeros(2)
-            prevError[0] = results[(numGates - step, True)][2]
-            prevError[1] = results[(numGates - step, True)][3]
-
-            MAPE = ((MAPE + prevError) * iter) / (iter + 1)
-
-        results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1])
 
 
 
@@ -116,14 +118,14 @@ def testAlgorithms():
 def testAlgorithms_MOSEK():
 
     # number of testing
-    numberOfIterations = 2
-    step = 2
+    numberOfIterations = 6
+    step = 1
 
     numberOfGatesStart = 1
-    numberOfBins = 10
-    numberOfUnaries = 10
+    numberOfBins = 14
+    numberOfUnaries = 14
 
-    interval = (-5, 20)
+    interval = (-5, 18)
 
     # for saving values of the last gates and calculating error
     rvs_nonPrecise = np.zeros((numberOfIterations, 2))
@@ -141,44 +143,15 @@ def testAlgorithms_MOSEK():
         rvs_MonteCarlo[iter, 0] = lastGate[0]
         rvs_MonteCarlo[iter, 1] = lastGate[1]
 
-    print("NO SYMMETRY\n\n")
-    # test non-precise
-    for iter in range(0, numberOfIterations):
-        print(str(iter) + ". iteration: \n\n")
-
-        # calculating
-        numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate, time = test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
-                                                                       interval,
-                                                                       withSymmetryConstr=False)
-        print(time)
-        # saving values
-        rvs_nonPrecise[iter, 0] = lastGate[0]
-        rvs_nonPrecise[iter, 1] = lastGate[1]
-
-        MAPE = 100 * np.abs(np.divide(rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))
-
-        if iter != 0:
-            prevError = np.zeros(2)
-            prevError[0] = results[(numGates - step, False)][2]
-            prevError[1] = results[(numGates - step, False)][3]
-
-            MAPE = ((MAPE + prevError) * iter) / (iter + 1)
-
-        results[(numGates, False)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1])
-
-        # print results
-    print("\n\n" + str(results))
-
     print("SYMMETRY\n\n")
     # test precise
     for iter in range(0, numberOfIterations):
         print("\n\n" + str(iter) + ". iteration: \n\n")
 
         numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate, time = test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
-                                                                       interval,
-                                                                       withSymmetryConstr=True)
+        numNonZeros, ObjVal, lastGate, time, numVars, numConstr = test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
+                                                                            interval,
+                                                                            withSymmetryConstr=True)
 
         # saving values
         rvs_Precise[iter, 0] = lastGate[0]
@@ -193,7 +166,39 @@ def testAlgorithms_MOSEK():
 
             MAPE = ((MAPE + prevError) * iter) / (iter + 1)
 
-        results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1])
+        results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr)
+
+        # print results
+    print("\n\n" + str(results))
+
+
+    print("NO SYMMETRY\n\n")
+    # test non-precise
+    for iter in range(0, numberOfIterations):
+        print(str(iter) + ". iteration: \n\n")
+
+        # calculating
+        numGates = numberOfGatesStart + iter * step
+        numNonZeros, ObjVal, lastGate, time, numVars, numConstr = test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
+                                                                       interval,
+                                                                       withSymmetryConstr=False)
+        # saving values
+        rvs_nonPrecise[iter, 0] = lastGate[0]
+        rvs_nonPrecise[iter, 1] = lastGate[1]
+
+        MAPE = 100 * np.abs(np.divide(rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))
+
+        if iter != 0:
+            prevError = np.zeros(2)
+            prevError[0] = results[(numGates - step, False)][2]
+            prevError[1] = results[(numGates - step, False)][3]
+
+            MAPE = ((MAPE + prevError) * iter) / (iter + 1)
+
+        results[(numGates, False)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr)
+
+
+
 
     print("\nNON-symmetry:\n")
     print(rvs_nonPrecise)

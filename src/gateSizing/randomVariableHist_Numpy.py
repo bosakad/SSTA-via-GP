@@ -565,6 +565,7 @@ class RandomVariable:
         newBins = np.zeros((numberOfBins, numberOfUnaries))
 
         for bin in range(0, numberOfBins):
+            # newBins[bin, :int(np.floor(doableSum[bin] + 0.5))] = 1
             newBins[bin, :round(doableSum[bin])] = 1
 
         return newBins

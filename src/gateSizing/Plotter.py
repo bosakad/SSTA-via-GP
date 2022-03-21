@@ -41,6 +41,8 @@ def plotNonzeros():
     file = open("Inputs.outputs/testParsing.txt")    # file with 1 line - dictionary
     verbose = "../Inputs/verbose.stdout"        # file with verbose text, should be complex problem - so there is 'Presolved'
     readFromVerbose = False
+    plotUnder = True
+
 
     line = file.readline()
 
@@ -54,9 +56,14 @@ def plotNonzeros():
     timeWithConstr = np.array([])
     timeNoConstr = np.array([])
 
+    varsWithConstr = np.array([])
+    varsNoConstr = np.array([])
+
+    constrWithConstr = np.array([])
+    constrNoConstr = np.array([])
+
     if readFromVerbose:
         nonZ = parseVerbose(verbose)
-        print(nonZ.shape)
         zerosNoConstr = nonZ[0][:]
         zerosWithConstr = nonZ[1][:]
 
@@ -70,6 +77,8 @@ def plotNonzeros():
             timeWithConstr = np.append(timeWithConstr, results[(gateNum, WithConstr)][2])
             errorWithConstr = np.append(errorWithConstr, results[(gateNum, WithConstr)][3])
             errorWithConstr = np.append(errorWithConstr, results[(gateNum, WithConstr)][4])
+            varsWithConstr = np.append(varsWithConstr, results[(gateNum, WithConstr)][5])
+            constrWithConstr = np.append(constrWithConstr, results[(gateNum, WithConstr)][6])
         else:
             if not readFromVerbose:
                 zerosNoConstr = np.append(zerosNoConstr, results[(gateNum, WithConstr)][0])
@@ -77,6 +86,8 @@ def plotNonzeros():
             timeNoConstr = np.append(timeNoConstr, results[(gateNum, WithConstr)][2])
             errorNoConstr = np.append(errorNoConstr, results[(gateNum, WithConstr)][3])
             errorNoConstr = np.append(errorNoConstr, results[(gateNum, WithConstr)][4])
+            varsNoConstr = np.append(varsNoConstr, results[(gateNum, WithConstr)][5])
+            constrNoConstr = np.append(constrNoConstr, results[(gateNum, WithConstr)][6])
 
         if gateNum not in Gates:
             Gates = np.append(Gates, gateNum)
@@ -85,54 +96,136 @@ def plotNonzeros():
     errorNoConstr = errorNoConstr.reshape((len(errorNoConstr)//2, 2))
     errorWithConstr = errorWithConstr.reshape((len(errorWithConstr)//2, 2))
 
-    print(timeNoConstr)
-    print(timeWithConstr)
-
-    print(errorNoConstr)
-    print(errorWithConstr)
-
-    # set histograms
-    fig, axs = plt.subplots(4, 1)
+    if not plotUnder:
+        # set histograms
+        fig, axs = plt.subplots(3, 2)
 
         # nonzeros
-    axs[0].plot(Gates, zerosWithConstr, color='blue')
-    axs[0].plot(Gates, zerosNoConstr, color='orange')
-    axs[0].scatter(Gates, zerosWithConstr, color='blue')
-    axs[0].scatter(Gates, zerosNoConstr, color='orange')
+        axs[0, 0].plot(Gates, zerosWithConstr, color='blue')
+        axs[0, 0].plot(Gates, zerosNoConstr, color='orange')
+        axs[0, 0].scatter(Gates, zerosWithConstr, color='blue')
+        axs[0, 0].scatter(Gates, zerosNoConstr, color='orange')
 
-        # error mean
-    axs[1].plot(Gates, errorWithConstr[:, 0], color='blue')
-    axs[1].plot(Gates, errorNoConstr[:, 0], color='orange')
-    axs[1].scatter(Gates, errorWithConstr[:, 0], color='blue')
-    axs[1].scatter(Gates, errorNoConstr[:, 0], color='orange')
+        # variables
+        axs[1, 0].scatter(Gates, varsWithConstr, color='blue')
+        axs[1, 0].scatter(Gates, varsNoConstr, color='orange')
+        axs[1, 0].plot(Gates, varsWithConstr, color='blue')
+        axs[1, 0].plot(Gates, varsNoConstr, color='orange')
 
-        # error std
-    axs[2].scatter(Gates, errorWithConstr[:, 1], color='blue')
-    axs[2].scatter(Gates, errorNoConstr[:, 1], color='orange')
-    axs[2].plot(Gates, errorWithConstr[:, 1], color='blue')
-    axs[2].plot(Gates, errorNoConstr[:, 1], color='orange')
+        # constraints
+        axs[2, 0].scatter(Gates, constrWithConstr, color='blue')
+        axs[2, 0].scatter(Gates, constrNoConstr, color='orange')
+        axs[2, 0].plot(Gates, constrWithConstr, color='blue')
+        axs[2, 0].plot(Gates, constrNoConstr, color='orange')
 
         # time
-    axs[3].scatter(Gates, timeWithConstr, color='blue')
-    axs[3].scatter(Gates, timeNoConstr, color='orange')
-    axs[3].plot(Gates, timeWithConstr, color='blue')
-    axs[3].plot(Gates, timeNoConstr, color='orange')
+        axs[0, 1].scatter(Gates, timeWithConstr, color='blue')
+        axs[0, 1].scatter(Gates, timeNoConstr, color='orange')
+        axs[0, 1].plot(Gates, timeWithConstr, color='blue')
+        axs[0, 1].plot(Gates, timeNoConstr, color='orange')
 
-    for ax in axs.flat:
-        ax.set(xlabel='Number Of Gates')
+        # error mean
+        axs[1, 1].plot(Gates, errorWithConstr[:, 0], color='blue')
+        axs[1, 1].plot(Gates, errorNoConstr[:, 0], color='orange')
+        axs[1, 1].scatter(Gates, errorWithConstr[:, 0], color='blue')
+        axs[1, 1].scatter(Gates, errorNoConstr[:, 0], color='orange')
 
-    axs.flat[0].set(ylabel='Nonzeros')
-    axs.flat[1].set(ylabel='Mean Error')
-    axs.flat[2].set(ylabel='Std Error')
+        # error std
+        axs[2, 1].scatter(Gates, errorWithConstr[:, 1], color='blue')
+        axs[2, 1].scatter(Gates, errorNoConstr[:, 1], color='orange')
+        axs[2, 1].plot(Gates, errorWithConstr[:, 1], color='blue')
+        axs[2, 1].plot(Gates, errorNoConstr[:, 1], color='orange')
 
-    # Hide x labels and tick labels for top plots and y ticks for right plots.
-    for ax in axs.flat:
-        ax.label_outer()
+        for ax in axs.flat:
+            ax.set(xlabel='Number Of Gates')
 
-    # set legend
-    axs[0].legend(["With constraints", "Without constraints"])
-    axs[1].legend(["With constraints", "Without constraints"])
-    axs[2].legend(["With constraints", "Without constraints"])
+        axs.flat[0].set(ylabel='Nonzeros')
+        axs.flat[1].set(ylabel='MAPE Mean')
+        axs.flat[2].set(ylabel='MAPE std')
+        axs.flat[3].set(ylabel='Time')
+        axs.flat[4].set(ylabel='Variables')
+        axs.flat[5].set(ylabel='Constraints')
+
+        # Hide x labels and tick labels for top plots and y ticks for right plots.
+        for ax in axs.flat:
+            ax.label_outer()
+
+        # set legend
+        axs[0, 0].legend(["With constraints", "Without constraints"])
+        axs[1, 0].legend(["With constraints", "Without constraints"])
+        axs[2, 0].legend(["With constraints", "Without constraints"])
+        axs[0, 1].legend(["With constraints", "Without constraints"])
+        axs[1, 1].legend(["With constraints", "Without constraints"])
+        axs[2, 1].legend(["With constraints", "Without constraints"])
+    else:
+        # set histograms
+        fig, axs = plt.subplots(3, 1)
+        i = 0
+
+        # nonzeros
+        axs[i].plot(Gates, zerosWithConstr, color='blue')
+        axs[i].plot(Gates, zerosNoConstr, color='orange')
+        axs[i].scatter(Gates, zerosWithConstr, color='blue')
+        axs[i].scatter(Gates, zerosNoConstr, color='orange')
+        axs.flat[i].set(ylabel='Nonzeros')
+        axs[i].legend(["With constraints", "Without constraints"])
+        i += 1
+
+        # variables
+        axs[i].scatter(Gates, varsWithConstr, color='blue')
+        axs[i].scatter(Gates, varsNoConstr, color='orange')
+        axs[i].plot(Gates, varsWithConstr, color='blue')
+        axs[i].plot(Gates, varsNoConstr, color='orange')
+        axs.flat[i].set(ylabel='Variables')
+        # axs[i].legend(["With constraints", "Without constraints"])
+        i += 1
+
+        # constraints
+        axs[i].scatter(Gates, constrWithConstr, color='blue')
+        axs[i].scatter(Gates, constrNoConstr, color='orange')
+        axs[i].plot(Gates, constrWithConstr, color='blue')
+        axs[i].plot(Gates, constrNoConstr, color='orange')
+        axs.flat[i].set(ylabel='Constraints')
+        # axs[i].legend(["With constraints", "Without constraints"])
+        i += 1
+
+        #
+        # # time
+        # axs[i].scatter(Gates, timeWithConstr, color='blue')
+        # axs[i].scatter(Gates, timeNoConstr, color='orange')
+        # axs[i].plot(Gates, timeWithConstr, color='blue')
+        # axs[i].plot(Gates, timeNoConstr, color='orange')
+        # axs.flat[i].set(ylabel='Time')
+        # axs[i].legend(["With constraints", "Without constraints"])
+        # i += 1
+        #
+        # # error mean
+        # axs[i].plot(Gates, errorWithConstr[:, 0], color='blue')
+        # axs[i].plot(Gates, errorNoConstr[:, 0], color='orange')
+        # axs[i].scatter(Gates, errorWithConstr[:, 0], color='blue')
+        # axs[i].scatter(Gates, errorNoConstr[:, 0], color='orange')
+        # axs.flat[i].set(ylabel='MAPE Mean')
+        # axs[i].legend(["With constraints", "Without constraints"])
+        # i += 1
+        #
+        # # error std
+        # axs[i].scatter(Gates, errorWithConstr[:, 1], color='blue')
+        # axs[i].scatter(Gates, errorNoConstr[:, 1], color='orange')
+        # axs[i].plot(Gates, errorWithConstr[:, 1], color='blue')
+        # axs[i].plot(Gates, errorNoConstr[:, 1], color='orange')
+        # axs.flat[i].set(ylabel='MAPE std')
+        # axs[i].legend(["With constraints", "Without constraints"])
+        # i += 1
+
+
+        for ax in axs.flat:
+            ax.set(xlabel='Number Of Gates')
+
+
+        # Hide x labels and tick labels for top plots and y ticks for right plots.
+        for ax in axs.flat:
+            ax.label_outer()
+
 
     # plt.show()
     plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)

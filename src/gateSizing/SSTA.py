@@ -133,7 +133,7 @@ def Convolution_UNARY_MOSEK(withSymmetryConstr=False):
     """
 
     def convolutionF(x1: RandomVariableMOSEK, x2: RandomVariableMOSEK, curNofVariables, curNofConstr):
-        return x1.convolution_UNARY_MAX_DIVIDE(x2, curNofVariables, curNofConstr, withSymmetryConstr=withSymmetryConstr)
+        return x1.convolution_UNARY_MAX_DIVIDE_VECTORIZED(x2, curNofVariables, curNofConstr, withSymmetryConstr=withSymmetryConstr)
 
     return convolutionF
 
@@ -182,7 +182,7 @@ def maxOfDistributionsMOSEK_UNARY(withSymmetryConstr=False) -> cp.Variable:
     def maximumF(delays: [RandomVariableMOSEK], curNofVariables, curNofConstr):
         size = len(delays)
         for i in range(0, size - 1):
-            newRV, newNofVariables, newNofConstr = delays[i].maximum_UNARY_MAX_DIVIDE(delays[i + 1],curNofVariables, curNofConstr,
+            newRV, newNofVariables, newNofConstr = delays[i].maximum_UNARY_MAX_DIVIDE_VECTORIZED(delays[i + 1],curNofVariables, curNofConstr,
                                                                 withSymmetryConstr=withSymmetryConstr)
             delays[i + 1] = newRV
 
