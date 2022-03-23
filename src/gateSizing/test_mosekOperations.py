@@ -31,8 +31,8 @@ def testConvolution_MAX(dec = 3):
     interval = (-5, 40)
 
     numberOfSamples = 2000000
-    numberOfBins = 31
-    numberOfUnaries = 33
+    numberOfBins = 40
+    numberOfUnaries = 40
 
     # DESIRED
 
@@ -99,8 +99,9 @@ def testConvolution_MAX(dec = 3):
             RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
             RV2 = RandomVariableMOSEK(bins2, rv1.edges, task)
 
-            convolution, newNofVariables, newNofConstr = RV1.convolution_UNARY_MAX_DIVIDE(RV2, numberVariablesRVs, 0
+            convolution, newNofVariables, newNofConstr = RV1.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs, 0
                                                                                                      ,withSymmetryConstr=True)
+            print(newNofConstr)
             convolutionConCat = convolution.bins
 
                 # create the objective function
@@ -164,11 +165,11 @@ def testMaximum_MAX(dec = 3):
     numberOfGates = 2
 
 
-    interval = (-5, 10)
+    interval = (-5, 15)
 
     numberOfSamples = 2000000
-    numberOfBins = 20
-    numberOfUnaries = 20
+    numberOfBins = 16
+    numberOfUnaries = 30
 
     # DESIRED
 
@@ -453,8 +454,8 @@ def testMaximum_MAX_CONV(dec = 3):
 
 
 if __name__ == "__main__":
-    # testConvolution_MAX(dec=8)
-    testMaximum_MAX(dec=8)
+    testConvolution_MAX(dec=8)
+    # testMaximum_MAX(dec=8)
 
     # testMaximum_MAX_CONV(dec=8)
 

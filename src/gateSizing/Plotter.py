@@ -42,6 +42,7 @@ def plotNonzeros():
     verbose = "../Inputs/verbose.stdout"        # file with verbose text, should be complex problem - so there is 'Presolved'
     readFromVerbose = False
     plotUnder = True
+    only1 = True
 
 
     line = file.readline()
@@ -95,6 +96,7 @@ def plotNonzeros():
 
     errorNoConstr = errorNoConstr.reshape((len(errorNoConstr)//2, 2))
     errorWithConstr = errorWithConstr.reshape((len(errorWithConstr)//2, 2))
+
 
     if not plotUnder:
         # set histograms
@@ -162,29 +164,34 @@ def plotNonzeros():
         fig, axs = plt.subplots(3, 1)
         i = 0
 
+
         # nonzeros
         axs[i].plot(Gates, zerosWithConstr, color='blue')
-        axs[i].plot(Gates, zerosNoConstr, color='orange')
         axs[i].scatter(Gates, zerosWithConstr, color='blue')
-        axs[i].scatter(Gates, zerosNoConstr, color='orange')
+
+        if not only1:
+            axs[i].plot(Gates, zerosNoConstr, color='orange')
+            axs[i].scatter(Gates, zerosNoConstr, color='orange')
         axs.flat[i].set(ylabel='Nonzeros')
         axs[i].legend(["With constraints", "Without constraints"])
         i += 1
 
         # variables
         axs[i].scatter(Gates, varsWithConstr, color='blue')
-        axs[i].scatter(Gates, varsNoConstr, color='orange')
         axs[i].plot(Gates, varsWithConstr, color='blue')
-        axs[i].plot(Gates, varsNoConstr, color='orange')
+        if not only1:
+            axs[i].scatter(Gates, varsNoConstr, color='orange')
+            axs[i].plot(Gates, varsNoConstr, color='orange')
         axs.flat[i].set(ylabel='Variables')
         # axs[i].legend(["With constraints", "Without constraints"])
         i += 1
 
         # constraints
         axs[i].scatter(Gates, constrWithConstr, color='blue')
-        axs[i].scatter(Gates, constrNoConstr, color='orange')
         axs[i].plot(Gates, constrWithConstr, color='blue')
-        axs[i].plot(Gates, constrNoConstr, color='orange')
+        if not only1:
+            axs[i].scatter(Gates, constrNoConstr, color='orange')
+            axs[i].plot(Gates, constrNoConstr, color='orange')
         axs.flat[i].set(ylabel='Constraints')
         # axs[i].legend(["With constraints", "Without constraints"])
         i += 1
@@ -230,5 +237,128 @@ def plotNonzeros():
     # plt.show()
     plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)
 
+
+def plotPresolve():
+    file = open("Inputs.outputs/testParsing.txt")    # file with 1 line - dictionary
+    verbose = "../Inputs/verbose.stdout"        # file with verbose text, should be complex problem - so there is 'Presolved'
+    readFromVerbose = False
+    plotUnder = True
+
+
+    line = file.readline()
+
+    results = eval(line)    # load dictionary
+
+    Gates = np.array([], dtype=int)
+
+    if readFromVerbose:
+        nonZ = parseVerbose(verbose)
+        zerosNoConstr = nonZ[0][:]
+        zerosWithConstr = nonZ[1][:]
+
+    nonZeros = {}
+    vars = {}
+    constraints = {}
+
+    # store data from dictionary into numpy array
+    for gateNum, passes in results:
+
+        if passes not in nonZeros:
+            nonZeros[passes] = np.array([])
+            vars[passes] = np.array([])
+            constraints[passes] = np.array([])
+
+        nonZeros[passes] = np.append(nonZeros[passes], results[(gateNum, passes)][0])
+        vars[passes] = np.append(vars[passes], results[(gateNum, passes)][1])
+        constraints[passes] = np.append(constraints[passes], results[(gateNum, passes)][2])
+
+        if gateNum not in Gates:
+            Gates = np.append(Gates, gateNum)
+
+
+
+    # set histograms
+    fig, axs = plt.subplots(3, 1)
+    i = 0
+
+        # non zeros
+    colors = ['blue', 'orange', 'green']
+    legend = [0, 0, 0]
+    for passes in nonZeros:
+        # nonzeros
+        axs[0].plot(Gates, nonZeros[passes], color=colors[i])
+        axs[0].scatter(Gates, nonZeros[passes], color=colors[i])
+        legend[i] = passes
+        i += 1
+
+    axs.flat[0].set(ylabel='Nonzeros')
+    axs[0].legend(legend)
+
+
+        # number of variables
+    colors = ['blue', 'orange', 'green']
+    legend = [0, 0, 0]
+    i = 0
+    for passes in vars:
+        # nonzeros
+        axs[1].plot(Gates, vars[passes], color=colors[i])
+        axs[1].scatter(Gates, vars[passes], color=colors[i])
+        legend[i] = passes
+        i += 1
+
+    axs.flat[1].set(ylabel='Variables')
+    axs[1].legend(legend)
+
+        # number of constraints
+    colors = ['blue', 'orange', 'green']
+    legend = [0, 0, 0]
+    i = 0
+    for passes in constraints:
+        # nonzeros
+        axs[2].plot(Gates, constraints[passes], color=colors[i])
+        axs[2].scatter(Gates, constraints[passes], color=colors[i])
+        legend[i] = passes
+        i += 1
+
+    axs.flat[2].set(ylabel='Constraints')
+    axs[2].legend(legend)
+
+
+    for ax in axs.flat:
+        ax.set(xlabel='Number Of Gates')
+
+
+    # Hide x labels and tick labels for top plots and y ticks for right plots.
+    for ax in axs.flat:
+        ax.label_outer()
+
+
+    # plt.show()
+    plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)
+
+def plotForThesis():
+    from randomVariableHist_Numpy import RandomVariable
+    bins = np.array([0, 0.25, 0.5, 0.25, 0])
+    edges = np.array([0, 1, 2, 3, 4, 5])
+
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_ylim(0, 0.75)
+
+    rv = RandomVariable(bins, edges)
+    plt.hist(rv.edges[:-1], rv.edges, weights=rv.bins, density="PDF", color='orange')
+    # plt.show()
+
+
+    for i, j in zip(edges[2:-1], bins[1:-1]):
+        ax.annotate(str(j), xy=(i - 0.6, j + 0.005))
+
+    plt.savefig("Inputs.outputs/exampleHist.jpeg", dpi=500)
+
+    # plt.show()
+
 if __name__ == "__main__":
     plotNonzeros()
+    # plotPresolve()
+    # plotForThesis()

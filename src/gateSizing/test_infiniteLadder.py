@@ -396,7 +396,7 @@ def streamprinter(text):
     sys.stdout.flush()
 
 
-def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=(-2, 18), withSymmetryConstr=False):
+def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=(-2, 18), withSymmetryConstr=True, presolvePasses = -1):
 
     # parse command line arguments
     # number_of_nodes = 1
@@ -528,16 +528,26 @@ def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=
             # set mip gap to 1%
             task.putdouparam(dparam.mio_tol_rel_gap, 1.0e-2)
 
+            # task.putintparam(iparam.presolve_max_num_reductions, 1)
+            # task.putintparam(iparam.presolve_eliminator_max_fill, 0)
+
+
+            task.putintparam(iparam.presolve_use, presolvemode.on)
+            task.putintparam(iparam.presolve_max_num_pass, 0)
+            task.putparam("MSK_IPAR_LOG_PRESOLVE", "10")
+            # task.putintparam(iparam.log_presolve, 100000000)
 
 
             # Solve the problem
             task.optimize()
+
             # Print a summary containing information
             # about the solution for debugging purposes
             task.solutionsummary(mosek.streamtype.msg)
 
-            prosta = task.getprosta(mosek.soltype.itg)
-            solsta = task.getsolsta(mosek.soltype.itg)
+
+            # prosta = task.getprosta(mosek.soltype.itg)
+            # solsta = task.getsolsta(mosek.soltype.itg)
 
             # Output a solution
             xx = np.array([0.] * newNofVariables)

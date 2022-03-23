@@ -225,8 +225,10 @@ class RandomVariableMOSEK:
         else:
             symN = 0
 
-        task.appendcons(2 * numberOfBins + 3 * nSlackMult + symN)
-        offset = curNofConstr + 2 * numberOfBins
+        # task.appendcons(2 * numberOfBins + 3 * nSlackMult + symN)
+        task.appendcons(numberOfBins + 3 * nSlackMult + symN)
+
+        offset = curNofConstr + numberOfBins
 
 
         for z in range(0, numberOfBins):
@@ -298,10 +300,10 @@ class RandomVariableMOSEK:
             task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, round)
 
             # sumOfNewVariables <= numberOfUnaries
-            task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
-            task.putconbound(bin + offset + numberOfBins, mosek.boundkey.up, -self.inf, numberOfUnaries)
+            # task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
+            # task.putconbound(bin + offset + numberOfBins, mosek.boundkey.up, -self.inf, numberOfUnaries)
 
-        newNofConstr = curNofConstr + 2*numberOfBins + 3*nSlackMult
+        newNofConstr = curNofConstr + numberOfBins + 3*nSlackMult
 
         if withSymmetryConstr:
 
@@ -563,10 +565,11 @@ class RandomVariableMOSEK:
             symN = (numberOfUnaries-1)*numberOfBins
         else:
             symN = 0
-        task.appendcons(2 * numberOfBins + 3 * nSlackMult + 3 * nSlackMult2 + symN)
+        # task.appendcons(2 * numberOfBins + 3 * nSlackMult + 3 * nSlackMult2 + symN)
+        task.appendcons(numberOfBins + 3 * nSlackMult + 3 * nSlackMult2 + symN)
 
         # set offsets
-        constrOffset = curNofConstr + 2 * numberOfBins
+        constrOffset = curNofConstr + numberOfBins
         constrOffset2 = constrOffset + 3 * nSlackMult
 
 
@@ -679,12 +682,12 @@ class RandomVariableMOSEK:
             task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, round)
 
             # sumOfNewVariables <= numberOfUnaries
-            task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
-            task.putconbound(bin + offset + numberOfBins, mosek.boundkey.up, -self.inf, numberOfUnaries)
+            # task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
+            # task.putconbound(bin + offset + numberOfBins, mosek.boundkey.up, -self.inf, numberOfUnaries)
 
 
 
-        newNofConstr = curNofConstr + 2 * numberOfBins + 3 * nSlackMult + 3 * nSlackMult2
+        newNofConstr = curNofConstr + numberOfBins + 3 * nSlackMult + 3 * nSlackMult2
 
         if withSymmetryConstr:
             for bin in range(0, numberOfBins):
