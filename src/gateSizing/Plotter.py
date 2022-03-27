@@ -173,7 +173,7 @@ def plotNonzeros():
             axs[i].plot(Gates, zerosNoConstr, color='orange')
             axs[i].scatter(Gates, zerosNoConstr, color='orange')
         axs.flat[i].set(ylabel='Nonzeros')
-        axs[i].legend(["With constraints", "Without constraints"])
+        # axs[i].legend(["With constraints", "Without constraints"])
         i += 1
 
         # variables

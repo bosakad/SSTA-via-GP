@@ -2,7 +2,7 @@ import numpy
 import numpy as np
 import histogramGenerator
 from randomVariableHist_Numpy import RandomVariable
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 
 
@@ -742,6 +742,56 @@ def testMAX_QUAD_FORMULA_UNARY2(dec: int):
 
     return None
 
+def test_convANDmax(dec: int):
+    mu1 = 12.98553396
+    sigma1 = 2.76804456
+
+    mu2 = 13.98483475
+    sigma2 = 2.802585
+
+    mu3 = 20.98483475
+    sigma3 = 0.802585
+
+
+    interval = (4, 45)
+
+    numberOfSamples = 2000000
+    numberOfBins = 30
+    numberOfUnaries = 30
+
+    # DESIRED
+
+    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
+    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
+    rv3 = np.random.normal(mu3, sigma3, numberOfSamples)
+
+    max = np.maximum(rv1, rv2)
+    max = max + rv3
+    desired = [np.mean(max), np.std(max)]
+
+    # ACTUAL
+
+    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv5 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv6 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+
+
+
+    # max2 = rv4.maxOfDistributionsQUAD_FORMULA_UNARY(rv5)
+    # max2 = max2.convolutionOfTwoVarsNaiveSAME_UNARY(rv6)
+    max2 = rv4.maximum_AND_Convolution_UNARY(rv5, rv6)
+    max2 = histogramGenerator.get_Histogram_from_UNARY(max2)
+    actual = [max2.mean, max2.std]
+
+    plt.hist(max2.edges[:-1], max2.edges, weights=max2.bins, density="PDF", color='blue')
+    _ = plt.hist(max, bins=2000, density='PDF', alpha=0.7, color='orange')
+    plt.show()
+
+    # TESTING
+
+    np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+    return None
 
 def test_Convolution_UNARY(dec: int):
 
@@ -755,7 +805,7 @@ def test_Convolution_UNARY(dec: int):
 
     numberOfSamples = 2000000
     numberOfBins = 50
-    numberOfUnaries = 12
+    numberOfUnaries = 100
 
     # DESIRED
 
@@ -796,7 +846,7 @@ if __name__ == "__main__":
     # testmaxOfDistributionsQUAD(dec=5)
 
     # testUniteEdges(dec=2)   # failed test
-    testUniteEdgesNormal(dec=2)
+    # testUniteEdgesNormal(dec=2)
     # testUniteEdgesStudent(dec=2)
     #
     # testMaxAndConvolution(dec=1)
@@ -814,5 +864,6 @@ if __name__ == "__main__":
 
     # test_Convolution_UNARY(2)
 
+    test_convANDmax(2)
 
     print("All tests passed!")

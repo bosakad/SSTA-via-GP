@@ -28,11 +28,11 @@ def testConvolution_MAX(dec = 3):
     numberOfGates = 2
 
 
-    interval = (-5, 40)
+    interval = (-10, 40)
 
     numberOfSamples = 2000000
-    numberOfBins = 40
-    numberOfUnaries = 40
+    numberOfBins = 20
+    numberOfUnaries = 20
 
     # DESIRED
 
@@ -302,30 +302,32 @@ def testMaximum_MAX_CONV(dec = 3):
     mu3 = 2
     sigma3 = 0.2
 
-    numberOfGates = 4
+    numberOfGates = 3
 
 
-    interval = (-2, 10)
+    interval = (-1, 9)
 
     numberOfSamples = 2000000
-    numberOfBins = 15
-    numberOfUnaries = 15
+    numberOfBins = 10
+    numberOfUnaries = 10
 
     # DESIRED
 
     rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
     rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
     rv3 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
-    print(rv1.bins)
-    print(rv2.bins)
-    max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
+    # print(rv1.bins)
+    # print(rv2.bins)
+    # max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
     # conv = max1.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
+    conv = rv1.maximum_AND_Convolution_UNARY(rv2, rv3)
     # conv = conv.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)
     # conv = conv.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
     # max1 = test1.convolutionOfTwoVarsShift(test2)
-    desired = [max1.mean, max1.std]
+
+
+    desired = [conv.mean, conv.std]
 
     # print(desired)
     # print(max1.bins)
@@ -355,10 +357,9 @@ def testMaximum_MAX_CONV(dec = 3):
             bins1 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins2 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins3 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
-            bins4 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
 
-            gates = [rv1, rv2, rv3, rv4]
-            bins = [bins1, bins2, bins3, bins4]
+            gates = [rv1, rv2, rv3]
+            bins = [bins1, bins2, bins3]
 
             # set objective function
             for gate in range(0, numberOfGates):
@@ -384,19 +385,16 @@ def testMaximum_MAX_CONV(dec = 3):
             RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
             RV2 = RandomVariableMOSEK(bins2, rv1.edges, task)
             RV3 = RandomVariableMOSEK(bins3, rv1.edges, task)
-            RV4 = RandomVariableMOSEK(bins4, rv1.edges, task)
 
-            maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE(RV2, numberVariablesRVs,
-                                                                                             0, withSymmetryConstr=True)
+            maximum, newNofVariables, newNofConstr = RV1.maximum_AND_Convolution(RV2, RV3, numberVariablesRVs,
+                                                                                             0)
+
+            # maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs,
+            #                                                                       0, withSymmetryConstr=True)
 
             # maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,
             #                                                                       newNofConstr, withSymmetryConstr=True)
-            #
-            # maximum, newNofVariables, newNofConstr = maximum.maximum_UNARY_MAX_DIVIDE(RV4, newNofVariables,
-            #                                                                       newNofConstr, withSymmetryConstr=True)
-            #
-            # maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,
-            #                                                                       newNofConstr, withSymmetryConstr=True)
+
 
             maximumConCat = maximum.bins
 
@@ -440,9 +438,10 @@ def testMaximum_MAX_CONV(dec = 3):
             else:
                 print("Other solution status")
 
+            print(conv.bins)
 
             maximum.bins = xx[maximum.bins]
-            # print(maximum.bins)
+            print(maximum.bins)
 
             rv = RandomVariable(maximum.bins, edges=maximum.edges, unary=True)
             actual = [rv.mean, rv.std]
@@ -454,10 +453,10 @@ def testMaximum_MAX_CONV(dec = 3):
 
 
 if __name__ == "__main__":
-    testConvolution_MAX(dec=8)
+    # testConvolution_MAX(dec=8)
     # testMaximum_MAX(dec=8)
 
-    # testMaximum_MAX_CONV(dec=8)
+    testMaximum_MAX_CONV(dec=8)
 
 
 

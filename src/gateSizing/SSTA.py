@@ -8,15 +8,17 @@ from mosekVariable import RandomVariableMOSEK
 import cvxpyVariable
 
 
-def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, curNofVariables=-1, withSymmetryConstr=False) -> [Node]:
+def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStatus=(-1, -1),
+                                                            withSymmetryConstr=False, mosekTRI=False) -> [Node]:
     """
     Compute circuit delay using PDFs algorithm
     Function executes the algorithm for finding out the PDF of a circuit delay.
 
     :param rootNodes: array of root nodes, [Node], Node includes next nodes and previous nodes
-    :param curNofVariables: current number of MOSEK variables
+    :param mosekStatus: current number of MOSEK variables and constraints (tuple)
     :param cvxpy: Bool, true if cvxpy objects are used, false if just RandomVariables class is used
     :param unary: Bool, true if unary (M 0/1-bin repr.) is used, false otherwise
+    :param mosekTRI: Bool, true if trilinear constraints are used, false otherwise
 
     :return newConstr: new constraints for CVXPY(optional)
     :return newNofVariables: new number of MOSEK variables(optional)
@@ -24,20 +26,21 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, curNofVar
     """
 
     # pointer to a max and convolution functions
-    if curNofVariables >= 0:  MaximumF = maxOfDistributionsMOSEK_UNARY(withSymmetryConstr)
+    if mosekStatus[0] >= 0:  MaximumF = maxOfDistributionsMOSEK_UNARY(withSymmetryConstr)
     elif cvxpy and unary:     MaximumF = maxOfDistributionsCVXPY_UNARY(withSymmetryConstr)
     elif cvxpy and not unary: MaximumF = maxOfDistributionsCVXPY_McCormick
-    elif not cvxpy and unary: MaximumF = maxOfDistributionsUNARY
+    elif not cvxpy and unary and not mosekTRI: MaximumF = maxOfDistributionsUNARY
     else:                     MaximumF = maxOfDistributionsFORM
-    if curNofVariables >= 0:  ConvolutionF = Convolution_UNARY_MOSEK(withSymmetryConstr)
+    if mosekStatus[0] >= 0:  ConvolutionF = Convolution_UNARY_MOSEK(withSymmetryConstr)
     elif cvxpy and unary:     ConvolutionF = Convolution_UNARY(withSymmetryConstr)
     elif cvxpy and not unary: ConvolutionF = Convolution_McCormick
     elif not cvxpy and unary: ConvolutionF = RandomVariable.convolutionOfTwoVarsNaiveSAME_UNARY
     else:                     ConvolutionF = RandomVariable.convolutionOfTwoVarsShift
 
-    if curNofVariables >= 0:
+    if mosekStatus[0] >= 0:
         usingMosek = True
-        curNofConstr = 0
+        curNofVariables = mosekStatus[0]
+        curNofConstr = mosekStatus[1]
     else:
         usingMosek = False
         curNofConstr = 0
@@ -62,11 +65,25 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, curNofVar
 
         if tmpNode.prevDelays:                                      # get maximum + convolution
 
-            if usingMosek:
+            if usingMosek and not mosekTRI:
 
                 maxDelay, curNofVariables, curNofConstr = MaximumF(tmpNode.prevDelays, curNofVariables, curNofConstr)
 
                 currentRandVar, curNofVariables, curNofConstr = ConvolutionF(currentRandVar, maxDelay, curNofVariables, curNofConstr)
+
+            elif usingMosek and mosekTRI:
+                        # just for 2 inputs for maximum
+                RV1 = tmpNode.prevDelays[0]
+                RV2 = tmpNode.prevDelays[1]
+                RV3 = currentRandVar
+                currentRandVar, curNofVariables, curNofConstr = RV1.maximum_AND_Convolution(RV2, RV3, curNofVariables, curNofConstr)
+
+            elif not usingMosek and mosekTRI:   # numpy version of the tri
+
+                RV1 = tmpNode.prevDelays[0]
+                RV2 = tmpNode.prevDelays[1]
+                RV3 = currentRandVar
+                currentRandVar = RV1.maximum_AND_Convolution_UNARY(RV2, RV3)
 
             elif cvxpy:
                 maxDelay, newConstraints = MaximumF(tmpNode.prevDelays)

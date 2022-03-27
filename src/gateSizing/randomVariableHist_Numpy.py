@@ -263,6 +263,66 @@ class RandomVariable:
 
         return RandomVariable(maximum, self.edges, unary=True)
 
+    def maximum_AND_Convolution_UNARY(self, secondVariable, thirdVariable):
+        """
+        Maximum AND Convolution of two independent random variables naively - using 2 for loops:
+            (f*g)(z) = sum{k=-inf, inf} ( f(k)g(z-k)  )
+        with unary bins - meaning each bin is represented by M 0/1-bins. M and number of bins is same for all variables
+        Uses division to get into unary form.
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :param thirdVariable: random variable class
+        :return convolution: random variable class of convolution
+        """
+
+        binMatrix1 = self.bins
+        binMatrix2 = secondVariable.bins
+
+        numberOfBins = binMatrix1.shape[0]
+        numberOfUnaries = binMatrix1.shape[1]
+
+        # prealloc
+        maximum = np.zeros((numberOfBins, numberOfUnaries))
+
+        # vectorized
+        for i in range(0, numberOfBins):
+            for j in range(0, i + 1):
+
+                maximum[i, :] += binMatrix1[i, :] * np.sum(binMatrix2[j, :])
+
+                if i != j:
+                    maximum[i, :] += binMatrix1[j, :] * np.sum(binMatrix2[i, :])
+
+
+
+        # create unary matrices
+
+        maximum = np.sum(maximum, axis=1).astype(int)
+        maxNumber = int(np.max(maximum))
+
+        newMaximum = np.zeros((numberOfBins, maxNumber)).astype(int)
+        for i in range(0, numberOfBins):
+            newMaximum[i, :maximum[i]] = 1
+
+        # perform convolution
+        f = thirdVariable.bins
+
+        convolution = np.zeros((numberOfBins, numberOfUnaries))
+        for z in range(0, numberOfBins):
+            for k in range(0, z + 1):
+
+                convolution[z, :] += f[k, :] * np.sum(newMaximum [z - k, :])
+
+
+        # Deal With Edges
+        self.cutBins(self.edges, convolution)
+
+        # unarize
+        convolution = self.unarizeDivide(convolution, convolution=True, TRI=True)
+
+        return RandomVariable(convolution, self.edges, unary=True)
+
     def convolutionOfTwoVarsNaiveSAME_UNARY(self, secondVariable):
         """
         'SAME' Convolution of two independent random variables naively - using 2 for loops:
@@ -532,7 +592,7 @@ class RandomVariable:
 
 
     @staticmethod
-    def unarizeDivide(bins, convolution):
+    def unarizeDivide(bins, convolution, TRI=False):
         """
             Make a non unarized histogram in the unary form. This is done using the divison of the numbers.
         """
@@ -550,13 +610,18 @@ class RandomVariable:
 
 
             # technique with maximum possible
-        if convolution:
-            # divisor = numberOfUnaries
+        if not TRI and convolution:
             divisor = numberOfUnaries*numberOfBins / 30
+
+        elif TRI and convolution:
+            divisor = numberOfUnaries * numberOfBins / 14
+
+
         else:   # maximum
-            # divisor = numberOfBins*numberOfUnaries / 10
             divisor = numberOfBins*numberOfUnaries / 22
+            # divisor = 1
         bins = bins / divisor
+
 
 
         # doableSum = np.ceil(np.sum(bins, axis=1)).astype(int)

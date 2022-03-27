@@ -118,12 +118,12 @@ def testAlgorithms():
 def testAlgorithms_MOSEK():
 
     # number of testing
-    numberOfIterations = 6
+    numberOfIterations = 2
     step = 1
 
     numberOfGatesStart = 1
-    numberOfBins = 7
-    numberOfUnaries = 7
+    numberOfBins = 8
+    numberOfUnaries = 8
 
     interval = (-5, 18)
 
@@ -150,7 +150,7 @@ def testAlgorithms_MOSEK():
 
         numGates = numberOfGatesStart + iter * step
         numNonZeros, ObjVal, lastGate, time, numVars, numConstr = test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
-                                                                            interval,
+                                                                            interval, TRI=True,
                                                                             withSymmetryConstr=True)
 
         # saving values
@@ -292,7 +292,7 @@ def computeMAPE(n_bins, n_unaries, start, function):
 if __name__ == "__main__":
 
     # testAlgorithms()
-    # testAlgorithms_MOSEK()
-    testAlgorithms_PRESOLVE()
+    testAlgorithms_MOSEK()
+    # testAlgorithms_PRESOLVE()
 
 
