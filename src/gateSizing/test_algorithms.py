@@ -122,8 +122,8 @@ def testAlgorithms_MOSEK():
     step = 1
 
     numberOfGatesStart = 1
-    numberOfBins = 8
-    numberOfUnaries = 8
+    numberOfBins = 20
+    numberOfUnaries = 20
 
     interval = (-5, 18)
 
@@ -149,9 +149,10 @@ def testAlgorithms_MOSEK():
         print("\n\n" + str(iter) + ". iteration: \n\n")
 
         numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate, time, numVars, numConstr = test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
-                                                                            interval, TRI=True,
-                                                                            withSymmetryConstr=True)
+        numNonZeros, ObjVal, lastGate, time, numVars, numConstr, mipGapRoot,nVarsPresolve, nConstrPresolve = \
+                                            test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
+                                                                            interval, TRI=False,
+                                                                            withSymmetryConstr=False)
 
         # saving values
         rvs_Precise[iter, 0] = lastGate[0]
@@ -166,7 +167,8 @@ def testAlgorithms_MOSEK():
 
             MAPE = ((MAPE + prevError) * iter) / (iter + 1)
 
-        results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr)
+        results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr, mipGapRoot,
+                                     nVarsPresolve, nConstrPresolve)
 
         # print results
         print("\n\n" + str(results))
@@ -179,7 +181,8 @@ def testAlgorithms_MOSEK():
     #
     #     # calculating
     #     numGates = numberOfGatesStart + iter * step
-    #     numNonZeros, ObjVal, lastGate, time, numVars, numConstr = test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
+    #     numNonZeros, ObjVal, lastGate, time, numVars, numConstr, mipGapRoot,nVarsPresolve, nConstrPresolve   = \
+    #                                             test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
     #                                                                    interval,
     #                                                                    withSymmetryConstr=False)
     #     # saving values
@@ -195,8 +198,11 @@ def testAlgorithms_MOSEK():
     #
     #         MAPE = ((MAPE + prevError) * iter) / (iter + 1)
     #
-    #     results[(numGates, False)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr)
-
+    #     results[(numGates, False)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr, mipGapRoot,
+    #                                                                                     nVarsPresolve, nConstrPresolve)
+    #
+    #     # print results
+    #     print("\n\n" + str(results))
 
 
 

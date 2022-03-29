@@ -42,7 +42,7 @@ def plotNonzeros():
     verbose = "../Inputs/verbose.stdout"        # file with verbose text, should be complex problem - so there is 'Presolved'
     readFromVerbose = False
     plotUnder = True
-    only1 = True
+    only1 = False
 
 
     line = file.readline()
@@ -63,6 +63,9 @@ def plotNonzeros():
     constrWithConstr = np.array([])
     constrNoConstr = np.array([])
 
+    mipGapWithConstr = np.array([])
+    mipGapNoConstr = np.array([])
+
     if readFromVerbose:
         nonZ = parseVerbose(verbose)
         zerosNoConstr = nonZ[0][:]
@@ -80,6 +83,7 @@ def plotNonzeros():
             errorWithConstr = np.append(errorWithConstr, results[(gateNum, WithConstr)][4])
             varsWithConstr = np.append(varsWithConstr, results[(gateNum, WithConstr)][5])
             constrWithConstr = np.append(constrWithConstr, results[(gateNum, WithConstr)][6])
+            mipGapWithConstr = np.append(mipGapWithConstr, results[(gateNum, WithConstr)][7])
         else:
             if not readFromVerbose:
                 zerosNoConstr = np.append(zerosNoConstr, results[(gateNum, WithConstr)][0])
@@ -89,6 +93,7 @@ def plotNonzeros():
             errorNoConstr = np.append(errorNoConstr, results[(gateNum, WithConstr)][4])
             varsNoConstr = np.append(varsNoConstr, results[(gateNum, WithConstr)][5])
             constrNoConstr = np.append(constrNoConstr, results[(gateNum, WithConstr)][6])
+            mipGapNoConstr = np.append(mipGapNoConstr, results[(gateNum, WithConstr)][7])
 
         if gateNum not in Gates:
             Gates = np.append(Gates, gateNum)
@@ -161,7 +166,7 @@ def plotNonzeros():
         axs[2, 1].legend(["With constraints", "Without constraints"])
     else:
         # set histograms
-        fig, axs = plt.subplots(3, 1)
+        fig, axs = plt.subplots(4, 1)
         i = 0
 
 
@@ -193,6 +198,16 @@ def plotNonzeros():
             axs[i].scatter(Gates, constrNoConstr, color='orange')
             axs[i].plot(Gates, constrNoConstr, color='orange')
         axs.flat[i].set(ylabel='Constraints')
+        # axs[i].legend(["With constraints", "Without constraints"])
+        i += 1
+
+        # constraints
+        axs[i].scatter(Gates, mipGapWithConstr, color='blue')
+        axs[i].plot(Gates, mipGapWithConstr, color='blue')
+        if not only1:
+            axs[i].scatter(Gates, mipGapNoConstr, color='orange')
+            axs[i].plot(Gates, mipGapNoConstr, color='orange')
+        axs.flat[i].set(ylabel='MIP gap at root')
         # axs[i].legend(["With constraints", "Without constraints"])
         i += 1
 

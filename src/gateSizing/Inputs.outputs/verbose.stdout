@@ -1,1025 +1,179 @@
+0. iteration:
+
+
+Problem
+  Name                   :
+  Objective sense        : max
+  Type                   : LO (linear optimization problem)
+  Constraints            : 732800
+  Cones                  : 0
+  Scalar variables       : 246000
+  Matrix variables       : 0
+  Integer variables      : 246000
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 8
+Presolve started.
+Presolve terminated. Time = 0.55
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME
+0        0        1        0        2.0000000000e+01     NA                   NA          1.4
+0        1        1        0        2.0000000000e+01     2.0000000000e+01     0.00e+00    1.4
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 2.000000000000e+01
+Best objective bound               : 2.000000000000e+01
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 0.55
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 1.36
+
+Optimizer terminated. Time: 1.50
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 2.0000000000e+01    nrm: 1e+00    Viol.  con: 0e+00    var: 0e+00    itg: 0e+00
+
+ MOSEK UNARY VALUES:
+
+6.844999999999999 1.1839974662135047
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones
+               732800        246000        0             0
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed
+ Constraints:  244000        760           488040        0             0
+   Variables:  0             0             0             246000        0
+
+               Integer constraint types
+               Binary        General
+               244851        1149
+
+*** Data report
+               Nonzeros      Min           Max
+        |cj|:  400           0.0e+00       1.0e+00
+       |Aij|:  1218320       5.5e-02       1.0e+00
+
+               # finite      Min           Max
+      |blci|:  760           0.0e+00       0.0e+00
+      |buci|:  488040        0.0e+00       5.0e-01
+      |blxj|:  246000        0.0e+00       0.0e+00
+      |buxj|:  246000        0.0e+00       1.0e+00
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 1.4964978694915771, 2.8617331545191234, 3.6975478006181497, 246000, 732800)}
 NO SYMMETRY
 
 
 0. iteration:
 
 
-===============================================================================
-                                     CVXPY
-                                    v1.1.18
-===============================================================================
-(CVXPY) Mar 06 04:58:01 PM: Your problem has 497200 variables, 1349680 constraints, and 0 parameters.
-(CVXPY) Mar 06 04:58:30 PM: It is compliant with the following grammars: DCP, DQCP
-(CVXPY) Mar 06 04:58:30 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
-(CVXPY) Mar 06 04:58:30 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
--------------------------------------------------------------------------------
-                                  Compilation
--------------------------------------------------------------------------------
-(CVXPY) Mar 06 04:59:14 PM: Compiling problem (target solver=GUROBI).
-(CVXPY) Mar 06 04:59:14 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
-(CVXPY) Mar 06 04:59:14 PM: Applying reduction FlipObjective
-(CVXPY) Mar 06 04:59:15 PM: Applying reduction CvxAttr2Constr
-(CVXPY) Mar 06 04:59:22 PM: Applying reduction Qp2SymbolicQp
-(CVXPY) Mar 06 05:01:16 PM: Applying reduction QpMatrixStuffing
-(CVXPY) Mar 06 07:23:06 PM: Applying reduction GUROBI
-(CVXPY) Mar 06 07:23:14 PM: Finished problem compilation (took 8.684e+03 seconds).
--------------------------------------------------------------------------------
-                                Numerical solver
--------------------------------------------------------------------------------
-(CVXPY) Mar 06 07:23:14 PM: Invoking solver GUROBI  to obtain a solution.
-Using license file /mnt/appl/software/Gurobi/9.1.2-GCCcore-10.2.0/gurobi.lic
-Set parameter TokenServer to value 147.32.84.36
-Parameter OutputFlag unchanged
-   Value: 1  Min: 0  Max: 1  Default: 1
-Changed value of parameter QCPDual to 1
-   Prev: 0  Min: 0  Max: 1  Default: 0
-Changed value of parameter MIPGAP to 0.01
-   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
-Changed value of parameter TimeLimit to 1200.0
-   Prev: inf  Min: 0.0  Max: inf  Default: inf
-Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
-Thread count: 64 physical cores, 128 logical processors, using up to 32 threads
-Optimize a model with 1349680 rows, 497200 columns and 3596080 nonzeros
-Model fingerprint: 0x4a1a2fd5
-Variable types: 0 continuous, 497200 integer (497200 binary)
-Coefficient statistics:
-  Matrix range     [1e+00, 1e+00]
-  Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+00]
-  RHS range        [1e+00, 2e+01]
-Found heuristic solution: objective 0.0000000
-Presolve removed 1312666 rows and 474826 columns
-Presolve time: 0.87s
-Presolved: 37014 rows, 22374 columns, 106110 nonzeros
-Variable types: 0 continuous, 22374 integer (21699 binary)
-
-Deterministic concurrent LP optimizer: primal and dual simplex
-Showing first log only...
-
-Concurrent spin time: 0.00s
-
-Solved with dual simplex
-
-Root relaxation: objective -6.885000e+03, 15318 iterations, 0.27 seconds
-
-    Nodes    |    Current Node    |     Objective Bounds      |     Work
- Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
-
-*    0     0               0    -6885.000000 -6885.0000  0.00%     -    1s
-
-Explored 0 nodes (21373 simplex iterations) in 1.58 seconds
-Thread count was 32 (of 128 available processors)
-
-Solution count 2: -6885 0
-No other solutions better than -6885
-
-Optimal solution found (tolerance 1.00e-02)
-Best objective -6.885000000000e+03, best bound -6.885000000000e+03, gap 0.0000%
--------------------------------------------------------------------------------
-                                    Summary
--------------------------------------------------------------------------------
-(CVXPY) Mar 06 07:23:29 PM: Problem status: optimal
-(CVXPY) Mar 06 07:23:29 PM: Optimal value: 6.885e+03
-(CVXPY) Mar 06 07:23:29 PM: Compilation took 8.684e+03 seconds
-(CVXPY) Mar 06 07:23:29 PM: Solver (including time spent in interface) took 9.195e+00 seconds
-
- APRX. VALUES:
-
-7.336666666666666 1.7095166633356407
-8.037244897959182 2.416852621300317
-8.506012658227846 3.2410080456145893
-9.043803418803419 4.066885904639547
-11.431132075471698 3.725952473074861
-12.425 4.614947533909865
-13.029248366013071 5.217166071792929
-14.000852272727272 5.937874328946215
-15.444148936170214 6.325432481988958
-16.029106280193236 6.843606279336861
-15.717187499999998 7.389097853584275
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-16.872549019607842 6.689770788927031
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.147685185185182 7.1702877940177405
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.044495412844032 7.218167905398808
-15.388260869565215 7.565741451738605
-15.172222222222219 7.678893732212817
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.279310344827586 7.623780481803012
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.044495412844032 7.218167905398808
-16.018150684931502 7.191650640265552
-15.907805429864252 7.2515561321490205
-16.872549019607842 6.689770788927031
-1. iteration:
-
-
-===============================================================================
-                                     CVXPY
-                                    v1.1.18
-===============================================================================
-(CVXPY) Mar 06 07:26:14 PM: Your problem has 524800 variables, 1424640 constraints, and 0 parameters.
-(CVXPY) Mar 06 07:26:45 PM: It is compliant with the following grammars: DCP, DQCP
-(CVXPY) Mar 06 07:26:45 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
-(CVXPY) Mar 06 07:26:45 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
--------------------------------------------------------------------------------
-                                  Compilation
--------------------------------------------------------------------------------
-(CVXPY) Mar 06 07:27:32 PM: Compiling problem (target solver=GUROBI).
-(CVXPY) Mar 06 07:27:32 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
-(CVXPY) Mar 06 07:27:32 PM: Applying reduction FlipObjective
-(CVXPY) Mar 06 07:27:33 PM: Applying reduction CvxAttr2Constr
-(CVXPY) Mar 06 07:27:40 PM: Applying reduction Qp2SymbolicQp
-(CVXPY) Mar 06 07:29:38 PM: Applying reduction QpMatrixStuffing
-(CVXPY) Mar 06 10:01:43 PM: Applying reduction GUROBI
-(CVXPY) Mar 06 10:01:52 PM: Finished problem compilation (took 9.307e+03 seconds).
--------------------------------------------------------------------------------
-                                Numerical solver
--------------------------------------------------------------------------------
-(CVXPY) Mar 06 10:01:52 PM: Invoking solver GUROBI  to obtain a solution.
-Parameter OutputFlag unchanged
-   Value: 1  Min: 0  Max: 1  Default: 1
-Changed value of parameter QCPDual to 1
-   Prev: 0  Min: 0  Max: 1  Default: 0
-Changed value of parameter MIPGAP to 0.01
-   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
-Changed value of parameter TimeLimit to 1200.0
-   Prev: inf  Min: 0.0  Max: inf  Default: inf
-Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
-Thread count: 64 physical cores, 128 logical processors, using up to 32 threads
-Optimize a model with 1424640 rows, 524800 columns and 3795840 nonzeros
-Model fingerprint: 0x6ccd7cd5
-Variable types: 0 continuous, 524800 integer (524800 binary)
-Coefficient statistics:
-  Matrix range     [1e+00, 1e+00]
-  Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+00]
-  RHS range        [1e+00, 2e+01]
-Found heuristic solution: objective 0.0000000
-Presolve removed 1385331 rows and 501189 columns
-Presolve time: 0.92s
-Presolved: 39309 rows, 23611 columns, 112548 nonzeros
-Variable types: 0 continuous, 23611 integer (22850 binary)
-
-Deterministic concurrent LP optimizer: primal and dual simplex
-Showing first log only...
-
-Concurrent spin time: 0.00s
-
-Solved with dual simplex
-
-Root relaxation: objective -7.358000e+03, 16228 iterations, 0.30 seconds
-
-    Nodes    |    Current Node    |     Objective Bounds      |     Work
- Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
-
-H    0     0                    -7358.000000 -9068.0000  23.2%     -    1s
-     0     0          -    0      -7358.0000 -7358.0000  0.00%     -    1s
-
-Explored 0 nodes (22758 simplex iterations) in 1.64 seconds
-Thread count was 32 (of 128 available processors)
-
-Solution count 2: -7358 0
-No other solutions better than -7358
-
-Optimal solution found (tolerance 1.00e-02)
-Best objective -7.358000000000e+03, best bound -7.358000000000e+03, gap 0.0000%
--------------------------------------------------------------------------------
-                                    Summary
--------------------------------------------------------------------------------
-(CVXPY) Mar 06 10:02:07 PM: Problem status: optimal
-(CVXPY) Mar 06 10:02:07 PM: Optimal value: 7.358e+03
-(CVXPY) Mar 06 10:02:07 PM: Compilation took 9.307e+03 seconds
-(CVXPY) Mar 06 10:02:07 PM: Solver (including time spent in interface) took 9.665e+00 seconds
-
- APRX. VALUES:
-
-7.049999999999999 1.6055941866822054
-7.91421568627451 2.4552527469730374
-8.446264367816092 3.284644106615076
-9.090677966101692 4.081233919181039
-11.431132075471698 3.725952473074861
-12.425 4.614947533909865
-13.029248366013071 5.217166071792929
-13.907758620689656 5.90658033388073
-15.324242424242428 6.584252864958585
-15.752380952380953 6.93357945746427
-15.611946902654868 7.440165152250042
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-16.872549019607842 6.689770788927031
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.147685185185182 7.1702877940177405
-16.074082568807338 7.160444932780659
-15.962727272727273 7.222012393822716
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.172222222222219 7.678893732212817
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.799439461883404 7.308287974367888
-16.872549019607842 6.689770788927031
-16.460071090047393 6.949946460271001
-16.245 7.061487095506158
-16.245 7.061487095506158
-16.13052995391705 7.128368187325885
-16.5706937799043 6.8892576819728255
-16.35152582159624 7.007287497379387
-16.1875 7.095392104765625
-2. iteration:
-
-
-===============================================================================
-                                     CVXPY
-                                    v1.1.18
-===============================================================================
-(CVXPY) Mar 06 10:04:49 PM: Your problem has 552400 variables, 1499600 constraints, and 0 parameters.
-(CVXPY) Mar 06 10:05:20 PM: It is compliant with the following grammars: DCP, DQCP
-(CVXPY) Mar 06 10:05:20 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
-(CVXPY) Mar 06 10:05:20 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
--------------------------------------------------------------------------------
-                                  Compilation
--------------------------------------------------------------------------------
-(CVXPY) Mar 06 10:06:11 PM: Compiling problem (target solver=GUROBI).
-(CVXPY) Mar 06 10:06:11 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
-(CVXPY) Mar 06 10:06:11 PM: Applying reduction FlipObjective
-(CVXPY) Mar 06 10:06:11 PM: Applying reduction CvxAttr2Constr
-(CVXPY) Mar 06 10:06:19 PM: Applying reduction Qp2SymbolicQp
-(CVXPY) Mar 06 10:08:11 PM: Applying reduction QpMatrixStuffing
-(CVXPY) Mar 07 12:58:54 AM: Applying reduction GUROBI
-(CVXPY) Mar 07 12:59:03 AM: Finished problem compilation (took 1.042e+04 seconds).
--------------------------------------------------------------------------------
-                                Numerical solver
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 12:59:03 AM: Invoking solver GUROBI  to obtain a solution.
-Parameter OutputFlag unchanged
-   Value: 1  Min: 0  Max: 1  Default: 1
-Changed value of parameter QCPDual to 1
-   Prev: 0  Min: 0  Max: 1  Default: 0
-Changed value of parameter MIPGAP to 0.01
-   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
-Changed value of parameter TimeLimit to 1200.0
-   Prev: inf  Min: 0.0  Max: inf  Default: inf
-Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
-Thread count: 64 physical cores, 128 logical processors, using up to 32 threads
-Optimize a model with 1499600 rows, 552400 columns and 3995600 nonzeros
-Model fingerprint: 0xe0073f10
-Variable types: 0 continuous, 552400 integer (552400 binary)
-Coefficient statistics:
-  Matrix range     [1e+00, 1e+00]
-  Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+00]
-  RHS range        [1e+00, 2e+01]
-Found heuristic solution: objective 0.0000000
-Presolve removed 1457765 rows and 527180 columns
-Presolve time: 1.04s
-Presolved: 41835 rows, 25220 columns, 119892 nonzeros
-Variable types: 0 continuous, 25220 integer (24471 binary)
-
-Deterministic concurrent LP optimizer: primal and dual simplex
-Showing first log only...
-
-Concurrent spin time: 0.00s
-
-Solved with dual simplex
-
-Root relaxation: objective -7.822000e+03, 16951 iterations, 0.30 seconds
-
-    Nodes    |    Current Node    |     Objective Bounds      |     Work
- Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
-
-H    0     0                    -7822.000000 -9629.0000  23.1%     -    1s
-     0     0          -    0      -7822.0000 -7822.0000  0.00%     -    1s
-
-Explored 0 nodes (23502 simplex iterations) in 1.80 seconds
-Thread count was 32 (of 128 available processors)
-
-Solution count 2: -7822 0
-No other solutions better than -7822
-
-Optimal solution found (tolerance 1.00e-02)
-Best objective -7.822000000000e+03, best bound -7.822000000000e+03, gap 0.0000%
--------------------------------------------------------------------------------
-                                    Summary
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 12:59:19 AM: Problem status: optimal
-(CVXPY) Mar 07 12:59:19 AM: Optimal value: 7.822e+03
-(CVXPY) Mar 07 12:59:19 AM: Compilation took 1.042e+04 seconds
-(CVXPY) Mar 07 12:59:19 AM: Solver (including time spent in interface) took 1.053e+01 seconds
-
- APRX. VALUES:
-
-7.429411764705882 1.6257743696583675
-8.04956140350877 2.381399463366939
-8.461746987951809 3.2268460144613575
-9.090677966101692 4.081233919181039
-11.431132075471698 3.725952473074861
-12.425 4.614947533909865
-12.86027607361963 5.555495075803801
-13.655277777777776 6.047369715702444
-15.344473684210527 6.400136901236616
-15.882834101382485 7.197207818175573
-15.388260869565215 7.565741451738605
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-16.460071090047393 6.949946460271001
-16.5706937799043 6.8892576819728255
-16.35152582159624 7.007287497379387
-16.872549019607842 6.689770788927031
-16.5706937799043 6.8892576819728255
-16.35152582159624 7.007287497379387
-16.245 7.061487095506158
-16.13052995391705 7.128368187325885
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.172222222222219 7.678893732212817
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-16.872549019607842 6.689770788927031
-16.5706937799043 6.8892576819728255
-16.35152582159624 7.007287497379387
-16.1875 7.095392104765625
-16.074082568807338 7.160444932780659
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.044495412844032 7.218167905398808
-15.962727272727273 7.222012393822716
-15.853378378378379 7.280306713237552
-3. iteration:
-
-
-===============================================================================
-                                     CVXPY
-                                    v1.1.18
-===============================================================================
-(CVXPY) Mar 07 01:02:22 AM: Your problem has 580000 variables, 1574560 constraints, and 0 parameters.
-(CVXPY) Mar 07 01:02:55 AM: It is compliant with the following grammars: DCP, DQCP
-(CVXPY) Mar 07 01:02:55 AM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
-(CVXPY) Mar 07 01:02:55 AM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
--------------------------------------------------------------------------------
-                                  Compilation
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 01:03:48 AM: Compiling problem (target solver=GUROBI).
-(CVXPY) Mar 07 01:03:48 AM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
-(CVXPY) Mar 07 01:03:48 AM: Applying reduction FlipObjective
-(CVXPY) Mar 07 01:03:49 AM: Applying reduction CvxAttr2Constr
-(CVXPY) Mar 07 01:03:57 AM: Applying reduction Qp2SymbolicQp
-(CVXPY) Mar 07 01:05:55 AM: Applying reduction QpMatrixStuffing
-(CVXPY) Mar 07 04:20:36 AM: Applying reduction GUROBI
-(CVXPY) Mar 07 04:20:46 AM: Finished problem compilation (took 1.187e+04 seconds).
--------------------------------------------------------------------------------
-                                Numerical solver
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 04:20:46 AM: Invoking solver GUROBI  to obtain a solution.
-Parameter OutputFlag unchanged
-   Value: 1  Min: 0  Max: 1  Default: 1
-Changed value of parameter QCPDual to 1
-   Prev: 0  Min: 0  Max: 1  Default: 0
-Changed value of parameter MIPGAP to 0.01
-   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
-Changed value of parameter TimeLimit to 1200.0
-   Prev: inf  Min: 0.0  Max: inf  Default: inf
-Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
-Thread count: 64 physical cores, 128 logical processors, using up to 32 threads
-Optimize a model with 1574560 rows, 580000 columns and 4195360 nonzeros
-Model fingerprint: 0xb4b9756d
-Variable types: 0 continuous, 580000 integer (580000 binary)
-Coefficient statistics:
-  Matrix range     [1e+00, 1e+00]
-  Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+00]
-  RHS range        [1e+00, 2e+01]
-Found heuristic solution: objective 0.0000000
-Presolve removed 1530474 rows and 553641 columns
-Presolve time: 1.11s
-Presolved: 44086 rows, 26359 columns, 126132 nonzeros
-Variable types: 0 continuous, 26359 integer (25513 binary)
-
-Deterministic concurrent LP optimizer: primal and dual simplex
-Showing first log only...
-
-Concurrent spin time: 0.00s
-
-Solved with dual simplex
-
-Root relaxation: objective -8.290000e+03, 17401 iterations, 0.31 seconds
-
-    Nodes    |    Current Node    |     Objective Bounds      |     Work
- Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
-
-*    0     0               0    -8290.000000 -8290.0000  0.00%     -    1s
-
-Explored 0 nodes (24745 simplex iterations) in 1.92 seconds
-Thread count was 32 (of 128 available processors)
-
-Solution count 2: -8290 0
-No other solutions better than -8290
-
-Optimal solution found (tolerance 1.00e-02)
-Best objective -8.290000000000e+03, best bound -8.290000000000e+03, gap 0.0000%
--------------------------------------------------------------------------------
-                                    Summary
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 04:21:04 AM: Problem status: optimal
-(CVXPY) Mar 07 04:21:04 AM: Optimal value: 8.290e+03
-(CVXPY) Mar 07 04:21:04 AM: Compilation took 1.187e+04 seconds
-(CVXPY) Mar 07 04:21:04 AM: Solver (including time spent in interface) took 1.094e+01 seconds
-
- APRX. VALUES:
-
-7.408333333333332 1.645640092222875
-8.04956140350877 2.381399463366939
-8.446264367816092 3.284644106615076
-8.996120689655172 4.051682020140593
-10.985743801652891 4.158990096202781
-11.463157894736842 5.148373327803421
-12.47776073619632 5.4979813683571095
-13.562566137566138 6.3315341138655965
-15.164340101522845 6.572878289315752
-15.75141509433962 6.995730529331261
-15.611946902654868 7.440165152250042
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-16.872549019607842 6.689770788927031
-16.872549019607842 6.689770788927031
-16.5706937799043 6.8892576819728255
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.460071090047393 6.949946460271001
-16.245 7.061487095506158
-16.13052995391705 7.128368187325885
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.172222222222219 7.678893732212817
-15.49912280701754 7.504600146133002
-15.279310344827586 7.623780481803012
-15.11478723404255 7.712743113685906
-15.279310344827586 7.623780481803012
-16.872549019607842 6.689770788927031
-16.460071090047393 6.949946460271001
-16.245 7.061487095506158
-16.35152582159624 7.007287497379387
-15.93340909090909 7.278280873187587
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.460071090047393 6.949946460271001
-15.878619909502262 7.307125421044834
-15.388260869565215 7.565741451738605
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-4. iteration:
-
-
-===============================================================================
-                                     CVXPY
-                                    v1.1.18
-===============================================================================
-(CVXPY) Mar 07 04:24:06 AM: Your problem has 607600 variables, 1649520 constraints, and 0 parameters.
-(CVXPY) Mar 07 04:24:41 AM: It is compliant with the following grammars: DCP, DQCP
-(CVXPY) Mar 07 04:24:41 AM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
-(CVXPY) Mar 07 04:24:41 AM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
--------------------------------------------------------------------------------
-                                  Compilation
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 04:25:37 AM: Compiling problem (target solver=GUROBI).
-(CVXPY) Mar 07 04:25:37 AM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
-(CVXPY) Mar 07 04:25:37 AM: Applying reduction FlipObjective
-(CVXPY) Mar 07 04:25:37 AM: Applying reduction CvxAttr2Constr
-(CVXPY) Mar 07 04:25:46 AM: Applying reduction Qp2SymbolicQp
-(CVXPY) Mar 07 04:27:49 AM: Applying reduction QpMatrixStuffing
-(CVXPY) Mar 07 08:10:21 AM: Applying reduction GUROBI
-(CVXPY) Mar 07 08:10:31 AM: Finished problem compilation (took 1.355e+04 seconds).
--------------------------------------------------------------------------------
-                                Numerical solver
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 08:10:31 AM: Invoking solver GUROBI  to obtain a solution.
-Parameter OutputFlag unchanged
-   Value: 1  Min: 0  Max: 1  Default: 1
-Changed value of parameter QCPDual to 1
-   Prev: 0  Min: 0  Max: 1  Default: 0
-Changed value of parameter MIPGAP to 0.01
-   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
-Changed value of parameter TimeLimit to 1200.0
-   Prev: inf  Min: 0.0  Max: inf  Default: inf
-Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
-Thread count: 64 physical cores, 128 logical processors, using up to 32 threads
-Optimize a model with 1649520 rows, 607600 columns and 4395120 nonzeros
-Model fingerprint: 0x1d3eb6dd
-Variable types: 0 continuous, 607600 integer (607600 binary)
-Coefficient statistics:
-  Matrix range     [1e+00, 1e+00]
-  Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+00]
-  RHS range        [1e+00, 2e+01]
-Found heuristic solution: objective 0.0000000
-Presolve removed 1603235 rows and 579725 columns
-Presolve time: 1.22s
-Presolved: 46285 rows, 27875 columns, 132620 nonzeros
-Variable types: 0 continuous, 27875 integer (26983 binary)
-
-Deterministic concurrent LP optimizer: primal and dual simplex
-Showing first log only...
-
-Concurrent spin time: 0.00s
-
-Solved with dual simplex
-
-Root relaxation: objective -8.697000e+03, 18507 iterations, 0.34 seconds
-
-    Nodes    |    Current Node    |     Objective Bounds      |     Work
- Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
-
-H    0     0                    -8697.000000 -10708.000  23.1%     -    1s
-     0     0          -    0      -8697.0000 -8697.0000  0.00%     -    1s
-
-Explored 0 nodes (25883 simplex iterations) in 2.07 seconds
-Thread count was 32 (of 128 available processors)
-
-Solution count 2: -8697 0
-No other solutions better than -8697
-
-Optimal solution found (tolerance 1.00e-02)
-Best objective -8.697000000000e+03, best bound -8.697000000000e+03, gap 0.0000%
--------------------------------------------------------------------------------
-                                    Summary
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 08:10:49 AM: Problem status: optimal
-(CVXPY) Mar 07 08:10:49 AM: Optimal value: 8.697e+03
-(CVXPY) Mar 07 08:10:49 AM: Compilation took 1.355e+04 seconds
-(CVXPY) Mar 07 08:10:49 AM: Solver (including time spent in interface) took 1.168e+01 seconds
-
- APRX. VALUES:
-
-7.468055555555555 1.5879823317034953
-7.968636363636364 2.385506512737714
-8.53567415730337 3.3006338505164203
-8.947608695652175 4.035576805269444
-11.401190476190475 3.7309394657448083
-12.425 4.614947533909865
-12.814687499999998 5.486039375300158
-13.669101123595507 6.0111045677650194
-15.36102150537634 6.30807157277717
-15.82475369458128 6.750848327529221
-15.770515695067262 7.3625112440838
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-16.13052995391705 7.128368187325885
-16.872549019607842 6.689770788927031
-16.5706937799043 6.8892576819728255
-16.872549019607842 6.689770788927031
-16.5706937799043 6.8892576819728255
-16.044495412844032 7.218167905398808
-16.1875 7.095392104765625
-16.074082568807338 7.160444932780659
-15.962727272727273 7.222012393822716
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.172222222222219 7.678893732212817
-16.872549019607842 6.689770788927031
-16.5706937799043 6.8892576819728255
-15.93340909090909 7.278280873187587
-16.074082568807338 7.160444932780659
-15.962727272727273 7.222012393822716
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.147685185185182 7.1702877940177405
-16.018150684931502 7.191650640265552
-15.611946902654868 7.440165152250042
-16.1875 7.095392104765625
-16.074082568807338 7.160444932780659
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-5. iteration:
-
-
-===============================================================================
-                                     CVXPY
-                                    v1.1.18
-===============================================================================
-(CVXPY) Mar 07 08:14:04 AM: Your problem has 635200 variables, 1724480 constraints, and 0 parameters.
-(CVXPY) Mar 07 08:14:41 AM: It is compliant with the following grammars: DCP, DQCP
-(CVXPY) Mar 07 08:14:41 AM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
-(CVXPY) Mar 07 08:14:41 AM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
--------------------------------------------------------------------------------
-                                  Compilation
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 08:15:39 AM: Compiling problem (target solver=GUROBI).
-(CVXPY) Mar 07 08:15:39 AM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
-(CVXPY) Mar 07 08:15:39 AM: Applying reduction FlipObjective
-(CVXPY) Mar 07 08:15:39 AM: Applying reduction CvxAttr2Constr
-(CVXPY) Mar 07 08:15:49 AM: Applying reduction Qp2SymbolicQp
-(CVXPY) Mar 07 08:18:14 AM: Applying reduction QpMatrixStuffing
-(CVXPY) Mar 07 12:19:43 PM: Applying reduction GUROBI
-(CVXPY) Mar 07 12:19:54 PM: Finished problem compilation (took 1.471e+04 seconds).
--------------------------------------------------------------------------------
-                                Numerical solver
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 12:19:54 PM: Invoking solver GUROBI  to obtain a solution.
-Parameter OutputFlag unchanged
-   Value: 1  Min: 0  Max: 1  Default: 1
-Changed value of parameter QCPDual to 1
-   Prev: 0  Min: 0  Max: 1  Default: 0
-Changed value of parameter MIPGAP to 0.01
-   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
-Changed value of parameter TimeLimit to 1200.0
-   Prev: inf  Min: 0.0  Max: inf  Default: inf
-Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
-Thread count: 64 physical cores, 128 logical processors, using up to 32 threads
-Optimize a model with 1724480 rows, 635200 columns and 4594880 nonzeros
-Model fingerprint: 0xfd327bc9
-Variable types: 0 continuous, 635200 integer (635200 binary)
-Coefficient statistics:
-  Matrix range     [1e+00, 1e+00]
-  Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+00]
-  RHS range        [1e+00, 2e+01]
-Found heuristic solution: objective 0.0000000
-Presolve removed 1675335 rows and 606068 columns
-Presolve time: 1.19s
-Presolved: 49145 rows, 29132 columns, 140388 nonzeros
-Variable types: 0 continuous, 29132 integer (28201 binary)
-
-Deterministic concurrent LP optimizer: primal and dual simplex
-Showing first log only...
-
-Concurrent spin time: 0.01s
-
-Solved with dual simplex
-
-Root relaxation: objective -9.169000e+03, 20070 iterations, 0.39 seconds
-
-    Nodes    |    Current Node    |     Objective Bounds      |     Work
- Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
-
-H    0     0                    -9169.000000 -11271.000  22.9%     -    1s
-     0     0          -    0      -9169.0000 -9169.0000  0.00%     -    2s
-
-Explored 0 nodes (29311 simplex iterations) in 2.16 seconds
-Thread count was 32 (of 128 available processors)
-
-Solution count 2: -9169 0
-No other solutions better than -9169
-
-Optimal solution found (tolerance 1.00e-02)
-Best objective -9.169000000000e+03, best bound -9.169000000000e+03, gap 0.0000%
--------------------------------------------------------------------------------
-                                    Summary
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 12:20:13 PM: Problem status: optimal
-(CVXPY) Mar 07 12:20:13 PM: Optimal value: 9.169e+03
-(CVXPY) Mar 07 12:20:13 PM: Compilation took 1.471e+04 seconds
-(CVXPY) Mar 07 12:20:13 PM: Solver (including time spent in interface) took 1.230e+01 seconds
-
- APRX. VALUES:
-
-7.502631578947367 1.552574151480333
-7.968636363636364 2.385506512737714
-8.53567415730337 3.3006338505164203
-9.090677966101692 4.081233919181039
-11.431132075471698 3.725952473074861
-12.425 4.614947533909865
-13.029248366013071 5.217166071792929
-13.8125 5.872858652308942
-15.344473684210527 6.400136901236616
-16.032109004739336 6.95512846907182
-15.66433333333333 7.414975657411155
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-14.918277310924367 7.86132011592935
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.460071090047393 6.949946460271001
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.460071090047393 6.949946460271001
-16.35152582159624 7.007287497379387
-15.93340909090909 7.278280873187587
-15.388260869565215 7.565741451738605
-15.172222222222219 7.678893732212817
-15.057838983050846 7.7457391233693045
-15.279310344827586 7.623780481803012
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-16.460071090047393 6.949946460271001
-16.147685185185182 7.1702877940177405
-16.018150684931502 7.191650640265552
-16.1875 7.095392104765625
-16.074082568807338 7.160444932780659
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.044495412844032 7.218167905398808
-15.438755458515283 7.543472023942775
-15.172222222222219 7.678893732212817
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.044495412844032 7.218167905398808
-15.388260869565215 7.565741451738605
-15.853378378378379 7.280306713237552
-16.018150684931502 7.191650640265552
-
-
-{(36, False): (3596080, -6885.0, 6.652315705890919, 3.1170031425930884), (38, False): (3795840, -7358.0, 5.863329808480827, 3.2801356800954364), (40, False): (3995600, -7822.0, 5.537177091087559, 3.213041267010529), (42, False): (4195360, -8290.0, 6.135978974228053, 2.7423026318635024), (44, False): (4395120, -8697.0, 4.842232766230639, 3.280341713858965), (46, False): (4594880, -9169.0, 5.240034589468269, 2.8795226264262803)}
-SYMMETRY
-
-
-
-
-0. iteration:
-
-
-===============================================================================
-                                     CVXPY
-                                    v1.1.18
-===============================================================================
-(CVXPY) Mar 07 12:22:32 PM: Your problem has 497200 variables, 1377040 constraints, and 0 parameters.
-(CVXPY) Mar 07 12:23:02 PM: It is compliant with the following grammars: DCP, DQCP
-(CVXPY) Mar 07 12:23:02 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
-(CVXPY) Mar 07 12:23:02 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
--------------------------------------------------------------------------------
-                                  Compilation
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 12:23:49 PM: Compiling problem (target solver=GUROBI).
-(CVXPY) Mar 07 12:23:49 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
-(CVXPY) Mar 07 12:23:49 PM: Applying reduction FlipObjective
-(CVXPY) Mar 07 12:23:49 PM: Applying reduction CvxAttr2Constr
-(CVXPY) Mar 07 12:23:57 PM: Applying reduction Qp2SymbolicQp
-(CVXPY) Mar 07 12:25:52 PM: Applying reduction QpMatrixStuffing
-(CVXPY) Mar 07 02:18:45 PM: Applying reduction GUROBI
-(CVXPY) Mar 07 02:18:54 PM: Finished problem compilation (took 6.952e+03 seconds).
--------------------------------------------------------------------------------
-                                Numerical solver
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 02:18:54 PM: Invoking solver GUROBI  to obtain a solution.
-Parameter OutputFlag unchanged
-   Value: 1  Min: 0  Max: 1  Default: 1
-Changed value of parameter QCPDual to 1
-   Prev: 0  Min: 0  Max: 1  Default: 0
-Changed value of parameter MIPGAP to 0.01
-   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
-Changed value of parameter TimeLimit to 1200.0
-   Prev: inf  Min: 0.0  Max: inf  Default: inf
-Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
-Thread count: 64 physical cores, 128 logical processors, using up to 32 threads
-Optimize a model with 1377040 rows, 497200 columns and 3650800 nonzeros
-Model fingerprint: 0x4927f41d
-Variable types: 0 continuous, 497200 integer (497200 binary)
-Coefficient statistics:
-  Matrix range     [1e+00, 1e+00]
-  Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+00]
-  RHS range        [1e+00, 2e+01]
-Found heuristic solution: objective 0.0000000
-Presolve removed 1325456 rows and 470977 columns
-Presolve time: 1.32s
-Presolved: 51584 rows, 26223 columns, 140127 nonzeros
-Variable types: 0 continuous, 26223 integer (26223 binary)
-
-Deterministic concurrent LP optimizer: primal and dual simplex (primal and dual model)
-Showing first log only...
-
-Presolve removed 6 rows and 6 columns
-Presolved: 51578 rows, 26217 columns, 140110 nonzeros
-
-Concurrent spin time: 0.01s
-
-Solved with dual simplex (primal model)
-
-Root relaxation: objective -6.885000e+03, 17868 iterations, 0.65 seconds
-
-    Nodes    |    Current Node    |     Objective Bounds      |     Work
- Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
-
-H    0     0                    -6885.000000 -6888.0000  0.04%     -    2s
-     0     0 -6885.0000    0   79 -6885.0000 -6885.0000  0.00%     -    2s
-
-Explored 0 nodes (17868 simplex iterations) in 2.24 seconds
-Thread count was 32 (of 128 available processors)
-
-Solution count 2: -6885 0
-No other solutions better than -6885
-
-Optimal solution found (tolerance 1.00e-02)
-Best objective -6.885000000000e+03, best bound -6.885000000000e+03, gap 0.0000%
--------------------------------------------------------------------------------
-                                    Summary
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 02:19:10 PM: Problem status: optimal
-(CVXPY) Mar 07 02:19:10 PM: Optimal value: 6.885e+03
-(CVXPY) Mar 07 02:19:10 PM: Compilation took 6.952e+03 seconds
-(CVXPY) Mar 07 02:19:10 PM: Solver (including time spent in interface) took 1.035e+01 seconds
-
- APRX. VALUES:
-
-7.336666666666666 1.7095166633356407
-8.037244897959182 2.416852621300317
-8.506012658227846 3.2410080456145893
-9.043803418803419 4.066885904639547
-11.431132075471698 3.725952473074861
-12.425 4.614947533909865
-13.029248366013071 5.217166071792929
-14.000852272727272 5.937874328946215
-15.444148936170214 6.325432481988958
-16.029106280193236 6.843606279336861
-15.717187499999998 7.389097853584275
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-16.872549019607842 6.689770788927031
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.147685185185182 7.1702877940177405
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.044495412844032 7.218167905398808
-15.388260869565215 7.565741451738605
-15.172222222222219 7.678893732212817
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.279310344827586 7.623780481803012
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.044495412844032 7.218167905398808
-16.018150684931502 7.191650640265552
-15.907805429864252 7.2515561321490205
-16.872549019607842 6.689770788927031
-
-
-1. iteration:
-
-
-===============================================================================
-                                     CVXPY
-                                    v1.1.18
-===============================================================================
-(CVXPY) Mar 07 02:22:03 PM: Your problem has 524800 variables, 1453520 constraints, and 0 parameters.
-(CVXPY) Mar 07 02:22:34 PM: It is compliant with the following grammars: DCP, DQCP
-(CVXPY) Mar 07 02:22:34 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
-(CVXPY) Mar 07 02:22:34 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
--------------------------------------------------------------------------------
-                                  Compilation
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 02:23:24 PM: Compiling problem (target solver=GUROBI).
-(CVXPY) Mar 07 02:23:24 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
-(CVXPY) Mar 07 02:23:24 PM: Applying reduction FlipObjective
-(CVXPY) Mar 07 02:23:24 PM: Applying reduction CvxAttr2Constr
-(CVXPY) Mar 07 02:23:32 PM: Applying reduction Qp2SymbolicQp
-(CVXPY) Mar 07 02:25:17 PM: Applying reduction QpMatrixStuffing
-(CVXPY) Mar 07 04:24:09 PM: Applying reduction GUROBI
-(CVXPY) Mar 07 04:24:18 PM: Finished problem compilation (took 7.304e+03 seconds).
--------------------------------------------------------------------------------
-                                Numerical solver
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 04:24:18 PM: Invoking solver GUROBI  to obtain a solution.
-Parameter OutputFlag unchanged
-   Value: 1  Min: 0  Max: 1  Default: 1
-Changed value of parameter QCPDual to 1
-   Prev: 0  Min: 0  Max: 1  Default: 0
-Changed value of parameter MIPGAP to 0.01
-   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
-Changed value of parameter TimeLimit to 1200.0
-   Prev: inf  Min: 0.0  Max: inf  Default: inf
-Gurobi Optimizer version 9.1.2 build v9.1.2rc0 (linux64)
-Thread count: 64 physical cores, 128 logical processors, using up to 32 threads
-Optimize a model with 1453520 rows, 524800 columns and 3853600 nonzeros
-Model fingerprint: 0x47856414
-Variable types: 0 continuous, 524800 integer (524800 binary)
-Coefficient statistics:
-  Matrix range     [1e+00, 1e+00]
-  Objective range  [1e+00, 1e+00]
-  Bounds range     [1e+00, 1e+00]
-  RHS range        [1e+00, 2e+01]
-Found heuristic solution: objective 0.0000000
-Presolve removed 1398278 rows and 496753 columns
-Presolve time: 1.40s
-Presolved: 55242 rows, 28047 columns, 150080 nonzeros
-Variable types: 0 continuous, 28047 integer (28047 binary)
-
-Deterministic concurrent LP optimizer: primal and dual simplex (primal and dual model)
-Showing first log only...
-
-Presolve removed 10 rows and 9 columns
-Presolved: 55232 rows, 28038 columns, 150051 nonzeros
-
-Concurrent spin time: 0.05s
-
-Solved with dual simplex (primal model)
-
-Root relaxation: objective -7.358000e+03, 19336 iterations, 0.73 seconds
-
-    Nodes    |    Current Node    |     Objective Bounds      |     Work
- Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
-
-H    0     0                    -7358.000000 -7362.0000  0.05%     -    2s
-     0     0 -7358.0000    0   54 -7358.0000 -7358.0000  0.00%     -    2s
-
-Explored 0 nodes (19336 simplex iterations) in 2.40 seconds
-Thread count was 32 (of 128 available processors)
-
-Solution count 2: -7358 0
-No other solutions better than -7358
-
-Optimal solution found (tolerance 1.00e-02)
-Best objective -7.358000000000e+03, best bound -7.358000000000e+03, gap 0.0000%
--------------------------------------------------------------------------------
-                                    Summary
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 04:24:35 PM: Problem status: optimal
-(CVXPY) Mar 07 04:24:35 PM: Optimal value: 7.358e+03
-(CVXPY) Mar 07 04:24:35 PM: Compilation took 7.304e+03 seconds
-(CVXPY) Mar 07 04:24:35 PM: Solver (including time spent in interface) took 1.077e+01 seconds
-
- APRX. VALUES:
-
-7.049999999999999 1.6055941866822054
-7.91421568627451 2.4552527469730374
-8.446264367816092 3.284644106615076
-9.090677966101692 4.081233919181039
-11.431132075471698 3.725952473074861
-12.425 4.614947533909865
-13.029248366013071 5.217166071792929
-13.907758620689656 5.90658033388073
-15.324242424242428 6.584252864958585
-15.752380952380953 6.93357945746427
-15.611946902654868 7.440165152250042
-15.799439461883404 7.308287974367888
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-16.872549019607842 6.689770788927031
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.872549019607842 6.689770788927031
-16.68345410628019 6.824995869940535
-16.147685185185182 7.1702877940177405
-16.074082568807338 7.160444932780659
-15.962727272727273 7.222012393822716
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.172222222222219 7.678893732212817
-15.799439461883404 7.308287974367888
-15.611946902654868 7.440165152250042
-15.388260869565215 7.565741451738605
-15.799439461883404 7.308287974367888
-16.872549019607842 6.689770788927031
-16.460071090047393 6.949946460271001
-16.245 7.061487095506158
-16.245 7.061487095506158
-16.13052995391705 7.128368187325885
-16.5706937799043 6.8892576819728255
-16.35152582159624 7.007287497379387
-16.1875 7.095392104765625
-
-
-2. iteration:
-
-
-===============================================================================
-                                     CVXPY
-                                    v1.1.18
-===============================================================================
-(CVXPY) Mar 07 04:27:35 PM: Your problem has 552400 variables, 1530000 constraints, and 0 parameters.
-(CVXPY) Mar 07 04:28:08 PM: It is compliant with the following grammars: DCP, DQCP
-(CVXPY) Mar 07 04:28:08 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
-(CVXPY) Mar 07 04:28:08 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
--------------------------------------------------------------------------------
-                                  Compilation
--------------------------------------------------------------------------------
-(CVXPY) Mar 07 04:29:00 PM: Compiling problem (target solver=GUROBI).
-(CVXPY) Mar 07 04:29:00 PM: Reduction chain: FlipObjective -> CvxAttr2Constr -> Qp2SymbolicQp -> QpMatrixStuffing -> GUROBI
-(CVXPY) Mar 07 04:29:00 PM: Applying reduction FlipObjective
-(CVXPY) Mar 07 04:29:00 PM: Applying reduction CvxAttr2Constr
-(CVXPY) Mar 07 04:29:08 PM: Applying reduction Qp2SymbolicQp
-(CVXPY) Mar 07 04:31:01 PM: Applying reduction QpMatrixStuffing
+Problem
+  Name                   :
+  Objective sense        : max
+  Type                   : LO (linear optimization problem)
+  Constraints            : 732040
+  Cones                  : 0
+  Scalar variables       : 246000
+  Matrix variables       : 0
+  Integer variables      : 246000
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 8
+Presolve started.
+Presolve terminated. Time = 0.55
+Presolved problem: 180 variables, 9 constraints, 420 non-zeros
+Presolved problem: 0 general integer, 180 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME
+0        0        1        0        2.0000000000e+01     NA                   NA          1.2
+0        1        1        0        2.0000000000e+01     2.3400000000e+01     17.00       1.2
+Cut generation started.
+0        1        1        0        2.0000000000e+01     2.3400000000e+01     17.00       1.3
+Cut generation terminated. Time = 0.00
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 2.000000000000e+01
+Best objective bound               : 2.000000000000e+01
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 10
+  Number of Gomory cuts            : 6
+  Number of CMIR cuts              : 4
+Number of branches                 : 0
+Number of relaxations solved       : 3
+Number of interior point iterations: 0
+Number of simplex iterations       : 12
+Time spend presolving the root     : 0.55
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 1.27
+
+Optimizer terminated. Time: 1.42
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 2.0000000000e+01    nrm: 1e+00    Viol.  con: 0e+00    var: 0e+00    itg: 0e+00
+
+ MOSEK UNARY VALUES:
+
+6.844999999999999 1.1839974662135047
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones
+               732040        246000        0             0
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed
+ Constraints:  244000        0             488040        0             0
+   Variables:  0             0             0             246000        0
+
+               Integer constraint types
+               Binary        General
+               244851        1149
+
+*** Data report
+               Nonzeros      Min           Max
+        |cj|:  400           0.0e+00       1.0e+00
+       |Aij|:  1216800       5.5e-02       1.0e+00
+
+               # finite      Min           Max
+      |buci|:  488040        0.0e+00       5.0e-01
+      |blxj|:  246000        0.0e+00       0.0e+00
+      |buxj|:  246000        0.0e+00       1.0e+00
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 1.4964978694915771, 2.8617331545191234, 3.6975478006181497, 246000, 732800), (1, False): (420, 20.0, 1.416841983795166, 2.8617331545191234, 3.6975478006181497, 246000, 732040)}

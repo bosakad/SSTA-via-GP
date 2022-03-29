@@ -390,11 +390,6 @@ def LadderNumpy(number_of_nodes=1, numberOfBins=10, numberOfUnaries=10, interval
     return desired
 
 
-# Define a stream printer to grab output from MOSEK
-def streamprinter(text):
-    sys.stdout.write(text)
-    sys.stdout.flush()
-
 
 def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=(-2, 18), withSymmetryConstr=True, TRI=False):
 
@@ -402,6 +397,8 @@ def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=
     # number_of_nodes = 1
     n_samples = 2000000
     seed = 0
+
+
 
     # numberOfBins = 1000
     # numberOfUnaries = numberOfBins*10
@@ -535,18 +532,25 @@ def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=
             task.putobjsense(mosek.objsense.maximize)
             # set mip gap to 1%
             task.putdouparam(dparam.mio_tol_rel_gap, 1.0e-2)
+            task.putdouparam(dparam.mio_max_time, 1200)
+
+
 
             # task.putintparam(iparam.presolve_max_num_reductions, 1)
             # task.putintparam(iparam.presolve_eliminator_max_fill, 0)
 
 
             task.putintparam(iparam.presolve_use, presolvemode.on)
-            task.putintparam(iparam.presolve_max_num_pass, 0)
-            task.putparam("MSK_IPAR_LOG_PRESOLVE", "10")
+            # task.putintparam(iparam.presolve_max_num_pass, 0)
+            # task.putparam("MSK_IPAR_LOG_PRESOLVE", "10")
             # task.putintparam(iparam.log_presolve, 100000000)
 
 
-            # Solve the problem
+            usercallback = makeUserCallback(maxtime=0.01, task=task)
+            task.set_InfoCallback(usercallback)
+
+
+            # Solve the prolem
             task.optimize()
 
             # Print a summary containing information
@@ -586,13 +590,91 @@ def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=
             ObjVal = task.getdouinf(mosek.dinfitem.mio_obj_int)
             num_nonZeros = task.getlintinf(mosek.liinfitem.mio_presolved_anz)
 
+            numConstrPriorPresolve = task.getintinf(mosek.iinfitem.mio_numcon)
+            numVarsPriorPresolve = task.getintinf(iinfitem.mio_numbin)
 
             task.analyzeproblem(mosek.streamtype.log)
             numConstr = task.getintinf(iinfitem.ana_pro_num_con)
             numVariables = task.getintinf(iinfitem.ana_pro_num_var)
 
-    return (num_nonZeros, ObjVal, lastGate, time, numVariables, numConstr)
+    return (num_nonZeros, ObjVal, lastGate, time, numVariables, numConstr, MIPgap, numVarsPriorPresolve, numConstrPriorPresolve)
 
+
+# Define a stream printer to grab output from MOSEK
+def streamprinter(text):
+    sys.stdout.write(text)
+    sys.stdout.flush()
+
+
+def makeUserCallback(maxtime, task):
+    xx = np.zeros(task.getnumvar())    # Space for integer solutions
+
+    def userCallback(caller,
+                     douinf,
+                     intinf,
+                     lintinf):
+        opttime = 0.0
+
+        global MIPgap
+
+        curRelax = intinf[iinfitem.mio_num_relax]
+        if curRelax == 1:   # root node hit
+            MIPgap = douinf[dinfitem.mio_obj_rel_gap]
+
+        # if caller == callbackcode.begin_intpnt:
+        #     print("Starting interior-point optimizer")
+        # elif caller == callbackcode.intpnt:
+        #     itrn = intinf[iinfitem.intpnt_iter]
+        #     pobj = douinf[dinfitem.intpnt_primal_obj]
+        #     dobj = douinf[dinfitem.intpnt_dual_obj]
+        #     stime = douinf[dinfitem.intpnt_time]
+        #     opttime = douinf[dinfitem.optimizer_time]
+        #
+        #     print("Iterations: %-3d" % itrn)
+        #     print("  Elapsed time: %6.2f(%.2f) " % (opttime, stime))
+        #     print("  Primal obj.: %-18.6e  Dual obj.: %-18.6e" % (pobj, dobj))
+        # elif caller == callbackcode.end_intpnt:
+        #     print("Interior-point optimizer finished.")
+        # elif caller == callbackcode.begin_primal_simplex:
+        #     print("Primal simplex optimizer started.")
+        # elif caller == callbackcode.update_primal_simplex:
+        #     itrn = intinf[iinfitem.sim_primal_iter]
+        #     pobj = douinf[dinfitem.sim_obj]
+        #     stime = douinf[dinfitem.sim_time]
+        #     opttime = douinf[dinfitem.optimizer_time]
+        #
+        #     print("Iterations: %-3d" % itrn)
+        #     print("  Elapsed time: %6.2f(%.2f)" % (opttime, stime))
+        #     print("  Obj.: %-18.6e" % pobj)
+        # elif caller == callbackcode.end_primal_simplex:
+        #     print("Primal simplex optimizer finished.")
+        # elif caller == callbackcode.begin_dual_simplex:
+        #     print("Dual simplex optimizer started.")
+        # elif caller == callbackcode.update_dual_simplex:
+        #     itrn = intinf[iinfitem.sim_dual_iter]
+        #     pobj = douinf[dinfitem.sim_obj]
+        #     stime = douinf[dinfitem.sim_time]
+        #     opttime = douinf[dinfitem.optimizer_time]
+        #     print("Iterations: %-3d" % itrn)
+        #     print("  Elapsed time: %6.2f(%.2f)" % (opttime, stime))
+        #     print("  Obj.: %-18.6e" % pobj)
+        # elif caller == callbackcode.end_dual_simplex:
+        #     print("Dual simplex optimizer finished.")
+        # elif caller == callbackcode.new_int_mio:
+        #     print("New integer solution has been located.")
+        #     task.getxx(soltype.itg, xx)
+        #     print(xx)
+        #     print("Obj.: %f" % douinf[dinfitem.mio_obj_int])
+        # else:
+        #     pass
+        #
+        # if opttime >= maxtime:
+        #     # mosek is spending too much time. Terminate it.
+        #     print("Terminating.")
+        #     return 1
+
+        return 0
+    return userCallback
 
 def LadderMOSEK_test(number_of_nodes=3, numberOfBins=30, numberOfUnaries=30, interval=(-5, 18)):
 
@@ -853,7 +935,7 @@ def LadderMOSEK_test(number_of_nodes=3, numberOfBins=30, numberOfUnaries=30, int
 
     return desired
 
-def LadderMOSEK_maxconv_test(number_of_nodes=1, numberOfBins=10, numberOfUnaries=10, interval=(-5, 18)):
+def LadderMOSEK_maxconv_test(number_of_nodes=4, numberOfBins=10, numberOfUnaries=10, interval=(-5, 18)):
 
     # parse command line arguments
     # number_of_nodes = 1
@@ -1084,7 +1166,7 @@ def LadderMOSEK_maxconv_test(number_of_nodes=1, numberOfBins=10, numberOfUnaries
     print(rvMOSEK.edges.shape)
 
     plt.hist(rvMOSEK.edges[:-1], rvMOSEK.edges, weights=rvMOSEK.bins, density="PDF", color='blue')
-    plt.hist(rvNump.edges[:-1], rvNump.edges, weights=rvNump.bins, density="PDF",alpha=0.2, color='orange')
+    plt.hist(rvNump.edges[:-1], rvNump.edges, weights=rvNump.bins, density="PDF",alpha=0.7, color='orange')
     plt.show()
 
     # ------------------- monte carlo ----------------------------------
@@ -1115,7 +1197,7 @@ if __name__ == "__main__":
 
     # mainCVXPY()
     # LadderNumpy()
-    LadderMOSEK_test()
-    # LadderMOSEK_maxconv_test()
+    # LadderMOSEK_test()
+    LadderMOSEK_maxconv_test()
 
     # print("All tests passed!")

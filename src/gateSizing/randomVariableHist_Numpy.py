@@ -314,7 +314,7 @@ class RandomVariable:
 
                 convolution[z, :] += f[k, :] * np.sum(newMaximum [z - k, :])
 
-
+        print('maxconv')
         # Deal With Edges
         self.cutBins(self.edges, convolution)
 
@@ -604,7 +604,8 @@ class RandomVariable:
         # sum = np.sum(bins, axis=1)
         # maximum = np.max(sum)
         # norm =  maximum / numberOfUnaries
-        # bins = bins * norm    # non-unarized version
+        # print(norm)
+        # bins = bins / norm    # non-unarized version
         # print(convolution)
         # print(norm)
 
@@ -614,7 +615,8 @@ class RandomVariable:
             divisor = numberOfUnaries*numberOfBins / 30
 
         elif TRI and convolution:
-            divisor = numberOfUnaries * numberOfBins / 14
+            # divisor = (numberOfUnaries*numberOfBins)*16
+            divisor = 3
 
 
         else:   # maximum

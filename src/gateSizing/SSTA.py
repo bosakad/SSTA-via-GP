@@ -76,7 +76,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
                 RV1 = tmpNode.prevDelays[0]
                 RV2 = tmpNode.prevDelays[1]
                 RV3 = currentRandVar
-                currentRandVar, curNofVariables, curNofConstr = RV1.maximum_AND_Convolution(RV2, RV3, curNofVariables, curNofConstr)
+                currentRandVar, curNofVariables, curNofConstr = RV1.maximum_AND_Convolution_VECTORIZED(RV2, RV3, curNofVariables, curNofConstr)
 
             elif not usingMosek and mosekTRI:   # numpy version of the tri
 
