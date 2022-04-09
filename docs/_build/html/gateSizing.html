@@ -56,7 +56,7 @@
 <li><a class="reference internal" href="#module-src.gateSizing.optimizeGatesVectorized">gateSizing.optimizeGatesVectorized module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.randomVariableHist_Numpy">gateSizing.randomVariableHist_Numpy module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.test_Operations_Cvxpy">gateSizing.test_Operations_Cvxpy module</a></li>
-<li><a class="reference internal" href="#module-src.gateSizing.test_RV_Numpy">gateSizing.test_RV_Numpy module</a></li>
+<li><a class="reference internal" href="#gatesizing-test-rv-numpy-module">gateSizing.test_RV_Numpy module</a></li>
 <li><a class="reference internal" href="#gatesizing-test-ssta-numpy-module">gateSizing.test_SSTA_Numpy module</a></li>
 <li><a class="reference internal" href="#gatesizing-test-ssta-cvxpy-module">gateSizing.test_SSTA_cvxpy module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.test_algorithms">gateSizing.test_algorithms module</a></li>
@@ -122,13 +122,77 @@
 </div>
 <div class="section" id="module-src.gateSizing.distrFitter">
 <span id="gatesizing-distrfitter-module"></span><h2>gateSizing.distrFitter module<a class="headerlink" href="#module-src.gateSizing.distrFitter" title="Permalink to this headline"></a></h2>
-<p>This module has funtions that generate distribution with a given parameters (such as area of the circuit or max power)
-and fits the curve (linear reg.)</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.distrFitter.generateDistr">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.distrFitter.</span></span><span class="sig-name descname"><span class="pre">generateDistr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/distrFitter.html#generateDistr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.distrFitter.generateDistr" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.distrFitter.</span></span><span class="sig-name descname"><span class="pre">generateDistr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfBins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shouldSave</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/distrFitter.html#generateDistr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.distrFitter.generateDistr" title="Permalink to this definition"></a></dt>
 <dd><p>Generates a distributions with parameters and saves it into numpy file.</p>
-<p>:return None</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>area</strong> – array of area constraints</p></li>
+<li><p><strong>power</strong> – array of power constraints</p></li>
+<li><p><strong>interval</strong> – tuple - interval</p></li>
+<li><p><strong>numberOfBins</strong> – int - number of bins</p></li>
+<li><p><strong>shouldSave</strong> – boolean - true if should save into file, false otherwise</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return distros</dt>
+<dd class="field-even"><p>(numberOfDistros, NumberOfBins) np matrix of generated values</p>
+</dd>
+<dt class="field-odd">Return edges</dt>
+<dd class="field-odd"><p>(1, numberOfBins + 1) np array of edges</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.distrFitter.linearRegression">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.distrFitter.</span></span><span class="sig-name descname"><span class="pre">linearRegression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/distrFitter.html#linearRegression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.distrFitter.linearRegression" title="Permalink to this definition"></a></dt>
+<dd><p>Performs linear regression on the generated data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>distros</strong> – (numberOfDistros, NumberOfBins) np matrix of generated values</p></li>
+<li><p><strong>area</strong> – array of area constraints</p></li>
+<li><p><strong>power</strong> – array of power constraints</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return coef</dt>
+<dd class="field-even"><p>(numberOfBins, 3) - 3 coeficients for each bins - 1. = b, 2. = area, 3. = power
+- reg([a, p]) = b + a* area + p* power</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.distrFitter.plotDistros">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.distrFitter.</span></span><span class="sig-name descname"><span class="pre">plotDistros</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/distrFitter.html#plotDistros"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.distrFitter.plotDistros" title="Permalink to this definition"></a></dt>
+<dd><p>Plot distros
+:param distros: (numberOfDistros, NumberOfBins) np matrix of generated values
+:param edges: (1, numberOfBins + 1) np array of edges</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.distrFitter.plotLinesForBin">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.distrFitter.</span></span><span class="sig-name descname"><span class="pre">plotLinesForBin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distros</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/distrFitter.html#plotLinesForBin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.distrFitter.plotLinesForBin" title="Permalink to this definition"></a></dt>
+<dd><p>Plot distros and lines
+:param distros: (numberOfDistros, NumberOfBins) np matrix of generated values
+:param area: array of area constraints
+:param power: array of power constraints
+:param coef: (numberOfBins, 3) - 3 coeficients for each bins - 1. = b, 2. = area, 3. = power</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>reg([a, p]) = b + a* area + p* power</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.distrFitter.saveModel">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.distrFitter.</span></span><span class="sig-name descname"><span class="pre">saveModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coef</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/distrFitter.html#saveModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.distrFitter.saveModel" title="Permalink to this definition"></a></dt>
+<dd><p>Saves model
+:param coef: coeficients of the model
+:return: None</p>
 </dd></dl>
 
 </div>
@@ -425,6 +489,11 @@ no errors appeared.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.Plotter.plotForThesis">
 <span class="sig-prename descclassname"><span class="pre">src.gateSizing.Plotter.</span></span><span class="sig-name descname"><span class="pre">plotForThesis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/Plotter.html#plotForThesis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.Plotter.plotForThesis" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.Plotter.plotForThesis2">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.Plotter.</span></span><span class="sig-name descname"><span class="pre">plotForThesis2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/Plotter.html#plotForThesis2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.Plotter.plotForThesis2" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1962,103 +2031,8 @@ Edges are considered to have the same difference and same length.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-src.gateSizing.test_RV_Numpy">
-<span id="gatesizing-test-rv-numpy-module"></span><h2>gateSizing.test_RV_Numpy module<a class="headerlink" href="#module-src.gateSizing.test_RV_Numpy" title="Permalink to this headline"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.maxOfDistributionsELEMENTWISE">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">maxOfDistributionsELEMENTWISE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#maxOfDistributionsELEMENTWISE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.maxOfDistributionsELEMENTWISE" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.maxOfDistributionsFORM_MultiMax">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">maxOfDistributionsFORM_MultiMax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#maxOfDistributionsFORM_MultiMax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.maxOfDistributionsFORM_MultiMax" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testConvolutionGaussShift">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testConvolutionGaussShift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testConvolutionGaussShift"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testConvolutionGaussShift" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testConvolutionNaive">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testConvolutionNaive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testConvolutionNaive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testConvolutionNaive" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testConvolutionUnion">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testConvolutionUnion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testConvolutionUnion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testConvolutionUnion" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testMAX_QUAD_FORMULA">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testMAX_QUAD_FORMULA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testMAX_QUAD_FORMULA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testMAX_QUAD_FORMULA" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testMAX_QUAD_FORMULA_UNARY">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testMAX_QUAD_FORMULA_UNARY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testMAX_QUAD_FORMULA_UNARY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testMAX_QUAD_FORMULA_UNARY" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testMAX_QUAD_FORMULA_UNARY2">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testMAX_QUAD_FORMULA_UNARY2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testMAX_QUAD_FORMULA_UNARY2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testMAX_QUAD_FORMULA_UNARY2" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testMAX_UNARY">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testMAX_UNARY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testMAX_UNARY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testMAX_UNARY" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testMaxAndConvolution">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testMaxAndConvolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testMaxAndConvolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testMaxAndConvolution" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testMeanGauss">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testMeanGauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testMeanGauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testMeanGauss" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testMeanUniform">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testMeanUniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testMeanUniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testMeanUniform" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testStdGauss">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testStdGauss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testStdGauss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testStdGauss" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testStdUniform">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testStdUniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testStdUniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testStdUniform" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testUniteEdgesNormal">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testUniteEdgesNormal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testUniteEdgesNormal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testUniteEdgesNormal" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testUniteEdgesStudent">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testUniteEdgesStudent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testUniteEdgesStudent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testUniteEdgesStudent" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.test_Convolution_UNARY">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">test_Convolution_UNARY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#test_Convolution_UNARY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.test_Convolution_UNARY" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.test_convANDmax">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">test_convANDmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#test_convANDmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.test_convANDmax" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.test_RV_Numpy.testmaxOfDistributionsQUAD">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_RV_Numpy.</span></span><span class="sig-name descname"><span class="pre">testmaxOfDistributionsQUAD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_RV_Numpy.html#testmaxOfDistributionsQUAD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_RV_Numpy.testmaxOfDistributionsQUAD" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
+<div class="section" id="gatesizing-test-rv-numpy-module">
+<h2>gateSizing.test_RV_Numpy module<a class="headerlink" href="#gatesizing-test-rv-numpy-module" title="Permalink to this headline"></a></h2>
 </div>
 <div class="section" id="gatesizing-test-ssta-numpy-module">
 <h2>gateSizing.test_SSTA_Numpy module<a class="headerlink" href="#gatesizing-test-ssta-numpy-module" title="Permalink to this headline"></a></h2>

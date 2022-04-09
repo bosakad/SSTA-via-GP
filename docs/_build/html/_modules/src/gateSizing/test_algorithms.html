@@ -181,14 +181,15 @@
 <div class="viewcode-block" id="testAlgorithms_MOSEK"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.testAlgorithms_MOSEK">[docs]</a><span class="k">def</span> <span class="nf">testAlgorithms_MOSEK</span><span class="p">():</span>
 
     <span class="c1"># number of testing</span>
-    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="mi">9</span>
     <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">prevMape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.0627844482985895</span><span class="p">,</span> <span class="mf">31.477761094020565</span><span class="p">])</span>
 
-    <span class="n">numberOfGatesStart</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfGatesStart</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">20</span>
     <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">18</span><span class="p">)</span>
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">19</span><span class="p">)</span>
 
     <span class="c1"># for saving values of the last gates and calculating error</span>
     <span class="n">rvs_nonPrecise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
@@ -221,14 +222,21 @@
         <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
+        <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:])</span> <span class="o">/</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:])</span>
+
         <span class="n">MAPE</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:],</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">MAPE</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">iter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">prevError</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-            <span class="n">prevError</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">2</span><span class="p">]</span>
-            <span class="n">prevError</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">4</span><span class="p">]</span>
 
-            <span class="n">MAPE</span> <span class="o">=</span> <span class="p">((</span><span class="n">MAPE</span> <span class="o">+</span> <span class="n">prevError</span><span class="p">)</span> <span class="o">*</span> <span class="nb">iter</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">iter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">MAPE</span> <span class="o">=</span> <span class="p">(</span><span class="n">MAPE</span> <span class="o">+</span> <span class="p">(</span><span class="n">prevError</span><span class="p">)</span> <span class="o">*</span> <span class="nb">iter</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">iter</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">iter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="n">MAPE</span> <span class="o">=</span> <span class="p">(</span><span class="n">MAPE</span> <span class="o">+</span> <span class="p">(</span><span class="n">prevMape</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">iter</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">numNonZeros</span><span class="p">,</span> <span class="n">ObjVal</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numVars</span><span class="p">,</span> <span class="n">numConstr</span><span class="p">,</span> <span class="n">mipGapRoot</span><span class="p">,</span>
                                      <span class="n">nVarsPresolve</span><span class="p">,</span> <span class="n">nConstrPresolve</span><span class="p">)</span>

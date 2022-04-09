@@ -63,7 +63,7 @@
   <h1>Source code for src.gateSizing.Plotter</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">matplotlib.transforms</span> <span class="k">as</span> <span class="nn">mtransforms</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This module includes plotting functions for numberOfGates/ number of non zeros graphs.</span>
@@ -99,6 +99,127 @@
             <span class="n">iterMet</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nonZeros</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="plotForThesis2"><a class="viewcode-back" href="../../../index.html#src.gateSizing.Plotter.plotForThesis2">[docs]</a><span class="k">def</span> <span class="nf">plotForThesis2</span><span class="p">():</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;Inputs.outputs/testParsing.txt&quot;</span><span class="p">)</span>  <span class="c1"># file with 1 line - dictionary</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>  <span class="c1"># load dictionary</span>
+
+    <span class="n">Gates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">mip1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">mip2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">mip3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">time1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">time2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">time3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+
+    <span class="c1"># store data from dictionary into numpy array</span>
+    <span class="k">for</span> <span class="n">gateNum</span><span class="p">,</span> <span class="n">WithConstr</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+
+        <span class="n">time1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time1</span><span class="p">,</span> <span class="n">results</span><span class="p">[(</span><span class="n">gateNum</span><span class="p">,</span> <span class="n">WithConstr</span><span class="p">)][</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">mip1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mip1</span><span class="p">,</span> <span class="n">results</span><span class="p">[(</span><span class="n">gateNum</span><span class="p">,</span> <span class="n">WithConstr</span><span class="p">)][</span><span class="mi">7</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">gateNum</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Gates</span><span class="p">:</span>
+            <span class="n">Gates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">gateNum</span><span class="p">)</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>  <span class="c1"># load dictionary</span>
+
+    <span class="c1"># store data from dictionary into numpy array</span>
+    <span class="k">for</span> <span class="n">gateNum</span><span class="p">,</span> <span class="n">WithConstr</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+
+        <span class="n">time2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time2</span><span class="p">,</span> <span class="n">results</span><span class="p">[(</span><span class="n">gateNum</span><span class="p">,</span> <span class="n">WithConstr</span><span class="p">)][</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">mip2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mip2</span><span class="p">,</span> <span class="n">results</span><span class="p">[(</span><span class="n">gateNum</span><span class="p">,</span> <span class="n">WithConstr</span><span class="p">)][</span><span class="mi">7</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">gateNum</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Gates</span><span class="p">:</span>
+            <span class="n">Gates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">gateNum</span><span class="p">)</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>  <span class="c1"># load dictionary</span>
+
+    <span class="c1"># store data from dictionary into numpy array</span>
+    <span class="k">for</span> <span class="n">gateNum</span><span class="p">,</span> <span class="n">WithConstr</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+
+        <span class="n">time3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time3</span><span class="p">,</span> <span class="n">results</span><span class="p">[(</span><span class="n">gateNum</span><span class="p">,</span> <span class="n">WithConstr</span><span class="p">)][</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">mip3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mip3</span><span class="p">,</span> <span class="n">results</span><span class="p">[(</span><span class="n">gateNum</span><span class="p">,</span> <span class="n">WithConstr</span><span class="p">)][</span><span class="mi">7</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">gateNum</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Gates</span><span class="p">:</span>
+            <span class="n">Gates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">gateNum</span><span class="p">)</span>
+
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">gridspec_kw</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;wspace&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s1">&#39;hspace&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">},</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># nonzeros</span>
+
+    <span class="n">p0</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">mip1</span><span class="p">,</span>  <span class="c1"># data</span>
+                     <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>  <span class="c1"># each marker will be rendered as a circle</span>
+                     <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>  <span class="c1"># marker size</span>
+                     <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
+                     <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
+                     <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
+                     <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+                     <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                     <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># line width</span>
+
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">mip2</span><span class="p">,</span>  <span class="c1"># data</span>
+                     <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>  <span class="c1"># each marker will be rendered as a circle</span>
+                     <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>  <span class="c1"># marker size</span>
+                     <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
+                     <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
+                     <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
+                     <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+                     <span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># line width</span>
+
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">mip3</span><span class="p">,</span>  <span class="c1"># data</span>
+                     <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>  <span class="c1"># each marker will be rendered as a circle</span>
+                     <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>  <span class="c1"># marker size</span>
+                     <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
+                     <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
+                     <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
+                     <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+                     <span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># line width</span>
+
+
+    <span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Mip gap at root (%)&#39;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">p0</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">time1</span><span class="p">,</span>  <span class="c1"># data</span>
+                     <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>  <span class="c1"># each marker will be rendered as a circle</span>
+                     <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>  <span class="c1"># marker size</span>
+                     <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
+                     <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
+                     <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
+                     <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+                     <span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                     <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># line width</span>
+
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">time2</span><span class="p">,</span>  <span class="c1"># data</span>
+                     <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>  <span class="c1"># each marker will be rendered as a circle</span>
+                     <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>  <span class="c1"># marker size</span>
+                     <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
+                     <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
+                     <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
+                     <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+                     <span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># line width</span>
+
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">time3</span><span class="p">,</span>  <span class="c1"># data</span>
+                     <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span>  <span class="c1"># each marker will be rendered as a circle</span>
+                     <span class="n">markersize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>  <span class="c1"># marker size</span>
+                     <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
+                     <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
+                     <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
+                     <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+                     <span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># line width</span>
+
+    <span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Time (seconds)&#39;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># plt.show()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Inputs.outputs/scaling.jpeg&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="plotNonzeros"><a class="viewcode-back" href="../../../index.html#src.gateSizing.Plotter.plotNonzeros">[docs]</a><span class="k">def</span> <span class="nf">plotNonzeros</span><span class="p">():</span>
     <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;Inputs.outputs/testParsing.txt&quot;</span><span class="p">)</span>    <span class="c1"># file with 1 line - dictionary</span>
@@ -166,23 +287,10 @@
     <span class="n">errorNoConstr</span> <span class="o">=</span> <span class="n">errorNoConstr</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">errorNoConstr</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">errorWithConstr</span> <span class="o">=</span> <span class="n">errorWithConstr</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">errorWithConstr</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
+    <span class="c1"># print(errorWithConstr)</span>
 
 
 
-
-    <span class="kn">import</span> <span class="nn">matplotlib.transforms</span> <span class="k">as</span> <span class="nn">mtransforms</span>
-    <span class="c1"># fig, axs = plt.subplot_mosaic([[&#39;a)&#39;, &#39;c)&#39;], [&#39;b)&#39;, &#39;c)&#39;], [&#39;d)&#39;, &#39;d)&#39;]],</span>
-    <span class="c1">#                               constrained_layout=True)</span>
-    <span class="c1">#</span>
-    <span class="c1"># for label, ax in axs.items():</span>
-    <span class="c1">#     # label physical distance in and down:</span>
-    <span class="c1">#     trans = mtransforms.ScaledTranslation(10 / 72, -5 / 72, fig.dpi_scale_trans)</span>
-    <span class="c1">#     ax.text(0.0, 1.0, label, transform=ax.transAxes + trans,</span>
-    <span class="c1">#             fontsize=&#39;medium&#39;, verticalalignment=&#39;top&#39;, fontfamily=&#39;serif&#39;,</span>
-    <span class="c1">#             bbox=dict(facecolor=&#39;0.7&#39;, edgecolor=&#39;none&#39;, pad=3.0))</span>
-    <span class="c1">#</span>
-    <span class="c1"># plt.show()</span>
-    <span class="c1"># exit(-1)</span>
 
     <span class="k">if</span> <span class="n">forPaper</span><span class="p">:</span>
 
@@ -193,7 +301,6 @@
 
 
         <span class="c1"># nonzeros</span>
-        <span class="c1"># axs[i].scatter(Gates, zerosWithConstr, color=&#39;blue&#39;)</span>
 
         <span class="n">p0</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">zerosWithConstr</span><span class="p">,</span>  <span class="c1"># data</span>
         <span class="n">marker</span> <span class="o">=</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span>  <span class="c1"># each marker will be rendered as a circle</span>
@@ -201,7 +308,7 @@
         <span class="n">markerfacecolor</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
         <span class="n">markeredgecolor</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
         <span class="n">markeredgewidth</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
-        <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;dotted&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+        <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
         <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
         <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># line width</span>
 
@@ -211,7 +318,7 @@
                     <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
                     <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
                     <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
-                    <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+                    <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
                     <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="n">zorder</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># line width</span>
 
         <span class="n">p2</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">constrWithConstr</span><span class="p">,</span>  <span class="c1"># data</span>
@@ -245,7 +352,7 @@
                          <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
                          <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
                          <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
-                         <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+                         <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
                          <span class="n">linewidth</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># line width</span>
         <span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Mip gap at root&#39;</span><span class="p">)</span>
         <span class="c1"># axs.flat[i].set(ylabel=&#39;MIP&#39;)</span>
@@ -261,7 +368,7 @@
                          <span class="n">markerfacecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>  <span class="c1"># marker facecolor</span>
                          <span class="n">markeredgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>  <span class="c1"># marker edgecolor</span>
                          <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
-                         <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
+                         <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
                          <span class="n">linewidth</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># line width</span>
         <span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">)</span>
         <span class="c1"># axs[i].legend([&quot;With constraints&quot;, &quot;Without constraints&quot;])</span>
@@ -284,21 +391,16 @@
                          <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># marker edge width</span>
                          <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span>  <span class="c1"># line style will be dash line</span>
                          <span class="n">linewidth</span><span class="o">=</span><span class="mf">3.5</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># line width</span>
-        <span class="c1"># axs[i].scatter(Gates, errorWithConstr[:, 0], color=&#39;blue&#39;)</span>
-        <span class="c1">#</span>
-        <span class="c1"># axs[i].scatter(Gates, errorWithConstr[:, 1], color=&#39;orange&#39;)</span>
-        <span class="c1">#</span>
-        <span class="c1"># axs[i].plot(Gates, errorWithConstr[:, 0], color=&#39;blue&#39;)</span>
-        <span class="c1"># axs[i].plot(Gates, errorWithConstr[:, 1], color=&#39;orange&#39;)</span>
 
-        <span class="c1"># axs.flat[i].set(ylabel=&#39;MAPE Mean&#39;)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">errorWithConstr</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y2</span><span class="o">=</span><span class="n">errorWithConstr</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">Gates</span><span class="p">,</span> <span class="n">errorWithConstr</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+
         <span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="s1">&#39;Mape&#39;</span><span class="p">)</span>
-        <span class="c1"># axs[i].legend([&quot;Mean&quot;, &quot;Std&quot;])</span>
         <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
 
         <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Number Of Gates&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
 
         <span class="c1"># Hide x labels and tick labels for top plots and y ticks for right plots.</span>
         <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
@@ -466,7 +568,7 @@
 
 
             <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Number Of Gates&#39;</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
 
 
             <span class="c1"># Hide x labels and tick labels for top plots and y ticks for right plots.</span>
@@ -474,8 +576,8 @@
                 <span class="n">ax</span><span class="o">.</span><span class="n">label_outer</span><span class="p">()</span>
 
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
-    <span class="c1"># plt.savefig(&quot;Inputs.outputs/scaling.jpeg&quot;, dpi=500)</span>
+    <span class="c1"># plt.show()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Inputs.outputs/scaling.jpeg&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="plotPresolve"><a class="viewcode-back" href="../../../index.html#src.gateSizing.Plotter.plotPresolve">[docs]</a><span class="k">def</span> <span class="nf">plotPresolve</span><span class="p">():</span>
@@ -565,7 +667,7 @@
 
 
     <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axs</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;Number Of Gates&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
 
 
     <span class="c1"># Hide x labels and tick labels for top plots and y ticks for right plots.</span>
@@ -602,6 +704,7 @@
     <span class="n">plotNonzeros</span><span class="p">()</span>
     <span class="c1"># plotPresolve()</span>
     <span class="c1"># plotForThesis()</span>
+    <span class="c1"># plotForThesis2()</span>
 </pre></div>
 
            </div>
