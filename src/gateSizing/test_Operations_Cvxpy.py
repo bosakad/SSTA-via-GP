@@ -776,10 +776,16 @@ def test_CVXPY_CONVOLUTION_McCormick(dec: int):
     mu2 = 18.98483475
     sigma2 = 2.802585
 
-    interval = (-5, 40)
+    mu3 = 10.98553396
+    sigma3 = 3.76804456
+
+    mu4 = 18.98483475
+    sigma4 = 1.802585
+
+    interval = (0, 20)
 
     numberOfSamples = 2000000
-    numberOfBins = 10
+    numberOfBins = 15
 
 
     # DESIRED
@@ -787,10 +793,19 @@ def test_CVXPY_CONVOLUTION_McCormick(dec: int):
     test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
     test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
 
-    max1 = test1.convolutionOfTwoVarsShift(test2)
+
+    test3 = histogramGenerator.get_gauss_bins(mu3, sigma3, numberOfBins, numberOfSamples, interval)
+    test4 = histogramGenerator.get_gauss_bins(mu4, sigma4, numberOfBins, numberOfSamples, interval)
+
+    max1 = test1.maxOfDistributionsFORM(test2)
+
+    max2 = test3.maxOfDistributionsFORM(test4)
+
+    max1 = max1.maxOfDistributionsFORM(max2)
+
     desired = [max1.mean, max1.std]
 
-    print(max1.bins)
+    # print(max1.bins)
 
     # ACTUAL
         # init
@@ -804,13 +819,41 @@ def test_CVXPY_CONVOLUTION_McCormick(dec: int):
     for bin in range(0, numberOfBins):
         x2[bin] = cp.Variable(nonneg=True)
 
+    x3 = {}
+
+    for bin in range(0, numberOfBins):
+        x3[bin] = cp.Variable(nonneg=True)
+
+    x4 = {}
+
+    for bin in range(0, numberOfBins):
+        x4[bin] = cp.Variable(nonneg=True)
+
+
     RV1 = RandomVariableCVXPY(x1, test1.edges, test1.bins)
     RV2 = RandomVariableCVXPY(x2, test1.edges, test2.bins)
 
+
+    RV3 = RandomVariableCVXPY(x3, test1.edges, test3.bins)
+    RV4 = RandomVariableCVXPY(x4, test1.edges, test4.bins)
+
         # GET obj. function and constr
 
-    maximum, constr = RV1.convolution_McCormick(RV2)
+    maximum, constr1 = RV1.maximum_McCormick(RV2)
+    maximum2, constr2 = RV3.maximum_McCormick(RV4)
+    # maximum, constr3 = maximum.convolution_McCormick(RV3)
+
+
+    maximum, constr3 = maximum.maximum_McCormick(maximum2)
     maximum = maximum.bins
+
+    # print(len(constr1))
+    # print(len(constr2))
+    # constr = constr1 + constr3
+    constr = constr1 + constr2 + constr3
+    # print(len(constr))
+
+
 
         # FORMULATE
 
@@ -927,10 +970,10 @@ if __name__ == "__main__":
     # test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec=
     # test_CVXPY_MAX_UNARY_NEW_AS_MIN(dec=5)
     # test_CVXPY_CONVOLUTION_UNARY_MIN(dec=5)
-    test_CVXPY_CONVOLUTION_UNARY_MAX(dec=5)
+    # test_CVXPY_CONVOLUTION_UNARY_MAX(dec=5)
     # test_CVXPY_MAXIMUM_McCormick(dec=5)
     # test_CVXPY_MULTIPLICATION_McCormick(5)
-    # test_CVXPY_CONVOLUTION_McCormick(5)
+    test_CVXPY_CONVOLUTION_McCormick(5)
     # test_CVXPY_MAX_UNARY_NEW_AS_MAX_FORM(3)
 
     print("All tests passed!")

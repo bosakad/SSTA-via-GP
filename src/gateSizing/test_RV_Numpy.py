@@ -2,7 +2,7 @@ import numpy
 import numpy as np
 import histogramGenerator
 from randomVariableHist_Numpy import RandomVariable
-import matplotlib.pyplot as plt
+import matplotlib.pyplotplot as plt
 
 
 

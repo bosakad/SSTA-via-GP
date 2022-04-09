@@ -208,7 +208,7 @@
                 <span class="n">MaxConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y_U</span> <span class="o">+</span> <span class="n">x_L</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="n">x_L</span> <span class="o">*</span> <span class="n">y_U</span><span class="p">)</span>
 
                 <span class="c1"># creating bound-constraints</span>
-                <span class="n">MaxConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="c1"># MaxConstraints.append(slackMult &lt;= 1)</span>
                 <span class="n">MaxConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x_U</span><span class="p">)</span>
                 <span class="n">MaxConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x_L</span><span class="p">)</span>
                 <span class="n">MaxConstraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">y_U</span><span class="p">)</span>
@@ -289,6 +289,12 @@
 
         <span class="n">rv1</span> <span class="o">=</span> <span class="n">RandomVariableNumpy</span><span class="p">(</span><span class="n">lowerBounds1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
         <span class="n">rv2</span> <span class="o">=</span> <span class="n">RandomVariableNumpy</span><span class="p">(</span><span class="n">lowerBounds2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+
+        <span class="c1"># newBins = {}</span>
+
+        <span class="c1"># for i in range(0, numberOfBins):</span>
+        <span class="c1">#     newBins[i] = cp.Variable(nonneg=True)</span>
+        <span class="c1">#     ConvConstraints.append( newBins[i] &gt;= convolution[i] )</span>
 
         <span class="c1"># convClass = RandomVariableCVXPY(convolution, self.edges)</span>
         <span class="n">convClass</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">convolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">convolutionOfTwoVarsShift</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>

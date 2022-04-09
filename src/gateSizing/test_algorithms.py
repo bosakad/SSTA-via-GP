@@ -118,14 +118,15 @@ def testAlgorithms():
 def testAlgorithms_MOSEK():
 
     # number of testing
-    numberOfIterations = 2
+    numberOfIterations = 9
     step = 1
+    prevMape = np.array([3.0627844482985895, 31.477761094020565])
 
-    numberOfGatesStart = 1
+    numberOfGatesStart = 11
     numberOfBins = 20
-    numberOfUnaries = 20
+    numberOfUnaries = 10
 
-    interval = (-5, 18)
+    interval = (-4, 19)
 
     # for saving values of the last gates and calculating error
     rvs_nonPrecise = np.zeros((numberOfIterations, 2))
@@ -151,21 +152,28 @@ def testAlgorithms_MOSEK():
         numGates = numberOfGatesStart + iter * step
         numNonZeros, ObjVal, lastGate, time, numVars, numConstr, mipGapRoot,nVarsPresolve, nConstrPresolve = \
                                             test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
-                                                                            interval, TRI=False,
-                                                                            withSymmetryConstr=False)
+                                                                            interval, TRI=True,
+                                                                            withSymmetryConstr=True)
 
         # saving values
         rvs_Precise[iter, 0] = lastGate[0]
         rvs_Precise[iter, 1] = lastGate[1]
 
+        print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
+
         MAPE = 100 * np.abs(np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))
+
+        print(MAPE)
 
         if iter != 0:
             prevError = np.zeros(2)
-            prevError[0] = results[(numGates - step, True)][2]
-            prevError[1] = results[(numGates - step, True)][3]
+            prevError[0] = results[(numGates - step, True)][3]
+            prevError[1] = results[(numGates - step, True)][4]
 
-            MAPE = ((MAPE + prevError) * iter) / (iter + 1)
+            MAPE = (MAPE + (prevError) * iter) / (iter + 10 + 1)
+        elif iter == 0:
+
+            MAPE = (MAPE + (prevMape) * 10) / (iter + 10 + 1)
 
         results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr, mipGapRoot,
                                      nVarsPresolve, nConstrPresolve)

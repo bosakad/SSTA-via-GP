@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import math
+import matplotlib.transforms as mtransforms
 
 """
     This module includes plotting functions for numberOfGates/ number of non zeros graphs.
@@ -37,12 +37,134 @@ def parseVerbose(verboseFile):
 
     return np.array(nonZeros)
 
+def plotForThesis2():
+    file = open("Inputs.outputs/testParsing.txt")  # file with 1 line - dictionary
+
+    line = file.readline()
+
+    results = eval(line)  # load dictionary
+
+    Gates = np.array([], dtype=int)
+    mip1 = np.array([])
+    mip2 = np.array([])
+    mip3 = np.array([])
+    time1 = np.array([])
+    time2 = np.array([])
+    time3 = np.array([])
+
+
+    # store data from dictionary into numpy array
+    for gateNum, WithConstr in results:
+
+        time1 = np.append(time1, results[(gateNum, WithConstr)][2])
+        mip1 = np.append(mip1, results[(gateNum, WithConstr)][7])
+
+        if gateNum not in Gates:
+            Gates = np.append(Gates, gateNum)
+
+    line = file.readline()
+    results = eval(line)  # load dictionary
+
+    # store data from dictionary into numpy array
+    for gateNum, WithConstr in results:
+
+        time2 = np.append(time2, results[(gateNum, WithConstr)][2])
+        mip2 = np.append(mip2, results[(gateNum, WithConstr)][7])
+
+        if gateNum not in Gates:
+            Gates = np.append(Gates, gateNum)
+
+    line = file.readline()
+    results = eval(line)  # load dictionary
+
+    # store data from dictionary into numpy array
+    for gateNum, WithConstr in results:
+
+        time3 = np.append(time3, results[(gateNum, WithConstr)][2])
+        mip3 = np.append(mip3, results[(gateNum, WithConstr)][7])
+
+        if gateNum not in Gates:
+            Gates = np.append(Gates, gateNum)
+
+
+    fig, axs = plt.subplots(2, 1, gridspec_kw={'wspace': 0.3, 'hspace': 0.3}, sharex=True)
+    i = 0
+
+    # nonzeros
+
+    p0 = axs[i].plot(Gates, mip1,  # data
+                     marker='o',  # each marker will be rendered as a circle
+                     markersize=6,  # marker size
+                     markerfacecolor='red',  # marker facecolor
+                     markeredgecolor='black',  # marker edgecolor
+                     markeredgewidth=1,  # marker edge width
+                     linestyle='-',  # line style will be dash line
+                     linewidth=3,
+                     zorder=3)  # line width
+
+    p1 = axs[i].plot(Gates, mip2,  # data
+                     marker='o',  # each marker will be rendered as a circle
+                     markersize=6,  # marker size
+                     markerfacecolor='red',  # marker facecolor
+                     markeredgecolor='black',  # marker edgecolor
+                     markeredgewidth=1,  # marker edge width
+                     linestyle='-',  # line style will be dash line
+                     linewidth=4, zorder=2)  # line width
+
+    p2 = axs[i].plot(Gates, mip3,  # data
+                     marker='o',  # each marker will be rendered as a circle
+                     markersize=6,  # marker size
+                     markerfacecolor='red',  # marker facecolor
+                     markeredgecolor='black',  # marker edgecolor
+                     markeredgewidth=1,  # marker edge width
+                     linestyle='-',  # line style will be dash line
+                     linewidth=4, zorder=1)  # line width
+
+
+    axs.flat[i].set(ylabel='Mip gap at root (%)')
+    i += 1
+
+    p0 = axs[i].plot(Gates, time1,  # data
+                     marker='o',  # each marker will be rendered as a circle
+                     markersize=6,  # marker size
+                     markerfacecolor='red',  # marker facecolor
+                     markeredgecolor='black',  # marker edgecolor
+                     markeredgewidth=1,  # marker edge width
+                     linestyle='-',  # line style will be dash line
+                     linewidth=4,
+                     zorder=3)  # line width
+
+    p1 = axs[i].plot(Gates, time2,  # data
+                     marker='o',  # each marker will be rendered as a circle
+                     markersize=6,  # marker size
+                     markerfacecolor='red',  # marker facecolor
+                     markeredgecolor='black',  # marker edgecolor
+                     markeredgewidth=1,  # marker edge width
+                     linestyle='-',  # line style will be dash line
+                     linewidth=4, zorder=2)  # line width
+
+    p2 = axs[i].plot(Gates, time3,  # data
+                     marker='o',  # each marker will be rendered as a circle
+                     markersize=6,  # marker size
+                     markerfacecolor='red',  # marker facecolor
+                     markeredgecolor='black',  # marker edgecolor
+                     markeredgewidth=1,  # marker edge width
+                     linestyle='-',  # line style will be dash line
+                     linewidth=4, zorder=1)  # line width
+
+    axs.flat[i].set(ylabel='Time (seconds)')
+    i += 1
+
+    # plt.show()
+    plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)
+
 def plotNonzeros():
     file = open("Inputs.outputs/testParsing.txt")    # file with 1 line - dictionary
     verbose = "../Inputs/verbose.stdout"        # file with verbose text, should be complex problem - so there is 'Presolved'
     readFromVerbose = False
     plotUnder = True
-    only1 = False
+    only1 = True
+    forPaper = True
 
 
     line = file.readline()
@@ -102,151 +224,293 @@ def plotNonzeros():
     errorNoConstr = errorNoConstr.reshape((len(errorNoConstr)//2, 2))
     errorWithConstr = errorWithConstr.reshape((len(errorWithConstr)//2, 2))
 
+    # print(errorWithConstr)
 
-    if not plotUnder:
+
+
+
+    if forPaper:
+
         # set histograms
-        fig, axs = plt.subplots(3, 2)
-
-        # nonzeros
-        axs[0, 0].plot(Gates, zerosWithConstr, color='blue')
-        axs[0, 0].plot(Gates, zerosNoConstr, color='orange')
-        axs[0, 0].scatter(Gates, zerosWithConstr, color='blue')
-        axs[0, 0].scatter(Gates, zerosNoConstr, color='orange')
-
-        # variables
-        axs[1, 0].scatter(Gates, varsWithConstr, color='blue')
-        axs[1, 0].scatter(Gates, varsNoConstr, color='orange')
-        axs[1, 0].plot(Gates, varsWithConstr, color='blue')
-        axs[1, 0].plot(Gates, varsNoConstr, color='orange')
-
-        # constraints
-        axs[2, 0].scatter(Gates, constrWithConstr, color='blue')
-        axs[2, 0].scatter(Gates, constrNoConstr, color='orange')
-        axs[2, 0].plot(Gates, constrWithConstr, color='blue')
-        axs[2, 0].plot(Gates, constrNoConstr, color='orange')
-
-        # time
-        axs[0, 1].scatter(Gates, timeWithConstr, color='blue')
-        axs[0, 1].scatter(Gates, timeNoConstr, color='orange')
-        axs[0, 1].plot(Gates, timeWithConstr, color='blue')
-        axs[0, 1].plot(Gates, timeNoConstr, color='orange')
-
-        # error mean
-        axs[1, 1].plot(Gates, errorWithConstr[:, 0], color='blue')
-        axs[1, 1].plot(Gates, errorNoConstr[:, 0], color='orange')
-        axs[1, 1].scatter(Gates, errorWithConstr[:, 0], color='blue')
-        axs[1, 1].scatter(Gates, errorNoConstr[:, 0], color='orange')
-
-        # error std
-        axs[2, 1].scatter(Gates, errorWithConstr[:, 1], color='blue')
-        axs[2, 1].scatter(Gates, errorNoConstr[:, 1], color='orange')
-        axs[2, 1].plot(Gates, errorWithConstr[:, 1], color='blue')
-        axs[2, 1].plot(Gates, errorNoConstr[:, 1], color='orange')
-
-        for ax in axs.flat:
-            ax.set(xlabel='Number Of Gates')
-
-        axs.flat[0].set(ylabel='Nonzeros')
-        axs.flat[1].set(ylabel='MAPE Mean')
-        axs.flat[2].set(ylabel='MAPE std')
-        axs.flat[3].set(ylabel='Time')
-        axs.flat[4].set(ylabel='Variables')
-        axs.flat[5].set(ylabel='Constraints')
-
-        # Hide x labels and tick labels for top plots and y ticks for right plots.
-        for ax in axs.flat:
-            ax.label_outer()
-
-        # set legend
-        axs[0, 0].legend(["With constraints", "Without constraints"])
-        axs[1, 0].legend(["With constraints", "Without constraints"])
-        axs[2, 0].legend(["With constraints", "Without constraints"])
-        axs[0, 1].legend(["With constraints", "Without constraints"])
-        axs[1, 1].legend(["With constraints", "Without constraints"])
-        axs[2, 1].legend(["With constraints", "Without constraints"])
-    else:
-        # set histograms
-        fig, axs = plt.subplots(4, 1)
+        fig, axs = plt.subplots(4, 1, gridspec_kw={'wspace':0.5,'hspace':0.5}, sharex=True)
         i = 0
 
 
+
         # nonzeros
-        axs[i].plot(Gates, zerosWithConstr, color='blue')
-        axs[i].scatter(Gates, zerosWithConstr, color='blue')
 
-        if not only1:
-            axs[i].plot(Gates, zerosNoConstr, color='orange')
-            axs[i].scatter(Gates, zerosNoConstr, color='orange')
-        axs.flat[i].set(ylabel='Nonzeros')
-        # axs[i].legend(["With constraints", "Without constraints"])
-        i += 1
+        p0 = axs[i].plot(Gates, zerosWithConstr,  # data
+        marker = 'o',  # each marker will be rendered as a circle
+        markersize = 4.5,  # marker size
+        markerfacecolor = 'red',  # marker facecolor
+        markeredgecolor = 'black',  # marker edgecolor
+        markeredgewidth = 1,  # marker edge width
+        linestyle = '-',  # line style will be dash line
+        linewidth = 3,
+        zorder=3)  # line width
 
-        # variables
-        axs[i].scatter(Gates, varsWithConstr, color='blue')
-        axs[i].plot(Gates, varsWithConstr, color='blue')
-        if not only1:
-            axs[i].scatter(Gates, varsNoConstr, color='orange')
-            axs[i].plot(Gates, varsNoConstr, color='orange')
-        axs.flat[i].set(ylabel='Variables')
-        # axs[i].legend(["With constraints", "Without constraints"])
-        i += 1
+        p1 = axs[i].plot(Gates, varsWithConstr,  # data
+                    marker='o',  # each marker will be rendered as a circle
+                    markersize=4.5,  # marker size
+                    markerfacecolor='red',  # marker facecolor
+                    markeredgecolor='black',  # marker edgecolor
+                    markeredgewidth=1,  # marker edge width
+                    linestyle='-',  # line style will be dash line
+                    linewidth=3,zorder=2)  # line width
 
-        # constraints
-        axs[i].scatter(Gates, constrWithConstr, color='blue')
-        axs[i].plot(Gates, constrWithConstr, color='blue')
-        if not only1:
-            axs[i].scatter(Gates, constrNoConstr, color='orange')
-            axs[i].plot(Gates, constrNoConstr, color='orange')
-        axs.flat[i].set(ylabel='Constraints')
-        # axs[i].legend(["With constraints", "Without constraints"])
-        i += 1
+        p2 = axs[i].plot(Gates, constrWithConstr,  # data
+                    marker='o',  # each marker will be rendered as a circle
+                    markersize=4.5,  # marker size
+                    markerfacecolor='red',  # marker facecolor
+                    markeredgecolor='black',  # marker edgecolor
+                    markeredgewidth=1,  # marker edge width
+                    linestyle='-',  # line style will be dash line
+                    linewidth=3, zorder=1)  # line width
 
-        # constraints
-        axs[i].scatter(Gates, mipGapWithConstr, color='blue')
-        axs[i].plot(Gates, mipGapWithConstr, color='blue')
-        if not only1:
-            axs[i].scatter(Gates, mipGapNoConstr, color='orange')
-            axs[i].plot(Gates, mipGapNoConstr, color='orange')
-        axs.flat[i].set(ylabel='MIP gap at root')
-        # axs[i].legend(["With constraints", "Without constraints"])
-        i += 1
-
+        # axs[i].scatter(Gates, varsWithConstr, color='orange')
         #
-        # # time
+        # axs[i].scatter(Gates, constrWithConstr, color='green')
+        #
+        # # axs[i].plot(Gates, zerosWithConstr, color='blue')
+        # axs[i].plot(Gates, varsWithConstr, color='orange')
+        # axs[i].plot(Gates, constrWithConstr, color='green')
+
+        axs.flat[i].set(ylabel='Count')
+        # axs[i].legend(["Nonzeros", "Variables", "Constraints"])
+        i += 1
+
+
+        # constraints
+        # axs[i].scatter(Gates, mipGapWithConstr, color='blue')
+        # axs[i].plot(Gates, mipGapWithConstr, color='blue')
+        p2 = axs[i].plot(Gates, mipGapWithConstr,  # data
+                         marker='o',  # each marker will be rendered as a circle
+                         markersize=5,  # marker size
+                         markerfacecolor='red',  # marker facecolor
+                         markeredgecolor='black',  # marker edgecolor
+                         markeredgewidth=1,  # marker edge width
+                         linestyle='-',  # line style will be dash line
+                         linewidth=3.5, zorder=1)  # line width
+        axs.flat[i].set(ylabel='Mip gap at root')
+        # axs.flat[i].set(ylabel='MIP')
+        # axs[i].legend(["With constraints", "Without constraints"])
+        i += 1
+
+        # time
         # axs[i].scatter(Gates, timeWithConstr, color='blue')
-        # axs[i].scatter(Gates, timeNoConstr, color='orange')
         # axs[i].plot(Gates, timeWithConstr, color='blue')
-        # axs[i].plot(Gates, timeNoConstr, color='orange')
-        # axs.flat[i].set(ylabel='Time')
+        p2 = axs[i].plot(Gates, timeWithConstr,  # data
+                         marker='o',  # each marker will be rendered as a circle
+                         markersize=5,  # marker size
+                         markerfacecolor='red',  # marker facecolor
+                         markeredgecolor='black',  # marker edgecolor
+                         markeredgewidth=1,  # marker edge width
+                         linestyle='-',  # line style will be dash line
+                         linewidth=3.5, zorder=1)  # line width
+        axs.flat[i].set(ylabel='Time')
         # axs[i].legend(["With constraints", "Without constraints"])
-        # i += 1
-        #
-        # # error mean
-        # axs[i].plot(Gates, errorWithConstr[:, 0], color='blue')
-        # axs[i].plot(Gates, errorNoConstr[:, 0], color='orange')
-        # axs[i].scatter(Gates, errorWithConstr[:, 0], color='blue')
-        # axs[i].scatter(Gates, errorNoConstr[:, 0], color='orange')
-        # axs.flat[i].set(ylabel='MAPE Mean')
-        # axs[i].legend(["With constraints", "Without constraints"])
-        # i += 1
-        #
-        # # error std
-        # axs[i].scatter(Gates, errorWithConstr[:, 1], color='blue')
-        # axs[i].scatter(Gates, errorNoConstr[:, 1], color='orange')
-        # axs[i].plot(Gates, errorWithConstr[:, 1], color='blue')
-        # axs[i].plot(Gates, errorNoConstr[:, 1], color='orange')
-        # axs.flat[i].set(ylabel='MAPE std')
-        # axs[i].legend(["With constraints", "Without constraints"])
-        # i += 1
+        i += 1
+
+        # error mean
+        p2 = axs[i].plot(Gates, errorWithConstr[:, 0],  # data
+                         marker='o',  # each marker will be rendered as a circle
+                         markersize=5,  # marker size
+                         markerfacecolor='red',  # marker facecolor
+                         markeredgecolor='black',  # marker edgecolor
+                         markeredgewidth=1,  # marker edge width
+                         linestyle='-',  # line style will be dash line
+                         linewidth=3.5, zorder=1)  # line width
+        p2 = axs[i].plot(Gates, errorWithConstr[:, 1],  # data
+                         marker='o',  # each marker will be rendered as a circle
+                         markersize=5,  # marker size
+                         markerfacecolor='red',  # marker facecolor
+                         markeredgecolor='black',  # marker edgecolor
+                         markeredgewidth=1,  # marker edge width
+                         linestyle='-',  # line style will be dash line
+                         linewidth=3.5, zorder=1)  # line width
+
+        plt.fill_between(Gates, errorWithConstr[:, 1], y2=errorWithConstr[:, 0], alpha=0.3, color='orange')
+        plt.fill_between(Gates, errorWithConstr[:, 0], alpha=0.3, color='blue')
+
+        axs.flat[i].set(ylabel='Mape')
+        i += 1
 
 
         for ax in axs.flat:
-            ax.set(xlabel='Number Of Gates')
-
+            ax.set(xlabel='N')
 
         # Hide x labels and tick labels for top plots and y ticks for right plots.
         for ax in axs.flat:
             ax.label_outer()
+
+        labels = ['a', 'b', 'c', 'd']
+        j = 0
+        for ax in axs:
+            # label physical distance in and down:
+            trans = mtransforms.ScaledTranslation(10 / 72, -5 / 72, fig.dpi_scale_trans)
+            ax.text(0.0, 1.0, labels[j], transform=ax.transAxes + trans,
+                    fontsize='medium', verticalalignment='top', fontfamily='DejaVu Sans', weight='bold',
+                    bbox=dict(facecolor='1', edgecolor='none', pad=3.0))
+            j += 1
+
+
+    else:
+
+        if not plotUnder:
+            # set histograms
+            fig, axs = plt.subplots(3, 2)
+
+            # nonzeros
+            axs[0, 0].plot(Gates, zerosWithConstr, color='blue')
+            axs[0, 0].plot(Gates, zerosNoConstr, color='orange')
+            axs[0, 0].scatter(Gates, zerosWithConstr, color='blue')
+            axs[0, 0].scatter(Gates, zerosNoConstr, color='orange')
+
+            # variables
+            axs[1, 0].scatter(Gates, varsWithConstr, color='blue')
+            axs[1, 0].scatter(Gates, varsNoConstr, color='orange')
+            axs[1, 0].plot(Gates, varsWithConstr, color='blue')
+            axs[1, 0].plot(Gates, varsNoConstr, color='orange')
+
+            # constraints
+            axs[2, 0].scatter(Gates, constrWithConstr, color='blue')
+            axs[2, 0].scatter(Gates, constrNoConstr, color='orange')
+            axs[2, 0].plot(Gates, constrWithConstr, color='blue')
+            axs[2, 0].plot(Gates, constrNoConstr, color='orange')
+
+            # time
+            axs[0, 1].scatter(Gates, timeWithConstr, color='blue')
+            axs[0, 1].scatter(Gates, timeNoConstr, color='orange')
+            axs[0, 1].plot(Gates, timeWithConstr, color='blue')
+            axs[0, 1].plot(Gates, timeNoConstr, color='orange')
+
+            # error mean
+            axs[1, 1].plot(Gates, errorWithConstr[:, 0], color='blue')
+            axs[1, 1].plot(Gates, errorNoConstr[:, 0], color='orange')
+            axs[1, 1].scatter(Gates, errorWithConstr[:, 0], color='blue')
+            axs[1, 1].scatter(Gates, errorNoConstr[:, 0], color='orange')
+
+            # error std
+            axs[2, 1].scatter(Gates, errorWithConstr[:, 1], color='blue')
+            axs[2, 1].scatter(Gates, errorNoConstr[:, 1], color='orange')
+            axs[2, 1].plot(Gates, errorWithConstr[:, 1], color='blue')
+            axs[2, 1].plot(Gates, errorNoConstr[:, 1], color='orange')
+
+            for ax in axs.flat:
+                ax.set(xlabel='Number Of Gates')
+
+            axs.flat[0].set(ylabel='Nonzeros')
+            axs.flat[1].set(ylabel='MAPE Mean')
+            axs.flat[2].set(ylabel='MAPE std')
+            axs.flat[3].set(ylabel='Time')
+            axs.flat[4].set(ylabel='Variables')
+            axs.flat[5].set(ylabel='Constraints')
+
+            # Hide x labels and tick labels for top plots and y ticks for right plots.
+            for ax in axs.flat:
+                ax.label_outer()
+
+            # set legend
+            axs[0, 0].legend(["With constraints", "Without constraints"])
+            axs[1, 0].legend(["With constraints", "Without constraints"])
+            axs[2, 0].legend(["With constraints", "Without constraints"])
+            axs[0, 1].legend(["With constraints", "Without constraints"])
+            axs[1, 1].legend(["With constraints", "Without constraints"])
+            axs[2, 1].legend(["With constraints", "Without constraints"])
+        else:
+            # set histograms
+            fig, axs = plt.subplots(7, 1)
+            i = 0
+
+
+            # nonzeros
+            axs[i].plot(Gates, zerosWithConstr, color='blue')
+            axs[i].scatter(Gates, zerosWithConstr, color='blue')
+
+            if not only1:
+                axs[i].plot(Gates, zerosNoConstr, color='orange')
+                axs[i].scatter(Gates, zerosNoConstr, color='orange')
+            axs.flat[i].set(ylabel='Nonzeros')
+            # axs[i].legend(["With constraints", "Without constraints"])
+            i += 1
+
+            # variables
+            axs[i].scatter(Gates, varsWithConstr, color='blue')
+            axs[i].plot(Gates, varsWithConstr, color='blue')
+            if not only1:
+                axs[i].scatter(Gates, varsNoConstr, color='orange')
+                axs[i].plot(Gates, varsNoConstr, color='orange')
+            # axs.flat[i].set(ylabel='Variables')
+            axs.flat[i].set(ylabel='Vars')
+            # axs[i].legend(["With constraints", "Without constraints"])
+            i += 1
+
+            # constraints
+            axs[i].scatter(Gates, constrWithConstr, color='blue')
+            axs[i].plot(Gates, constrWithConstr, color='blue')
+            if not only1:
+                axs[i].scatter(Gates, constrNoConstr, color='orange')
+                axs[i].plot(Gates, constrNoConstr, color='orange')
+            # axs.flat[i].set(ylabel='Constraints')
+            axs.flat[i].set(ylabel='Constr')
+            # axs[i].legend(["With constraints", "Without constraints"])
+            i += 1
+
+            # constraints
+            axs[i].scatter(Gates, mipGapWithConstr, color='blue')
+            axs[i].plot(Gates, mipGapWithConstr, color='blue')
+            if not only1:
+                axs[i].scatter(Gates, mipGapNoConstr, color='orange')
+                axs[i].plot(Gates, mipGapNoConstr, color='orange')
+            # axs.flat[i].set(ylabel='MIP gap at root')
+            axs.flat[i].set(ylabel='MIP')
+            # axs[i].legend(["With constraints", "Without constraints"])
+            i += 1
+
+
+            # time
+            axs[i].scatter(Gates, timeWithConstr, color='blue')
+            if not only1:
+                axs[i].scatter(Gates, timeNoConstr, color='orange')
+                axs[i].plot(Gates, timeNoConstr, color='orange')
+
+            axs[i].plot(Gates, timeWithConstr, color='blue')
+            axs.flat[i].set(ylabel='Time')
+            # axs[i].legend(["With constraints", "Without constraints"])
+            i += 1
+
+            # error mean
+            axs[i].plot(Gates, errorWithConstr[:, 0], color='blue')
+            if not only1:
+                axs[i].plot(Gates, errorNoConstr[:, 0], color='orange')
+                axs[i].scatter(Gates, errorNoConstr[:, 0], color='orange')
+
+            axs[i].scatter(Gates, errorWithConstr[:, 0], color='blue')
+            # axs.flat[i].set(ylabel='MAPE Mean')
+            axs.flat[i].set(ylabel='Mean')
+            # axs[i].legend(["With constraints", "Without constraints"])
+            i += 1
+
+            # error std
+            axs[i].scatter(Gates, errorWithConstr[:, 1], color='blue')
+            if not only1:
+                axs[i].scatter(Gates, errorNoConstr[:, 1], color='orange')
+                axs[i].plot(Gates, errorNoConstr[:, 1], color='orange')
+
+            axs[i].plot(Gates, errorWithConstr[:, 1], color='blue')
+            # axs.flat[i].set(ylabel='MAPE std')
+            axs.flat[i].set(ylabel='std')
+            # axs[i].legend(["With constraints", "Without constraints"])
+            i += 1
+
+
+            for ax in axs.flat:
+                ax.set(xlabel='N')
+
+
+            # Hide x labels and tick labels for top plots and y ticks for right plots.
+            for ax in axs.flat:
+                ax.label_outer()
 
 
     # plt.show()
@@ -340,7 +604,7 @@ def plotPresolve():
 
 
     for ax in axs.flat:
-        ax.set(xlabel='Number Of Gates')
+        ax.set(xlabel='N')
 
 
     # Hide x labels and tick labels for top plots and y ticks for right plots.
@@ -377,3 +641,4 @@ if __name__ == "__main__":
     plotNonzeros()
     # plotPresolve()
     # plotForThesis()
+    # plotForThesis2()

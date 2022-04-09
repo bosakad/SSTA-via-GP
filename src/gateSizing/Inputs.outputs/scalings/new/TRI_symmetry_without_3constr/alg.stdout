@@ -1,0 +1,928 @@
+SYMMETRY
+
+
+
+
+0. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 1155100         
+  Cones                  : 0               
+  Scalar variables       : 385400          
+  Matrix variables       : 0               
+  Integer variables      : 385400          
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 1.14
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        2.0000000000e+01     NA                   NA          3.5   
+0        1        1        0        2.0000000000e+01     2.0000000000e+01     0.00e+00    3.5   
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 2.000000000000e+01      
+Best objective bound               : 2.000000000000e+01      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 1.14
+Time spend optimizing the root     : 0.01
+Mixed integer optimizer terminated. Time: 3.48
+
+Optimizer terminated. Time: 3.82    
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 2.0000000000e+01    nrm: 6e+00    Viol.  con: 0e+00    var: 0e+00    itg: 0e+00  
+
+ MOSEK UNARY VALUES: 
+
+6.384999999999999 1.3558300040934335
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               1155100       385400        0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             90            1155010       0             0           
+   Variables:  0             0             0             385400        0           
+
+               Integer constraint types
+               Binary        General     
+               385113        287         
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  100           0.0e+00       1.0e+00     
+       |Aij|:  2690280       3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  90            0.0e+00       0.0e+00     
+      |buci|:  1155010       0.0e+00       5.0e-01     
+      |blxj|:  385400        0.0e+00       0.0e+00     
+      |buxj|:  385400        0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100)}
+
+
+1. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 2310200         
+  Cones                  : 0               
+  Scalar variables       : 770700          
+  Matrix variables       : 0               
+  Integer variables      : 770700          
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 3.28
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        5.1000000000e+01     NA                   NA          7.9   
+0        1        1        0        5.1000000000e+01     5.1000000000e+01     0.00e+00    7.9   
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 5.100000000000e+01      
+Best objective bound               : 5.100000000000e+01      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 3.28
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 7.88
+
+Optimizer terminated. Time: 8.51    
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 5.1000000000e+01    nrm: 4e+01    Viol.  con: 0e+00    var: 0e+00    itg: 0e+00  
+
+ MOSEK UNARY VALUES: 
+
+6.384999999999999 1.3558300040934335
+5.201612903225806 2.018282720651066
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               2310200       770700        0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             180           2310020       0             0           
+   Variables:  0             0             0             770700        0           
+
+               Integer constraint types
+               Binary        General     
+               770221        479         
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  200           0.0e+00       1.0e+00     
+       |Aij|:  5380560       3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  180           0.0e+00       0.0e+00     
+      |buci|:  2310020       0.0e+00       5.0e-01     
+      |blxj|:  770700        0.0e+00       0.0e+00     
+      |buxj|:  770700        0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100), (2, True): (0, 51.0, 8.507734060287476, 15.057236734623364, 18.31016201416361, 770700, 2310200, 0.0, 770700, 2310200)}
+
+
+2. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 3465300         
+  Cones                  : 0               
+  Scalar variables       : 1156000         
+  Matrix variables       : 0               
+  Integer variables      : 1156000         
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 5.21
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        9.2000000000e+01     NA                   NA          12.2  
+0        1        1        0        9.2000000000e+01     9.2000000000e+01     0.00e+00    12.2  
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 9.200000000000e+01      
+Best objective bound               : 9.200000000000e+01      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 5.21
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 12.21
+
+Optimizer terminated. Time: 13.20   
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 9.2000000000e+01    nrm: 5e+01    Viol.  con: 0e+00    var: 0e+00    itg: 1e-16  
+
+ MOSEK UNARY VALUES: 
+
+6.439473684210527 1.3695541867192078
+5.0625 2.132157065040003
+4.0597560975609746 2.690344513077867
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               3465300       1156000       0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             270           3465030       0             0           
+   Variables:  0             0             0             1156000       0           
+
+               Integer constraint types
+               Binary        General     
+               1155329       671         
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  300           0.0e+00       1.0e+00     
+       |Aij|:  8070840       3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  270           0.0e+00       0.0e+00     
+      |buci|:  3465030       0.0e+00       5.0e-01     
+      |blxj|:  1156000       0.0e+00       0.0e+00     
+      |buxj|:  1156000       0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100), (2, True): (0, 51.0, 8.507734060287476, 15.057236734623364, 18.31016201416361, 770700, 2310200, 0.0, 770700, 2310200), (3, True): (0, 92.0, 13.19522500038147, 34.5738643640837, 35.31098873084995, 1156000, 3465300, 0.0, 1156000, 3465300)}
+
+
+3. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 4620400         
+  Cones                  : 0               
+  Scalar variables       : 1541300         
+  Matrix variables       : 0               
+  Integer variables      : 1541300         
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 7.09
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        1.3200000000e+02     NA                   NA          16.3  
+0        1        1        0        1.3200000000e+02     1.3200000000e+02     0.00e+00    16.3  
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 1.320000000000e+02      
+Best objective bound               : 1.320000000000e+02      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 7.09
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 16.33
+
+Optimizer terminated. Time: 17.40   
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 1.3200000000e+02    nrm: 7e+01    Viol.  con: 0e+00    var: 0e+00    itg: 0e+00  
+
+ MOSEK UNARY VALUES: 
+
+6.5 1.3821279889278624
+5.201612903225806 2.018282720651066
+4.199999999999999 2.571478174124758
+3.798837209302325 2.8804369898626416
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               4620400       1541300       0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             360           4620040       0             0           
+   Variables:  0             0             0             1541300       0           
+
+               Integer constraint types
+               Binary        General     
+               1540437       863         
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  400           0.0e+00       1.0e+00     
+       |Aij|:  10761120      3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  360           0.0e+00       0.0e+00     
+      |buci|:  4620040       0.0e+00       5.0e-01     
+      |blxj|:  1541300       0.0e+00       0.0e+00     
+      |buxj|:  1541300       0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100), (2, True): (0, 51.0, 8.507734060287476, 15.057236734623364, 18.31016201416361, 770700, 2310200, 0.0, 770700, 2310200), (3, True): (0, 92.0, 13.19522500038147, 34.5738643640837, 35.31098873084995, 1156000, 3465300, 0.0, 1156000, 3465300), (4, True): (0, 132.0, 17.40485382080078, 44.614371591100316, 54.158239933291696, 1541300, 4620400, 0.0, 1541300, 4620400)}
+
+
+4. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 5775500         
+  Cones                  : 0               
+  Scalar variables       : 1926600         
+  Matrix variables       : 0               
+  Integer variables      : 1926600         
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 9.15
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        1.7300000000e+02     NA                   NA          20.7  
+0        1        1        0        1.7300000000e+02     1.7300000000e+02     0.00e+00    20.7  
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 1.730000000000e+02      
+Best objective bound               : 1.730000000000e+02      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 9.15
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 20.69
+
+Optimizer terminated. Time: 22.18   
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 1.7300000000e+02    nrm: 1e+02    Viol.  con: 0e+00    var: 0e+00    itg: 0e+00  
+
+ MOSEK UNARY VALUES: 
+
+6.1863636363636365 1.4784959970264175
+4.931818181818181 2.2259427074026674
+4.0597560975609746 2.690344513077867
+3.343617021276595 3.133443775765011
+5.349999999999999 1.8779421361337698
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               5775500       1926600       0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             450           5775050       0             0           
+   Variables:  0             0             0             1926600       0           
+
+               Integer constraint types
+               Binary        General     
+               1925547       1053        
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  500           0.0e+00       1.0e+00     
+       |Aij|:  13451400      3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  450           0.0e+00       0.0e+00     
+      |buci|:  5775050       0.0e+00       5.0e-01     
+      |blxj|:  1926600       0.0e+00       0.0e+00     
+      |buxj|:  1926600       0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100), (2, True): (0, 51.0, 8.507734060287476, 15.057236734623364, 18.31016201416361, 770700, 2310200, 0.0, 770700, 2310200), (3, True): (0, 92.0, 13.19522500038147, 34.5738643640837, 35.31098873084995, 1156000, 3465300, 0.0, 1156000, 3465300), (4, True): (0, 132.0, 17.40485382080078, 44.614371591100316, 54.158239933291696, 1541300, 4620400, 0.0, 1541300, 4620400), (5, True): (0, 173.0, 22.17709493637085, 36.59715408544655, 36.71565770345031, 1926600, 5775500, 0.0, 1926600, 5775500)}
+
+
+5. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 6930600         
+  Cones                  : 0               
+  Scalar variables       : 2311900         
+  Matrix variables       : 0               
+  Integer variables      : 2311900         
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 10.90
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        2.0400000000e+02     NA                   NA          24.7  
+0        1        1        0        2.0400000000e+02     2.0400000000e+02     0.00e+00    24.7  
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 2.040000000000e+02      
+Best objective bound               : 2.040000000000e+02      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 10.90
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 24.74
+
+Optimizer terminated. Time: 26.39   
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 2.0400000000e+02    nrm: 1e+02    Viol.  con: 0e+00    var: 0e+00    itg: 0e+00  
+
+ MOSEK UNARY VALUES: 
+
+6.5 1.3821279889278624
+5.201612903225806 2.018282720651066
+4.0597560975609746 2.690344513077867
+3.6772727272727272 2.956991994052835
+5.349999999999999 1.8779421361337698
+4.199999999999999 2.571478174124758
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               6930600       2311900       0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             540           6930060       0             0           
+   Variables:  0             0             0             2311900       0           
+
+               Integer constraint types
+               Binary        General     
+               2310653       1247        
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  600           0.0e+00       1.0e+00     
+       |Aij|:  16141680      3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  540           0.0e+00       0.0e+00     
+      |buci|:  6930060       0.0e+00       5.0e-01     
+      |blxj|:  2311900       0.0e+00       0.0e+00     
+      |buxj|:  2311900       0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100), (2, True): (0, 51.0, 8.507734060287476, 15.057236734623364, 18.31016201416361, 770700, 2310200, 0.0, 770700, 2310200), (3, True): (0, 92.0, 13.19522500038147, 34.5738643640837, 35.31098873084995, 1156000, 3465300, 0.0, 1156000, 3465300), (4, True): (0, 132.0, 17.40485382080078, 44.614371591100316, 54.158239933291696, 1541300, 4620400, 0.0, 1541300, 4620400), (5, True): (0, 173.0, 22.17709493637085, 36.59715408544655, 36.71565770345031, 1926600, 5775500, 0.0, 1926600, 5775500), (6, True): (0, 204.0, 26.39107394218445, 55.155006046622084, 48.09613447540272, 2311900, 6930600, 0.0, 2311900, 6930600)}
+
+
+6. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 8085700         
+  Cones                  : 0               
+  Scalar variables       : 2697200         
+  Matrix variables       : 0               
+  Integer variables      : 2697200         
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 12.87
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        2.5300000000e+02     NA                   NA          29.3  
+0        1        1        0        2.5300000000e+02     2.5300000000e+02     0.00e+00    29.3  
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 2.530000000000e+02      
+Best objective bound               : 2.530000000000e+02      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 12.87
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 29.35
+
+Optimizer terminated. Time: 31.23   
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 2.5300000000e+02    nrm: 1e+02    Viol.  con: 0e+00    var: 0e+00    itg: 0e+00  
+
+ MOSEK UNARY VALUES: 
+
+6.1863636363636365 1.4784959970264175
+4.931818181818181 2.2259427074026674
+4.0597560975609746 2.690344513077867
+3.343617021276595 3.133443775765011
+5.349999999999999 1.8779421361337698
+4.199999999999999 2.571478174124758
+4.199999999999999 2.571478174124758
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               8085700       2697200       0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             630           8085070       0             0           
+   Variables:  0             0             0             2697200       0           
+
+               Integer constraint types
+               Binary        General     
+               2695764       1436        
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  700           0.0e+00       1.0e+00     
+       |Aij|:  18831960      3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  630           0.0e+00       0.0e+00     
+      |buci|:  8085070       0.0e+00       5.0e-01     
+      |blxj|:  2697200       0.0e+00       0.0e+00     
+      |buxj|:  2697200       0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100), (2, True): (0, 51.0, 8.507734060287476, 15.057236734623364, 18.31016201416361, 770700, 2310200, 0.0, 770700, 2310200), (3, True): (0, 92.0, 13.19522500038147, 34.5738643640837, 35.31098873084995, 1156000, 3465300, 0.0, 1156000, 3465300), (4, True): (0, 132.0, 17.40485382080078, 44.614371591100316, 54.158239933291696, 1541300, 4620400, 0.0, 1541300, 4620400), (5, True): (0, 173.0, 22.17709493637085, 36.59715408544655, 36.71565770345031, 1926600, 5775500, 0.0, 1926600, 5775500), (6, True): (0, 204.0, 26.39107394218445, 55.155006046622084, 48.09613447540272, 2311900, 6930600, 0.0, 2311900, 6930600), (7, True): (0, 253.0, 31.23333716392517, 59.838510650697586, 59.522107954760585, 2697200, 8085700, 0.0, 2697200, 8085700)}
+
+
+7. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 9240800         
+  Cones                  : 0               
+  Scalar variables       : 3082500         
+  Matrix variables       : 0               
+  Integer variables      : 3082500         
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 14.83
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        2.8800000000e+02     NA                   NA          33.7  
+0        1        1        0        2.8800000000e+02     2.8800000000e+02     0.00e+00    33.7  
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 2.880000000000e+02      
+Best objective bound               : 2.880000000000e+02      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 14.83
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 33.70
+
+Optimizer terminated. Time: 35.81   
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 2.8800000000e+02    nrm: 2e+02    Viol.  con: 0e+00    var: 0e+00    itg: 1e-16  
+
+ MOSEK UNARY VALUES: 
+
+6.439473684210527 1.3695541867192078
+5.201612903225806 2.018282720651066
+4.0597560975609746 2.690344513077867
+3.343617021276595 3.133443775765011
+5.349999999999999 1.8779421361337698
+4.199999999999999 2.571478174124758
+4.199999999999999 2.571478174124758
+4.199999999999999 2.571478174124758
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               9240800       3082500       0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             720           9240080       0             0           
+   Variables:  0             0             0             3082500       0           
+
+               Integer constraint types
+               Binary        General     
+               3080871       1629        
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  800           0.0e+00       1.0e+00     
+       |Aij|:  21522240      3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  720           0.0e+00       0.0e+00     
+      |buci|:  9240080       0.0e+00       5.0e-01     
+      |blxj|:  3082500       0.0e+00       0.0e+00     
+      |buxj|:  3082500       0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100), (2, True): (0, 51.0, 8.507734060287476, 15.057236734623364, 18.31016201416361, 770700, 2310200, 0.0, 770700, 2310200), (3, True): (0, 92.0, 13.19522500038147, 34.5738643640837, 35.31098873084995, 1156000, 3465300, 0.0, 1156000, 3465300), (4, True): (0, 132.0, 17.40485382080078, 44.614371591100316, 54.158239933291696, 1541300, 4620400, 0.0, 1541300, 4620400), (5, True): (0, 173.0, 22.17709493637085, 36.59715408544655, 36.71565770345031, 1926600, 5775500, 0.0, 1926600, 5775500), (6, True): (0, 204.0, 26.39107394218445, 55.155006046622084, 48.09613447540272, 2311900, 6930600, 0.0, 2311900, 6930600), (7, True): (0, 253.0, 31.23333716392517, 59.838510650697586, 59.522107954760585, 2697200, 8085700, 0.0, 2697200, 8085700), (8, True): (0, 288.0, 35.80649518966675, 66.37227381344091, 57.909963845447116, 3082500, 9240800, 0.0, 3082500, 9240800)}
+
+
+8. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 10395900        
+  Cones                  : 0               
+  Scalar variables       : 3467800         
+  Matrix variables       : 0               
+  Integer variables      : 3467800         
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 17.39
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        3.1200000000e+02     NA                   NA          38.2  
+0        1        1        0        3.1200000000e+02     3.1200000000e+02     0.00e+00    38.2  
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 3.120000000000e+02      
+Best objective bound               : 3.120000000000e+02      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 17.39
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 38.20
+
+Optimizer terminated. Time: 40.67   
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 3.1200000000e+02    nrm: 1e+02    Viol.  con: 0e+00    var: 0e+00    itg: 1e-16  
+
+ MOSEK UNARY VALUES: 
+
+6.384999999999999 1.3558300040934335
+5.201612903225806 2.018282720651066
+4.0597560975609746 2.690344513077867
+4.199999999999999 2.571478174124758
+5.349999999999999 1.8779421361337698
+4.199999999999999 2.571478174124758
+4.199999999999999 2.571478174124758
+4.199999999999999 2.571478174124758
+5.349999999999999 1.8779421361337698
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               10395900      3467800       0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             810           10395090      0             0           
+   Variables:  0             0             0             3467800       0           
+
+               Integer constraint types
+               Binary        General     
+               3465979       1821        
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  900           0.0e+00       1.0e+00     
+       |Aij|:  24212520      3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  810           0.0e+00       0.0e+00     
+      |buci|:  10395090      0.0e+00       5.0e-01     
+      |blxj|:  3467800       0.0e+00       0.0e+00     
+      |buxj|:  3467800       0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100), (2, True): (0, 51.0, 8.507734060287476, 15.057236734623364, 18.31016201416361, 770700, 2310200, 0.0, 770700, 2310200), (3, True): (0, 92.0, 13.19522500038147, 34.5738643640837, 35.31098873084995, 1156000, 3465300, 0.0, 1156000, 3465300), (4, True): (0, 132.0, 17.40485382080078, 44.614371591100316, 54.158239933291696, 1541300, 4620400, 0.0, 1541300, 4620400), (5, True): (0, 173.0, 22.17709493637085, 36.59715408544655, 36.71565770345031, 1926600, 5775500, 0.0, 1926600, 5775500), (6, True): (0, 204.0, 26.39107394218445, 55.155006046622084, 48.09613447540272, 2311900, 6930600, 0.0, 2311900, 6930600), (7, True): (0, 253.0, 31.23333716392517, 59.838510650697586, 59.522107954760585, 2697200, 8085700, 0.0, 2697200, 8085700), (8, True): (0, 288.0, 35.80649518966675, 66.37227381344091, 57.909963845447116, 3082500, 9240800, 0.0, 3082500, 9240800), (9, True): (0, 312.0, 40.66893982887268, 61.02425896140637, 77.02549286439275, 3467800, 10395900, 0.0, 3467800, 10395900)}
+
+
+9. iteration: 
+
+
+Problem
+  Name                   :                 
+  Objective sense        : max             
+  Type                   : LO (linear optimization problem)
+  Constraints            : 11551000        
+  Cones                  : 0               
+  Scalar variables       : 3853100         
+  Matrix variables       : 0               
+  Integer variables      : 3853100         
+
+Optimizer started.
+Mixed integer optimizer started.
+Threads used: 2
+Presolve started.
+Presolve terminated. Time = 19.08
+Presolved problem: 0 variables, 0 constraints, 0 non-zeros
+Presolved problem: 0 general integer, 0 binary, 0 continuous
+Clique table size: 0
+BRANCHES RELAXS   ACT_NDS  DEPTH    BEST_INT_OBJ         BEST_RELAX_OBJ       REL_GAP(%)  TIME  
+0        0        1        0        3.5000000000e+02     NA                   NA          42.3  
+0        1        1        0        3.5000000000e+02     3.5000000000e+02     0.00e+00    42.3  
+An optimal solution satisfying the relative gap tolerance of 1.00e+00(%) has been located.
+The relative gap is 0.00e+00(%).
+An optimal solution satisfying the absolute gap tolerance of 0.00e+00 has been located.
+The absolute gap is 0.00e+00.
+
+Objective of best integer solution : 3.500000000000e+02      
+Best objective bound               : 3.500000000000e+02      
+Construct solution objective       : Not employed
+User objective cut value           : Not employed
+Number of cuts generated           : 0
+Number of branches                 : 0
+Number of relaxations solved       : 1
+Number of interior point iterations: 0
+Number of simplex iterations       : 0
+Time spend presolving the root     : 19.08
+Time spend optimizing the root     : 0.00
+Mixed integer optimizer terminated. Time: 42.28
+
+Optimizer terminated. Time: 44.86   
+
+
+Integer solution solution summary
+  Problem status  : PRIMAL_FEASIBLE
+  Solution status : INTEGER_OPTIMAL
+  Primal.  obj: 3.5000000000e+02    nrm: 1e+02    Viol.  con: 0e+00    var: 0e+00    itg: 0e+00  
+
+ MOSEK UNARY VALUES: 
+
+6.439473684210527 1.3695541867192078
+5.201612903225806 2.018282720651066
+4.199999999999999 2.571478174124758
+3.798837209302325 2.8804369898626416
+5.349999999999999 1.8779421361337698
+4.199999999999999 2.571478174124758
+4.199999999999999 2.571478174124758
+4.199999999999999 2.571478174124758
+5.349999999999999 1.8779421361337698
+4.479729729729729 2.4708970758383306
+
+                    Analyzing the problem
+
+*** Structural report
+               Dimensions
+               Constraints   Variables     Matrix var.   Cones       
+               11551000      3853100       0             0           
+
+               Constraint and bound types
+               Free          Lower         Upper         Ranged        Fixed       
+ Constraints:  0             900           11550100      0             0           
+   Variables:  0             0             0             3853100       0           
+
+               Integer constraint types
+               Binary        General     
+               3851085       2015        
+
+*** Data report
+               Nonzeros      Min           Max         
+        |cj|:  1000          0.0e+00       1.0e+00     
+       |Aij|:  26902800      3.3e-01       1.0e+00     
+
+               # finite      Min           Max         
+      |blci|:  900           0.0e+00       0.0e+00     
+      |buci|:  11550100      0.0e+00       5.0e-01     
+      |blxj|:  3853100       0.0e+00       0.0e+00     
+      |buxj|:  3853100       0.0e+00       1.0e+00     
+
+*** Done analyzing the problem
+
+
+
+{(1, True): (0, 20.0, 3.8216347694396973, 9.389651744573353, 10.278744579805164, 385400, 1155100, 0.0, 385400, 1155100), (2, True): (0, 51.0, 8.507734060287476, 15.057236734623364, 18.31016201416361, 770700, 2310200, 0.0, 770700, 2310200), (3, True): (0, 92.0, 13.19522500038147, 34.5738643640837, 35.31098873084995, 1156000, 3465300, 0.0, 1156000, 3465300), (4, True): (0, 132.0, 17.40485382080078, 44.614371591100316, 54.158239933291696, 1541300, 4620400, 0.0, 1541300, 4620400), (5, True): (0, 173.0, 22.17709493637085, 36.59715408544655, 36.71565770345031, 1926600, 5775500, 0.0, 1926600, 5775500), (6, True): (0, 204.0, 26.39107394218445, 55.155006046622084, 48.09613447540272, 2311900, 6930600, 0.0, 2311900, 6930600), (7, True): (0, 253.0, 31.23333716392517, 59.838510650697586, 59.522107954760585, 2697200, 8085700, 0.0, 2697200, 8085700), (8, True): (0, 288.0, 35.80649518966675, 66.37227381344091, 57.909963845447116, 3082500, 9240800, 0.0, 3082500, 9240800), (9, True): (0, 312.0, 40.66893982887268, 61.02425896140637, 77.02549286439275, 3467800, 10395900, 0.0, 3467800, 10395900), (10, True): (0, 350.0, 44.86156105995178, 76.11670572556214, 56.423280346318975, 3853100, 11551000, 0.0, 3853100, 11551000)}

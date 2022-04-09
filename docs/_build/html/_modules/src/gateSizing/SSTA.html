@@ -71,15 +71,17 @@
 <span class="kn">import</span> <span class="nn">cvxpyVariable</span>
 
 
-<div class="viewcode-block" id="calculateCircuitDelay"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.calculateCircuitDelay">[docs]</a><span class="k">def</span> <span class="nf">calculateCircuitDelay</span><span class="p">(</span><span class="n">rootNodes</span><span class="p">:</span> <span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="n">cvxpy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
+<div class="viewcode-block" id="calculateCircuitDelay"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.calculateCircuitDelay">[docs]</a><span class="k">def</span> <span class="nf">calculateCircuitDelay</span><span class="p">(</span><span class="n">rootNodes</span><span class="p">:</span> <span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="n">cvxpy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mosekStatus</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                                                            <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mosekTRI</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute circuit delay using PDFs algorithm</span>
 <span class="sd">    Function executes the algorithm for finding out the PDF of a circuit delay.</span>
 
 <span class="sd">    :param rootNodes: array of root nodes, [Node], Node includes next nodes and previous nodes</span>
-<span class="sd">    :param curNofVariables: current number of MOSEK variables</span>
+<span class="sd">    :param mosekStatus: current number of MOSEK variables and constraints (tuple)</span>
 <span class="sd">    :param cvxpy: Bool, true if cvxpy objects are used, false if just RandomVariables class is used</span>
 <span class="sd">    :param unary: Bool, true if unary (M 0/1-bin repr.) is used, false otherwise</span>
+<span class="sd">    :param mosekTRI: Bool, true if trilinear constraints are used, false otherwise</span>
 
 <span class="sd">    :return newConstr: new constraints for CVXPY(optional)</span>
 <span class="sd">    :return newNofVariables: new number of MOSEK variables(optional)</span>
@@ -87,20 +89,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># pointer to a max and convolution functions</span>
-    <span class="k">if</span> <span class="n">curNofVariables</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>  <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsMOSEK_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>  <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsMOSEK_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span><span class="p">:</span>     <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsCVXPY_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">unary</span><span class="p">:</span> <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsCVXPY_McCormick</span>
-    <span class="k">elif</span> <span class="ow">not</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span><span class="p">:</span> <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsUNARY</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">mosekTRI</span><span class="p">:</span> <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsUNARY</span>
     <span class="k">else</span><span class="p">:</span>                     <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsFORM</span>
-    <span class="k">if</span> <span class="n">curNofVariables</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>  <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">Convolution_UNARY_MOSEK</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>  <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">Convolution_UNARY_MOSEK</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span><span class="p">:</span>     <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">Convolution_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">unary</span><span class="p">:</span> <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">Convolution_McCormick</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span><span class="p">:</span> <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="o">.</span><span class="n">convolutionOfTwoVarsNaiveSAME_UNARY</span>
     <span class="k">else</span><span class="p">:</span>                     <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="o">.</span><span class="n">convolutionOfTwoVarsShift</span>
 
-    <span class="k">if</span> <span class="n">curNofVariables</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">usingMosek</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">curNofConstr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">curNofVariables</span> <span class="o">=</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">usingMosek</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">curNofConstr</span> <span class="o">=</span> <span class="mi">0</span>
@@ -125,11 +128,25 @@
 
         <span class="k">if</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">:</span>                                      <span class="c1"># get maximum + convolution</span>
 
-            <span class="k">if</span> <span class="n">usingMosek</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">mosekTRI</span><span class="p">:</span>
 
                 <span class="n">maxDelay</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
 
                 <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">ConvolutionF</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="n">mosekTRI</span><span class="p">:</span>
+                        <span class="c1"># just for 2 inputs for maximum</span>
+                <span class="n">RV1</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">RV2</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">RV3</span> <span class="o">=</span> <span class="n">currentRandVar</span>
+                <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_VECTORIZED</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="n">mosekTRI</span><span class="p">:</span>   <span class="c1"># numpy version of the tri</span>
+
+                <span class="n">RV1</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">RV2</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">RV3</span> <span class="o">=</span> <span class="n">currentRandVar</span>
+                <span class="n">currentRandVar</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_UNARY</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">cvxpy</span><span class="p">:</span>
                 <span class="n">maxDelay</span><span class="p">,</span> <span class="n">newConstraints</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">)</span>
@@ -245,7 +262,7 @@
     <span class="k">def</span> <span class="nf">maximumF</span><span class="p">(</span><span class="n">delays</span><span class="p">:</span> <span class="p">[</span><span class="n">RandomVariableMOSEK</span><span class="p">],</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">):</span>
         <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">newRV</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maximum_UNARY_MAX_DIVIDE</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span><span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">,</span>
+            <span class="n">newRV</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maximum_UNARY_MAX_DIVIDE_VECTORIZED</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span><span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">,</span>
                                                                 <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
             <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
 

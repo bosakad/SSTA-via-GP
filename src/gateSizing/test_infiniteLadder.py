@@ -204,6 +204,153 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
     #
     #
 
+def mainCVXPYMcCormick(numberOfGates=1, numberOfUnaries=10, numberOfBins=20, interval=(-5, 18)):
+
+    """
+        Computes SSTA using unary encoding, can be computed in a 'precise' or non-precise way
+    """
+
+    n_samples = 2000000
+    seed = 0
+
+    # numberOfBins = 10
+    # numberOfUnaries = 8
+    # interval = (-8, 35)
+
+    gateParams = [0.0, 1.0]
+
+    # fix a random seed seed exists
+    if seed != None:
+        seed = seed
+        np.random.seed(seed)
+
+
+    ####################################
+    ####### Generate Input data ########
+    ####################################
+
+    # list with inputs' mean values
+    input_means = [np.random.randint(20, 70) / 10 for _ in range(numberOfGates + 1)]
+    # list with inputs' stds
+    input_stds = [np.random.randint(20, 130) / 100 for _ in range(numberOfGates + 1)]
+
+    # CVXPY
+
+    constraints = []
+
+    # generate inputs
+    startingNodes = []
+    xs_starting = {}
+    for i in range(0, numberOfGates + 1):
+        g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples,
+                                                    interval)
+        xs_starting[i] = {}
+
+        for bin in range(0, numberOfBins):
+            xs_starting[i][bin] = cp.Variable(nonneg=True)
+            # constraints.append(xs_starting[i][bin] <= g.bins[bin])
+
+        node = Node(RandomVariableCVXPY(xs_starting[i], g.edges, g.bins))
+        startingNodes.append(node)
+
+        # generetate nodes
+    generatedNodes = []
+    xs_generated = {}
+    for i in range(0, numberOfGates):
+        g = histogramGenerator.get_gauss_bins(gateParams[0], gateParams[1], numberOfBins, n_samples, interval)
+        xs_generated[i] = {}
+
+        for bin in range(0, numberOfBins):
+            xs_generated[i][bin] = cp.Variable(nonneg=True)
+
+        node = Node(RandomVariableCVXPY(xs_generated[i], g.edges, g.bins))
+        generatedNodes.append(node)
+
+    # set circuit design
+
+    # start
+    startingNodes[0].setNextNodes([generatedNodes[0]])
+
+    # upper part
+    for i in range(1, numberOfGates + 1):
+        start = startingNodes[i]
+        start.setNextNodes([generatedNodes[i - 1]])
+
+        # lower part
+    for i in range(0, numberOfGates - 1):
+        node = generatedNodes[i]
+        node.setNextNodes([generatedNodes[i + 1]])
+
+    delays, newConstr = SSTA.calculateCircuitDelay(startingNodes, cvxpy=True, unary=False,
+                                                withSymmetryConstr=False)
+    delays = delays[numberOfGates + 1:]
+
+    constraints.extend(newConstr)
+
+    # setting objective
+    # startingIndex = numberOfGates + 2
+    sum = 0
+    for gate in range(0, numberOfGates):
+        for bin in range(0, numberOfBins):
+            sum += delays[gate].bins[bin]
+
+    # solve
+
+    objective = cp.Minimize(sum)
+    prob = cp.Problem(objective, constraints)
+
+    prob.solve(verbose=True, solver=cp.GUROBI,
+               MIPGAP=0.01,  # relative gap
+               TimeLimit=1200,  # 'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}  # max time
+               )
+
+    num_nonZeros = prob.solver_stats.extra_stats.getAttr("NumNZs")
+    ObjVal = prob.solver_stats.extra_stats.getAttr("ObjVal")
+    time = prob.solver_stats.extra_stats.getAttr("Runtime")
+
+
+    # print out the values
+    # print("PROBLEM VALUE: ", prob.value)
+
+    rvs = []
+
+    for gate in range(0, numberOfGates):  # construct RVs
+
+        finalBins = np.zeros(numberOfBins)
+        for bin in range(0, numberOfBins):
+            finalBins[bin] = ((delays[gate].bins)[bin]).value
+
+        rvs.append(RandomVariable(finalBins, generatedNodes[0].randVar.edges))
+
+    print("\n APRX. VALUES: \n")
+    for i in range(0, numberOfGates):
+        print(rvs[i].mean, rvs[i].std)
+
+    lastGate = (rvs[-1].mean, rvs[-1].std)
+
+    # monte carlo
+
+    #
+    # simulate inputs
+    nodes_simulation = [0 for _ in range(numberOfGates)]
+    inputs_simulation = MonteCarlo_inputs(input_means, input_stds, n_samples, 'Normal')
+
+    # traverse the circuit
+    nodes_simulation[0] = MonteCarlo_nodes(inputs_simulation[0], inputs_simulation[1], gateParams, n_samples)
+    for i in range(1, numberOfGates):
+        nodes_simulation[i] = MonteCarlo_nodes(nodes_simulation[i - 1], inputs_simulation[i + 1], gateParams, n_samples)
+
+    desired = get_moments_from_simulations(nodes_simulation)
+
+    print('MONTE CARLO - GROUND TRUTH')
+    print(
+        tabulate(desired, headers=["Mean", "std"]
+                 )
+    )
+
+    return (num_nonZeros, ObjVal, lastGate, time)
+
+
 def MonteCarlo(numberOfGates=10):
 
     n_samples = 2000000
@@ -532,7 +679,7 @@ def mainMOSEK(number_of_nodes=10, numberOfUnaries=20, numberOfBins=20, interval=
             task.putobjsense(mosek.objsense.maximize)
             # set mip gap to 1%
             task.putdouparam(dparam.mio_tol_rel_gap, 1.0e-2)
-            task.putdouparam(dparam.mio_max_time, 1200)
+            # task.putdouparam(dparam.mio_max_time, 1200)
 
 
 
@@ -676,7 +823,7 @@ def makeUserCallback(maxtime, task):
         return 0
     return userCallback
 
-def LadderMOSEK_test(number_of_nodes=3, numberOfBins=30, numberOfUnaries=30, interval=(-5, 18)):
+def LadderMOSEK_test(number_of_nodes=3, numberOfBins=20, numberOfUnaries=10, interval=(-5, 18)):
 
 
     # parse command line arguments
@@ -935,12 +1082,18 @@ def LadderMOSEK_test(number_of_nodes=3, numberOfBins=30, numberOfUnaries=30, int
 
     return desired
 
-def LadderMOSEK_maxconv_test(number_of_nodes=4, numberOfBins=10, numberOfUnaries=10, interval=(-5, 18)):
+def LadderMOSEK_maxconv_test(number_of_nodes=1, numberOfBins=13, numberOfUnaries=14, interval=(-5, 18)):
 
     # parse command line arguments
     # number_of_nodes = 1
     n_samples = 2000000
+
+
     seed = 0
+
+
+
+
 
     # numberOfBins = 1000
     # numberOfUnaries = numberOfBins*10
@@ -1159,8 +1312,8 @@ def LadderMOSEK_maxconv_test(number_of_nodes=4, numberOfBins=10, numberOfUnaries
         # print
 
     # plot
-    rvMOSEK = histogramGenerator.get_Histogram_from_UNARY(rvs[0])
-    rvNump = histogramGenerator.get_Histogram_from_UNARY(rvs2[0])
+    rvMOSEK = histogramGenerator.get_Histogram_from_UNARY(rvs[-1])
+    rvNump = histogramGenerator.get_Histogram_from_UNARY(rvs2[-1])
 
     print(rvMOSEK.bins.shape)
     print(rvMOSEK.edges.shape)
@@ -1196,8 +1349,9 @@ if __name__ == "__main__":
         # dec param is Desired precision
 
     # mainCVXPY()
+    # mainCVXPYMcCormick()
     # LadderNumpy()
     # LadderMOSEK_test()
-    LadderMOSEK_maxconv_test()
+    LadderMOSEK_maxconv_test(number_of_nodes=2, numberOfBins=10, numberOfUnaries=12, interval=(-5, 18))
 
     # print("All tests passed!")

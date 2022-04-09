@@ -12,6 +12,14 @@ gateSizing.test\_mosekOperations module
    :undoc-members:
    :show-inheritance:
 
+gateSizing.distrFitter module
+--------------------------------
+
+.. automodule:: src.gateSizing.distrFitter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 gateSizing.mosekVariable module
 --------------------------------

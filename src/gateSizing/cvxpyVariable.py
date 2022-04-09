@@ -145,7 +145,7 @@ class RandomVariableCVXPY:
                 MaxConstraints.append(slackMult <= x * y_U + x_L * y - x_L * y_U)
 
                 # creating bound-constraints
-                MaxConstraints.append(slackMult <= 1)
+                # MaxConstraints.append(slackMult <= 1)
                 MaxConstraints.append(x <= x_U)
                 MaxConstraints.append(x >= x_L)
                 MaxConstraints.append(y <= y_U)
@@ -226,6 +226,12 @@ class RandomVariableCVXPY:
 
         rv1 = RandomVariableNumpy(lowerBounds1, self.edges)
         rv2 = RandomVariableNumpy(lowerBounds2, self.edges)
+
+        # newBins = {}
+
+        # for i in range(0, numberOfBins):
+        #     newBins[i] = cp.Variable(nonneg=True)
+        #     ConvConstraints.append( newBins[i] >= convolution[i] )
 
         # convClass = RandomVariableCVXPY(convolution, self.edges)
         convClass = RandomVariableCVXPY(convolution, self.edges, rv1.convolutionOfTwoVarsShift(rv2).bins)

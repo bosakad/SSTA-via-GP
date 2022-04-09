@@ -314,7 +314,7 @@ class RandomVariable:
 
                 convolution[z, :] += f[k, :] * np.sum(newMaximum [z - k, :])
 
-        print('maxconv')
+        # print('maxconv')
         # Deal With Edges
         self.cutBins(self.edges, convolution)
 
@@ -601,9 +601,9 @@ class RandomVariable:
 
         # find divider
         # old version - does not work with cvxpy
-        # sum = np.sum(bins, axis=1)
-        # maximum = np.max(sum)
-        # norm =  maximum / numberOfUnaries
+        sum = np.sum(bins, axis=1)
+        maximum = np.max(sum)
+        norm =  maximum / numberOfUnaries
         # print(norm)
         # bins = bins / norm    # non-unarized version
         # print(convolution)
@@ -615,9 +615,12 @@ class RandomVariable:
             divisor = numberOfUnaries*numberOfBins / 30
 
         elif TRI and convolution:
-            # divisor = (numberOfUnaries*numberOfBins)*16
-            divisor = 3
-
+            # divisor = (numberOfUnaries*numberOfBins) / 2.4
+            divisor = norm
+            # divisor = 61
+            # print('norm')
+            # print(norm)
+            # divisor = 239
 
         else:   # maximum
             divisor = numberOfBins*numberOfUnaries / 22
@@ -632,7 +635,7 @@ class RandomVariable:
         newBins = np.zeros((numberOfBins, numberOfUnaries))
 
         for bin in range(0, numberOfBins):
-            # newBins[bin, :int(np.floor(doableSum[bin] + 0.5))] = 1
+            # newBins[bin, :int(round(doableSum[bin]))] = 1
             newBins[bin, :round(doableSum[bin])] = 1
 
         return newBins
