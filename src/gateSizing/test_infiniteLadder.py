@@ -59,6 +59,12 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
     for i in range(0, numberOfGates + 1):
         g = histogramGenerator.get_gauss_bins_UNARY(input_means[i], input_stds[i], numberOfBins, n_samples,
                                                     interval, numberOfUnaries)
+
+        # g = histogramGenerator.get_Histogram_from_UNARY(g)
+        # print(g.bins)
+
+        # exit(-1)
+
         xs_starting[i] = {}
 
         for bin in range(0, numberOfBins):
@@ -1351,7 +1357,7 @@ if __name__ == "__main__":
     # mainCVXPY()
     # mainCVXPYMcCormick()
     # LadderNumpy()
-    # LadderMOSEK_test()
-    LadderMOSEK_maxconv_test(number_of_nodes=2, numberOfBins=10, numberOfUnaries=12, interval=(-5, 18))
+    LadderMOSEK_test()
+    # LadderMOSEK_maxconv_test(number_of_nodes=2, numberOfBins=10, numberOfUnaries=12, interval=(-5, 18))
 
     # print("All tests passed!")

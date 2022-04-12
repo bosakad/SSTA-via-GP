@@ -27,8 +27,8 @@ def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shoul
         # some random parameters: todo: make them real
     # mus = [1, 1.3, 1.4, 1.5, 2.6]
     # stds = [0.17, 0.16, 0.15, 0.13, 0.12]
-    mus = [1.9, 1, 0.9, 0.8, 0.7]
-    stds = [0.165, 0.16, 0.14, 0.13, 0.11]
+    mus = [1.9,1.9, 1.9, 1.9, 1, 0.9, 0.8, 0.7]
+    stds = [0.165,0.164, 0.163, 0.161, 0.16, 0.14, 0.13, 0.11]
 
 
         # generate distr
@@ -101,7 +101,8 @@ def plotLinesForBin(distros, area, power, coef, bin):
     minP = np.min(power)
     maxP = np.max(power)
 
-    def f (a, p): return coef[0] + coef[1]*a + coef[2]*p + coef[3]* np.square(a) + coef[4]* np.square(p)
+    # def f (a, p): return coef[0] + coef[1]*a + coef[2]*p + coef[3]* np.square(a) + coef[4]* np.square(p)
+    def f (a, p): return coef[0] + coef[1]*a + coef[2]*p
 
     # print(f(5, 20))
     # print(f(7, 30))
@@ -147,17 +148,17 @@ def linearRegression(distros, area, power):
 
     numberOfBins = distros.shape[1]
     numberOfDistros = distros.shape[0]
-    coef = np.zeros((numberOfBins, 5))
+    coef = np.zeros((numberOfBins, 3))
 
     for bin in range(0, numberOfBins):
 
-        A = np.zeros((numberOfDistros, 5))
+        A = np.zeros((numberOfDistros, 3))
 
         A[:, 0] = 1     # b
         A[:, 1] = area[:]   # area
         A[:, 2] = power[:]  # power
-        A[:, 3] = np.square(area[:])  # area
-        A[:, 4] = np.square(power[:])  # area
+        # A[:, 3] = np.square(area[:])  # area
+        # A[:, 4] = np.square(power[:])  # area
 
         b = distros[:, bin]
 
@@ -192,8 +193,11 @@ def saveModel(coef):
 if __name__ == "__main__":
 
     # parameters
-    area = np.array([5, 7, 10, 12, 15])
-    power = np.array([20, 30, 40, 50, 60])
+    # area = np.array([1, 4, 5, 15, 20, 25, 35])
+    # power = np.array([1, 4, 5, 40, 80, 100, 140])
+    area = np.array([10, 20, 30, 35, 50, 55, 70])
+    power = np.array([10, 20, 30, 40, 45, 60, 65])
+
     # area = np.array([5, 7, 8])
     # power = np.array([20, 30, 40])
 
@@ -204,7 +208,7 @@ if __name__ == "__main__":
     plotDistros(distros, edges)
     coef = linearRegression(distros, area, power)
 
-    plotLinesForBin(distros, area, power, coef, 40)
+    plotLinesForBin(distros, area, power, coef, 24)
 
     saveModel(coef)
 

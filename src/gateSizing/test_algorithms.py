@@ -122,7 +122,7 @@ def testAlgorithms_MOSEK():
     step = 1
     prevMape = np.array([3.0627844482985895, 31.477761094020565])
 
-    numberOfGatesStart = 11
+    numberOfGatesStart = 20
     numberOfBins = 20
     numberOfUnaries = 10
 
@@ -170,10 +170,10 @@ def testAlgorithms_MOSEK():
             prevError[0] = results[(numGates - step, True)][3]
             prevError[1] = results[(numGates - step, True)][4]
 
-            MAPE = (MAPE + (prevError) * iter) / (iter + 10 + 1)
+            MAPE = (MAPE + (prevError) *(iter + 19)) / (iter + 19 + 1)
         elif iter == 0:
 
-            MAPE = (MAPE + (prevMape) * 10) / (iter + 10 + 1)
+            MAPE = (MAPE + (prevMape) * 19) / (iter + 19 + 1)
 
         results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr, mipGapRoot,
                                      nVarsPresolve, nConstrPresolve)

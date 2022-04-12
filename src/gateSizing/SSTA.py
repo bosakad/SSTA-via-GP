@@ -76,7 +76,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
                 RV1 = tmpNode.prevDelays[0]
                 RV2 = tmpNode.prevDelays[1]
                 RV3 = currentRandVar
-                currentRandVar, curNofVariables, curNofConstr = RV1.maximum_AND_Convolution_VECTORIZED(RV2, RV3, curNofVariables, curNofConstr)
+                currentRandVar, curNofVariables, curNofConstr = RV1.maximum_AND_Convolution_VECTORIZED_MIN(RV2, RV3, curNofVariables, curNofConstr)
 
             elif not usingMosek and mosekTRI:   # numpy version of the tri
 
@@ -95,9 +95,9 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
                 maxDelay = MaximumF(tmpNode.prevDelays)
                 currentRandVar = ConvolutionF(currentRandVar, maxDelay)
 
-
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
             nextNode.appendPrevDelays(currentRandVar)
+            # print(len(nextNode.prevDelays))
 
         if not tmpNode.nextNodes:                                   # save for later ouput delays
             sink.append(currentRandVar)
@@ -112,7 +112,9 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
 
         # make max into sink
         if usingMosek:
-            maxDelay, curNofVariables, curNofConstr = MaximumF(tmpNode.prevDelays, curNofVariables, curNofConstr)
+            sinkDelay, curNofVariables, curNofConstr = MaximumF(sink, curNofVariables, curNofConstr)
+        elif not usingMosek and mosekTRI:
+            sinkDelay = maxOfDistributionsUNARY(sink)
 
         elif cvxpy:
             sinkDelay, newConstraints = MaximumF(sink)
@@ -126,7 +128,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
         # newDelays.append(sink[0])
 
     if usingMosek:
-        return newDelays, curNofVariables
+        return newDelays, curNofVariables, curNofConstr
     elif cvxpy:
         return newDelays, AllConstr
     else:
@@ -200,7 +202,7 @@ def maxOfDistributionsMOSEK_UNARY(withSymmetryConstr=False) -> cp.Variable:
         size = len(delays)
         for i in range(0, size - 1):
             newRV, newNofVariables, newNofConstr = delays[i].maximum_UNARY_MAX_DIVIDE_VECTORIZED(delays[i + 1],curNofVariables, curNofConstr,
-                                                                withSymmetryConstr=withSymmetryConstr)
+                                                                withSymmetryConstr=withSymmetryConstr, asMin=True)
             delays[i + 1] = newRV
 
         maximum = delays[-1]

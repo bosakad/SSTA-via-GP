@@ -616,8 +616,9 @@ class RandomVariable:
 
         elif TRI and convolution:
             # divisor = (numberOfUnaries*numberOfBins) / 2.4
-            divisor = norm
+            # divisor = norm
             # divisor = 61
+            divisor = 50
             # print('norm')
             # print(norm)
             # divisor = 239
