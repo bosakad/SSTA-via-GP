@@ -1,6 +1,7 @@
 import histogramGenerator
 import numpy as np
 import matplotlib.pyplot as plt
+from randomVariableHist_Numpy import RandomVariable
 
 """
 This module has funtions that generate distribution with a given parameters (such as area of the circuit or max power)
@@ -27,8 +28,8 @@ def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shoul
         # some random parameters: todo: make them real
     # mus = [1, 1.3, 1.4, 1.5, 2.6]
     # stds = [0.17, 0.16, 0.15, 0.13, 0.12]
-    mus = [1.9,1.9, 1.9, 1.9, 1, 0.9, 0.8, 0.7]
-    stds = [0.165,0.164, 0.163, 0.161, 0.16, 0.14, 0.13, 0.11]
+    mus = [2, 1.95, 1.85, 1.9, 1, 0.9, 0, 0]
+    stds = [0.165,0.164, 0.163, 0.161, 0.16, 0.14, 0.13, 0.1]
 
 
         # generate distr
@@ -69,8 +70,8 @@ def plotDistros(distros, edges):
         plt.hist(edges[:-1], edges, weights=bins, density="PDF")
 
 
-    plt.savefig("Inputs.outputs/generatedDistros.jpeg", dpi=500)
-    # plt.show()
+    # plt.savefig("Inputs.outputs/generatedDistros.jpeg", dpi=500)
+    plt.show()
 
 def plotLinesForBin(distros, area, power, coef, bin):
     """
@@ -164,8 +165,13 @@ def linearRegression(distros, area, power):
 
 
             # Rx = Q^T b
-        Q, R = np.linalg.qr(A)
-        x = np.linalg.solve(R, (Q.T@b).T)
+        # Q, R = np.linalg.qr(A)
+        # x = np.linalg.solve(R, (Q.T@b))
+        # print(x)
+        # coef[bin, :] = x[:]
+
+        x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
+        print(x)
         coef[bin, :] = x[:]
 
         #
@@ -190,27 +196,81 @@ def saveModel(coef):
 
     return None
 
+def plotDistrosForInputs(a, f, e):
+
+    interval = (0, 16)
+
+    coef = np.load("Inputs.outputs/model.npz")
+    model = coef['coef']
+    numberOfBins = model.shape[0]
+
+    gate = 4
+
+    a_i = a[gate]
+    f_i = f[gate]
+    e_i = e[gate]
+
+    x = 10
+
+    # for x in [1, 1.5, 2, 2.5, 3, 3.5, 4]:
+    for x in [1, 2, 4, 6, 10]:
+
+        # x = 1 + 2*iter
+
+        distr = np.zeros(numberOfBins)
+        for bin in range(0, numberOfBins):
+            shift = model[bin, 0]
+            areaCoef = model[bin, 1]
+            powerCoef = model[bin, 2]
+
+            prob = shift + areaCoef*a_i*x + powerCoef*f_i*e_i*x
+            distr[bin] = prob
+
+        STATIC_BINS = np.linspace(interval[0], interval[1], numberOfBins+1)
+
+        plt.hist(STATIC_BINS[:-1], STATIC_BINS[:], weights=distr, density="PDF", alpha=0.4)
+
+        rv = RandomVariable(distr, edges=STATIC_BINS)
+
+        print(rv.mean, rv.std)
+
+        plt.legend([str(x)])
+        plt.show()
+
+    # plt.legend(["1", '2', '3', '4'])
+
+
+    # plt.show()
+
+
 if __name__ == "__main__":
 
     # parameters
     # area = np.array([1, 4, 5, 15, 20, 25, 35])
     # power = np.array([1, 4, 5, 40, 80, 100, 140])
-    area = np.array([10, 20, 30, 35, 50, 55, 70])
-    power = np.array([10, 20, 30, 40, 45, 60, 65])
+
+    area = np.array([0, 2, 3, 4, 5., 6, 7]) ** 1.6
+    power = np.array([0, 2, 3, 4, 5, 6, 7]) ** 1.6
+    # e = np.array([1, 2, 1, 1.5, 1.5, 1])
+
+    # area = np.array([10, 20, 30, 35, 50, 55, 70])
+    # power = np.array([10, 20, 30, 40, 45, 60, 65])
 
     # area = np.array([5, 7, 8])
     # power = np.array([20, 30, 40])
 
-    interval = (0, 10)
-    numberOfBins = 100
+    interval = (0, 20)
+    numberOfBins = 10
 
     distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=False)
-    plotDistros(distros, edges)
+    # plotDistros(distros, edges)
     coef = linearRegression(distros, area, power)
 
-    plotLinesForBin(distros, area, power, coef, 24)
+    plotLinesForBin(distros, area, power, coef, 0)
 
     saveModel(coef)
 
-    print(coef)
-
+    f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
+    e = np.array([1, 2, 1, 1.5, 1.5, 1])
+    a = np.ones(6)
+    plotDistrosForInputs(a, f, e)

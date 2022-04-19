@@ -118,12 +118,12 @@ def testAlgorithms():
 def testAlgorithms_MOSEK():
 
     # number of testing
-    numberOfIterations = 9
+    numberOfIterations = 1
     step = 1
     prevMape = np.array([3.0627844482985895, 31.477761094020565])
 
-    numberOfGatesStart = 20
-    numberOfBins = 20
+    numberOfGatesStart = 3
+    numberOfBins = 10
     numberOfUnaries = 10
 
     interval = (-4, 19)

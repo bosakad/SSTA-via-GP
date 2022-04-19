@@ -232,7 +232,7 @@ def plotNonzeros():
     if forPaper:
 
         # set histograms
-        fig, axs = plt.subplots(4, 1, gridspec_kw={'wspace':0.5,'hspace':0.5}, sharex=True)
+        fig, axs = plt.subplots(4, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
         i = 0
 
 
@@ -291,7 +291,7 @@ def plotNonzeros():
                          markeredgewidth=1,  # marker edge width
                          linestyle='-',  # line style will be dash line
                          linewidth=3.5, zorder=1)  # line width
-        axs.flat[i].set(ylabel='Mip gap at root')
+        axs.flat[i].set(ylabel='Mip gap \nat root(%)')
         # axs.flat[i].set(ylabel='MIP')
         # axs[i].legend(["With constraints", "Without constraints"])
         i += 1
@@ -307,7 +307,7 @@ def plotNonzeros():
                          markeredgewidth=1,  # marker edge width
                          linestyle='-',  # line style will be dash line
                          linewidth=3.5, zorder=1)  # line width
-        axs.flat[i].set(ylabel='Time')
+        axs.flat[i].set(ylabel='Time\n(seconds)')
         # axs[i].legend(["With constraints", "Without constraints"])
         i += 1
 
@@ -332,7 +332,7 @@ def plotNonzeros():
         plt.fill_between(Gates, errorWithConstr[:, 1], y2=errorWithConstr[:, 0], alpha=0.3, color='orange')
         plt.fill_between(Gates, errorWithConstr[:, 0], alpha=0.3, color='blue')
 
-        axs.flat[i].set(ylabel='Mape')
+        axs.flat[i].set(ylabel='Mape(%)')
         i += 1
 
 
@@ -514,7 +514,7 @@ def plotNonzeros():
 
 
     # plt.show()
-    plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)
+    plt.savefig("Inputs.outputs/scaling.jpeg", dpi=800, bbox_inches='tight')
 
 
 def plotPresolve():

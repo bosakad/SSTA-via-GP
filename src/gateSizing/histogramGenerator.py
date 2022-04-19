@@ -107,3 +107,25 @@ def get_Histogram_from_UNARY(unaryHist):
     return result
 
 
+def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries):
+    """
+    Generates distribution according to a linear regression model
+    """
+
+    numberOfBins = model.shape[0]
+
+    distr = np.zeros((numberOfBins, nUnaries))
+
+    for bin in range(0, numberOfBins):
+
+        binP = model[bin, 0] + model[bin, 1]*a_i*x_i + model[bin, 2]*p_i*x_i
+
+        numberOfOnes = round(binP*nUnaries)
+
+        distr[bin, :numberOfOnes] = 1
+
+    STATIC_BINS = np.linspace(int[0], int[1], numberOfBins+1)
+
+    return RandomVariable(distr, STATIC_BINS, unary=True)
+
+

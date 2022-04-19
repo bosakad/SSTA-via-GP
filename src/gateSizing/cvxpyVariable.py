@@ -160,6 +160,84 @@ class RandomVariableCVXPY:
 
         return maximumClass, MaxConstraints
 
+    def convolution_GP(self, secondVariable):
+        """
+        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+        using the 'quadratic' algorithm and McCormick envelopes
+        IMPORTANT:
+                WORKS ONLY FOR MINIMIZATION PROBLEM
+
+        :param self: class RandomVariableCVXPY
+        :param secondVariable: class RandomVariableCVXPY
+        :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
+        :return MaxConstraints: python array with inequalities - for computing the maximum
+        """
+
+        x1 = self.bins
+
+        x2 = secondVariable.bins
+
+        numberOfBins = len(x1)
+
+        MaxConstraints = []
+
+        convolution = {}
+        # allocation of convolution dictionary
+        for i in range(0, numberOfBins):
+            convolution[i] = 0
+
+        # i >= j
+
+        for z in range(0, numberOfBins):
+            for k in range(0, z + 1):
+                convolution[z] += x1[k] * x2[z - k]
+
+
+        maximumClass = RandomVariableCVXPY(convolution, self.edges) # with exact comput.
+
+        return maximumClass, MaxConstraints
+
+    def maximum_GP(self, secondVariable):
+        """
+        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+        using the 'quadratic' algorithm and McCormick envelopes
+        IMPORTANT:
+                WORKS ONLY FOR MINIMIZATION PROBLEM
+
+        :param self: class RandomVariableCVXPY
+        :param secondVariable: class RandomVariableCVXPY
+        :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
+        :return MaxConstraints: python array with inequalities - for computing the maximum
+        """
+
+        x1 = self.bins
+
+        x2 = secondVariable.bins
+
+        numberOfBins = len(x1)
+
+        MaxConstraints = []
+
+        maximum = {}
+        # allocation of convolution dictionary
+        for i in range(0, numberOfBins):
+            maximum[i] = 0
+
+        # i >= j
+        for i in range(0, numberOfBins):
+            for j in range(0, i + 1):
+
+                # new variable - multiplication of x*y
+                maximum[i] += x1[i]*x2[j]
+
+                if i != j:
+                    maximum[i] += x1[j] * x2[i]
+
+
+        maximumClass = RandomVariableCVXPY(maximum, self.edges) # with exact comput.
+
+        return maximumClass, MaxConstraints
+
     def convolution_McCormick(self, secondVariable):
         """
         Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
