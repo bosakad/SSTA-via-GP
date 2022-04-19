@@ -233,6 +233,65 @@ def testAlgorithms_MOSEK():
     # print("\n\n" + str(results))
 
 
+
+def testAlgorithms_CVXPY_GP():
+
+    # number of testing
+    numberOfIterations = 30
+    step = 1
+
+    numberOfGatesStart = 1
+    numberOfBins = 20
+
+    interval = (-4, 19)
+
+    # for saving values of the last gates and calculating error
+    rvs_nonPrecise = np.zeros((numberOfIterations, 2))
+    rvs_Precise = np.zeros((numberOfIterations, 2))
+    rvs_MonteCarlo = np.zeros((numberOfIterations, 2))
+
+    results = {}
+
+    # MonteCarlo
+    for iter in range(0, numberOfIterations):
+        numGates = numberOfGatesStart + iter * step
+        lastGate = test_infiniteLadder.MonteCarlo(numGates)
+
+        # saving values
+        rvs_MonteCarlo[iter, 0] = lastGate[0]
+        rvs_MonteCarlo[iter, 1] = lastGate[1]
+
+    print("SYMMETRY\n\n")
+    # test precise
+    for iter in range(0, numberOfIterations):
+        print("\n\n" + str(iter) + ". iteration: \n\n")
+
+        numGates = numberOfGatesStart + iter * step
+        lastGate, time = test_infiniteLadder.mainCVXPY_GP(numGates, numberOfBins, interval)
+
+        # saving values
+        rvs_Precise[iter, 0] = lastGate[0]
+        rvs_Precise[iter, 1] = lastGate[1]
+
+        print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
+
+        MAPE = 100 * np.abs(np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))
+
+        print(MAPE)
+
+        if iter != 0:
+            prevError = np.zeros(2)
+            prevError[0] = results[(numGates - step, True)][3]
+            prevError[1] = results[(numGates - step, True)][4]
+
+            MAPE = (MAPE + (prevError) *(iter)) / (iter)
+
+        results[(numGates, True)] = (-1, -1, time, MAPE[0], MAPE[1], -1, -1, -1,
+                                     -1, -1)
+
+        # print results
+        print("\n\n" + str(results))
+
 def testAlgorithms_PRESOLVE():
 
     # number of testing
@@ -306,7 +365,8 @@ def computeMAPE(n_bins, n_unaries, start, function):
 if __name__ == "__main__":
 
     # testAlgorithms()
-    testAlgorithms_MOSEK()
+    # testAlgorithms_MOSEK()
+    testAlgorithms_CVXPY_GP()
     # testAlgorithms_PRESOLVE()
 
 

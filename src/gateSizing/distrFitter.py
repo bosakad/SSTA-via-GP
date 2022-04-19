@@ -2,6 +2,7 @@ import histogramGenerator
 import numpy as np
 import matplotlib.pyplot as plt
 from randomVariableHist_Numpy import RandomVariable
+import cvxpy as cp
 
 """
 This module has funtions that generate distribution with a given parameters (such as area of the circuit or max power)
@@ -136,7 +137,7 @@ def plotLinesForBin(distros, area, power, coef, bin):
     # plt.savefig("Inputs.outputs/fitting.jpeg", dpi=500)
 
 
-def linearRegression(distros, area, power):
+def linearRegression(distros, area, power, asQP=False):
     """
     Performs linear regression on the generated data
 
@@ -164,23 +165,30 @@ def linearRegression(distros, area, power):
         b = distros[:, bin]
 
 
-            # Rx = Q^T b
-        # Q, R = np.linalg.qr(A)
-        # x = np.linalg.solve(R, (Q.T@b))
+        # if asQP:
+        #     pass
+        # else:
+
+        x = cp.Variable(3, pos=True)
+        # constr = [x >= 0]
+        cost = cp.sum_squares(A @ x - b)
+        prob = cp.Problem(cp.Minimize(cost), [])
+        prob.solve()
+
+        # print(x.value)
+
+        # x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
+        coef[bin, :] = np.array(x.value)
+
+        print(x.value)
+
         # print(x)
-        # coef[bin, :] = x[:]
 
-        x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
-        print(x)
-        coef[bin, :] = x[:]
+        # exit(-1)
 
-        #
-        # print(coef[bin, 0] + coef[bin, 1] * 5 + coef[bin, 2] * 20)
-        # print(coef[bin, 0] + coef[bin, 1] * 7 + coef[bin, 2] * 30)
-        # print(coef[bin, 0] + coef[bin, 1] * 8 + coef[bin, 2] * 40)
-        # print(distros[:, bin])
-        # print()
+    coef[coef <= 0] += 0.000000000000000000000000000001
 
+    print(coef)
     return coef
 
 def saveModel(coef):
@@ -198,13 +206,14 @@ def saveModel(coef):
 
 def plotDistrosForInputs(a, f, e):
 
-    interval = (0, 16)
+    interval = (0, 20)
 
     coef = np.load("Inputs.outputs/model.npz")
     model = coef['coef']
+    print(model)
     numberOfBins = model.shape[0]
 
-    gate = 4
+    gate = 0
 
     a_i = a[gate]
     f_i = f[gate]
@@ -213,7 +222,7 @@ def plotDistrosForInputs(a, f, e):
     x = 10
 
     # for x in [1, 1.5, 2, 2.5, 3, 3.5, 4]:
-    for x in [1, 2, 4, 6, 10]:
+    for x in [1, 2, 4, 6, 10, 20]:
 
         # x = 1 + 2*iter
 
@@ -259,16 +268,16 @@ if __name__ == "__main__":
     # area = np.array([5, 7, 8])
     # power = np.array([20, 30, 40])
 
-    interval = (0, 20)
-    numberOfBins = 10
-
-    distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=False)
-    # plotDistros(distros, edges)
-    coef = linearRegression(distros, area, power)
-
-    plotLinesForBin(distros, area, power, coef, 0)
-
-    saveModel(coef)
+    # interval = (0, 20)
+    # numberOfBins = 6
+    #
+    # distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=False)
+    # # plotDistros(distros, edges)
+    # coef = linearRegression(distros, area, power)
+    #
+    # plotLinesForBin(distros, area, power, coef, 5)
+    #
+    # saveModel(coef)
 
     f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
     e = np.array([1, 2, 1, 1.5, 1.5, 1])

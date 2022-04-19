@@ -915,11 +915,11 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
 
     # DESIRED
 
-    test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
-    test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+    test1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval, forGP=True)
+    test2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval, forGP=True)
 
-    test3 = histogramGenerator.get_gauss_bins(mu3, sigma3, numberOfBins, numberOfSamples, interval)
-    test4 = histogramGenerator.get_gauss_bins(mu4, sigma4, numberOfBins, numberOfSamples, interval)
+    test3 = histogramGenerator.get_gauss_bins(mu3, sigma3, numberOfBins, numberOfSamples, interval, forGP=True)
+    test4 = histogramGenerator.get_gauss_bins(mu4, sigma4, numberOfBins, numberOfSamples, interval, forGP=True)
     #
     # max1 = test1.maxOfDistributionsFORM(test2)
 
@@ -941,8 +941,8 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
 
         x1[bin] = cp.Variable(pos=True)
 
-        if test1.bins[bin] == 0:
-            test1.bins[bin] += 0.00000000000000001
+        # if test1.bins[bin] == 0:
+        #     test1.bins[bin] += 0.00000000000000001
         constr.append(x1[bin] >= test1.bins[bin])
 
 
@@ -951,8 +951,8 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     for bin in range(0, numberOfBins):
         x2[bin] = cp.Variable(pos=True)
 
-        if test2.bins[bin] == 0:
-            test2.bins[bin] += 0.000000000000000001
+        # if test2.bins[bin] == 0:
+        #     test2.bins[bin] += 0.000000000000000001
         constr.append(x2[bin] >= test2.bins[bin])
 
     x3 = {}
@@ -961,8 +961,8 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
 
         x3[bin] = cp.Variable(pos=True)
 
-        if test3.bins[bin] == 0:
-            test3.bins[bin] += 0.000000000000000001
+        # if test3.bins[bin] == 0:
+        #     test3.bins[bin] += 0.000000000000000001
         constr.append(x3[bin] >= test3.bins[bin])
 
     x4 = {}
@@ -970,8 +970,8 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     for bin in range(0, numberOfBins):
         x4[bin] = cp.Variable(pos=True)
 
-        if test4.bins[bin] == 0:
-            test4.bins[bin] += 0.000000000000000001
+        # if test4.bins[bin] == 0:
+        #     test4.bins[bin] += 0.000000000000000001
         constr.append(x4[bin] >= test4.bins[bin])
 
 

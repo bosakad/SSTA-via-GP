@@ -9,7 +9,7 @@ import cvxpyVariable
 
 
 def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStatus=(-1, -1),
-                                                            withSymmetryConstr=False, mosekTRI=False) -> [Node]:
+                                                            withSymmetryConstr=False, mosekTRI=False, GP=False) -> [Node]:
     """
     Compute circuit delay using PDFs algorithm
     Function executes the algorithm for finding out the PDF of a circuit delay.
@@ -19,6 +19,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
     :param cvxpy: Bool, true if cvxpy objects are used, false if just RandomVariables class is used
     :param unary: Bool, true if unary (M 0/1-bin repr.) is used, false otherwise
     :param mosekTRI: Bool, true if trilinear constraints are used, false otherwise
+    :param GP: Bool, true if using the GP version of the SSTA, false otherwise
 
     :return newConstr: new constraints for CVXPY(optional)
     :return newNofVariables: new number of MOSEK variables(optional)
@@ -28,12 +29,14 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
     # pointer to a max and convolution functions
     if mosekStatus[0] >= 0:  MaximumF = maxOfDistributionsMOSEK_UNARY(withSymmetryConstr)
     elif cvxpy and unary:     MaximumF = maxOfDistributionsCVXPY_UNARY(withSymmetryConstr)
-    elif cvxpy and not unary: MaximumF = maxOfDistributionsCVXPY_McCormick
+    elif cvxpy and not unary and not GP: MaximumF = maxOfDistributionsCVXPY_McCormick
+    elif cvxpy and GP:        MaximumF = maxOfDistributionsCVXPY_GP
     elif not cvxpy and unary and not mosekTRI: MaximumF = maxOfDistributionsUNARY
     else:                     MaximumF = maxOfDistributionsFORM
     if mosekStatus[0] >= 0:  ConvolutionF = Convolution_UNARY_MOSEK(withSymmetryConstr)
     elif cvxpy and unary:     ConvolutionF = Convolution_UNARY(withSymmetryConstr)
-    elif cvxpy and not unary: ConvolutionF = Convolution_McCormick
+    elif cvxpy and not unary and not GP: ConvolutionF = Convolution_McCormick
+    elif cvxpy and GP:        ConvolutionF = Convolution_GP
     elif not cvxpy and unary: ConvolutionF = RandomVariable.convolutionOfTwoVarsNaiveSAME_UNARY
     else:                     ConvolutionF = RandomVariable.convolutionOfTwoVarsShift
 
@@ -85,9 +88,14 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
                 RV3 = currentRandVar
                 currentRandVar = RV1.maximum_AND_Convolution_UNARY(RV2, RV3)
 
-            elif cvxpy:
+            elif cvxpy and not GP:
                 maxDelay, newConstraints = MaximumF(tmpNode.prevDelays)
                 AllConstr.extend(newConstraints)
+                currentRandVar, newConstraints = ConvolutionF(currentRandVar, maxDelay)
+                AllConstr.extend(newConstraints)
+
+            elif cvxpy and GP:
+                maxDelay = MaximumF(tmpNode.prevDelays)
                 currentRandVar, newConstraints = ConvolutionF(currentRandVar, maxDelay)
                 AllConstr.extend(newConstraints)
 
@@ -116,7 +124,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
         elif not usingMosek and mosekTRI:
             sinkDelay = maxOfDistributionsUNARY(sink)
 
-        elif cvxpy:
+        elif cvxpy and not GP:
             sinkDelay, newConstraints = MaximumF(sink)
             AllConstr.extend(newConstraints)
         else:
@@ -183,6 +191,17 @@ def Convolution_McCormick(x1: cvxpyVariable.RandomVariableCVXPY,
 
     return x1.convolution_McCormick(x2)
 
+def Convolution_GP(x1: cvxpyVariable.RandomVariableCVXPY,
+                      x2: cvxpyVariable.RandomVariableCVXPY) -> cvxpyVariable.RandomVariableCVXPY:
+    """
+    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.
+
+    :param x1: RandomVariableCVXPY class
+    :param x2: RandomVariableCVXPY class
+    :return convolution: RandomVariableCVXPY class
+    """
+
+    return x1.convolution_GP(x2)
 
 def maxOfDistributionsMOSEK_UNARY(withSymmetryConstr=False) -> cp.Variable:
     """
@@ -249,6 +268,22 @@ def maxOfDistributionsCVXPY_McCormick(delays: [cvxpyVariable.RandomVariableCVXPY
 
     return maximum
 
+def maxOfDistributionsCVXPY_GP(delays: [cvxpyVariable.RandomVariableCVXPY]) -> cp.Variable:
+    """
+    Calculates maximum of an array of PDFs of cvxpy variable
+
+    :param delays: array of cvxpy variables (n, m), n gates, m bins
+    :return maximum:  cvxpy variable (1, m)
+    """
+
+    size = len(delays)
+    for i in range(0, size - 1):
+        newRV = delays[i].maximum_GP(delays[i + 1])
+        delays[i + 1] = newRV
+
+    maximum = delays[-1]
+
+    return maximum
 
 
 def maxOfDistributionsELEMENTWISE(delays: [RandomVariable]) -> RandomVariable:

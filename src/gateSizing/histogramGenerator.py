@@ -5,7 +5,7 @@ from randomVariableHist_Numpy import RandomVariable
 
 
 def get_gauss_bins(mu: float, sigma: float, numberOfBins: int, numberOfSamples: int, binsInterval: tuple
-                                                                            , distr="Gauss") -> RandomVariable:
+                                                                            , distr="Gauss", forGP=False) -> RandomVariable:
     """
     Generates a randomly generated gaussian histogram with given mean and standard deviation.
 
@@ -28,6 +28,10 @@ def get_gauss_bins(mu: float, sigma: float, numberOfBins: int, numberOfSamples: 
 
     data, edges = np.histogram(s, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
+
+        # no zeros allowed
+    if forGP:
+        dataNorm[dataNorm == 0] += 0.0000000000000000001
 
     randomVar = RandomVariable(dataNorm, edges)
 
@@ -107,25 +111,40 @@ def get_Histogram_from_UNARY(unaryHist):
     return result
 
 
-def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries):
+def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries=0):
     """
     Generates distribution according to a linear regression model
     """
 
     numberOfBins = model.shape[0]
 
-    distr = np.zeros((numberOfBins, nUnaries))
+    if nUnaries == 0:
+        distr = np.zeros(numberOfBins)
 
-    for bin in range(0, numberOfBins):
+        for bin in range(0, numberOfBins):
+            binP = model[bin, 0] + model[bin, 1] * a_i * x_i + model[bin, 2] * p_i * x_i
+            distr[bin] = max(binP, 0)
 
-        binP = model[bin, 0] + model[bin, 1]*a_i*x_i + model[bin, 2]*p_i*x_i
 
-        numberOfOnes = round(binP*nUnaries)
+        STATIC_BINS = np.linspace(int[0], int[1], numberOfBins + 1)
 
-        distr[bin, :numberOfOnes] = 1
+        dataNorm = distr / (np.sum(distr))
 
-    STATIC_BINS = np.linspace(int[0], int[1], numberOfBins+1)
+        return RandomVariable(dataNorm, STATIC_BINS, unary=False)
+    else:
 
-    return RandomVariable(distr, STATIC_BINS, unary=True)
+        distr = np.zeros((numberOfBins, nUnaries))
+
+        for bin in range(0, numberOfBins):
+
+            binP = model[bin, 0] + model[bin, 1]*a_i*x_i + model[bin, 2]*p_i*x_i
+
+            numberOfOnes = round(binP*nUnaries)
+
+            distr[bin, :numberOfOnes] = 1
+
+        STATIC_BINS = np.linspace(int[0], int[1], numberOfBins+1)
+
+        return RandomVariable(distr, STATIC_BINS, unary=True)
 
 

@@ -210,7 +210,7 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
     #
     #
 
-def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-8, 35), withSymmetryConstr=False):
+def mainCVXPY_GP(numberOfGates=1, numberOfBins=15, interval=(0, 35)):
 
     """
         Computes SSTA using unary encoding, can be computed in a 'precise' or non-precise way
@@ -248,22 +248,15 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
     startingNodes = []
     xs_starting = {}
     for i in range(0, numberOfGates + 1):
-        g = histogramGenerator.get_gauss_bins_UNARY(input_means[i], input_stds[i], numberOfBins, n_samples,
-                                                    interval, numberOfUnaries)
-
-        # g = histogramGenerator.get_Histogram_from_UNARY(g)
-        # print(g.bins)
-
-        # exit(-1)
+        g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples,
+                                                    interval, forGP=True)
 
         xs_starting[i] = {}
 
         for bin in range(0, numberOfBins):
-            xs_starting[i][bin] = {}
-            for unary in range(0, numberOfUnaries):
-                xs_starting[i][bin][unary] = cp.Variable(boolean=True)
+            xs_starting[i][bin] = cp.Variable(pos=True)
 
-                constraints.append(xs_starting[i][bin][unary] <= g.bins[bin][unary])
+            constraints.append(xs_starting[i][bin] >= g.bins[bin])
 
         node = Node(RandomVariableCVXPY(xs_starting[i], g.edges))
         startingNodes.append(node)
@@ -272,16 +265,14 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
     generatedNodes = []
     xs_generated = {}
     for i in range(0, numberOfGates):
-        g = histogramGenerator.get_gauss_bins_UNARY(gateParams[0], gateParams[1], numberOfBins, n_samples, interval,
-                                                    numberOfUnaries)
+        g = histogramGenerator.get_gauss_bins(gateParams[0], gateParams[1], numberOfBins, n_samples, interval,
+                                                    forGP=True)
         xs_generated[i] = {}
 
         for bin in range(0, numberOfBins):
-            xs_generated[i][bin] = {}
-            for unary in range(0, numberOfUnaries):
-                xs_generated[i][bin][unary] = cp.Variable(boolean=True)
+            xs_generated[i][bin] = cp.Variable(pos=True)
 
-                constraints.append(xs_generated[i][bin][unary] <= g.bins[bin][unary])
+            constraints.append(xs_generated[i][bin] >= g.bins[bin])
 
         node = Node(RandomVariableCVXPY(xs_generated[i], g.edges))
         generatedNodes.append(node)
@@ -301,8 +292,7 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
         node = generatedNodes[i]
         node.setNextNodes([generatedNodes[i + 1]])
 
-    delays, newConstr = SSTA.calculateCircuitDelay(startingNodes, cvxpy=True, unary=True,
-                                                withSymmetryConstr=withSymmetryConstr)
+    delays, newConstr = SSTA.calculateCircuitDelay(startingNodes, cvxpy=True, GP=True)
     delays = delays[numberOfGates + 1:]
 
     constraints.extend(newConstr)
@@ -310,24 +300,27 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
     # setting objective
     # startingIndex = numberOfGates + 2
     sum = 0
-    for gate in range(0, numberOfGates):
-        for bin in range(0, numberOfBins):
-            for unary in range(0, numberOfUnaries):
-                sum += delays[gate].bins[bin][unary]
+    midPoints = 0.5 * (delays[-1].edges[1:] + delays[-1].edges[:-1])  # midpoints of the edges of hist.
+    # for gate in range(0, len(delays)):
+    print(midPoints)
+    for bin in range(0, numberOfBins):
+            sum += delays[-1].bins[bin]
 
     # solve
 
-    objective = cp.Maximize(sum)
+    objective = cp.Minimize(sum)
     prob = cp.Problem(objective, constraints)
 
-    prob.solve(verbose=True, solver=cp.MOSEK,
+    prob.solve(verbose=True, solver=cp.MOSEK, gp=True,
                mosek_params={  'MSK_DPAR_INTPNT_CO_TOL_MU_RED': 0.1,
                'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}  # max time
                )
 
-    num_nonZeros = prob.solver_stats.extra_stats.getAttr("NumNZs")
-    ObjVal = prob.solver_stats.extra_stats.getAttr("ObjVal")
-    time = prob.solver_stats.extra_stats.getAttr("Runtime")
+    # num_nonZeros = prob.solver_stats.extra_stats.getAttr("NumNZs")
+    # ObjVal = prob.solver_stats.extra_stats.getAttr("ObjVal")
+    # time = prob.solver_stats.extra_stats.getAttr("Runtime")
+    # time = prob.solver_stats.extra_stats.getAttr("dinfitem.optimizer_time")
+    time = prob.solver_stats.solve_time
 
 
     # print out the values
@@ -335,43 +328,47 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
 
     rvs = []
 
-    for gate in range(0, numberOfGates):  # construct RVs
+    for gate in range(0, len(delays)):  # construct RVs
 
-        finalBins = np.zeros((numberOfBins, numberOfUnaries))
+        finalBins = np.zeros(numberOfBins)
         for bin in range(0, numberOfBins):
-            for unary in range(0, numberOfUnaries):
-                finalBins[bin, unary] = ((delays[gate].bins)[bin])[unary].value
+            # if ((delays[gate].bins)[bin]) != 0:
+            finalBins[bin] = ((delays[gate].bins)[bin]).value
+            # else:
+            #     finalBins[bin] = 0
 
-        rvs.append(RandomVariable(finalBins, generatedNodes[0].randVar.edges, unary=True))
+        rvs.append(RandomVariable(finalBins, generatedNodes[0].randVar.edges))
 
     print("\n APRX. VALUES: \n")
-    for i in range(0, numberOfGates):
+    for i in range(0, len(delays)):
         print(rvs[i].mean, rvs[i].std)
 
     lastGate = (rvs[-1].mean, rvs[-1].std)
 
-    return (num_nonZeros, ObjVal, lastGate, time)
+    # return (lastGate, time)
+    # return (num_nonZeros, ObjVal, lastGate, time)
+
 
     # NUMPY
 
         # generate inputs
     startingNodes = []
     for i in range(0, numberOfGates + 1):
-        g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval)
+        g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval, forGP=False)
         node = Node(g)
         startingNodes.append( node )
 
     # generate inputs
     startingNodes = []
     for i in range(0, numberOfGates + 1):
-        g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval)
+        g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval, forGP=False)
         node = Node(g)
         startingNodes.append(node)
 
         # generetate nodes
     generatedNodes = []
     for i in range(0, numberOfGates):
-        g = histogramGenerator.get_gauss_bins(gateParams[0], gateParams[1], numberOfBins, n_samples, interval)
+        g = histogramGenerator.get_gauss_bins(gateParams[0], gateParams[1], numberOfBins, n_samples, interval, forGP=False)
         node = Node(g)
         generatedNodes.append(node)
 
@@ -391,10 +388,16 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
         node.setNextNodes([generatedNodes[i + 1]])
 
     delays = SSTA.calculateCircuitDelay(startingNodes)
+    delays = delays[numberOfGates + 1:]
 
-    delays = delays[numberOfGates + 1:-1]
+    print(delays[-1].bins)
 
     actual = putTuplesIntoArray(rvs=delays)
+
+    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins,alpha=0.2, color='orange')
+    plt.hist(rvs[-1].edges[:-1], rvs[-1].edges, weights=rvs[-1].bins, density="PDF", color='blue')
+    plt.show()
+
 
     print("NUMPY VALUES")
     print(actual)
@@ -1545,7 +1548,8 @@ def LadderMOSEK_maxconv_test(number_of_nodes=1, numberOfBins=13, numberOfUnaries
 if __name__ == "__main__":
         # dec param is Desired precision
 
-    mainCVXPY()
+    # mainCVXPY()
+    mainCVXPY_GP()
     # mainCVXPYMcCormick()
     # LadderNumpy()
     # LadderMOSEK_test()

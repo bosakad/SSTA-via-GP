@@ -163,9 +163,7 @@ class RandomVariableCVXPY:
     def convolution_GP(self, secondVariable):
         """
         Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-        using the 'quadratic' algorithm and McCormick envelopes
-        IMPORTANT:
-                WORKS ONLY FOR MINIMIZATION PROBLEM
+        using the 'quadratic' algorithm and GP programming
 
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
@@ -179,8 +177,6 @@ class RandomVariableCVXPY:
 
         numberOfBins = len(x1)
 
-        MaxConstraints = []
-
         convolution = {}
         # allocation of convolution dictionary
         for i in range(0, numberOfBins):
@@ -192,10 +188,13 @@ class RandomVariableCVXPY:
             for k in range(0, z + 1):
                 convolution[z] += x1[k] * x2[z - k]
 
+        constr = self.cutBins(self.edges, convolution, GP=True)
 
         maximumClass = RandomVariableCVXPY(convolution, self.edges) # with exact comput.
 
-        return maximumClass, MaxConstraints
+        if constr == None: constr = []
+
+        return maximumClass, constr
 
     def maximum_GP(self, secondVariable):
         """
@@ -216,8 +215,6 @@ class RandomVariableCVXPY:
 
         numberOfBins = len(x1)
 
-        MaxConstraints = []
-
         maximum = {}
         # allocation of convolution dictionary
         for i in range(0, numberOfBins):
@@ -236,7 +233,7 @@ class RandomVariableCVXPY:
 
         maximumClass = RandomVariableCVXPY(maximum, self.edges) # with exact comput.
 
-        return maximumClass, MaxConstraints
+        return maximumClass
 
     def convolution_McCormick(self, secondVariable):
         """
@@ -977,7 +974,7 @@ class RandomVariableCVXPY:
         return maximumClass, MaxConstraints
 
     @staticmethod
-    def cutBins(edges: np.array, bins: {cp.Expression}, mccormick=False):
+    def cutBins(edges: np.array, bins: {cp.Expression}, mccormick=False, GP=False):
         """
         Cuts bins depending on edge[0]
         if edge[0] < 0: cuts left bins and adds zeros to the end
@@ -994,6 +991,7 @@ class RandomVariableCVXPY:
 
         numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
 
+        constr = []
         if edges[0] > 0:  # cut bins
 
             for i in range(numberOfBinsNeeded, numberOfBins):
@@ -1002,6 +1000,9 @@ class RandomVariableCVXPY:
             for i in range(0, numberOfBinsNeeded):
                 if mccormick:
                     bins[i] = cp.Variable(nonneg=True)
+                elif GP:
+                    bins[i] = cp.Variable(pos=True)
+                    constr.append(bins[i] >= 0.0000000000000000001)
                 else:
                     bins[i] = 0
 
@@ -1013,8 +1014,15 @@ class RandomVariableCVXPY:
             for i in range(numberOfBins - numberOfBinsNeeded, numberOfBins):
                 if mccormick:
                     bins[i] = cp.Variable(nonneg=True)
+                elif GP:
+                    bins[i] = cp.Variable(pos=True)
+                    constr.append(bins[i] >= 0.0000000000000000001)
+
                 else:
                     bins[i] = 0
+
+        if GP:
+            return constr
 
     @staticmethod
     def cutBins_UNARY(edges: np.array, bins: {cp.Expression}):

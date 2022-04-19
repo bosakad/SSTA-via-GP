@@ -647,6 +647,7 @@ def optimizeGates():
 
 
 
+
     #######################
     ######NUMPY############
     #######################
@@ -676,6 +677,212 @@ def optimizeGates():
     actual = putTuplesIntoArray(rvs=delays)
     print(actual)
 
+def optimizeCVXPY_GP():
+
+    numberOfBins = 6
+    binsInterval = (0, 20)
+    numberOfSamples = 20000000
+    numberOfGates = 8
+
+    coef = np.load('Inputs.outputs/model.npz')
+    model = coef['coef']
+
+    f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
+    e = np.array([1, 2, 1, 1.5, 1.5, 1])
+    a = np.ones(numberOfGates - 2)
+
+    # generate gates
+    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=10, int=binsInterval)
+
+    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=2.5, int=binsInterval)
+    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=4, int=binsInterval)
+    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=2, int=binsInterval)
+    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=2, int=binsInterval)
+    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=2, int=binsInterval)
+
+    # generate inputs
+    in1 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=2.5, int=binsInterval)
+    in2 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=2.5, int=binsInterval)
+
+
+    gateNodes = []
+    constr = []
+
+    RVs = [rv1, rv2, rv3, rv4, rv5, rv6, in1, in2]
+
+    for gate in range(0, numberOfGates):
+        bins = {}
+
+        g = RVs[gate]
+
+        for bin in range(0, numberOfBins):
+
+            var = cp.Variable(pos=True)
+
+            if g.bins[bin] == 0: g.bins[bin] += 0.0000000000000000000000000000001
+
+            # if gate >= 6:   # for input gates
+            constr.append(var >= g.bins[bin])
+
+            bins[bin] = var
+
+        node = Node(RandomVariableCVXPY(bins, rv1.edges))
+        gateNodes.append(node)
+
+        # set circuit design
+    gateNodes[0].setNextNodes([gateNodes[4]])
+    gateNodes[1].setNextNodes([gateNodes[2], gateNodes[3]])
+    gateNodes[2].setNextNodes([gateNodes[4], gateNodes[5]])
+    gateNodes[3].setNextNodes([gateNodes[5]])
+
+    IN1 = gateNodes[-2]
+    IN2 = gateNodes[-1]
+
+    IN1.setNextNodes([gateNodes[2]])
+    IN2.setNextNodes([gateNodes[3]])
+
+    startingNodes = [gateNodes[1], IN1, IN2, gateNodes[0]]
+
+    # calculate delay
+    delays, newConstr = SSTA.calculateCircuitDelay(startingNodes, cvxpy=True, GP=True)
+    constr.extend(newConstr)
+
+    sum = 0
+    norm = 0
+    midPoints = 0.5 * (delays[-1].edges[1:] + delays[-1].edges[:-1])  # midpoints of the edges of hist.
+    # for gate in range(0, len(delays)):
+
+    for bin in range(0, numberOfBins):
+        sum += delays[-1].bins[bin]                # minimize the mean value
+        norm += delays[-1].bins[bin]
+
+    # sum = sum / (delays[-1].bins[0] + delays[-1].bins[1])
+
+
+
+
+    # create sizing parameters
+
+    Amax = 100
+    Pmax = 100
+
+    sizingVariables = cp.Variable((6,), pos=True)
+    constr.append(sizingVariables >= 1)
+
+
+    power = cp.sum(cp.multiply((cp.multiply(f, sizingVariables)), e))
+    area = cp.sum(cp.multiply(a, sizingVariables))
+
+    constr.append(power <= Pmax)
+    constr.append(area <= Amax)
+
+    model = loadModel('Inputs.outputs/model.npz')
+
+    # for gate in range(0, 6):
+    for gate in range(0, 6):
+        curGate = gateNodes[gate]
+        bins = curGate.randVar.bins
+
+        x_i = sizingVariables[gate]
+        a_i = a[gate]
+        f_i = f[gate]
+        e_i = e[gate]
+
+        for bin in range(0, numberOfBins):
+
+            # constr.append(bins[bin] >= rv1.bins[bin])
+
+
+            shift = model[bin, 0]
+            areaCoef = model[bin, 1]
+            powerCoef = model[bin, 2]
+
+            prob = shift + areaCoef * x_i * a_i + powerCoef * x_i * e_i * f_i
+
+            # constr.append(bins[bin] >= prob)
+
+    # solve
+
+    objective = cp.Minimize(sum)
+    prob = cp.Problem(objective, constr)
+
+    prob.solve(verbose=True, solver=cp.MOSEK, gp=True,
+               mosek_params={  'MSK_DPAR_INTPNT_CO_TOL_MU_RED': 0.1,
+               'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}  # max time
+               )
+
+
+    # print('Mean:')
+    # print(prob.value)
+    #
+    # print(midPoints)
+    sum = 0
+    for bin in range(0, numberOfBins):
+        print(delays[-1].bins[bin].value)
+        sum += delays[-1].bins[bin].value  # minimize the mean value
+    print(sum)
+
+    rvs = []
+    for gate in range(0, len(delays)):  # construct RVs
+
+        finalBins = np.zeros(numberOfBins)
+        for bin in range(0, numberOfBins):
+            # if ((delays[gate].bins)[bin]) != 0:
+            finalBins[bin] = ((delays[gate].bins)[bin]).value
+            # else:
+            #     finalBins[bin] = 0
+            # print(finalBins)
+            # print(rv1.bins)
+            print(finalBins >= rv1.bins)
+            # exit(-1)
+        last = finalBins
+        rvs.append(RandomVariable(finalBins, delays[0].edges))
+
+    print('Sizing parameters')
+    print(sizingVariables.value)
+
+    print("\n APRX. VALUES: \n")
+    for i in range(0, len(delays)):
+        print(rvs[i].mean, rvs[i].std)
+
+
+    #######################
+    ######NUMPY############
+    #######################
+
+    n1 = Node(rv1)
+    n2 = Node(rv2)
+    n3 = Node(rv3)
+    n4 = Node(rv4)
+    n5 = Node(rv5)
+    n6 = Node(rv6)
+
+    IN1 = Node(in1)
+    IN2 = Node(in2)
+
+    # set circuit design
+    n1.setNextNodes([n5])
+    # n2.setNextNodes([n3, n3, n4, n4])
+    IN1.setNextNodes([n3])
+    IN2.setNextNodes([n4])
+    n2.setNextNodes([n3, n4])
+    n3.setNextNodes([n5, n6])
+    n4.setNextNodes([n6])
+
+    delays = SSTA.calculateCircuitDelay([n2, IN1, IN2, n1])
+
+    # print(np.sum(delays[-1].bins))
+
+    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, density="PDF", alpha=0.2, color='orange')
+    plt.hist(rvs[-1].edges[:-1], rvs[-1].edges, weights=last, density="PDF", color='blue')
+
+    print(np.sum(last)*(1))
+    print(np.sum(delays[-1].bins)*(rvs[-1].edges[1] - rvs[-1].edges[0]))
+    plt.show()
+
+    actual = putTuplesIntoArray(rvs=delays)
+    print(actual)
+
 
 def loadModel(path):
     """
@@ -694,5 +901,6 @@ if __name__ == "__main__":
 
     # test_SSTA_MAX()
     # test_SSTA_MIN()
-    optimizeGates()
+    # optimizeGates()
+    optimizeCVXPY_GP()
     # loadModel("Inputs.outputs/model.npz")
