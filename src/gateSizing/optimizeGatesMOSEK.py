@@ -680,7 +680,7 @@ def optimizeGates():
 def optimizeCVXPY_GP():
 
     numberOfBins = 6
-    binsInterval = (0, 20)
+    binsInterval = (0, 28)
     numberOfSamples = 20000000
     numberOfGates = 8
 
@@ -692,18 +692,17 @@ def optimizeCVXPY_GP():
     a = np.ones(numberOfGates - 2)
 
     # generate gates
-    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=10, int=binsInterval)
+    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=5, int=binsInterval)
 
-    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=2.5, int=binsInterval)
-    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=4, int=binsInterval)
-    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=2, int=binsInterval)
-    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=2, int=binsInterval)
-    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=2, int=binsInterval)
+    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=1, int=binsInterval)
+    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=1, int=binsInterval)
+    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=1, int=binsInterval)
+    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=1, int=binsInterval)
+    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=1, int=binsInterval)
 
     # generate inputs
-    in1 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=2.5, int=binsInterval)
-    in2 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=2.5, int=binsInterval)
-
+    in1 = histogramGenerator.generateAccordingToModel(model, 4, 4, x_i=3, int=binsInterval)
+    in2 = histogramGenerator.generateAccordingToModel(model, 4, 4, x_i=3, int=binsInterval)
 
     gateNodes = []
     constr = []
@@ -719,10 +718,12 @@ def optimizeCVXPY_GP():
 
             var = cp.Variable(pos=True)
 
-            if g.bins[bin] == 0: g.bins[bin] += 0.0000000000000000000000000000001
+            # if g.bins[bin] == 0: g.bins[bin] += 0.0000000000000000000000000000001
 
-            # if gate >= 6:   # for input gates
-            constr.append(var >= g.bins[bin])
+            if gate >= 6:   # for input gates
+            # if gate != 0:
+                constr.append(var >= g.bins[bin])
+
 
             bins[bin] = var
 
@@ -752,9 +753,9 @@ def optimizeCVXPY_GP():
     midPoints = 0.5 * (delays[-1].edges[1:] + delays[-1].edges[:-1])  # midpoints of the edges of hist.
     # for gate in range(0, len(delays)):
 
-    for bin in range(0, numberOfBins):
-        sum += delays[-1].bins[bin]                # minimize the mean value
-        norm += delays[-1].bins[bin]
+    for bin in range(4, numberOfBins):
+        sum += delays[-1].bins[bin] * midPoints[bin]                # minimize the mean value
+        # norm += delays[-1].bins[bin]
 
     # sum = sum / (delays[-1].bins[0] + delays[-1].bins[1])
 
@@ -763,11 +764,12 @@ def optimizeCVXPY_GP():
 
     # create sizing parameters
 
-    Amax = 100
-    Pmax = 100
+    Amax = 30
+    Pmax = 55
 
     sizingVariables = cp.Variable((6,), pos=True)
     constr.append(sizingVariables >= 1)
+    # constr.append(sizingVariables[0] >= 10)
 
 
     power = cp.sum(cp.multiply((cp.multiply(f, sizingVariables)), e))
@@ -793,13 +795,15 @@ def optimizeCVXPY_GP():
             # constr.append(bins[bin] >= rv1.bins[bin])
 
 
-            shift = model[bin, 0]
-            areaCoef = model[bin, 1]
-            powerCoef = model[bin, 2]
+            a1 = model[bin, 0]
+            p1 = model[bin, 1]
+            a2 = model[bin, 2]
+            p2 = model[bin, 3]
 
-            prob = shift + areaCoef * x_i * a_i + powerCoef * x_i * e_i * f_i
+            # prob = shift + areaCoef * x_i * a_i + powerCoef * x_i * e_i * f_i
+            prob = a1 * x_i*a_i + p1 * x_i*e_i*f_i + a2 * (1/(x_i*a_i)) + p2 * (1/(x_i*e_i*f_i))
 
-            # constr.append(bins[bin] >= prob)
+            constr.append(bins[bin] >= prob)
 
     # solve
 
@@ -812,31 +816,32 @@ def optimizeCVXPY_GP():
                )
 
 
-    # print('Mean:')
-    # print(prob.value)
-    #
-    # print(midPoints)
+    print('Mean:')
+    print(prob.value)
+
+    print(midPoints)
     sum = 0
     for bin in range(0, numberOfBins):
-        print(delays[-1].bins[bin].value)
-        sum += delays[-1].bins[bin].value  # minimize the mean value
+        sum += delays[-1].bins[bin].value
     print(sum)
+
+    # for bin in range(3, numberOfBins):
+    #     print(delays[-1].bins[bin].value)
+    #     sum += delays[-1].bins[bin].value  * midPoints[bin]
+    # print(sum)
+
 
     rvs = []
     for gate in range(0, len(delays)):  # construct RVs
 
         finalBins = np.zeros(numberOfBins)
         for bin in range(0, numberOfBins):
-            # if ((delays[gate].bins)[bin]) != 0:
+
             finalBins[bin] = ((delays[gate].bins)[bin]).value
-            # else:
-            #     finalBins[bin] = 0
-            # print(finalBins)
-            # print(rv1.bins)
-            print(finalBins >= rv1.bins)
-            # exit(-1)
+
         last = finalBins
         rvs.append(RandomVariable(finalBins, delays[0].edges))
+
 
     print('Sizing parameters')
     print(sizingVariables.value)
@@ -873,11 +878,13 @@ def optimizeCVXPY_GP():
 
     # print(np.sum(delays[-1].bins))
 
-    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, density="PDF", alpha=0.2, color='orange')
-    plt.hist(rvs[-1].edges[:-1], rvs[-1].edges, weights=last, density="PDF", color='blue')
+    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, color='blue')
 
-    print(np.sum(last)*(1))
-    print(np.sum(delays[-1].bins)*(rvs[-1].edges[1] - rvs[-1].edges[0]))
+    # print(np.sum(last)*(rvs[-1].edges[1] - rvs[-1].edges[0]))
+    # print(np.sum(delays[-1].bins)*(rvs[-1].edges[1] - rvs[-1].edges[0]))
+    print(np.sum( np.multiply(delays[-1].bins[-2:], midPoints[-2:] ) ))
+    # print(np.sum(delays[-1].bins[:]))
     plt.show()
 
     actual = putTuplesIntoArray(rvs=delays)

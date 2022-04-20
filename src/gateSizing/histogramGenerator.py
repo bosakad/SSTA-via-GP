@@ -31,7 +31,7 @@ def get_gauss_bins(mu: float, sigma: float, numberOfBins: int, numberOfSamples: 
 
         # no zeros allowed
     if forGP:
-        dataNorm[dataNorm == 0] += 0.0000000000000000001
+        dataNorm[dataNorm == 0] += 0.00000000000000000001
 
     randomVar = RandomVariable(dataNorm, edges)
 
@@ -118,19 +118,28 @@ def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries=0):
 
     numberOfBins = model.shape[0]
 
+
     if nUnaries == 0:
         distr = np.zeros(numberOfBins)
 
         for bin in range(0, numberOfBins):
-            binP = model[bin, 0] + model[bin, 1] * a_i * x_i + model[bin, 2] * p_i * x_i
-            distr[bin] = max(binP, 0)
+            a1 = model[bin, 0]
+            p1 = model[bin, 1]
+            a2 = model[bin, 2]
+            p2 = model[bin, 3]
+            # binP = model[bin, 0] + model[bin, 1] * a_i * x_i + model[bin, 2] * p_i * x_i
 
+            binP = a1*a_i*x_i + p1*p_i*x_i + a2* (1/ (a_i*x_i)) + p2* (1/(p_i*x_i))
+            # distr[bin] = max(binP, 0)
+            distr[bin] = binP
+
+        print(distr > 0)
 
         STATIC_BINS = np.linspace(int[0], int[1], numberOfBins + 1)
 
-        dataNorm = distr / (np.sum(distr))
+        # dataNorm = distr / (np.sum(distr))
 
-        return RandomVariable(dataNorm, STATIC_BINS, unary=False)
+        return RandomVariable(distr, STATIC_BINS, unary=False)
     else:
 
         distr = np.zeros((numberOfBins, nUnaries))

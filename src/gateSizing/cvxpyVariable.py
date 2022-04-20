@@ -189,10 +189,23 @@ class RandomVariableCVXPY:
                 convolution[z] += x1[k] * x2[z - k]
 
         constr = self.cutBins(self.edges, convolution, GP=True)
+        if constr == None: constr = []
+
+
+        sum = 0
+        # normalize
+        for bin in range(0, numberOfBins):
+            sum += convolution[bin]
+
+        # create a new monomial
+        y = cp.Variable(pos=True)
+        constr.append(sum <= y)
+
+        for bin in range(0, numberOfBins):
+            convolution[bin] = convolution[bin]
 
         maximumClass = RandomVariableCVXPY(convolution, self.edges) # with exact comput.
 
-        if constr == None: constr = []
 
         return maximumClass, constr
 

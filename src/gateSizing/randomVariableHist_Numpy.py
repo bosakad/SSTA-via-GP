@@ -82,15 +82,15 @@ class RandomVariable:
 
 
         # unite
-        self.uniteEdges(secondVariable)
+        # self.uniteEdges(secondVariable)
         f1 = self.bins
         f2 = secondVariable.bins
 
 
         n = self.bins.shape[0]
 
-        f1 = f1 / (np.sum(f1) * (self.edges[1] - self.edges[0]))
-        f2 = f2 / (np.sum(f2) * (self.edges[1] - self.edges[0]))
+        # f1 = f1 / (np.sum(f1) * (self.edges[1] - self.edges[0]))
+        # f2 = f2 / (np.sum(f2) * (self.edges[1] - self.edges[0]))
         maximum = np.zeros(n)
         for i in range(0, n):
             F2 = np.sum(f2[:i+1])
@@ -98,7 +98,7 @@ class RandomVariable:
             maximum[i] = f1[i] * F2 + f2[i] * F1
 
         # normalize
-        maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
+        # maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
 
         # unite
         # self.uniteEdges(secondVariable)
@@ -457,7 +457,7 @@ class RandomVariable:
         self.cutBins(self.edges, convolution)
 
         # normalize
-        convolution = convolution / (np.sum(convolution) * diff)
+        # convolution = convolution / (np.sum(convolution) * diff)
 
         return RandomVariable(convolution, self.edges)
 

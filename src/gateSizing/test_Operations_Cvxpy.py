@@ -910,7 +910,7 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     interval = (0, 20)
 
     numberOfSamples = 2000000
-    numberOfBins = 30
+    numberOfBins = 6
 
 
     # DESIRED
@@ -920,13 +920,13 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
 
     test3 = histogramGenerator.get_gauss_bins(mu3, sigma3, numberOfBins, numberOfSamples, interval, forGP=True)
     test4 = histogramGenerator.get_gauss_bins(mu4, sigma4, numberOfBins, numberOfSamples, interval, forGP=True)
-    #
+
+    max1 = test1.maxOfDistributionsFORM(test2)
+
     # max1 = test1.maxOfDistributionsFORM(test2)
+    # max2 = test3.maxOfDistributionsFORM(test4)
 
-    max1 = test1.convolutionOfTwoVarsNaiveSAME(test2)
-    max2 = test3.maxOfDistributionsFORM(test4)
-
-    max1 = max1.convolutionOfTwoVarsNaiveSAME(max2)
+    # max1 = max1.convolutionOfTwoVarsNaiveSAME(max2)
 
     desired = [max1.mean, max1.std]
 
@@ -935,22 +935,24 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     # ACTUAL
         # init
     x1 = {}
+    inv1 = {}
     constr = []
 
     for bin in range(0, numberOfBins):
 
         x1[bin] = cp.Variable(pos=True)
-
+        inv1[bin] = 1 / x1[bin]
         # if test1.bins[bin] == 0:
         #     test1.bins[bin] += 0.00000000000000001
         constr.append(x1[bin] >= test1.bins[bin])
 
 
     x2 = {}
+    inv2 = {}
 
     for bin in range(0, numberOfBins):
         x2[bin] = cp.Variable(pos=True)
-
+        inv2[bin] = 1 / x2[bin]
         # if test2.bins[bin] == 0:
         #     test2.bins[bin] += 0.000000000000000001
         constr.append(x2[bin] >= test2.bins[bin])
@@ -978,6 +980,9 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     RV1 = RandomVariableCVXPY(x1, test1.edges)
     RV2 = RandomVariableCVXPY(x2, test1.edges)
 
+    RV1I = RandomVariableCVXPY(inv1, test1.edges)
+    RV2I = RandomVariableCVXPY(inv2, test1.edges)
+
 
     RV3 = RandomVariableCVXPY(x3, test1.edges)
     RV4 = RandomVariableCVXPY(x4, test1.edges)
@@ -986,9 +991,11 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
 
     # maximum, constr1 = RV1.maximum_GP(RV2)
 
-    maximum, constr1 = RV1.convolution_GP(RV2)
-    maximum2, constr1 = RV3.maximum_GP(RV4)
-    maximum, constr1 = maximum.convolution_GP(maximum2)
+    maximum = RV1.maximum_GP(RV2)
+
+    inverse = RV1I.maximum_GP(RV2I).bins
+    # maximum2 = RV3.maximum_GP(RV4)
+    # maximum, constr1 = maximum.convolution_GP(maximum2)
     # maximum2, constr2 = RV3.maximum_McCormick(RV4)
     # maximum, constr3 = maximum.convolution_McCormick(RV3)
 
@@ -1002,14 +1009,17 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     # constr = constr1 + constr2 + constr3
     # print(len(constr))
 
-
-
-        # FORMULATE
+    # FORMULATE
 
     # objective function
     sum = 0
-    for bin in range(0, numberOfBins):
+    for bin in range(5, numberOfBins):
         sum += maximum[bin]
+
+    inv = 0
+    for bin in range(5, numberOfBins):
+        inv += inverse[bin]
+
 
     # other constraints
 
@@ -1024,6 +1034,8 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
         # PRINT OUT THE VALUES
     print("Problem value: " + str(prob.value))
 
+    print(np.sum(max1.bins))
+
     convBins = np.zeros(numberOfBins)
     for bin in range(0, numberOfBins):
         convBins[bin] = maximum[bin].value
@@ -1034,9 +1046,16 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     print(maxRV.bins)
     print(max1.bins)
 
+    import matplotlib.pyplot as plt
+    plt.hist(maxRV.edges[:-1], maxRV.edges, weights=maxRV.bins, alpha=0.2, color='blue')
+    plt.hist(max1.edges[:-1], max1.edges, weights=max1.bins, density="PDF", color='orange')
+    plt.show()
+
     actual = [maxRV.mean, maxRV.std]
 
     # TESTING
+    # desired = maxRV.bins
+    # actual = max1.bins
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 

@@ -103,8 +103,8 @@ def plotLinesForBin(distros, area, power, coef, bin):
     minP = np.min(power)
     maxP = np.max(power)
 
-    # def f (a, p): return coef[0] + coef[1]*a + coef[2]*p + coef[3]* np.square(a) + coef[4]* np.square(p)
-    def f (a, p): return coef[0] + coef[1]*a + coef[2]*p
+    def f (a, p): return coef[0]*a + coef[1]*p + coef[2]* np.power(a, -1) + coef[3]* np.power(p, -1)
+    # def f (a, p): return coef[0] + coef[1]*a + coef[2]*p
 
     # print(f(5, 20))
     # print(f(7, 30))
@@ -150,17 +150,20 @@ def linearRegression(distros, area, power, asQP=False):
 
     numberOfBins = distros.shape[1]
     numberOfDistros = distros.shape[0]
-    coef = np.zeros((numberOfBins, 3))
+    coef = np.zeros((numberOfBins, 4))
 
     for bin in range(0, numberOfBins):
 
-        A = np.zeros((numberOfDistros, 3))
+        A = np.zeros((numberOfDistros, 4))
 
-        A[:, 0] = 1     # b
-        A[:, 1] = area[:]   # area
-        A[:, 2] = power[:]  # power
-        # A[:, 3] = np.square(area[:])  # area
-        # A[:, 4] = np.square(power[:])  # area
+        # A[:, 0] = 1     # b
+        A[:, 0] = area[:]   # area
+        A[:, 1] = power[:]  # power
+        A[:, 2] = np.power(area[:], -1)  # area
+        A[:, 3] = np.power(power[:], -1)  # power
+
+        print(area)
+        print(power)
 
         b = distros[:, bin]
 
@@ -169,7 +172,7 @@ def linearRegression(distros, area, power, asQP=False):
         #     pass
         # else:
 
-        x = cp.Variable(3, pos=True)
+        x = cp.Variable(4, pos=True)
         # constr = [x >= 0]
         cost = cp.sum_squares(A @ x - b)
         prob = cp.Problem(cp.Minimize(cost), [])
@@ -186,7 +189,7 @@ def linearRegression(distros, area, power, asQP=False):
 
         # exit(-1)
 
-    coef[coef <= 0] += 0.000000000000000000000000000001
+    coef[coef <= 0] += 0.000000000000000000000000001
 
     print(coef)
     return coef
@@ -222,19 +225,22 @@ def plotDistrosForInputs(a, f, e):
     x = 10
 
     # for x in [1, 1.5, 2, 2.5, 3, 3.5, 4]:
-    for x in [1, 2, 4, 6, 10, 20]:
+    for x in [1, 2, 4, 6, 10, 20, 100]:
+    # for x in [20, 100]:
 
         # x = 1 + 2*iter
 
         distr = np.zeros(numberOfBins)
         for bin in range(0, numberOfBins):
-            shift = model[bin, 0]
-            areaCoef = model[bin, 1]
-            powerCoef = model[bin, 2]
+            a1 = model[bin, 0]
+            p1 = model[bin, 1]
+            a2 = model[bin, 2]
+            p2 = model[bin, 3]
 
-            prob = shift + areaCoef*a_i*x + powerCoef*f_i*e_i*x
+            prob = a1*a_i*x + p1*f_i*e_i*x + a2* (1/ (a_i*x)) + p2* (1/(f_i*e_i*x))
             distr[bin] = prob
 
+        print(distr)
         STATIC_BINS = np.linspace(interval[0], interval[1], numberOfBins+1)
 
         plt.hist(STATIC_BINS[:-1], STATIC_BINS[:], weights=distr, density="PDF", alpha=0.4)
@@ -258,8 +264,8 @@ if __name__ == "__main__":
     # area = np.array([1, 4, 5, 15, 20, 25, 35])
     # power = np.array([1, 4, 5, 40, 80, 100, 140])
 
-    area = np.array([0, 2, 3, 4, 5., 6, 7]) ** 1.6
-    power = np.array([0, 2, 3, 4, 5, 6, 7]) ** 1.6
+    area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 1.6
+    power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.6
     # e = np.array([1, 2, 1, 1.5, 1.5, 1])
 
     # area = np.array([10, 20, 30, 35, 50, 55, 70])
@@ -268,16 +274,16 @@ if __name__ == "__main__":
     # area = np.array([5, 7, 8])
     # power = np.array([20, 30, 40])
 
-    # interval = (0, 20)
-    # numberOfBins = 6
-    #
-    # distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=False)
-    # # plotDistros(distros, edges)
-    # coef = linearRegression(distros, area, power)
-    #
-    # plotLinesForBin(distros, area, power, coef, 5)
-    #
-    # saveModel(coef)
+    interval = (0, 28)
+    numberOfBins = 6
+
+    distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=False)
+    # plotDistros(distros, edges)
+    coef = linearRegression(distros, area, power)
+
+    plotLinesForBin(distros, area, power, coef, 5)
+
+    saveModel(coef)
 
     f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
     e = np.array([1, 2, 1, 1.5, 1.5, 1])
