@@ -118,7 +118,6 @@ def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries=0):
 
     numberOfBins = model.shape[0]
 
-
     if nUnaries == 0:
         distr = np.zeros(numberOfBins)
 
@@ -132,8 +131,6 @@ def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries=0):
             binP = a1*a_i*x_i + p1*p_i*x_i + a2* (1/ (a_i*x_i)) + p2* (1/(p_i*x_i))
             # distr[bin] = max(binP, 0)
             distr[bin] = binP
-
-        print(distr > 0)
 
         STATIC_BINS = np.linspace(int[0], int[1], numberOfBins + 1)
 

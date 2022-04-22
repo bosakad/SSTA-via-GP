@@ -373,19 +373,17 @@ def test_SSTA_MIN():
     #     print(rvs2[i].mean, rvs2[i].std)
 
 
-def optimizeGates():
+def optimizeGates_MIXED_INT():
     """
-    This function optimizes the c17 circuit.
+    This function optimizes the c17 circuit using mixed integer model.
     """
 
+    numberOfBins = 7
+    binsInterval = (0, 12)
+    numberOfUnaries = 10
     numberOfGates = 8
 
-    numberOfBins = 10
-    numberOfUnaries = 10
-    binsInterval = (0, 20)
-    numberOfSamples = 20000000
-
-    coef = np.load('Inputs.outputs/model.npz')
+    coef = np.load('Inputs.outputs/model_MIXED_INT.npz')
     model = coef['coef']
 
     f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
@@ -393,17 +391,16 @@ def optimizeGates():
     a = np.ones(numberOfGates - 2)
 
     # generate gates
-    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0]*e[0], x_i=10, int=binsInterval, nUnaries=numberOfUnaries)
-    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1]*e[1], x_i=2.5, int=binsInterval, nUnaries=numberOfUnaries)
-    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2]*e[2], x_i=4, int=binsInterval, nUnaries=numberOfUnaries)
-    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3]*e[3], x_i=2, int=binsInterval, nUnaries=numberOfUnaries)
-    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4]*e[4], x_i=2, int=binsInterval, nUnaries=numberOfUnaries)
-    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5]*e[5], x_i=2, int=binsInterval, nUnaries=numberOfUnaries)
+    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=1, int=binsInterval, nUnaries=numberOfUnaries)
+    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=5, int=binsInterval, nUnaries=numberOfUnaries)
+    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=5, int=binsInterval, nUnaries=numberOfUnaries)
+    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=5, int=binsInterval, nUnaries=numberOfUnaries)
+    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=5, int=binsInterval, nUnaries=numberOfUnaries)
+    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=5, int=binsInterval, nUnaries=numberOfUnaries)
 
     # generate inputs
-    in1 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=2.5, int=binsInterval, nUnaries=numberOfUnaries)
-    in2 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=2.5, int=binsInterval, nUnaries=numberOfUnaries)
-
+    in1 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=15, int=binsInterval, nUnaries=numberOfUnaries)
+    in2 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=15, int=binsInterval, nUnaries=numberOfUnaries)
 
     #######################
     ######MOSEK############
@@ -444,7 +441,8 @@ def optimizeGates():
                         # Set the bounds on variable
                         # 0 <= x_j <= 1
 
-                        if gate == 6 or gate == 7 or gate == 1 or gate == 2 or gate == 3 or gate == 4 or gate == 5:
+                        # if gate == 6 or gate == 7 or gate == 1 or gate == 2 or gate == 3 or gate == 4 or gate == 5:
+                        if gate >= 6:
                             task.putvarbound(variableIndex, mosek.boundkey.ra, g.bins[bin][unary], 1)
                         else:
                             task.putvarbound(variableIndex, mosek.boundkey.ra, 0, 1)
@@ -456,17 +454,18 @@ def optimizeGates():
                 gateNodes.append(node)
 
 
-                # set circuit design
+            # set circuit design
             gateNodes[0].setNextNodes([gateNodes[4]])
             gateNodes[1].setNextNodes([gateNodes[2], gateNodes[3]])
-            gateNodes[2].setNextNodes([gateNodes[4], gateNodes[5]])
-            gateNodes[3].setNextNodes([gateNodes[5]])
+
+            gateNodes[2].setNextNodes([gateNodes[5]])
+            gateNodes[3].setNextNodes([gateNodes[4], gateNodes[5]])
 
             IN1 = gateNodes[-2]
             IN2 = gateNodes[-1]
 
-            IN1.setNextNodes([gateNodes[2]])
-            IN2.setNextNodes([gateNodes[3]])
+            IN1.setNextNodes([gateNodes[3]])
+            IN2.setNextNodes([gateNodes[2]])
 
             startingNodes = [gateNodes[1], IN1, IN2, gateNodes[0]]
 
@@ -493,47 +492,61 @@ def optimizeGates():
             # sum = np.append(sum, np.concatenate(delays[-3].bins[:, :]))
             # sum = np.append(sum, np.concatenate(delays[-1].bins[:, :]))
 
-            midPoints = np.array(0.5 * (g.edges[1:] + g.edges[:-1]))
-            midPoints = np.tile(midPoints, (numberOfUnaries, 1)).T
-            midPoints = np.concatenate(midPoints)
+            firstWeights = np.ones(8*numberOfUnaries*numberOfBins + numberOfUnaries*4)  * 0.01
+
+            # midPoints = np.array(0.5 * (g.edges[1:] + g.edges[:-1]))
+            # midPoints = np.tile(midPoints, (numberOfUnaries, 1)).T
+            # midPoints = np.concatenate(midPoints)
+            # midPoints = np.power(midPoints, 4)
+
+            midPoints = np.ones(numberOfUnaries*3) * 3
+
+            weights = np.append(firstWeights, midPoints)
 
             # task.putclist(sum, np.square(midPoints))
+            task.putclist(sum, weights)
                 # todo: zkus maly vahy na zacatku, velky na konci
-            task.putclist(sum, [1] * sum.shape[0])
+            # task.putclist(sum, [1] * sum.shape[0])
 
 
             # set the area and power constraints
-            # Amax = 1200
-            # Pmax = 10000
-            #
-            #
-            # # create sizing variables
-            # inf = 0.0
-            # task.appendvars(numberOfGates)
-            # sizingVariables = np.array(range(newNofVariables, newNofVariables + numberOfGates)).astype(int)
-            #
-            # # task.putvarboundlist(sizingVariables, [mosek.boundkey.fx] * numberOfGates,
-            # #                      [3] * numberOfGates, [3]*numberOfGates)
-            # # task.putvarboundlist(sizingVariables, [mosek.boundkey.lo] * numberOfGates,
-            #                      # [9, 1.5, 2.5, 2.5, 1.5, 1.5], [10]*numberOfGates)
-            #                      # [9.5, 9, 9, 9, 9, 9], [10]*numberOfGates)
-            #                      # [9.5], [10])
-            #
-            # newNofVariables += numberOfGates
-            #
-            # # create constraints
-            #
-            # task.appendcons(2)
-            #
-            #     # constraint for area
-            # task.putarow(newNoConstr, sizingVariables,  a[:1])
-            # task.putconbound(newNoConstr, mosek.boundkey.up, 0.0, Amax)
-            #
-            #     # constraint for power
-            # task.putarow(newNoConstr + 1, sizingVariables, np.multiply(f, e)[:1])
-            # task.putconbound(newNoConstr + 1, mosek.boundkey.up, 0.0, Pmax)
-            #
-            # newNoConstr += 2
+            Amax = 300
+            Pmax = 550
+
+
+            numberOfGates = 6
+            # create sizing variables
+            inf = 0.0
+            task.appendvars(numberOfGates)
+            sizingVariables = np.array(range(newNofVariables, newNofVariables + numberOfGates)).astype(int)
+
+            # task.putvarboundlist(sizingVariables, [mosek.boundkey.ra] * numberOfGates,
+            #                      [5] * numberOfGates, [5.2]*numberOfGates)
+            task.putvarboundlist(sizingVariables, [mosek.boundkey.ra] * numberOfGates,
+                                 [2.4, 4.8,5.9,5.4, 4.4, 7.6], [2.5,5,6,5.5,4.5, 8])
+
+            # x_i = 2.25, int = binsInterval)
+            # rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=4, int=binsInterval)
+            # rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=5.29, int=binsInterval)
+            # rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=5.37, int=binsInterval)
+            # rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=3.7, int=binsInterval)
+            # rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=9, int=binsInterval)
+
+            newNofVariables += numberOfGates
+
+            # create constraints
+
+            task.appendcons(2)
+
+                # constraint for area
+            task.putarow(newNoConstr, sizingVariables[:6],  a[:6])
+            task.putconbound(newNoConstr, mosek.boundkey.up, 0.0, Amax)
+
+                # constraint for power
+            task.putarow(newNoConstr + 1, sizingVariables[:6], np.multiply(f, e)[:6])
+            task.putconbound(newNoConstr + 1, mosek.boundkey.up, 0.0, Pmax)
+
+            newNoConstr += 2
 
 
 
@@ -541,21 +554,22 @@ def optimizeGates():
             # connect sizing constraints to histograms
             task.appendcons(2*numberOfGates*numberOfBins)
 
-
+            # print(sizingVariables)
+            # exit(-1)
 
                 # introduce fit constraints
-            for gate in range(0, 1):
+            for gate in range(0, 6):
 
                 curNode = gateNodes[gate]
-                # x_i = sizingVariables[gate]
+                x_i = sizingVariables[gate]
                 a_i = a[gate]
                 f_i = f[gate]
                 e_i = e[gate]
 
                 for bin in range(0, numberOfBins):
 
-                    generatedValues = np.sum(rv1.bins[bin, :])
-                    model = loadModel('Inputs.outputs/model.npz')
+                    # generatedValues = np.sum(rv1.bins[bin, :])
+                    model = loadModel('Inputs.outputs/model_MIXED_INT.npz')
                     # model = model
 
                     round = 0.5
@@ -572,21 +586,23 @@ def optimizeGates():
                     task.putarow(offset1, row, [1] * row.size)
                     task.putarow(offset2, row, [1] * row.size)
 
-                    task.putconbound(offset1, mosek.boundkey.up, generatedValues + 0.1, generatedValues+0.1)
-                    task.putconbound(offset2, mosek.boundkey.lo, generatedValues - 0.1, generatedValues - 0.1)
+                    # task.putconbound(offset1, mosek.boundkey.up, generatedValues + 0.1, generatedValues+0.1)
+                    # task.putconbound(offset2, mosek.boundkey.lo, generatedValues - 0.1, generatedValues - 0.1)
 
-                    # sizingValue = -numberOfUnaries * (areaCoef * a_i + powerCoef * f_i * e_i)
-                    # task.putaij(offset1, x_i, sizingValue)
-                    # task.putaij(offset2, x_i, sizingValue)
-                    #
-                    # task.putconbound(offset1, mosek.boundkey.up, 0.0, shift * numberOfUnaries + round)
-                    # task.putconbound(offset2, mosek.boundkey.lo, shift * numberOfUnaries - round, 0.0)
+                    sizingValue = -numberOfUnaries * (areaCoef * a_i + powerCoef * f_i * e_i)
+                    task.putaij(offset1, x_i, sizingValue)
+                    task.putaij(offset2, x_i, sizingValue)
+
+                    if gate != 5:
+                        task.putconbound(offset1, mosek.boundkey.up, 0.0, shift * numberOfUnaries + round)
+                    task.putconbound(offset2, mosek.boundkey.lo, shift * numberOfUnaries - round, 0.0)
 
 
 
             newNofConstr = newNoConstr + numberOfGates * numberOfBins * 2
             task.appendcons(numberOfGates * numberOfBins * (numberOfUnaries - 1))
 
+            numberOfGates = 6
 
             # introduce separation constraints
             for gate in range(0, numberOfGates):
@@ -630,8 +646,8 @@ def optimizeGates():
             xx = np.array([0.] * newNofVariables)
             task.getxx(mosek.soltype.itg, xx)
 
-            # print('Sizing parameters:')
-            # print(xx[sizingVariables])
+            print('Sizing parameters:')
+            print(xx[sizingVariables])
 
             rvs = []
 
@@ -639,6 +655,8 @@ def optimizeGates():
 
                 finalBins = xx[delays[gate].bins[:, :]]
                 rvs.append(RandomVariable(finalBins, gateNodes[0].randVar.edges, unary=True))
+
+            print(rvs[-1].bins)
 
             print("\n MOSEK UNARY VALUES: \n")
             for i in range(0, numberOfGates + 3):
@@ -663,25 +681,33 @@ def optimizeGates():
     IN2 = Node(in2)
 
     # set circuit design
+
     n1.setNextNodes([n5])
-    # n2.setNextNodes([n3, n3, n4, n4])
-    IN1.setNextNodes([n3])
-    IN2.setNextNodes([n4])
+    IN1.setNextNodes([n4])
+    IN2.setNextNodes([n3])
     n2.setNextNodes([n3, n4])
-    n3.setNextNodes([n5, n6])
-    n4.setNextNodes([n6])
+    n3.setNextNodes([n6])
+    n4.setNextNodes([n5, n6])
 
 
     delays = SSTA.calculateCircuitDelay([n2,IN1, IN2, n1], cvxpy=False, unary=True, mosekTRI=True)
+
+    # delays[-1] = histogramGenerator.get_Histogram_from_UNARY(delays[-1])
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins,density="PDF", alpha=0.2, color='orange')
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, density="PDF", color='blue')
+    # plt.show()
 
     actual = putTuplesIntoArray(rvs=delays)
     print(actual)
 
 def optimizeCVXPY_GP():
 
+    """
+    This function optimizes the c17 circuit using the GP model
+    """
+
     numberOfBins = 6
     binsInterval = (0, 28)
-    numberOfSamples = 20000000
     numberOfGates = 8
 
     coef = np.load('Inputs.outputs/model.npz')
@@ -692,17 +718,16 @@ def optimizeCVXPY_GP():
     a = np.ones(numberOfGates - 2)
 
     # generate gates
-    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=5, int=binsInterval)
-
-    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=1, int=binsInterval)
-    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=1, int=binsInterval)
-    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=1, int=binsInterval)
-    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=1, int=binsInterval)
+    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=2, int=binsInterval)
+    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=4, int=binsInterval)
+    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=5., int=binsInterval)
+    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=5, int=binsInterval)
+    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=3, int=binsInterval)
     rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=1, int=binsInterval)
 
     # generate inputs
-    in1 = histogramGenerator.generateAccordingToModel(model, 4, 4, x_i=3, int=binsInterval)
-    in2 = histogramGenerator.generateAccordingToModel(model, 4, 4, x_i=3, int=binsInterval)
+    in1 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=20, int=binsInterval)
+    in2 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=20, int=binsInterval)
 
     gateNodes = []
     constr = []
@@ -718,10 +743,7 @@ def optimizeCVXPY_GP():
 
             var = cp.Variable(pos=True)
 
-            # if g.bins[bin] == 0: g.bins[bin] += 0.0000000000000000000000000000001
-
             if gate >= 6:   # for input gates
-            # if gate != 0:
                 constr.append(var >= g.bins[bin])
 
 
@@ -733,14 +755,15 @@ def optimizeCVXPY_GP():
         # set circuit design
     gateNodes[0].setNextNodes([gateNodes[4]])
     gateNodes[1].setNextNodes([gateNodes[2], gateNodes[3]])
-    gateNodes[2].setNextNodes([gateNodes[4], gateNodes[5]])
-    gateNodes[3].setNextNodes([gateNodes[5]])
+
+    gateNodes[2].setNextNodes([gateNodes[5]])
+    gateNodes[3].setNextNodes([gateNodes[4], gateNodes[5]])
 
     IN1 = gateNodes[-2]
     IN2 = gateNodes[-1]
 
-    IN1.setNextNodes([gateNodes[2]])
-    IN2.setNextNodes([gateNodes[3]])
+    IN1.setNextNodes([gateNodes[3]])
+    IN2.setNextNodes([gateNodes[2]])
 
     startingNodes = [gateNodes[1], IN1, IN2, gateNodes[0]]
 
@@ -771,7 +794,7 @@ def optimizeCVXPY_GP():
     constr.append(sizingVariables >= 1)
     # constr.append(sizingVariables[0] >= 10)
 
-
+    # a[5] = 3
     power = cp.sum(cp.multiply((cp.multiply(f, sizingVariables)), e))
     area = cp.sum(cp.multiply(a, sizingVariables))
 
@@ -814,21 +837,11 @@ def optimizeCVXPY_GP():
                mosek_params={  'MSK_DPAR_INTPNT_CO_TOL_MU_RED': 0.1,
                'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}  # max time
                )
+    
 
 
-    print('Mean:')
+    print('CVaR:')
     print(prob.value)
-
-    print(midPoints)
-    sum = 0
-    for bin in range(0, numberOfBins):
-        sum += delays[-1].bins[bin].value
-    print(sum)
-
-    # for bin in range(3, numberOfBins):
-    #     print(delays[-1].bins[bin].value)
-    #     sum += delays[-1].bins[bin].value  * midPoints[bin]
-    # print(sum)
 
 
     rvs = []
@@ -845,6 +858,7 @@ def optimizeCVXPY_GP():
 
     print('Sizing parameters')
     print(sizingVariables.value)
+    print(np.sum(np.multiply(sizingVariables.value, a)))
 
     print("\n APRX. VALUES: \n")
     for i in range(0, len(delays)):
@@ -868,24 +882,21 @@ def optimizeCVXPY_GP():
     # set circuit design
     n1.setNextNodes([n5])
     # n2.setNextNodes([n3, n3, n4, n4])
-    IN1.setNextNodes([n3])
-    IN2.setNextNodes([n4])
+    IN1.setNextNodes([n4])
+    IN2.setNextNodes([n3])
     n2.setNextNodes([n3, n4])
-    n3.setNextNodes([n5, n6])
-    n4.setNextNodes([n6])
+    n3.setNextNodes([n6])
+    n4.setNextNodes([n5, n6])
+
+
 
     delays = SSTA.calculateCircuitDelay([n2, IN1, IN2, n1])
 
     # print(np.sum(delays[-1].bins))
 
-    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
-    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, color='blue')
-
-    # print(np.sum(last)*(rvs[-1].edges[1] - rvs[-1].edges[0]))
-    # print(np.sum(delays[-1].bins)*(rvs[-1].edges[1] - rvs[-1].edges[0]))
-    print(np.sum( np.multiply(delays[-1].bins[-2:], midPoints[-2:] ) ))
-    # print(np.sum(delays[-1].bins[:]))
-    plt.show()
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins,density="PDF", alpha=0.2, color='orange')
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, density="PDF", color='blue')
+    # plt.show()
 
     actual = putTuplesIntoArray(rvs=delays)
     print(actual)
@@ -908,6 +919,6 @@ if __name__ == "__main__":
 
     # test_SSTA_MAX()
     # test_SSTA_MIN()
-    # optimizeGates()
+
+    # optimizeGates_MIXED_INT()
     optimizeCVXPY_GP()
-    # loadModel("Inputs.outputs/model.npz")

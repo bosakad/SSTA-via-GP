@@ -281,19 +281,16 @@ def plotNonzeros():
 
 
         # constraints
-        # axs[i].scatter(Gates, mipGapWithConstr, color='blue')
-        # axs[i].plot(Gates, mipGapWithConstr, color='blue')
-        p2 = axs[i].plot(Gates, mipGapWithConstr,  # data
-                         marker='o',  # each marker will be rendered as a circle
-                         markersize=5,  # marker size
-                         markerfacecolor='red',  # marker facecolor
-                         markeredgecolor='black',  # marker edgecolor
-                         markeredgewidth=1,  # marker edge width
-                         linestyle='-',  # line style will be dash line
-                         linewidth=3.5, zorder=1)  # line width
-        axs.flat[i].set(ylabel='Mip gap \nat root(%)')
-        # axs.flat[i].set(ylabel='MIP')
-        # axs[i].legend(["With constraints", "Without constraints"])
+
+        # p2 = axs[i].plot(Gates, mipGapWithConstr,  # data
+        #                  marker='o',  # each marker will be rendered as a circle
+        #                  markersize=5,  # marker size
+        #                  markerfacecolor='red',  # marker facecolor
+        #                  markeredgecolor='black',  # marker edgecolor
+        #                  markeredgewidth=1,  # marker edge width
+        #                  linestyle='-',  # line style will be dash line
+        #                  linewidth=3.5, zorder=1)  # line width
+        # axs.flat[i].set(ylabel='Mip gap \nat root(%)')
         i += 1
 
         # time

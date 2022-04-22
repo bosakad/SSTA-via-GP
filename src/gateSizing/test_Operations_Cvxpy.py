@@ -924,9 +924,9 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     max1 = test1.maxOfDistributionsFORM(test2)
 
     # max1 = test1.maxOfDistributionsFORM(test2)
-    # max2 = test3.maxOfDistributionsFORM(test4)
+    max2 = test3.maxOfDistributionsFORM(test4)
 
-    # max1 = max1.convolutionOfTwoVarsNaiveSAME(max2)
+    max1 = max1.convolutionOfTwoVarsNaiveSAME(max2)
 
     desired = [max1.mean, max1.std]
 
@@ -980,10 +980,6 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     RV1 = RandomVariableCVXPY(x1, test1.edges)
     RV2 = RandomVariableCVXPY(x2, test1.edges)
 
-    RV1I = RandomVariableCVXPY(inv1, test1.edges)
-    RV2I = RandomVariableCVXPY(inv2, test1.edges)
-
-
     RV3 = RandomVariableCVXPY(x3, test1.edges)
     RV4 = RandomVariableCVXPY(x4, test1.edges)
 
@@ -991,11 +987,16 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
 
     # maximum, constr1 = RV1.maximum_GP(RV2)
 
-    maximum = RV1.maximum_GP(RV2)
+    print(len(constr))
+    maximum, constr = RV1.maximum_GP_OPT(RV2, constr)
+    # maximum = RV1.maximum_GP(RV2)
+    print(len(constr
+              ))
 
-    inverse = RV1I.maximum_GP(RV2I).bins
+    maximum2, constr = RV3.maximum_GP_OPT(RV4, constr)
     # maximum2 = RV3.maximum_GP(RV4)
-    # maximum, constr1 = maximum.convolution_GP(maximum2)
+    maximum, constr = maximum.convolution_GP_OPT(maximum2, constr)
+    # maximum, constr = maximum.convolution_GP(maximum2, constr)
     # maximum2, constr2 = RV3.maximum_McCormick(RV4)
     # maximum, constr3 = maximum.convolution_McCormick(RV3)
 
@@ -1013,12 +1014,9 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
 
     # objective function
     sum = 0
-    for bin in range(5, numberOfBins):
+    for bin in range(0, numberOfBins):
         sum += maximum[bin]
 
-    inv = 0
-    for bin in range(5, numberOfBins):
-        inv += inverse[bin]
 
 
     # other constraints

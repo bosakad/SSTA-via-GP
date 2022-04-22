@@ -747,6 +747,45 @@ class RandomVariableMOSEK:
 
         return maximumClass, newNofVariables, newNofConstr
 
+    def maximum_GP(self, secondVariable, curNofVariables, curNofConstr):
+        """
+        Calculates maximum of 2 PDFs of random variable. Works only for 2 identical edges.
+        Is in MOSEK environment.
+
+        :param self: class RandomVariableMOSEK
+        :param secondVariable: class RandomVariableMOSEK
+        :param curNofVariables: current number of MOSEK variables - to know the indices
+        :param curNofConstr: current number of MOSEK constraints - to know the indices
+        :return maximumClass:  class RandomVariableMOSEK with variables
+        :return newNofVariables: integer, new total number of MOSEK variables
+        :return newNofConstr: integer, new total number of MOSEK constraints
+        """
+
+        x1 = self.bins
+        x2 = secondVariable.bins
+
+        numberOfBins = len(x1)
+
+        maximum = {}
+        # allocation of convolution dictionary
+        for i in range(0, numberOfBins):
+            maximum[i] = 0
+
+        # i >= j
+        for i in range(0, numberOfBins):
+            for j in range(0, i + 1):
+
+                # new variable - multiplication of x*y
+                maximum[i] += x1[i] * x2[j]
+
+                if i != j:
+                    maximum[i] += x1[j] * x2[i]
+
+        maximumClass = RandomVariableMOSEK(maximum, self.edges, self.task)  # with exact comput.
+
+        return maximumClass
+
+
     def maximum_UNARY_MAX_DIVIDE_VECTORIZED(self, secondVariable, curNofVariables, curNofConstr, withSymmetryConstr=False,
                                                                             asMin=False):
         """ Calculates maximum of 2 PDFs of random variable. Works only for 2 identical edges. Is computed

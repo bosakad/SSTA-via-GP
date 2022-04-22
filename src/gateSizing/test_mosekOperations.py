@@ -1,4 +1,5 @@
 import mosek
+from mosek import *
 import sys
 import histogramGenerator
 import numpy as np
@@ -299,6 +300,108 @@ def testMaximum_MAX(dec = 3):
             print(actual)
 
             np.testing.assert_almost_equal(desired, actual, decimal=dec)
+
+def testMaximum_GP(dec = 3):
+    mu1 = 5.98553396
+    sigma1 = 1
+
+    # mu2 = 3.98483475
+    # sigma2 = 1.802585
+    mu2 = 5.98553396
+    sigma2 = 1
+    numberOfGates = 2
+
+
+    interval = (-5, 15)
+
+    numberOfSamples = 2000000
+    numberOfBins = 10
+
+    # DESIRED
+
+    rv1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval, forGP=True)
+    rv2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval, forGP=True)
+
+    max1 = rv1.maxOfDistributionsFORM(rv2)
+    desired = [max1.mean, max1.std]
+
+    inf = 0.0
+
+    with Env() as env:
+        with env.Task(0, 0) as task:
+            task.set_Stream(streamtype.log, streamprinter)
+
+            # Add variables and constraints
+            numLinCon = numberOfGates*numberOfBins
+            curNofVariables = numberOfGates*numberOfBins
+            curNofConstr = 0
+            numMono = 1
+
+            # task.appendvars(numvar + 1)   # try
+            task.appendvars(curNofVariables)
+            task.appendcons(numLinCon + numMono)
+
+
+            bins1 = [(0, )]*numberOfBins
+            bins2 = [(0, )]*numberOfBins
+
+            gates = [rv1, rv2]
+            bins = [bins1, bins2]
+
+            # set objective function
+            for gate in range(0, numberOfGates):
+                currentBins = bins[gate]
+                generatedRV = gates[gate]
+                for bin in range(0, numberOfBins):
+                    variableIndex = gate * numberOfBins + bin
+
+                    task.putvarbound(variableIndex, mosek.boundkey.ra, np.log(generatedRV.bins[bin]), 1)
+
+                    # save index to the bins
+                    currentBins[bin] = (variableIndex, )
+
+            RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
+            RV2 = RandomVariableMOSEK(bins2, rv1.edges, task)
+
+            print(RV2.bins)
+
+            maximum, newNofVariables, newNofConstr = RV1.maximum_GP(RV2, curNofVariables, curNofConstr)
+            maximumConCat = maximum.bins
+
+
+            # todo
+            # task.putobjsense(objsense.minimize)
+            # task.putclist([2], [1])  # minimize the upper auxiliary variables
+            #
+            # # Add linear constraints for the expressions appearing in exp(...)
+            # task.putaijlist([0, 0, 0], [numvar + numMono*3 - 1, 0, 1], [1, -1, -1])
+            # task.putconbound(0, boundkey.fx, 0, 0)
+            #
+            # expStart = numvar
+            #
+            # # aux unbounded
+            # task.putvarboundlistconst(range(expStart, expStart + 3 * numMono, 3),
+            #                           boundkey.fr, -inf, inf)
+            #
+            # # slack is unbounded
+            # task.putvarboundlistconst(range(expStart + 2, expStart + 2 + 3 * numMono, 3),
+            #                           boundkey.fr, -inf, inf)
+            #
+            # # t_i = 1
+            # task.putvarboundlistconst(range(expStart + 1, expStart + 1 + 3 * numMono, 3),
+            #                           boundkey.fx, 1.0, 1.0)
+            #
+            # # Every triple is in an exponential cone
+            # task.appendconesseq([conetype.pexp] * numMono, [0.0] * numMono, [3] * numMono, expStart)
+            #
+            # # Solve and map to original h, w, d
+            # task.optimize()
+            # xyz = [0.0] * (numvar + numMono*3)
+            # task.getxxslice(soltype.itr, 0, 5, xyz)
+            # print(xyz)
+            # print(np.exp(xyz))
+
+
 
 def testMaximum_MAX_CONV(dec = 3):
     mu1 = 5.98553396
@@ -1183,16 +1286,76 @@ def test_setting(dec = 3):
             # print(actual)
 
             # np.testing.assert_almost_equal(desired, actual, decimal=dec)
+def testMult_GP():
+
+    x = 0.5
+    y = 0.5
+
+    desired = x*y
+
+    inf = 0.0
+
+    with Env() as env:
+        with env.Task(0, 0) as task:
+            task.set_Stream(streamtype.log, streamprinter)
+
+            # Add variables and constraints
+            numLinCon = 2
+            numvar = 2
+            numMono = 1
+            task.appendvars(numvar + numMono*3)
+            task.appendcons(numLinCon + numMono)
+
+
+            task.putobjsense(objsense.minimize)
+            task.putclist([2], [1])   # minimize the upper auxiliary variables
+            task.putvarboundlist([0, 1], [boundkey.ra]*numvar, [np.log(x), np.log(y)], [1, 1])
+
+            # Add the upper bounds
+            # task.putaijlist([0, 1], , aval)
+            # task.putconboundslice(0, numvar, bkc, blc, buc)
+
+            # Add linear constraints for the expressions appearing in exp(...)
+            task.putaijlist([0, 0, 0], [numvar + numMono*3 - 1, 0, 1], [1, -1, -1])
+            task.putconbound(0, boundkey.fx, 0, 0)
+
+            expStart = numvar
+
+            # aux unbounded
+            task.putvarboundlistconst(range(expStart, expStart + 3 * numMono, 3),
+                                      boundkey.fr, -inf, inf)
+
+            # slack is unbounded
+            task.putvarboundlistconst(range(expStart + 2, expStart + 2 + 3 * numMono, 3),
+                                      boundkey.fr, -inf, inf)
+
+            # t_i = 1
+            task.putvarboundlistconst(range(expStart + 1, expStart + 1 + 3 * numMono, 3),
+                                      boundkey.fx, 1.0, 1.0)
+
+            # Every triple is in an exponential cone
+            task.appendconesseq([conetype.pexp] * numMono, [0.0] * numMono, [3] * numMono, expStart)
+
+            # Solve and map to original h, w, d
+            task.optimize()
+            xyz = [0.0] * (numvar + numMono*3)
+            task.getxxslice(soltype.itr, 0, 5, xyz)
+            print(xyz)
+            print(np.exp(xyz))
+
+    print(desired)
 
 if __name__ == "__main__":
     # testConvolution_MAX(dec=8)
     # testMaximum_MAX(dec=8)
 
     # testMaximum_MAX_CONV(dec=8)
-    testMaximum_MAX_CONV_asmin()
+    # testMaximum_MAX_CONV_asmin()
     # testMaximum_MAX_CONV2_asmin()
 
     # test_setting()
 
+    testMaximum_GP()
+    # testMult_GP()
 
     print('All tests passed!')

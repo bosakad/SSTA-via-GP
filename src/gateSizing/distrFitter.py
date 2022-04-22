@@ -10,7 +10,7 @@ and fits the curve (linear reg.)
 
 """
 
-def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shouldSave: bool):
+def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shouldSave: bool, GP=False):
     """
     Generates a distributions with parameters and saves it into numpy file.
 
@@ -25,13 +25,12 @@ def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shoul
     """
 
 
-
-        # some random parameters: todo: make them real
-    # mus = [1, 1.3, 1.4, 1.5, 2.6]
-    # stds = [0.17, 0.16, 0.15, 0.13, 0.12]
-    mus = [2, 1.95, 1.85, 1.9, 1, 0.9, 0, 0]
-    stds = [0.165,0.164, 0.163, 0.161, 0.16, 0.14, 0.13, 0.1]
-
+    if GP:
+        mus = [2, 1.95, 1.85, 1.9, 1, 0.9, 0, 0]
+        stds = [0.165,0.164, 0.163, 0.161, 0.16, 0.14, 0.13, 0.1]
+    else:
+        mus = [1.2, 1.1, 1.05, 1, 1, 0.9, 0, 0]
+        stds = [0.165, 0.164, 0.163, 0.161, 0.16, 0.14, 0.13, 0.1]
 
         # generate distr
     numberOfDistr = area.shape[0]
@@ -74,7 +73,7 @@ def plotDistros(distros, edges):
     # plt.savefig("Inputs.outputs/generatedDistros.jpeg", dpi=500)
     plt.show()
 
-def plotLinesForBin(distros, area, power, coef, bin):
+def plotLinesForBin(distros, area, power, coef, bin, GP=False):
     """
     Plot distros and lines
     :param distros: (numberOfDistros, NumberOfBins) np matrix of generated values
@@ -103,8 +102,10 @@ def plotLinesForBin(distros, area, power, coef, bin):
     minP = np.min(power)
     maxP = np.max(power)
 
-    def f (a, p): return coef[0]*a + coef[1]*p + coef[2]* np.power(a, -1) + coef[3]* np.power(p, -1)
-    # def f (a, p): return coef[0] + coef[1]*a + coef[2]*p
+    if GP:
+        def f (a, p): return coef[0]*a + coef[1]*p + coef[2]* np.power(a, -1) + coef[3]* np.power(p, -1)
+    else:
+        def f (a, p): return coef[0] + coef[1]*a + coef[2]*p
 
     # print(f(5, 20))
     # print(f(7, 30))
@@ -137,7 +138,7 @@ def plotLinesForBin(distros, area, power, coef, bin):
     # plt.savefig("Inputs.outputs/fitting.jpeg", dpi=500)
 
 
-def linearRegression(distros, area, power, asQP=False):
+def linearRegression(distros, area, power, GP=False):
     """
     Performs linear regression on the generated data
 
@@ -150,35 +151,37 @@ def linearRegression(distros, area, power, asQP=False):
 
     numberOfBins = distros.shape[1]
     numberOfDistros = distros.shape[0]
-    coef = np.zeros((numberOfBins, 4))
+
+    if GP: numberOfCoefs = 4
+    else:  numberOfCoefs = 3
+
+    coef = np.zeros((numberOfBins, numberOfCoefs))
 
     for bin in range(0, numberOfBins):
 
-        A = np.zeros((numberOfDistros, 4))
+        A = np.zeros((numberOfDistros, numberOfCoefs))
 
-        # A[:, 0] = 1     # b
-        A[:, 0] = area[:]   # area
-        A[:, 1] = power[:]  # power
-        A[:, 2] = np.power(area[:], -1)  # area
-        A[:, 3] = np.power(power[:], -1)  # power
+        if GP:
+            A[:, 0] = area[:]   # area
+            A[:, 1] = power[:]  # power
+            A[:, 2] = np.power(area[:], -1)  # area
+            A[:, 3] = np.power(power[:], -1)  # power
+        else:
+            A[:, 0] = 1     # b
+            A[:, 1] = area[:]   # area
+            A[:, 2] = power[:]  # power
 
-        print(area)
-        print(power)
 
         b = distros[:, bin]
 
+        if GP:
+            x = cp.Variable((4,), pos=True)
+        else:
+            x = cp.Variable((3,))
 
-        # if asQP:
-        #     pass
-        # else:
-
-        x = cp.Variable(4, pos=True)
-        # constr = [x >= 0]
         cost = cp.sum_squares(A @ x - b)
         prob = cp.Problem(cp.Minimize(cost), [])
         prob.solve()
-
-        # print(x.value)
 
         # x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
         coef[bin, :] = np.array(x.value)
@@ -189,29 +192,33 @@ def linearRegression(distros, area, power, asQP=False):
 
         # exit(-1)
 
-    coef[coef <= 0] += 0.000000000000000000000000001
+    if GP:
+        coef[coef <= 0] += 0.000000000000000000000000001
 
     print(coef)
     return coef
 
-def saveModel(coef):
+def saveModel(coef, GP=False):
     """
     Saves model
     :param coef: coeficients of the model
     :return: None
     """
 
-    outfile = "Inputs.outputs/model"
+    if GP:
+        outfile = "Inputs.outputs/model"
+    else:
+        outfile = "Inputs.outputs/model_MIXED_INT"
 
     np.savez(outfile, coef=coef)
 
     return None
 
-def plotDistrosForInputs(a, f, e):
+def plotDistrosForInputs(a, f, e, GP=False):
 
     interval = (0, 20)
 
-    coef = np.load("Inputs.outputs/model.npz")
+    coef = np.load("Inputs.outputs/model_MIXED_INT.npz")
     model = coef['coef']
     print(model)
     numberOfBins = model.shape[0]
@@ -225,19 +232,27 @@ def plotDistrosForInputs(a, f, e):
     x = 10
 
     # for x in [1, 1.5, 2, 2.5, 3, 3.5, 4]:
-    for x in [1, 2, 4, 6, 10, 20, 100]:
+    for x in [1, 2, 4, 6, 10, 15, 100]:
     # for x in [20, 100]:
 
         # x = 1 + 2*iter
 
         distr = np.zeros(numberOfBins)
         for bin in range(0, numberOfBins):
-            a1 = model[bin, 0]
-            p1 = model[bin, 1]
-            a2 = model[bin, 2]
-            p2 = model[bin, 3]
+            if GP:
+                a1 = model[bin, 0]
+                p1 = model[bin, 1]
+                a2 = model[bin, 2]
+                p2 = model[bin, 3]
 
-            prob = a1*a_i*x + p1*f_i*e_i*x + a2* (1/ (a_i*x)) + p2* (1/(f_i*e_i*x))
+                prob = a1*a_i*x + p1*f_i*e_i*x + a2* (1/ (a_i*x)) + p2* (1/(f_i*e_i*x))
+            else:
+                shift = model[bin, 0]
+                ac = model[bin, 1]
+                pc = model[bin, 2]
+
+                prob = shift + ac * a_i * x + pc * f_i * e_i * x
+
             distr[bin] = prob
 
         print(distr)
@@ -261,31 +276,26 @@ def plotDistrosForInputs(a, f, e):
 if __name__ == "__main__":
 
     # parameters
-    # area = np.array([1, 4, 5, 15, 20, 25, 35])
-    # power = np.array([1, 4, 5, 40, 80, 100, 140])
 
-    area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 1.6
-    power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.6
-    # e = np.array([1, 2, 1, 1.5, 1.5, 1])
+    area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 2
+    power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 2
 
-    # area = np.array([10, 20, 30, 35, 50, 55, 70])
-    # power = np.array([10, 20, 30, 40, 45, 60, 65])
+    # area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 1.6
+    # power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.6
 
-    # area = np.array([5, 7, 8])
-    # power = np.array([20, 30, 40])
+    interval = (0, 12)
+    numberOfBins = 7
+    asGp = False
 
-    interval = (0, 28)
-    numberOfBins = 6
-
-    distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=False)
+    distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=True)
     # plotDistros(distros, edges)
-    coef = linearRegression(distros, area, power)
+    coef = linearRegression(distros, area, power, GP=asGp)
 
-    plotLinesForBin(distros, area, power, coef, 5)
+    plotLinesForBin(distros, area, power, coef, 0, GP=asGp)
 
-    saveModel(coef)
+    saveModel(coef, GP=asGp)
 
     f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
     e = np.array([1, 2, 1, 1.5, 1.5, 1])
     a = np.ones(6)
-    plotDistrosForInputs(a, f, e)
+    plotDistrosForInputs(a, f, e, GP=asGp)

@@ -160,7 +160,7 @@ class RandomVariableCVXPY:
 
         return maximumClass, MaxConstraints
 
-    def convolution_GP(self, secondVariable):
+    def convolution_GP(self, secondVariable, constr):
         """
         Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
         using the 'quadratic' algorithm and GP programming
@@ -172,7 +172,6 @@ class RandomVariableCVXPY:
         """
 
         x1 = self.bins
-
         x2 = secondVariable.bins
 
         numberOfBins = len(x1)
@@ -188,23 +187,55 @@ class RandomVariableCVXPY:
             for k in range(0, z + 1):
                 convolution[z] += x1[k] * x2[z - k]
 
-        constr = self.cutBins(self.edges, convolution, GP=True)
-        if constr == None: constr = []
+        constrNew = self.cutBins(self.edges, convolution, GP=True)
 
-
-        sum = 0
-        # normalize
-        for bin in range(0, numberOfBins):
-            sum += convolution[bin]
-
-        # create a new monomial
-        y = cp.Variable(pos=True)
-        constr.append(sum <= y)
-
-        for bin in range(0, numberOfBins):
-            convolution[bin] = convolution[bin]
+        constr.extend(constrNew)
 
         maximumClass = RandomVariableCVXPY(convolution, self.edges) # with exact comput.
+
+        return maximumClass, constr
+
+    def convolution_GP_OPT(self, secondVariable, constr):
+        """
+        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+        using the 'quadratic' algorithm and GP programming
+
+        :param self: class RandomVariableCVXPY
+        :param secondVariable: class RandomVariableCVXPY
+        :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
+        :return MaxConstraints: python array with inequalities - for computing the maximum
+        """
+
+        x1 = self.bins
+        x2 = secondVariable.bins
+
+        numberOfBins = len(x1)
+
+        convolution = {}
+        # allocation of convolution dictionary
+        for i in range(0, numberOfBins):
+            convolution[i] = 0
+
+        # i >= j
+
+        for z in range(0, numberOfBins):
+            for k in range(0, z + 1):
+                convolution[z] += x1[k] * x2[z - k]
+
+        constrNew = self.cutBins(self.edges, convolution, GP=True)
+
+        constr.extend(constrNew)
+        print(constrNew)
+        print(constr.extend(constrNew))
+
+        newConv = {}
+        for bin in range(0, numberOfBins):
+            # create monomial
+            mono = cp.Variable(pos=True)
+            constr.append(convolution[bin] <= mono)
+            newConv[bin] = mono
+
+        maximumClass = RandomVariableCVXPY(newConv, self.edges) # with exact comput.
 
 
         return maximumClass, constr
@@ -247,6 +278,54 @@ class RandomVariableCVXPY:
         maximumClass = RandomVariableCVXPY(maximum, self.edges) # with exact comput.
 
         return maximumClass
+
+    def maximum_GP_OPT(self, secondVariable, constr):
+        """
+        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+        using the 'quadratic' algorithm and McCormick envelopes
+        IMPORTANT:
+                WORKS ONLY FOR MINIMIZATION PROBLEM
+
+        :param self: class RandomVariableCVXPY
+        :param secondVariable: class RandomVariableCVXPY
+        :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
+        :return MaxConstraints: python array with inequalities - for computing the maximum
+        """
+
+        x1 = self.bins
+
+        x2 = secondVariable.bins
+
+        numberOfBins = len(x1)
+
+        maximum = {}
+        # allocation of convolution dictionary
+        for i in range(0, numberOfBins):
+            maximum[i] = 0
+
+        # i >= j
+        for i in range(0, numberOfBins):
+            for j in range(0, i + 1):
+
+                # new variable - multiplication of x*y
+                maximum[i] += x1[i]*x2[j]
+
+                if i != j:
+                    maximum[i] += x1[j] * x2[i]
+
+            # create upper bounds
+
+        newMax = {}
+        for bin in range(0, numberOfBins):
+
+            # create monomial
+            mono = cp.Variable(pos=True)
+            constr.append(maximum[bin] <= mono)
+            newMax[bin] = mono
+
+        maximumClass = RandomVariableCVXPY(newMax, self.edges) # with exact comput.
+
+        return maximumClass, constr
 
     def convolution_McCormick(self, secondVariable):
         """
