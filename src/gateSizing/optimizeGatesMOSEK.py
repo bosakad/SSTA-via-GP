@@ -706,7 +706,7 @@ def optimizeCVXPY_GP():
     This function optimizes the c17 circuit using the GP model
     """
 
-    numberOfBins = 6
+    numberOfBins = 30
     binsInterval = (0, 28)
     numberOfGates = 8
 
@@ -718,12 +718,12 @@ def optimizeCVXPY_GP():
     a = np.ones(numberOfGates - 2)
 
     # generate gates
-    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=2, int=binsInterval)
-    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=4, int=binsInterval)
-    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=5., int=binsInterval)
-    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=5, int=binsInterval)
-    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=3, int=binsInterval)
-    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=1, int=binsInterval)
+    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=2.13, int=binsInterval)
+    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=2.4, int=binsInterval)
+    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=4.14, int=binsInterval)
+    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=8, int=binsInterval)
+    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=8, int=binsInterval)
+    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=7, int=binsInterval)
 
     # generate inputs
     in1 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=20, int=binsInterval)
@@ -771,19 +771,15 @@ def optimizeCVXPY_GP():
     delays, newConstr = SSTA.calculateCircuitDelay(startingNodes, cvxpy=True, GP=True)
     constr.extend(newConstr)
 
-    sum = 0
-    norm = 0
     midPoints = 0.5 * (delays[-1].edges[1:] + delays[-1].edges[:-1])  # midpoints of the edges of hist.
-    # for gate in range(0, len(delays)):
+    nLast = 2
+    finalMidPoints = np.append(np.ones((numberOfBins - nLast,))*1.0e-4, np.power(midPoints[-nLast:], 2))
 
-    for bin in range(4, numberOfBins):
-        sum += delays[-1].bins[bin] * midPoints[bin]                # minimize the mean value
-        # norm += delays[-1].bins[bin]
-
-    # sum = sum / (delays[-1].bins[0] + delays[-1].bins[1])
-
-
-
+    sum = 0
+    for bin in range(0, numberOfBins):
+        sum += delays[-1].bins[bin] * finalMidPoints[bin]                # minimize the mean value
+    # for bin in range(0, 28):
+    #     sum += 1 / delays[-1].bins[bin]
 
     # create sizing parameters
 
@@ -802,8 +798,8 @@ def optimizeCVXPY_GP():
     constr.append(area <= Amax)
 
     model = loadModel('Inputs.outputs/model.npz')
+    # print(model)
 
-    # for gate in range(0, 6):
     for gate in range(0, 6):
         curGate = gateNodes[gate]
         bins = curGate.randVar.bins
@@ -823,8 +819,12 @@ def optimizeCVXPY_GP():
             a2 = model[bin, 2]
             p2 = model[bin, 3]
 
-            # prob = shift + areaCoef * x_i * a_i + powerCoef * x_i * e_i * f_i
-            prob = a1 * x_i*a_i + p1 * x_i*e_i*f_i + a2 * (1/(x_i*a_i)) + p2 * (1/(x_i*e_i*f_i))
+                # if the gate is zero, no sizing should be applied
+            if (model[bin, :] == 1.00000000e-27).all():
+                prob = 1.00000000e-27
+
+            else:
+                prob = a1 * x_i*a_i + p1 * x_i*e_i*f_i + a2 * (1/(x_i*a_i)) + p2 * (1/(x_i*e_i*f_i))
 
             constr.append(bins[bin] >= prob)
 
@@ -837,11 +837,16 @@ def optimizeCVXPY_GP():
                mosek_params={  'MSK_DPAR_INTPNT_CO_TOL_MU_RED': 0.1,
                'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}  # max time
                )
-    
+
 
 
     print('CVaR:')
     print(prob.value)
+
+    sum = 0
+    for bin in range(numberOfBins - nLast, numberOfBins):
+        sum += delays[-1].bins[bin].value
+    print(sum)
 
 
     rvs = []
@@ -858,7 +863,10 @@ def optimizeCVXPY_GP():
 
     print('Sizing parameters')
     print(sizingVariables.value)
+    print('total area:')
     print(np.sum(np.multiply(sizingVariables.value, a)))
+    print('total power:')
+    print(np.sum(np.multiply(sizingVariables.value, np.multiply(f, e))))
 
     print("\n APRX. VALUES: \n")
     for i in range(0, len(delays)):
@@ -894,9 +902,14 @@ def optimizeCVXPY_GP():
 
     # print(np.sum(delays[-1].bins))
 
-    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins,density="PDF", alpha=0.2, color='orange')
-    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, density="PDF", color='blue')
-    # plt.show()
+    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
+    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, alpha=0.2, color='blue')
+    plt.show()
+
+    sum = 0
+    for bin in range(numberOfBins - nLast, numberOfBins):
+        sum += delays[-1].bins[bin]
+    print(sum)
 
     actual = putTuplesIntoArray(rvs=delays)
     print(actual)

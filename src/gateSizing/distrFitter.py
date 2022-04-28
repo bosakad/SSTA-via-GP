@@ -26,15 +26,16 @@ def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shoul
 
 
     if GP:
-        mus = [2, 1.95, 1.85, 1.9, 1, 0.9, 0, 0]
-        stds = [0.165,0.164, 0.163, 0.161, 0.16, 0.14, 0.13, 0.1]
+        mus = [1.97, 1.95, 1.85, 1.3, 0.8, 0.5, 0.3, 0.15]
+        stds = [0.165,0.163, 0.162, 0.161, 0.16, 0.14, 0.14, 0.13]
     else:
-        mus = [1.2, 1.1, 1.05, 1, 1, 0.9, 0, 0]
+        mus = [1.1, 1.1, 1.05, 1, 1, 0.9, 0, 0]
         stds = [0.165, 0.164, 0.163, 0.161, 0.16, 0.14, 0.13, 0.1]
 
         # generate distr
     numberOfDistr = area.shape[0]
 
+    print(GP)
     edges = None
     distros = np.zeros((numberOfDistr, numberOfBins))
     for d in range(0, numberOfDistr):
@@ -43,7 +44,6 @@ def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shoul
         distros[d, :] = rv.bins[:]
 
         edges = rv.edges
-
 
 
     if shouldSave:
@@ -58,7 +58,8 @@ def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shoul
 
 def plotDistros(distros, edges):
     """
-    Plot distros
+    Plot distributions
+
     :param distros: (numberOfDistros, NumberOfBins) np matrix of generated values
     :param edges: (1, numberOfBins + 1) np array of edges
     """
@@ -76,6 +77,7 @@ def plotDistros(distros, edges):
 def plotLinesForBin(distros, area, power, coef, bin, GP=False):
     """
     Plot distros and lines
+
     :param distros: (numberOfDistros, NumberOfBins) np matrix of generated values
     :param area: array of area constraints
     :param power: array of power constraints
@@ -186,21 +188,17 @@ def linearRegression(distros, area, power, GP=False):
         # x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
         coef[bin, :] = np.array(x.value)
 
-        print(x.value)
-
-        # print(x)
-
-        # exit(-1)
+        # print(x.value)
 
     if GP:
         coef[coef <= 0] += 0.000000000000000000000000001
 
-    print(coef)
     return coef
 
 def saveModel(coef, GP=False):
     """
     Saves model
+
     :param coef: coeficients of the model
     :return: None
     """
@@ -218,18 +216,19 @@ def plotDistrosForInputs(a, f, e, GP=False):
 
     interval = (0, 20)
 
-    coef = np.load("Inputs.outputs/model_MIXED_INT.npz")
+    if not GP:
+        coef = np.load("Inputs.outputs/model_MIXED_INT.npz")
+    else:
+        coef = np.load("Inputs.outputs/model.npz")
+
     model = coef['coef']
-    print(model)
     numberOfBins = model.shape[0]
 
-    gate = 0
+    gate = 5
 
     a_i = a[gate]
     f_i = f[gate]
     e_i = e[gate]
-
-    x = 10
 
     # for x in [1, 1.5, 2, 2.5, 3, 3.5, 4]:
     for x in [1, 2, 4, 6, 10, 15, 100]:
@@ -245,7 +244,7 @@ def plotDistrosForInputs(a, f, e, GP=False):
                 a2 = model[bin, 2]
                 p2 = model[bin, 3]
 
-                prob = a1*a_i*x + p1*f_i*e_i*x + a2* (1/ (a_i*x)) + p2* (1/(f_i*e_i*x))
+                prob = a1*a_i*x + p1*f_i*e_i*x + a2* (1/ np.power((a_i*x), 1)) + p2* (1/np.power((f_i*e_i*x), 1))
             else:
                 shift = model[bin, 0]
                 ac = model[bin, 1]
@@ -277,18 +276,18 @@ if __name__ == "__main__":
 
     # parameters
 
-    area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 2
-    power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 2
+    # area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 2
+    # power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 2
 
-    # area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 1.6
-    # power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.6
+    area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 1.6
+    power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.6
 
-    interval = (0, 12)
-    numberOfBins = 7
-    asGp = False
+    interval = (0, 28)
+    numberOfBins = 30
+    asGp = True
 
-    distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=True)
-    # plotDistros(distros, edges)
+    distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=True, GP=asGp)
+    plotDistros(distros, edges)
     coef = linearRegression(distros, area, power, GP=asGp)
 
     plotLinesForBin(distros, area, power, coef, 0, GP=asGp)

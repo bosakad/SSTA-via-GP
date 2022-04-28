@@ -210,7 +210,7 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
     #
     #
 
-def mainCVXPY_GP(numberOfGates=1, numberOfBins=15, interval=(0, 35)):
+def mainCVXPY_GP(numberOfGates=8, numberOfBins=25, interval=(-4, 25)):
 
     """
         Computes SSTA using unary encoding, can be computed in a 'precise' or non-precise way
@@ -302,7 +302,7 @@ def mainCVXPY_GP(numberOfGates=1, numberOfBins=15, interval=(0, 35)):
     sum = 0
     midPoints = 0.5 * (delays[-1].edges[1:] + delays[-1].edges[:-1])  # midpoints of the edges of hist.
     # for gate in range(0, len(delays)):
-    print(midPoints)
+    # print(midPoints)
     for bin in range(0, numberOfBins):
             sum += delays[-1].bins[bin]
 
@@ -313,8 +313,9 @@ def mainCVXPY_GP(numberOfGates=1, numberOfBins=15, interval=(0, 35)):
 
     prob.solve(verbose=True, solver=cp.MOSEK, gp=True,
                mosek_params={  'MSK_DPAR_INTPNT_CO_TOL_MU_RED': 0.1,
-               'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}  # max time
-               )
+               'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}
+                               # , mosek.iparam.intpnt_solve_form: mosek.solveform.dual}  # max time
+                )
 
     # num_nonZeros = prob.solver_stats.extra_stats.getAttr("NumNZs")
     # ObjVal = prob.solver_stats.extra_stats.getAttr("ObjVal")
@@ -345,62 +346,68 @@ def mainCVXPY_GP(numberOfGates=1, numberOfBins=15, interval=(0, 35)):
 
     lastGate = (rvs[-1].mean, rvs[-1].std)
 
-    # return (lastGate, time)
+    return (lastGate, time)
     # return (num_nonZeros, ObjVal, lastGate, time)
 
 
     # NUMPY
 
         # generate inputs
-    startingNodes = []
-    for i in range(0, numberOfGates + 1):
-        g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval, forGP=False)
-        node = Node(g)
-        startingNodes.append( node )
+    # startingNodes = []
+    # for i in range(0, numberOfGates + 1):
+    #     g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval, forGP=False)
+    #     node = Node(g)
+    #     startingNodes.append( node )
+    #
+    # # generate inputs
+    # startingNodes = []
+    # for i in range(0, numberOfGates + 1):
+    #     g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval, forGP=False)
+    #     node = Node(g)
+    #     startingNodes.append(node)
+    #
+    #     # generetate nodes
+    # generatedNodes = []
+    # for i in range(0, numberOfGates):
+    #     g = histogramGenerator.get_gauss_bins(gateParams[0], gateParams[1], numberOfBins, n_samples, interval, forGP=False)
+    #     node = Node(g)
+    #     generatedNodes.append(node)
+    #
+    # # set circuit design cvxpy
+    #
+    # # start
+    # startingNodes[0].setNextNodes([generatedNodes[0]])
+    #
+    # # upper part
+    # for i in range(1, numberOfGates + 1):
+    #     start = startingNodes[i]
+    #     start.setNextNodes([generatedNodes[i - 1]])
+    #
+    #     # lower part
+    # for i in range(0, numberOfGates - 1):
+    #     node = generatedNodes[i]
+    #     node.setNextNodes([generatedNodes[i + 1]])
+    #
+    # delays = SSTA.calculateCircuitDelay(startingNodes)
+    # delays = delays[numberOfGates + 1:]
+    #
+    # print(delays[-1].bins)
+    #
+    # actual = putTuplesIntoArray(rvs=delays)
 
-    # generate inputs
-    startingNodes = []
-    for i in range(0, numberOfGates + 1):
-        g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval, forGP=False)
-        node = Node(g)
-        startingNodes.append(node)
+        # monte carlo
+    lastGate, values = MonteCarlo(numberOfGates, True)
+    print(lastGate)
 
-        # generetate nodes
-    generatedNodes = []
-    for i in range(0, numberOfGates):
-        g = histogramGenerator.get_gauss_bins(gateParams[0], gateParams[1], numberOfBins, n_samples, interval, forGP=False)
-        node = Node(g)
-        generatedNodes.append(node)
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins,alpha=0.2, color='orange')
 
-    # set circuit design cvxpy
-
-    # start
-    startingNodes[0].setNextNodes([generatedNodes[0]])
-
-    # upper part
-    for i in range(1, numberOfGates + 1):
-        start = startingNodes[i]
-        start.setNextNodes([generatedNodes[i - 1]])
-
-        # lower part
-    for i in range(0, numberOfGates - 1):
-        node = generatedNodes[i]
-        node.setNextNodes([generatedNodes[i + 1]])
-
-    delays = SSTA.calculateCircuitDelay(startingNodes)
-    delays = delays[numberOfGates + 1:]
-
-    print(delays[-1].bins)
-
-    actual = putTuplesIntoArray(rvs=delays)
-
-    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins,alpha=0.2, color='orange')
     plt.hist(rvs[-1].edges[:-1], rvs[-1].edges, weights=rvs[-1].bins, density="PDF", color='blue')
+    _ = plt.hist(values, bins=numberOfBins, density='PDF', alpha=0.7)
     plt.show()
 
 
-    print("NUMPY VALUES")
-    print(actual)
+    # print("NUMPY VALUES")
+    # print(actual)
 
 
 
@@ -551,7 +558,7 @@ def mainCVXPYMcCormick(numberOfGates=1, numberOfUnaries=10, numberOfBins=20, int
     return (num_nonZeros, ObjVal, lastGate, time)
 
 
-def MonteCarlo(numberOfGates=10):
+def MonteCarlo(numberOfGates=10, returnGate=False):
 
     n_samples = 2000000
     seed = 0
@@ -588,8 +595,10 @@ def MonteCarlo(numberOfGates=10):
 
     desired = get_moments_from_simulations(nodes_simulation)
 
-    return desired[-1]
-
+    if returnGate:
+        return desired[-1], nodes_simulation[-1]
+    else:
+        return desired[-1]
 
 
 def LadderNumpy(number_of_nodes=1, numberOfBins=10, numberOfUnaries=10, interval=(-8, 20)):

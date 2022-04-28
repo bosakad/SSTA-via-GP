@@ -907,10 +907,10 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     mu4 = 10.98483475
     sigma4 = 1.802585
 
-    interval = (0, 20)
+    interval = (0, 60)
 
     numberOfSamples = 2000000
-    numberOfBins = 6
+    numberOfBins = 41
 
 
     # DESIRED
@@ -1045,7 +1045,7 @@ def test_CVXPY_CONVOLUTION_GP(dec: int):
     print(max1.bins)
 
     import matplotlib.pyplot as plt
-    plt.hist(maxRV.edges[:-1], maxRV.edges, weights=maxRV.bins, alpha=0.2, color='blue')
+    plt.hist(maxRV.edges[:-1], maxRV.edges, weights=maxRV.bins, alpha=0.2,density="PDF", color='blue')
     plt.hist(max1.edges[:-1], max1.edges, weights=max1.bins, density="PDF", color='orange')
     plt.show()
 

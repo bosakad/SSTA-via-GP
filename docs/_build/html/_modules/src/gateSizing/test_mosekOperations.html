@@ -62,6 +62,7 @@
              
   <h1>Source code for src.gateSizing.test_mosekOperations</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">mosek</span>
+<span class="kn">from</span> <span class="nn">mosek</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">histogramGenerator</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -103,7 +104,7 @@
     <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
 
 
-    <span class="n">max1</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">convolutionOfTwoVarsNaiveSAME_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span>
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maxOfDistributionsQUAD_FORMULA_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span>
     <span class="c1"># max1 = test1.convolutionOfTwoVarsShift(test2)</span>
     <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
 
@@ -153,7 +154,8 @@
                         <span class="c1"># Set the bounds on variable</span>
                         <span class="c1"># 0 &lt;= x_j &lt;= 1</span>
 
-                        <span class="n">task</span><span class="o">.</span><span class="n">putvarbound</span><span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">generatedRV</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">])</span>
+                        <span class="c1"># task.putvarbound(variableIndex, mosek.boundkey.ra, 0.0, generatedRV.bins[bin, unary])</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putvarbound</span><span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span> <span class="n">generatedRV</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
 
                             <span class="c1"># save index to the bins</span>
                         <span class="n">currentBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">variableIndex</span>
@@ -162,9 +164,9 @@
             <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
             <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
 
-            <span class="n">convolution</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">convolution_UNARY_MAX_DIVIDE_VECTORIZED</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">numberVariablesRVs</span><span class="p">,</span> <span class="mi">0</span>
-                                                                                                     <span class="p">,</span><span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">newNofConstr</span><span class="p">)</span>
+            <span class="n">convolution</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_UNARY_MAX_DIVIDE_VECTORIZED</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">numberVariablesRVs</span><span class="p">,</span> <span class="mi">0</span>
+                                                                                                     <span class="p">,</span><span class="n">asMin</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># print(newNofConstr)</span>
             <span class="n">convolutionConCat</span> <span class="o">=</span> <span class="n">convolution</span><span class="o">.</span><span class="n">bins</span>
 
                 <span class="c1"># create the objective function</span>
@@ -174,7 +176,8 @@
                 <span class="c1"># solve problem</span>
 
             <span class="c1"># Input the objective sense (minimize/maximize)</span>
-            <span class="n">task</span><span class="o">.</span><span class="n">putobjsense</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">objsense</span><span class="o">.</span><span class="n">maximize</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putobjsense</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">objsense</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span>
+            <span class="c1"># task.putobjsense(mosek.objsense.maximize)</span>
 
             <span class="c1"># Solve the problem</span>
             <span class="n">task</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
@@ -223,8 +226,10 @@
     <span class="n">mu1</span> <span class="o">=</span> <span class="mf">5.98553396</span>
     <span class="n">sigma1</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">3.98483475</span>
-    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">1.802585</span>
+    <span class="c1"># mu2 = 3.98483475</span>
+    <span class="c1"># sigma2 = 1.802585</span>
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">5.98553396</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">numberOfGates</span> <span class="o">=</span> <span class="mi">2</span>
 
 
@@ -242,7 +247,11 @@
 
     <span class="n">max1</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maxOfDistributionsQUAD_FORMULA_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span>
     <span class="c1"># max1 = test1.convolutionOfTwoVarsShift(test2)</span>
-    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">)</span>
+    <span class="c1"># s = np.random.normal(mu1, sigma1, numberOfSamples)</span>
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+    <span class="c1"># desired = [max1.mean, max1.std]</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">max1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">max1</span><span class="p">)]</span>
 
     <span class="c1"># print(desired)</span>
     <span class="c1"># print(max1.bins)</span>
@@ -355,6 +364,108 @@
 
             <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="testMaximum_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_mosekOperations.testMaximum_GP">[docs]</a><span class="k">def</span> <span class="nf">testMaximum_GP</span><span class="p">(</span><span class="n">dec</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">5.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># mu2 = 3.98483475</span>
+    <span class="c1"># sigma2 = 1.802585</span>
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">5.98553396</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">numberOfGates</span> <span class="o">=</span> <span class="mi">2</span>
+
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">forGP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">forGP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="n">inf</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">with</span> <span class="n">Env</span><span class="p">()</span> <span class="k">as</span> <span class="n">env</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">env</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">task</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+            <span class="c1"># Add variables and constraints</span>
+            <span class="n">numLinCon</span> <span class="o">=</span> <span class="n">numberOfGates</span><span class="o">*</span><span class="n">numberOfBins</span>
+            <span class="n">curNofVariables</span> <span class="o">=</span> <span class="n">numberOfGates</span><span class="o">*</span><span class="n">numberOfBins</span>
+            <span class="n">curNofConstr</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">numMono</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="c1"># task.appendvars(numvar + 1)   # try</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">curNofVariables</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="n">numLinCon</span> <span class="o">+</span> <span class="n">numMono</span><span class="p">)</span>
+
+
+            <span class="n">bins1</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="p">)]</span><span class="o">*</span><span class="n">numberOfBins</span>
+            <span class="n">bins2</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="p">)]</span><span class="o">*</span><span class="n">numberOfBins</span>
+
+            <span class="n">gates</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv1</span><span class="p">,</span> <span class="n">rv2</span><span class="p">]</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins1</span><span class="p">,</span> <span class="n">bins2</span><span class="p">]</span>
+
+            <span class="c1"># set objective function</span>
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfGates</span><span class="p">):</span>
+                <span class="n">currentBins</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">generatedRV</span> <span class="o">=</span> <span class="n">gates</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="n">variableIndex</span> <span class="o">=</span> <span class="n">gate</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="nb">bin</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putvarbound</span><span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">generatedRV</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+
+                    <span class="c1"># save index to the bins</span>
+                    <span class="n">currentBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="p">)</span>
+
+            <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+            <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">RV2</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+            <span class="n">maximum</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_GP</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
+            <span class="n">maximumConCat</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span></div>
+
+
+            <span class="c1"># todo</span>
+            <span class="c1"># task.putobjsense(objsense.minimize)</span>
+            <span class="c1"># task.putclist([2], [1])  # minimize the upper auxiliary variables</span>
+            <span class="c1">#</span>
+            <span class="c1"># # Add linear constraints for the expressions appearing in exp(...)</span>
+            <span class="c1"># task.putaijlist([0, 0, 0], [numvar + numMono*3 - 1, 0, 1], [1, -1, -1])</span>
+            <span class="c1"># task.putconbound(0, boundkey.fx, 0, 0)</span>
+            <span class="c1">#</span>
+            <span class="c1"># expStart = numvar</span>
+            <span class="c1">#</span>
+            <span class="c1"># # aux unbounded</span>
+            <span class="c1"># task.putvarboundlistconst(range(expStart, expStart + 3 * numMono, 3),</span>
+            <span class="c1">#                           boundkey.fr, -inf, inf)</span>
+            <span class="c1">#</span>
+            <span class="c1"># # slack is unbounded</span>
+            <span class="c1"># task.putvarboundlistconst(range(expStart + 2, expStart + 2 + 3 * numMono, 3),</span>
+            <span class="c1">#                           boundkey.fr, -inf, inf)</span>
+            <span class="c1">#</span>
+            <span class="c1"># # t_i = 1</span>
+            <span class="c1"># task.putvarboundlistconst(range(expStart + 1, expStart + 1 + 3 * numMono, 3),</span>
+            <span class="c1">#                           boundkey.fx, 1.0, 1.0)</span>
+            <span class="c1">#</span>
+            <span class="c1"># # Every triple is in an exponential cone</span>
+            <span class="c1"># task.appendconesseq([conetype.pexp] * numMono, [0.0] * numMono, [3] * numMono, expStart)</span>
+            <span class="c1">#</span>
+            <span class="c1"># # Solve and map to original h, w, d</span>
+            <span class="c1"># task.optimize()</span>
+            <span class="c1"># xyz = [0.0] * (numvar + numMono*3)</span>
+            <span class="c1"># task.getxxslice(soltype.itr, 0, 5, xyz)</span>
+            <span class="c1"># print(xyz)</span>
+            <span class="c1"># print(np.exp(xyz))</span>
+
+
+
 <div class="viewcode-block" id="testMaximum_MAX_CONV"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_mosekOperations.testMaximum_MAX_CONV">[docs]</a><span class="k">def</span> <span class="nf">testMaximum_MAX_CONV</span><span class="p">(</span><span class="n">dec</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
     <span class="n">mu1</span> <span class="o">=</span> <span class="mf">5.98553396</span>
     <span class="n">sigma1</span> <span class="o">=</span> <span class="mi">1</span>
@@ -449,7 +560,7 @@
             <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
             <span class="n">RV3</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins3</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
 
-            <span class="n">maximum</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">,</span> <span class="n">numberVariablesRVs</span><span class="p">,</span>
+            <span class="n">maximum</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_VECTORIZED</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">,</span> <span class="n">numberVariablesRVs</span><span class="p">,</span>
                                                                                              <span class="mi">0</span><span class="p">)</span>
 
             <span class="c1"># maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs,</span>
@@ -515,13 +626,800 @@
             <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="testMaximum_MAX_CONV_asmin"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_mosekOperations.testMaximum_MAX_CONV_asmin">[docs]</a><span class="k">def</span> <span class="nf">testMaximum_MAX_CONV_asmin</span><span class="p">(</span><span class="n">dec</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">1.802585</span>
+
+    <span class="n">mu3</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">sigma3</span> <span class="o">=</span> <span class="mf">0.2</span>
+
+    <span class="n">numberOfGates</span> <span class="o">=</span> <span class="mi">3</span>
+
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="c1"># numberOfBins = 7</span>
+    <span class="c1"># numberOfUnaries = 10</span>
+
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="c1"># rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)</span>
+    <span class="c1"># rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)</span>
+    <span class="c1"># rv3 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)</span>
+
+    <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;Inputs.outputs/model.npz&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">coef</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">]</span>
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">generateAccordingToModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">x_i</span><span class="o">=</span><span class="mf">1.5</span>  <span class="p">,</span> <span class="nb">int</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span> <span class="n">nUnaries</span><span class="o">=</span><span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">generateAccordingToModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">x_i</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span> <span class="n">nUnaries</span><span class="o">=</span><span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv3</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">generateAccordingToModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">x_i</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span> <span class="n">nUnaries</span><span class="o">=</span><span class="n">numberOfUnaries</span><span class="p">)</span>
+
+
+    <span class="c1"># print(rv1.bins)</span>
+    <span class="c1"># print(rv2.bins)</span>
+    <span class="c1"># max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)</span>
+    <span class="c1"># conv = max1.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)</span>
+    <span class="n">conv</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">,</span> <span class="n">rv3</span><span class="p">)</span>
+    <span class="c1"># conv = conv.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)</span>
+    <span class="c1"># conv = conv.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)</span>
+    <span class="c1"># max1 = test1.convolutionOfTwoVarsShift(test2)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">conv</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">conv</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="c1"># print(desired)</span>
+    <span class="c1"># exit(-1)</span>
+
+    <span class="c1"># print(desired)</span>
+    <span class="c1"># print(max1.bins)</span>
+
+    <span class="c1"># Make a MOSEK environment</span>
+    <span class="k">with</span> <span class="n">mosek</span><span class="o">.</span><span class="n">Env</span><span class="p">()</span> <span class="k">as</span> <span class="n">env</span><span class="p">:</span>
+        <span class="c1"># Attach a printer to the environment</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+        <span class="c1"># Create a task</span>
+        <span class="k">with</span> <span class="n">env</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">task</span><span class="p">:</span>
+            <span class="c1"># Attach a printer to the task</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+            <span class="n">numberVariablesRVs</span> <span class="o">=</span> <span class="n">numberOfGates</span><span class="o">*</span><span class="n">numberOfBins</span> <span class="o">*</span> <span class="n">numberOfUnaries</span>
+
+            <span class="c1"># The variables will initially be fixed at zero (x=0).</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">numberVariablesRVs</span><span class="p">)</span>
+
+            <span class="c1"># set variables to be boolean</span>
+            <span class="n">rvIndices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberVariablesRVs</span><span class="p">))</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putvartypelist</span><span class="p">(</span><span class="n">rvIndices</span><span class="p">,</span>
+                                <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">variabletype</span><span class="o">.</span><span class="n">type_int</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberVariablesRVs</span><span class="p">)</span>
+
+
+
+            <span class="n">bins1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">bins2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">bins3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="n">gates</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv1</span><span class="p">,</span> <span class="n">rv2</span><span class="p">,</span> <span class="n">rv3</span><span class="p">]</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins1</span><span class="p">,</span> <span class="n">bins2</span><span class="p">,</span> <span class="n">bins3</span><span class="p">]</span>
+
+            <span class="c1"># set objective function</span>
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="n">currentBins</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">generatedRV</span> <span class="o">=</span> <span class="n">gates</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+
+
+                        <span class="n">variableIndex</span> <span class="o">=</span> <span class="n">gate</span><span class="o">*</span><span class="n">numberOfBins</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="nb">bin</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary</span>
+                        <span class="c1"># task.putcj(variableIndex, 1)</span>
+
+                        <span class="c1"># Set the bounds on variable</span>
+                        <span class="c1"># 0 &lt;= x_j &lt;= 1</span>
+
+
+                        <span class="k">if</span> <span class="n">gate</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">task</span><span class="o">.</span><span class="n">putvarbound</span><span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">task</span><span class="o">.</span><span class="n">putvarbound</span><span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span> <span class="n">generatedRV</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+
+
+                            <span class="c1"># save index to the bins</span>
+                        <span class="n">currentBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">variableIndex</span>
+
+
+
+
+            <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+            <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+            <span class="n">RV3</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins3</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+
+            <span class="n">maximum</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_VECTORIZED_MIN</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">,</span> <span class="n">numberVariablesRVs</span><span class="p">,</span>
+                                                                                             <span class="mi">0</span><span class="p">,</span> <span class="n">VAR</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs,</span>
+            <span class="c1">#                                                                       0, withSymmetryConstr=True, asMin=True)</span>
+
+            <span class="c1"># maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,</span>
+            <span class="c1">#                                                                       newNofConstr, withSymmetryConstr=True, asMin=True)</span>
+
+
+            <span class="n">maximumConCat</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span>
+
+            <span class="c1"># create the objective function</span>
+            <span class="n">maximumConCat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">maximumConCat</span><span class="p">)</span>
+
+            <span class="n">midPoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">generatedRV</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">generatedRV</span><span class="o">.</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">midPoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">midPoints</span><span class="p">,</span> <span class="p">(</span><span class="n">numberOfUnaries</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">midPoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">midPoints</span><span class="p">)</span>
+
+
+            <span class="c1"># value at risk min</span>
+
+            <span class="c1"># maximumConCat = maximumConCat[-3*numberOfUnaries:]</span>
+            <span class="c1"># midPoints = midPoints[-3*numberOfUnaries:]</span>
+
+            <span class="c1"># print(midPoints)</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">putclist</span><span class="p">(</span><span class="n">maximumConCat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">midPoints</span><span class="p">))</span>
+
+            <span class="c1"># task.putclist(maximumConCat, [1]*maximumConCat.shape[0])</span>
+
+
+
+
+
+            <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.7</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">numberOfGates</span><span class="p">)</span>
+            <span class="n">Amax</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">Pmax</span> <span class="o">=</span> <span class="mi">30</span>
+
+            <span class="c1"># create sizing variables</span>
+            <span class="n">inf</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">sizingVariables</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofVariables</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">putvarboundlist</span><span class="p">(</span><span class="n">sizingVariables</span><span class="p">,</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span>
+                                 <span class="p">[</span><span class="mf">1.6</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="o">+</span><span class="n">inf</span><span class="p">]</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># binary</span>
+            <span class="n">newNofVariables</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># create constraints</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="c1"># constraint for area</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putarow</span><span class="p">(</span><span class="n">newNofConstr</span><span class="p">,</span> <span class="n">sizingVariables</span><span class="p">,</span> <span class="n">a</span><span class="p">[:</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">Amax</span><span class="p">)</span>
+
+            <span class="c1"># constraint for power</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putarow</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sizingVariables</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">e</span><span class="p">)[:</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">Pmax</span><span class="p">)</span>
+
+            <span class="n">newNofConstr</span> <span class="o">+=</span> <span class="mi">2</span>
+
+
+
+
+
+            <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">gateNodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins1</span><span class="p">,</span> <span class="n">bins2</span><span class="p">,</span> <span class="n">bins3</span><span class="p">]</span>
+
+            <span class="n">numberOfGates</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+
+                <span class="n">curNode</span> <span class="o">=</span> <span class="n">gateNodes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="c1"># generatedRV = gates[gate]</span>
+                <span class="n">x_i</span> <span class="o">=</span> <span class="n">sizingVariables</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">a_i</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">f_i</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">e_i</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="n">generatedValues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">generatedRV</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:])</span>
+
+                    <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;Inputs.outputs/model.npz&#39;</span><span class="p">)</span>
+                    <span class="n">model</span> <span class="o">=</span> <span class="n">coef</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">]</span>
+
+                    <span class="nb">round</span> <span class="o">=</span> <span class="mf">0.5</span>
+                    <span class="n">shift</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="n">areaCoef</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">powerCoef</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">curNode</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span>
+
+                    <span class="n">offset1</span> <span class="o">=</span> <span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">gate</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="nb">bin</span>
+                    <span class="n">offset2</span> <span class="o">=</span> <span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="n">gate</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="nb">bin</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putarow</span><span class="p">(</span><span class="n">offset1</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">row</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putarow</span><span class="p">(</span><span class="n">offset2</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">row</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+                    <span class="c1"># task.putconbound(offset1, mosek.boundkey.up, generatedValues + 0.1, generatedValues+0.1)</span>
+                    <span class="c1"># task.putconbound(offset2, mosek.boundkey.lo, generatedValues - 0.1, generatedValues - 0.1)</span>
+
+
+                    <span class="c1"># task.putaijlist([offset1]*row.size, row, [1]* row.size)</span>
+                    <span class="c1"># task.putaijlist([offset2] * row.size, row, [1] * row.size)</span>
+
+                    <span class="n">sizingValue</span> <span class="o">=</span> <span class="o">-</span><span class="n">numberOfUnaries</span><span class="o">*</span> <span class="p">(</span><span class="n">areaCoef</span><span class="o">*</span><span class="n">a_i</span> <span class="o">+</span> <span class="n">powerCoef</span><span class="o">*</span><span class="n">f_i</span><span class="o">*</span><span class="n">e_i</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">offset1</span><span class="p">,</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">sizingValue</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">offset2</span><span class="p">,</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">sizingValue</span><span class="p">)</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">offset1</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">up</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">shift</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="nb">round</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">offset2</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="n">shift</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="nb">round</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+
+
+
+                    <span class="c1"># task.putconbound(newNofConstr + gate * numberOfBins + bin, mosek.boundkey.fx, generatedValues, generatedValues)</span>
+
+
+
+
+
+            <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span><span class="o">*</span><span class="mi">2</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfGates</span><span class="p">):</span>
+                <span class="n">curNode</span> <span class="o">=</span> <span class="n">gateNodes</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+
+                <span class="c1"># symmetry constraints</span>
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">offset</span> <span class="o">=</span> <span class="nb">bin</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">unary</span>
+
+                        <span class="c1"># (maximum[bin])[unary] &gt;= (maximum[bin])[unary + 1])</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">curNode</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">curNode</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="n">newNofConstr</span> <span class="o">+=</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+
+                <span class="c1"># solve problem</span>
+
+            <span class="c1"># Input the objective sense (minimize/maximize)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putobjsense</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">objsense</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span>
+
+            <span class="c1"># Solve the problem</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+            <span class="c1"># Print a summary containing information</span>
+            <span class="c1"># about the solution for debugging purposes</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">solutionsummary</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">prosta</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">getprosta</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">)</span>
+            <span class="n">solsta</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">getsolsta</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">)</span>
+
+            <span class="c1"># Output a solution</span>
+            <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="n">newNofVariables</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">getxx</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">,</span> <span class="n">xx</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">solsta</span> <span class="ow">in</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">integer_optimal</span><span class="p">]:</span>
+                <span class="k">pass</span>
+                <span class="c1"># print(&quot;Optimal solution: %s&quot; % xx)</span>
+            <span class="k">elif</span> <span class="n">solsta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">prim_feas</span><span class="p">:</span>
+                <span class="k">pass</span>
+                <span class="c1"># print(&quot;Feasible solution: %s&quot; % xx)</span>
+            <span class="k">elif</span> <span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">unknown</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">prim_infeas_or_unbounded</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status Infeasible or unbounded.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">prim_infeas</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status Infeasible.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">unkown</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status unkown.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Other problem status.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Other solution status&quot;</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sizing parameters:&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">xx</span><span class="p">[</span><span class="n">sizingVariables</span><span class="p">])</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+            <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="n">xx</span><span class="p">[</span><span class="n">maximum</span><span class="o">.</span><span class="n">bins</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">maximum</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maximum</span><span class="o">.</span><span class="n">bins</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">maximum</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">rv</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+
+            <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="testMaximum_MAX_CONV2_asmin"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_mosekOperations.testMaximum_MAX_CONV2_asmin">[docs]</a><span class="k">def</span> <span class="nf">testMaximum_MAX_CONV2_asmin</span><span class="p">(</span><span class="n">dec</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">5.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">1.802585</span>
+
+    <span class="n">mu3</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">sigma3</span> <span class="o">=</span> <span class="mf">0.2</span>
+
+    <span class="n">mu4</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">sigma4</span> <span class="o">=</span> <span class="mf">0.3</span>
+
+    <span class="n">numberOfGates</span> <span class="o">=</span> <span class="mi">4</span>
+
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">8</span>
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv3</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu3</span><span class="p">,</span> <span class="n">sigma3</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv4</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu4</span><span class="p">,</span> <span class="n">sigma4</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+    <span class="c1"># print(rv1.bins)</span>
+    <span class="c1"># print(rv2.bins)</span>
+    <span class="c1"># max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)</span>
+    <span class="c1"># conv = max1.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)</span>
+    <span class="n">conv</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">,</span> <span class="n">rv3</span><span class="p">)</span>
+    <span class="n">conv</span> <span class="o">=</span> <span class="n">conv</span><span class="o">.</span><span class="n">maxOfDistributionsQUAD_FORMULA_UNARY</span><span class="p">(</span><span class="n">rv4</span><span class="p">)</span>
+    <span class="c1"># conv = conv.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)</span>
+    <span class="c1"># max1 = test1.convolutionOfTwoVarsShift(test2)</span>
+
+
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">conv</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">conv</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="c1"># print(desired)</span>
+    <span class="c1"># print(max1.bins)</span>
+
+    <span class="c1"># Make a MOSEK environment</span>
+    <span class="k">with</span> <span class="n">mosek</span><span class="o">.</span><span class="n">Env</span><span class="p">()</span> <span class="k">as</span> <span class="n">env</span><span class="p">:</span>
+        <span class="c1"># Attach a printer to the environment</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+        <span class="c1"># Create a task</span>
+        <span class="k">with</span> <span class="n">env</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">task</span><span class="p">:</span>
+            <span class="c1"># Attach a printer to the task</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+            <span class="n">numberVariablesRVs</span> <span class="o">=</span> <span class="n">numberOfGates</span><span class="o">*</span><span class="n">numberOfBins</span> <span class="o">*</span> <span class="n">numberOfUnaries</span>
+
+            <span class="c1"># The variables will initially be fixed at zero (x=0).</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">numberVariablesRVs</span><span class="p">)</span>
+
+            <span class="c1"># set variables to be boolean</span>
+            <span class="n">rvIndices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberVariablesRVs</span><span class="p">))</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putvartypelist</span><span class="p">(</span><span class="n">rvIndices</span><span class="p">,</span>
+                                <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">variabletype</span><span class="o">.</span><span class="n">type_int</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberVariablesRVs</span><span class="p">)</span>
+
+
+
+            <span class="n">bins1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">bins2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">bins3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">bins4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+
+            <span class="n">gates</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv1</span><span class="p">,</span> <span class="n">rv2</span><span class="p">,</span> <span class="n">rv3</span><span class="p">,</span> <span class="n">rv4</span><span class="p">]</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins1</span><span class="p">,</span> <span class="n">bins2</span><span class="p">,</span> <span class="n">bins3</span><span class="p">,</span> <span class="n">bins4</span><span class="p">]</span>
+
+            <span class="c1"># set objective function</span>
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfGates</span><span class="p">):</span>
+                <span class="n">currentBins</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">generatedRV</span> <span class="o">=</span> <span class="n">gates</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+
+                        <span class="n">variableIndex</span> <span class="o">=</span> <span class="n">gate</span><span class="o">*</span><span class="n">numberOfBins</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="nb">bin</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary</span>
+                        <span class="c1"># task.putcj(variableIndex, 1)</span>
+
+                        <span class="c1"># Set the bounds on variable</span>
+                        <span class="c1"># 0 &lt;= x_j &lt;= 1</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putvarbound</span><span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span> <span class="n">generatedRV</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="c1"># task.putvarbound(variableIndex, mosek.boundkey.ra, 0, 1)</span>
+
+                            <span class="c1"># save index to the bins</span>
+                        <span class="n">currentBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">variableIndex</span>
+
+
+
+
+            <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+            <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+            <span class="n">RV3</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins3</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+            <span class="n">RV4</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins4</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+
+            <span class="c1"># maximum, newNofVariables, newNofConstr = RV1.maximum_AND_Convolution_VECTORIZED_MIN(RV2, RV3, numberVariablesRVs,</span>
+            <span class="c1">#                                                                                  0)</span>
+            <span class="c1"># maximum, newNofVariables, newNofConstr = maximum.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV4, newNofVariables, newNofConstr,withSymmetryConstr=True,</span>
+            <span class="c1">#                                                                                         asMin=True)</span>
+
+            <span class="n">maximum</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_VECTORIZED_MEM_FREE</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">,</span>
+                                                                                                <span class="n">numberVariablesRVs</span><span class="p">,</span>
+                                                                                                <span class="mi">0</span><span class="p">)</span>
+            <span class="n">maximum</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">maximum_UNARY_MAX_DIVIDE_MEM_FREE</span><span class="p">(</span><span class="n">RV4</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span>
+                                                                                                 <span class="n">newNofConstr</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">,</span>
+                                                                                                 <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+
+            <span class="c1"># maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs,</span>
+            <span class="c1">#                                                                       0, withSymmetryConstr=True)</span>
+
+            <span class="c1"># maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,</span>
+            <span class="c1">#                                                                       newNofConstr, withSymmetryConstr=True)</span>
+
+
+            <span class="n">maximumConCat</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">maximumConCat</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">maximumConCat</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">maximumConCat</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+
+                <span class="c1"># create the objective function</span>
+            <span class="n">maximumConCat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">maximumConCat</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putclist</span><span class="p">(</span><span class="n">maximumConCat</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">maximumConCat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span><span class="p">)</span>
+
+            <span class="n">gateNodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins1</span><span class="p">,</span> <span class="n">bins2</span><span class="p">,</span> <span class="n">bins3</span><span class="p">,</span> <span class="n">bins4</span> <span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfGates</span><span class="p">):</span>
+
+                <span class="n">curNode</span> <span class="o">=</span> <span class="n">gateNodes</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">generatedRV</span> <span class="o">=</span> <span class="n">gates</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="n">generatedValues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">generatedRV</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:])</span>
+
+                    <span class="c1"># print(generatedValues)</span>
+
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">curNode</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putarow</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">gate</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="nb">bin</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">row</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">gate</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="nb">bin</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">fx</span><span class="p">,</span> <span class="n">generatedValues</span><span class="p">,</span> <span class="n">generatedValues</span><span class="p">)</span>
+
+
+            <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfGates</span><span class="p">):</span>
+                <span class="n">curNode</span> <span class="o">=</span> <span class="n">gateNodes</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+
+                <span class="c1"># symmetry constraints</span>
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">offset</span> <span class="o">=</span> <span class="nb">bin</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">unary</span>
+
+                        <span class="c1"># (maximum[bin])[unary] &gt;= (maximum[bin])[unary + 1])</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">curNode</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">curNode</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="n">newNofConstr</span> <span class="o">+=</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+
+                <span class="c1"># solve problem</span>
+
+            <span class="c1"># Input the objective sense (minimize/maximize)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putobjsense</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">objsense</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span>
+
+            <span class="c1"># Solve the problem</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+            <span class="c1"># Print a summary containing information</span>
+            <span class="c1"># about the solution for debugging purposes</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">solutionsummary</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">prosta</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">getprosta</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">)</span>
+            <span class="n">solsta</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">getsolsta</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">)</span>
+
+            <span class="c1"># Output a solution</span>
+            <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="n">newNofVariables</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">getxx</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">,</span> <span class="n">xx</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">solsta</span> <span class="ow">in</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">integer_optimal</span><span class="p">]:</span>
+                <span class="k">pass</span>
+                <span class="c1"># print(&quot;Optimal solution: %s&quot; % xx)</span>
+            <span class="k">elif</span> <span class="n">solsta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">prim_feas</span><span class="p">:</span>
+                <span class="k">pass</span>
+                <span class="c1"># print(&quot;Feasible solution: %s&quot; % xx)</span>
+            <span class="k">elif</span> <span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">unknown</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">prim_infeas_or_unbounded</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status Infeasible or unbounded.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">prim_infeas</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status Infeasible.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">unkown</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status unkown.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Other problem status.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Other solution status&quot;</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">conv</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+            <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="n">xx</span><span class="p">[</span><span class="n">maximum</span><span class="o">.</span><span class="n">bins</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">maximum</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maximum</span><span class="o">.</span><span class="n">bins</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">maximum</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">rv</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+
+            <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="test_setting"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_mosekOperations.test_setting">[docs]</a><span class="k">def</span> <span class="nf">test_setting</span><span class="p">(</span><span class="n">dec</span> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">5.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">1.802585</span>
+
+    <span class="n">mu3</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">sigma3</span> <span class="o">=</span> <span class="mf">0.2</span>
+
+    <span class="n">numberOfGates</span> <span class="o">=</span> <span class="mi">3</span>
+
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv3</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu3</span><span class="p">,</span> <span class="n">sigma3</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+    <span class="c1"># print(rv1.bins)</span>
+    <span class="c1"># print(rv2.bins)</span>
+    <span class="c1"># max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)</span>
+    <span class="c1"># conv = max1.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)</span>
+    <span class="n">conv</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">,</span> <span class="n">rv3</span><span class="p">)</span>
+    <span class="c1"># conv = conv.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)</span>
+    <span class="c1"># conv = conv.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)</span>
+    <span class="c1"># max1 = test1.convolutionOfTwoVarsShift(test2)</span>
+
+
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">conv</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">conv</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="c1"># print(desired)</span>
+    <span class="c1"># print(max1.bins)</span>
+
+    <span class="c1"># Make a MOSEK environment</span>
+    <span class="k">with</span> <span class="n">mosek</span><span class="o">.</span><span class="n">Env</span><span class="p">()</span> <span class="k">as</span> <span class="n">env</span><span class="p">:</span>
+        <span class="c1"># Attach a printer to the environment</span>
+        <span class="n">env</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+        <span class="c1"># Create a task</span>
+        <span class="k">with</span> <span class="n">env</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">task</span><span class="p">:</span>
+            <span class="c1"># Attach a printer to the task</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+            <span class="n">numberVariablesRVs</span> <span class="o">=</span> <span class="n">numberOfGates</span><span class="o">*</span><span class="n">numberOfBins</span> <span class="o">*</span> <span class="n">numberOfUnaries</span>
+
+            <span class="c1"># The variables will initially be fixed at zero (x=0).</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">numberVariablesRVs</span><span class="p">)</span>
+
+            <span class="c1"># set variables to be boolean</span>
+            <span class="n">rvIndices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberVariablesRVs</span><span class="p">))</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putvartypelist</span><span class="p">(</span><span class="n">rvIndices</span><span class="p">,</span>
+                                <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">variabletype</span><span class="o">.</span><span class="n">type_int</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberVariablesRVs</span><span class="p">)</span>
+
+
+
+            <span class="n">bins1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">bins2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">bins3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="n">gates</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv1</span><span class="p">,</span> <span class="n">rv2</span><span class="p">,</span> <span class="n">rv3</span><span class="p">]</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins1</span><span class="p">,</span> <span class="n">bins2</span><span class="p">,</span> <span class="n">bins3</span><span class="p">]</span>
+
+
+            <span class="c1"># set objective function</span>
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfGates</span><span class="p">):</span>
+                <span class="n">currentBins</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">generatedRV</span> <span class="o">=</span> <span class="n">gates</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+
+                        <span class="n">variableIndex</span> <span class="o">=</span> <span class="n">gate</span><span class="o">*</span><span class="n">numberOfBins</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="nb">bin</span><span class="o">*</span><span class="n">numberOfUnaries</span> <span class="o">+</span> <span class="n">unary</span>
+                        <span class="c1"># task.putcj(variableIndex, 1)</span>
+
+                        <span class="c1"># Set the bounds on variable</span>
+                        <span class="c1"># 0 &lt;= x_j &lt;= 1</span>
+
+                        <span class="c1"># task.putvarbound(variableIndex, mosek.boundkey.ra, generatedRV.bins[bin, unary], 1)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putvarbound</span><span class="p">(</span><span class="n">variableIndex</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                            <span class="c1"># save index to the bins</span>
+                        <span class="n">currentBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">variableIndex</span>
+
+
+
+
+            <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableMOSEK</span><span class="p">(</span><span class="n">bins1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
+
+                <span class="c1"># create the objective function</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putclist</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">bins1</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">bins1</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span><span class="p">)</span>
+
+            <span class="n">gateNodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">bins1</span><span class="p">,</span> <span class="n">bins2</span><span class="p">,</span> <span class="n">bins3</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfGates</span><span class="p">):</span>
+
+                <span class="n">curNode</span> <span class="o">=</span> <span class="n">gateNodes</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+                <span class="n">generatedRV</span> <span class="o">=</span> <span class="n">gates</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="n">generatedValues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">generatedRV</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:])</span>
+
+                    <span class="c1"># print(generatedValues)</span>
+
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">curNode</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span>
+
+                    <span class="n">task</span><span class="o">.</span><span class="n">putarow</span><span class="p">(</span><span class="n">gate</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="nb">bin</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">row</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+                    <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">gate</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="nb">bin</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="n">generatedValues</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+
+            <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+
+            <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="n">numberOfGates</span> <span class="o">*</span> <span class="n">numberOfBins</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfGates</span><span class="p">):</span>
+                <span class="n">curNode</span> <span class="o">=</span> <span class="n">gateNodes</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+
+                <span class="c1"># symmetry constraints</span>
+                <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">offset</span> <span class="o">=</span> <span class="nb">bin</span> <span class="o">*</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">unary</span>
+
+                        <span class="c1"># (maximum[bin])[unary] &gt;= (maximum[bin])[unary + 1])</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">curNode</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">task</span><span class="o">.</span><span class="n">putaij</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">curNode</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                        <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="n">newNofConstr</span> <span class="o">+</span> <span class="n">offset</span><span class="p">,</span> <span class="n">mosek</span><span class="o">.</span><span class="n">boundkey</span><span class="o">.</span><span class="n">lo</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+
+            <span class="n">newNofConstr</span> <span class="o">+=</span> <span class="p">(</span><span class="n">numberOfUnaries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">numberOfBins</span>
+
+                <span class="c1"># solve problem</span>
+
+            <span class="c1"># Input the objective sense (minimize/maximize)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putobjsense</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">objsense</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span>
+
+            <span class="c1"># Solve the problem</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+            <span class="c1"># Print a summary containing information</span>
+            <span class="c1"># about the solution for debugging purposes</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">solutionsummary</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">streamtype</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+
+            <span class="n">prosta</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">getprosta</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">)</span>
+            <span class="n">solsta</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">getsolsta</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">)</span>
+
+            <span class="c1"># Output a solution</span>
+            <span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="n">numberVariablesRVs</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">getxx</span><span class="p">(</span><span class="n">mosek</span><span class="o">.</span><span class="n">soltype</span><span class="o">.</span><span class="n">itg</span><span class="p">,</span> <span class="n">xx</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">solsta</span> <span class="ow">in</span> <span class="p">[</span><span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">integer_optimal</span><span class="p">]:</span>
+                <span class="k">pass</span>
+                <span class="c1"># print(&quot;Optimal solution: %s&quot; % xx)</span>
+            <span class="k">elif</span> <span class="n">solsta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">prim_feas</span><span class="p">:</span>
+                <span class="k">pass</span>
+                <span class="c1"># print(&quot;Feasible solution: %s&quot; % xx)</span>
+            <span class="k">elif</span> <span class="n">mosek</span><span class="o">.</span><span class="n">solsta</span><span class="o">.</span><span class="n">unknown</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">prim_infeas_or_unbounded</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status Infeasible or unbounded.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">prim_infeas</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status Infeasible.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prosta</span> <span class="o">==</span> <span class="n">mosek</span><span class="o">.</span><span class="n">prosta</span><span class="o">.</span><span class="n">unkown</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem status unkown.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Other problem status.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Other solution status&quot;</span><span class="p">)</span>
+
+            <span class="c1"># print(conv.bins)</span>
+            <span class="c1"># print()</span>
+
+
+            <span class="n">bins</span> <span class="o">=</span> <span class="n">xx</span><span class="p">[</span><span class="n">bins1</span><span class="p">]</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">rv1</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span></div>
+
+            <span class="c1"># rv = RandomVariable(maximum.bins, edges=maximum.edges, unary=True)</span>
+            <span class="c1"># actual = [rv.mean, rv.std]</span>
+
+            <span class="c1"># print(desired)</span>
+            <span class="c1"># print(actual)</span>
+
+            <span class="c1"># np.testing.assert_almost_equal(desired, actual, decimal=dec)</span>
+<div class="viewcode-block" id="testMult_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_mosekOperations.testMult_GP">[docs]</a><span class="k">def</span> <span class="nf">testMult_GP</span><span class="p">():</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="n">desired</span> <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">y</span>
+
+    <span class="n">inf</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">with</span> <span class="n">Env</span><span class="p">()</span> <span class="k">as</span> <span class="n">env</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">env</span><span class="o">.</span><span class="n">Task</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">task</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">set_Stream</span><span class="p">(</span><span class="n">streamtype</span><span class="o">.</span><span class="n">log</span><span class="p">,</span> <span class="n">streamprinter</span><span class="p">)</span>
+
+            <span class="c1"># Add variables and constraints</span>
+            <span class="n">numLinCon</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">numvar</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">numMono</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendvars</span><span class="p">(</span><span class="n">numvar</span> <span class="o">+</span> <span class="n">numMono</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendcons</span><span class="p">(</span><span class="n">numLinCon</span> <span class="o">+</span> <span class="n">numMono</span><span class="p">)</span>
+
+
+            <span class="n">task</span><span class="o">.</span><span class="n">putobjsense</span><span class="p">(</span><span class="n">objsense</span><span class="o">.</span><span class="n">minimize</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putclist</span><span class="p">([</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>   <span class="c1"># minimize the upper auxiliary variables</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putvarboundlist</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">boundkey</span><span class="o">.</span><span class="n">ra</span><span class="p">]</span><span class="o">*</span><span class="n">numvar</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y</span><span class="p">)],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+            <span class="c1"># Add the upper bounds</span>
+            <span class="c1"># task.putaijlist([0, 1], , aval)</span>
+            <span class="c1"># task.putconboundslice(0, numvar, bkc, blc, buc)</span>
+
+            <span class="c1"># Add linear constraints for the expressions appearing in exp(...)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putaijlist</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">numvar</span> <span class="o">+</span> <span class="n">numMono</span><span class="o">*</span><span class="mi">3</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putconbound</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">boundkey</span><span class="o">.</span><span class="n">fx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">expStart</span> <span class="o">=</span> <span class="n">numvar</span>
+
+            <span class="c1"># aux unbounded</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putvarboundlistconst</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">expStart</span><span class="p">,</span> <span class="n">expStart</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">numMono</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                                      <span class="n">boundkey</span><span class="o">.</span><span class="n">fr</span><span class="p">,</span> <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span>
+
+            <span class="c1"># slack is unbounded</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putvarboundlistconst</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">expStart</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">expStart</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">numMono</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                                      <span class="n">boundkey</span><span class="o">.</span><span class="n">fr</span><span class="p">,</span> <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="n">inf</span><span class="p">)</span>
+
+            <span class="c1"># t_i = 1</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">putvarboundlistconst</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">expStart</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">expStart</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">numMono</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                                      <span class="n">boundkey</span><span class="o">.</span><span class="n">fx</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+            <span class="c1"># Every triple is in an exponential cone</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">appendconesseq</span><span class="p">([</span><span class="n">conetype</span><span class="o">.</span><span class="n">pexp</span><span class="p">]</span> <span class="o">*</span> <span class="n">numMono</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numMono</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">numMono</span><span class="p">,</span> <span class="n">expStart</span><span class="p">)</span>
+
+            <span class="c1"># Solve and map to original h, w, d</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">optimize</span><span class="p">()</span>
+            <span class="n">xyz</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">numvar</span> <span class="o">+</span> <span class="n">numMono</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">getxxslice</span><span class="p">(</span><span class="n">soltype</span><span class="o">.</span><span class="n">itr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">xyz</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">xyz</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span></div>
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="c1"># testConvolution_MAX(dec=8)</span>
     <span class="c1"># testMaximum_MAX(dec=8)</span>
 
-    <span class="n">testMaximum_MAX_CONV</span><span class="p">(</span><span class="n">dec</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="c1"># testMaximum_MAX_CONV(dec=8)</span>
+    <span class="c1"># testMaximum_MAX_CONV_asmin()</span>
+    <span class="c1"># testMaximum_MAX_CONV2_asmin()</span>
 
+    <span class="c1"># test_setting()</span>
 
+    <span class="n">testMaximum_GP</span><span class="p">()</span>
+    <span class="c1"># testMult_GP()</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;All tests passed!&#39;</span><span class="p">)</span>
 </pre></div>

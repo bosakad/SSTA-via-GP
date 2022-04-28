@@ -216,22 +216,17 @@ class RandomVariableCVXPY:
         for i in range(0, numberOfBins):
             convolution[i] = 0
 
-        # i >= j
 
         for z in range(0, numberOfBins):
             for k in range(0, z + 1):
                 convolution[z] += x1[k] * x2[z - k]
 
         constrNew = self.cutBins(self.edges, convolution, GP=True)
-
         constr.extend(constrNew)
-        print(constrNew)
-        print(constr.extend(constrNew))
 
         newConv = {}
         for bin in range(0, numberOfBins):
-            # create monomial
-            mono = cp.Variable(pos=True)
+            mono = cp.Variable(pos=True)        # create monomial
             constr.append(convolution[bin] <= mono)
             newConv[bin] = mono
 
@@ -293,7 +288,6 @@ class RandomVariableCVXPY:
         """
 
         x1 = self.bins
-
         x2 = secondVariable.bins
 
         numberOfBins = len(x1)
@@ -317,9 +311,7 @@ class RandomVariableCVXPY:
 
         newMax = {}
         for bin in range(0, numberOfBins):
-
-            # create monomial
-            mono = cp.Variable(pos=True)
+            mono = cp.Variable(pos=True)  # create monomial
             constr.append(maximum[bin] <= mono)
             newMax[bin] = mono
 

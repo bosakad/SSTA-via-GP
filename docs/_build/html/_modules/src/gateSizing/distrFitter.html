@@ -64,6 +64,8 @@
 <span></span><span class="kn">import</span> <span class="nn">histogramGenerator</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">randomVariableHist_Numpy</span> <span class="kn">import</span> <span class="n">RandomVariable</span>
+<span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module has funtions that generate distribution with a given parameters (such as area of the circuit or max power)</span>
@@ -71,7 +73,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="generateDistr"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.generateDistr">[docs]</a><span class="k">def</span> <span class="nf">generateDistr</span><span class="p">(</span><span class="n">area</span><span class="p">:</span> <span class="p">[],</span> <span class="n">power</span><span class="p">:</span> <span class="p">[],</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">shouldSave</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<div class="viewcode-block" id="generateDistr"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.generateDistr">[docs]</a><span class="k">def</span> <span class="nf">generateDistr</span><span class="p">(</span><span class="n">area</span><span class="p">:</span> <span class="p">[],</span> <span class="n">power</span><span class="p">:</span> <span class="p">[],</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">shouldSave</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates a distributions with parameters and saves it into numpy file.</span>
 
@@ -86,17 +88,17 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 
-
-        <span class="c1"># some random parameters: todo: make them real</span>
-    <span class="c1"># mus = [1, 1.3, 1.4, 1.5, 2.6]</span>
-    <span class="c1"># stds = [0.17, 0.16, 0.15, 0.13, 0.12]</span>
-    <span class="n">mus</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.9</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">]</span>
-    <span class="n">stds</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.165</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.14</span><span class="p">,</span> <span class="mf">0.13</span><span class="p">,</span> <span class="mf">0.11</span><span class="p">]</span>
-
+    <span class="k">if</span> <span class="n">GP</span><span class="p">:</span>
+        <span class="n">mus</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.97</span><span class="p">,</span> <span class="mf">1.95</span><span class="p">,</span> <span class="mf">1.85</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">]</span>
+        <span class="n">stds</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.165</span><span class="p">,</span><span class="mf">0.163</span><span class="p">,</span> <span class="mf">0.162</span><span class="p">,</span> <span class="mf">0.161</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.14</span><span class="p">,</span> <span class="mf">0.14</span><span class="p">,</span> <span class="mf">0.13</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mus</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">stds</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.165</span><span class="p">,</span> <span class="mf">0.164</span><span class="p">,</span> <span class="mf">0.163</span><span class="p">,</span> <span class="mf">0.161</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.14</span><span class="p">,</span> <span class="mf">0.13</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]</span>
 
         <span class="c1"># generate distr</span>
     <span class="n">numberOfDistr</span> <span class="o">=</span> <span class="n">area</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
+    <span class="nb">print</span><span class="p">(</span><span class="n">GP</span><span class="p">)</span>
     <span class="n">edges</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">distros</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfDistr</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfDistr</span><span class="p">):</span>
@@ -105,7 +107,6 @@
         <span class="n">distros</span><span class="p">[</span><span class="n">d</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">bins</span><span class="p">[:]</span>
 
         <span class="n">edges</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">edges</span>
-
 
 
     <span class="k">if</span> <span class="n">shouldSave</span><span class="p">:</span>
@@ -120,7 +121,8 @@
 
 <div class="viewcode-block" id="plotDistros"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.plotDistros">[docs]</a><span class="k">def</span> <span class="nf">plotDistros</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">edges</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plot distros</span>
+<span class="sd">    Plot distributions</span>
+
 <span class="sd">    :param distros: (numberOfDistros, NumberOfBins) np matrix of generated values</span>
 <span class="sd">    :param edges: (1, numberOfBins + 1) np array of edges</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -132,12 +134,13 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="s2">&quot;PDF&quot;</span><span class="p">)</span>
 
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;Inputs.outputs/generatedDistros.jpeg&quot;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span></div>
-    <span class="c1"># plt.show()</span>
+    <span class="c1"># plt.savefig(&quot;Inputs.outputs/generatedDistros.jpeg&quot;, dpi=500)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="plotLinesForBin"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.plotLinesForBin">[docs]</a><span class="k">def</span> <span class="nf">plotLinesForBin</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">coef</span><span class="p">,</span> <span class="nb">bin</span><span class="p">):</span>
+<div class="viewcode-block" id="plotLinesForBin"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.plotLinesForBin">[docs]</a><span class="k">def</span> <span class="nf">plotLinesForBin</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">coef</span><span class="p">,</span> <span class="nb">bin</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot distros and lines</span>
+
 <span class="sd">    :param distros: (numberOfDistros, NumberOfBins) np matrix of generated values</span>
 <span class="sd">    :param area: array of area constraints</span>
 <span class="sd">    :param power: array of power constraints</span>
@@ -164,7 +167,10 @@
     <span class="n">minP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">power</span><span class="p">)</span>
     <span class="n">maxP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">power</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">f</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span> <span class="k">return</span> <span class="n">coef</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coef</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">a</span> <span class="o">+</span> <span class="n">coef</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">p</span> <span class="o">+</span> <span class="n">coef</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">coef</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">GP</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">f</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span> <span class="k">return</span> <span class="n">coef</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">a</span> <span class="o">+</span> <span class="n">coef</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">p</span> <span class="o">+</span> <span class="n">coef</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">coef</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">f</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span> <span class="k">return</span> <span class="n">coef</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">coef</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">a</span> <span class="o">+</span> <span class="n">coef</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">p</span>
 
     <span class="c1"># print(f(5, 20))</span>
     <span class="c1"># print(f(7, 30))</span>
@@ -197,7 +203,7 @@
     <span class="c1"># plt.savefig(&quot;Inputs.outputs/fitting.jpeg&quot;, dpi=500)</span>
 
 
-<div class="viewcode-block" id="linearRegression"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.linearRegression">[docs]</a><span class="k">def</span> <span class="nf">linearRegression</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">):</span>
+<div class="viewcode-block" id="linearRegression"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.linearRegression">[docs]</a><span class="k">def</span> <span class="nf">linearRegression</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Performs linear regression on the generated data</span>
 
@@ -210,69 +216,151 @@
 
     <span class="n">numberOfBins</span> <span class="o">=</span> <span class="n">distros</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">numberOfDistros</span> <span class="o">=</span> <span class="n">distros</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">GP</span><span class="p">:</span> <span class="n">numberOfCoefs</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="n">numberOfCoefs</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfCoefs</span><span class="p">))</span>
 
     <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
 
-        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfDistros</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfDistros</span><span class="p">,</span> <span class="n">numberOfCoefs</span><span class="p">))</span>
 
-        <span class="n">A</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>     <span class="c1"># b</span>
-        <span class="n">A</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">area</span><span class="p">[:]</span>   <span class="c1"># area</span>
-        <span class="n">A</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">power</span><span class="p">[:]</span>  <span class="c1"># power</span>
-        <span class="n">A</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">area</span><span class="p">[:])</span>  <span class="c1"># area</span>
-        <span class="n">A</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">power</span><span class="p">[:])</span>  <span class="c1"># area</span>
+        <span class="k">if</span> <span class="n">GP</span><span class="p">:</span>
+            <span class="n">A</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">area</span><span class="p">[:]</span>   <span class="c1"># area</span>
+            <span class="n">A</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">power</span><span class="p">[:]</span>  <span class="c1"># power</span>
+            <span class="n">A</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">area</span><span class="p">[:],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># area</span>
+            <span class="n">A</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">power</span><span class="p">[:],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># power</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">A</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>     <span class="c1"># b</span>
+            <span class="n">A</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">area</span><span class="p">[:]</span>   <span class="c1"># area</span>
+            <span class="n">A</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">power</span><span class="p">[:]</span>  <span class="c1"># power</span>
+
 
         <span class="n">b</span> <span class="o">=</span> <span class="n">distros</span><span class="p">[:,</span> <span class="nb">bin</span><span class="p">]</span>
 
+        <span class="k">if</span> <span class="n">GP</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">((</span><span class="mi">4</span><span class="p">,),</span> <span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">((</span><span class="mi">3</span><span class="p">,))</span>
 
-            <span class="c1"># Rx = Q^T b</span>
-        <span class="n">Q</span><span class="p">,</span> <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">qr</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="p">(</span><span class="n">Q</span><span class="o">.</span><span class="n">T</span><span class="nd">@b</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
-        <span class="n">coef</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:]</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">sum_squares</span><span class="p">(</span><span class="n">A</span> <span class="o">@</span> <span class="n">x</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span><span class="n">cost</span><span class="p">),</span> <span class="p">[])</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
 
-        <span class="c1">#</span>
-        <span class="c1"># print(coef[bin, 0] + coef[bin, 1] * 5 + coef[bin, 2] * 20)</span>
-        <span class="c1"># print(coef[bin, 0] + coef[bin, 1] * 7 + coef[bin, 2] * 30)</span>
-        <span class="c1"># print(coef[bin, 0] + coef[bin, 1] * 8 + coef[bin, 2] * 40)</span>
-        <span class="c1"># print(distros[:, bin])</span>
-        <span class="c1"># print()</span>
+        <span class="c1"># x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)</span>
+        <span class="n">coef</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># print(x.value)</span>
+
+    <span class="k">if</span> <span class="n">GP</span><span class="p">:</span>
+        <span class="n">coef</span><span class="p">[</span><span class="n">coef</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mf">0.000000000000000000000000001</span>
 
     <span class="k">return</span> <span class="n">coef</span></div>
 
-<div class="viewcode-block" id="saveModel"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.saveModel">[docs]</a><span class="k">def</span> <span class="nf">saveModel</span><span class="p">(</span><span class="n">coef</span><span class="p">):</span>
+<div class="viewcode-block" id="saveModel"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.saveModel">[docs]</a><span class="k">def</span> <span class="nf">saveModel</span><span class="p">(</span><span class="n">coef</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Saves model</span>
+
 <span class="sd">    :param coef: coeficients of the model</span>
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">outfile</span> <span class="o">=</span> <span class="s2">&quot;Inputs.outputs/model&quot;</span>
+    <span class="k">if</span> <span class="n">GP</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="s2">&quot;Inputs.outputs/model&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outfile</span> <span class="o">=</span> <span class="s2">&quot;Inputs.outputs/model_MIXED_INT&quot;</span>
 
     <span class="n">np</span><span class="o">.</span><span class="n">savez</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">coef</span><span class="o">=</span><span class="n">coef</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">None</span></div>
 
+<div class="viewcode-block" id="plotDistrosForInputs"><a class="viewcode-back" href="../../../index.html#src.gateSizing.distrFitter.plotDistrosForInputs">[docs]</a><span class="k">def</span> <span class="nf">plotDistrosForInputs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">GP</span><span class="p">:</span>
+        <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;Inputs.outputs/model_MIXED_INT.npz&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;Inputs.outputs/model.npz&quot;</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">coef</span><span class="p">[</span><span class="s1">&#39;coef&#39;</span><span class="p">]</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">gate</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="n">a_i</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+    <span class="n">f_i</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+    <span class="n">e_i</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+
+    <span class="c1"># for x in [1, 1.5, 2, 2.5, 3, 3.5, 4]:</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">100</span><span class="p">]:</span>
+    <span class="c1"># for x in [20, 100]:</span>
+
+        <span class="c1"># x = 1 + 2*iter</span>
+
+        <span class="n">distr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberOfBins</span><span class="p">)</span>
+        <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">GP</span><span class="p">:</span>
+                <span class="n">a1</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">p1</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">a2</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">p2</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+                <span class="n">prob</span> <span class="o">=</span> <span class="n">a1</span><span class="o">*</span><span class="n">a_i</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">p1</span><span class="o">*</span><span class="n">f_i</span><span class="o">*</span><span class="n">e_i</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">a2</span><span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">a_i</span><span class="o">*</span><span class="n">x</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="n">p2</span><span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">f_i</span><span class="o">*</span><span class="n">e_i</span><span class="o">*</span><span class="n">x</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">shift</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">ac</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">pc</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+                <span class="n">prob</span> <span class="o">=</span> <span class="n">shift</span> <span class="o">+</span> <span class="n">ac</span> <span class="o">*</span> <span class="n">a_i</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">pc</span> <span class="o">*</span> <span class="n">f_i</span> <span class="o">*</span> <span class="n">e_i</span> <span class="o">*</span> <span class="n">x</span>
+
+            <span class="n">distr</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">prob</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">distr</span><span class="p">)</span>
+        <span class="n">STATIC_BINS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">STATIC_BINS</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">STATIC_BINS</span><span class="p">[:],</span> <span class="n">weights</span><span class="o">=</span><span class="n">distr</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="s2">&quot;PDF&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">distr</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">STATIC_BINS</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">rv</span><span class="o">.</span><span class="n">std</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+    <span class="c1"># plt.legend([&quot;1&quot;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;])</span>
+
+
+    <span class="c1"># plt.show()</span>
+
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 
     <span class="c1"># parameters</span>
-    <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">])</span>
-    <span class="n">power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">60</span><span class="p">])</span>
-    <span class="c1"># area = np.array([5, 7, 8])</span>
-    <span class="c1"># power = np.array([20, 30, 40])</span>
 
-    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="c1"># area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 2</span>
+    <span class="c1"># power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 2</span>
 
-    <span class="n">distros</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">generateDistr</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">shouldSave</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">5.</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span> <span class="o">**</span> <span class="mf">1.6</span>
+    <span class="n">power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span> <span class="o">**</span> <span class="mf">1.6</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">asGp</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">distros</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">generateDistr</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">shouldSave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="n">asGp</span><span class="p">)</span>
     <span class="n">plotDistros</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
-    <span class="n">coef</span> <span class="o">=</span> <span class="n">linearRegression</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">)</span>
+    <span class="n">coef</span> <span class="o">=</span> <span class="n">linearRegression</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="n">asGp</span><span class="p">)</span>
 
-    <span class="n">plotLinesForBin</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">coef</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
+    <span class="n">plotLinesForBin</span><span class="p">(</span><span class="n">distros</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">coef</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="n">asGp</span><span class="p">)</span>
 
-    <span class="n">saveModel</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span>
+    <span class="n">saveModel</span><span class="p">(</span><span class="n">coef</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="n">asGp</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="n">coef</span><span class="p">)</span>
-
+    <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.7</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">plotDistrosForInputs</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="n">asGp</span><span class="p">)</span>
 </pre></div>
 
            </div>

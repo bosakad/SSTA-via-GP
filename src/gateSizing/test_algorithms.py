@@ -237,13 +237,13 @@ def testAlgorithms_MOSEK():
 def testAlgorithms_CVXPY_GP():
 
     # number of testing
-    numberOfIterations = 30
+    numberOfIterations = 15
     step = 1
 
     numberOfGatesStart = 1
-    numberOfBins = 20
+    numberOfBins = 60
 
-    interval = (-4, 19)
+    interval = (-4, 25)
 
     # for saving values of the last gates and calculating error
     rvs_nonPrecise = np.zeros((numberOfIterations, 2))
@@ -273,7 +273,7 @@ def testAlgorithms_CVXPY_GP():
         rvs_Precise[iter, 0] = lastGate[0]
         rvs_Precise[iter, 1] = lastGate[1]
 
-        print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
+        # print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
 
         MAPE = 100 * np.abs(np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))
 
@@ -284,9 +284,77 @@ def testAlgorithms_CVXPY_GP():
             prevError[0] = results[(numGates - step, True)][3]
             prevError[1] = results[(numGates - step, True)][4]
 
-            MAPE = (MAPE + (prevError) *(iter)) / (iter)
+            MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
 
         results[(numGates, True)] = (-1, -1, time, MAPE[0], MAPE[1], -1, -1, -1,
+                                     -1, -1)
+
+        # print results
+        print("\n\n" + str(results))
+
+
+def scalingBins_CVXPY_GP():
+
+    # number of testing
+    numberOfIterations = 5
+    step = 4
+
+    numberOfGates = 2
+    numBinsStart = 10
+
+    interval = (-4, 25)
+
+    # for saving values of the last gates and calculating error
+    rvs_nonPrecise = np.zeros((numberOfIterations, 2))
+    rvs_Precise = np.zeros((numberOfIterations, 2))
+    rvs_MonteCarlo = np.zeros((1, 2))
+
+    results = {}
+
+    # MonteCarlo
+    for iter in range(0, 1):
+        numGates = numberOfGates
+        lastGate = test_infiniteLadder.MonteCarlo(numGates)
+
+        # saving values
+        rvs_MonteCarlo[iter, 0] = lastGate[0]
+        rvs_MonteCarlo[iter, 1] = lastGate[1]
+
+    print("SYMMETRY\n\n")
+
+    BINS = [5, 8, 10]
+    numberOfIterations = len(BINS)
+    # test precise
+    for iter in range(0, numberOfIterations):
+        print("\n\n" + str(iter) + ". iteration: \n\n")
+
+        # numBins = numBinsStart + iter * step
+        numBins = BINS[iter]
+        print(numBins)
+        lastGate, time = test_infiniteLadder.mainCVXPY_GP(numberOfGates, numBins, interval)
+
+        # saving values
+        rvs_Precise[iter, 0] = lastGate[0]
+        rvs_Precise[iter, 1] = lastGate[1]
+
+        # print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
+
+        MAPE = 100 * np.abs(np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[0, :], rvs_MonteCarlo[0, :]))
+
+        print(MAPE)
+
+        # if iter != 0:
+        #     prevError = np.zeros(2)
+        #     lastNumBins = BINS[iter-1]
+        #
+        #     prevError[0] = results[(lastNumBins, True)][3]
+        #     prevError[1] = results[(lastNumBins, True)][4]
+        #     prevError[0] = results[(numBins - step, True)][3]
+        #     prevError[1] = results[(numBins - step, True)][4]
+            # 
+            # MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
+
+        results[(numBins, True)] = (-1, -1, time, MAPE[0], MAPE[1], -1, -1, -1,
                                      -1, -1)
 
         # print results
@@ -366,7 +434,8 @@ if __name__ == "__main__":
 
     # testAlgorithms()
     # testAlgorithms_MOSEK()
-    testAlgorithms_CVXPY_GP()
+    # testAlgorithms_CVXPY_GP()
+    scalingBins_CVXPY_GP()
     # testAlgorithms_PRESOLVE()
 
 

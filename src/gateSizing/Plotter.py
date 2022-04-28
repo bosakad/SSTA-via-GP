@@ -232,7 +232,7 @@ def plotNonzeros():
     if forPaper:
 
         # set histograms
-        fig, axs = plt.subplots(4, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
+        fig, axs = plt.subplots(3, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
         i = 0
 
 
@@ -291,7 +291,7 @@ def plotNonzeros():
         #                  linestyle='-',  # line style will be dash line
         #                  linewidth=3.5, zorder=1)  # line width
         # axs.flat[i].set(ylabel='Mip gap \nat root(%)')
-        i += 1
+        # i += 1
 
         # time
         # axs[i].scatter(Gates, timeWithConstr, color='blue')
@@ -326,15 +326,17 @@ def plotNonzeros():
                          linestyle='-',  # line style will be dash line
                          linewidth=3.5, zorder=1)  # line width
 
-        plt.fill_between(Gates, errorWithConstr[:, 1], y2=errorWithConstr[:, 0], alpha=0.3, color='orange')
-        plt.fill_between(Gates, errorWithConstr[:, 0], alpha=0.3, color='blue')
+        # plt.fill_between(Gates, errorWithConstr[:, 1], y2=errorWithConstr[:, 0], alpha=0.3, color='orange')
+        # plt.fill_between(Gates, errorWithConstr[:, 0], alpha=0.3, color='blue')
+        plt.fill_between(Gates, errorWithConstr[:, 1], alpha=0.3, color='orange')
+        plt.fill_between(Gates, errorWithConstr[:, 0], errorWithConstr[:, 1], alpha=0.3, color='blue')
 
-        axs.flat[i].set(ylabel='Mape(%)')
+        axs.flat[i].set(ylabel='MAPE(%)')
         i += 1
 
 
         for ax in axs.flat:
-            ax.set(xlabel='N')
+            ax.set(xlabel='Number of gates')
 
         # Hide x labels and tick labels for top plots and y ticks for right plots.
         for ax in axs.flat:
@@ -510,8 +512,8 @@ def plotNonzeros():
                 ax.label_outer()
 
 
-    # plt.show()
-    plt.savefig("Inputs.outputs/scaling.jpeg", dpi=800, bbox_inches='tight')
+    plt.show()
+    # plt.savefig("Inputs.outputs/scaling.jpeg", dpi=800, bbox_inches='tight')
 
 
 def plotPresolve():

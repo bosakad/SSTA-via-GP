@@ -95,9 +95,8 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
                 AllConstr.extend(newConstraints)
 
             elif cvxpy and GP:
-                maxDelay = MaximumF(tmpNode.prevDelays)
-                currentRandVar, newConstraints = ConvolutionF(currentRandVar, maxDelay)
-                AllConstr.extend(newConstraints)
+                maxDelay, AllConstr = MaximumF(tmpNode.prevDelays, AllConstr)
+                currentRandVar, AllConstr = ConvolutionF(currentRandVar, maxDelay, AllConstr)
 
             else:
                 maxDelay = MaximumF(tmpNode.prevDelays)
@@ -127,6 +126,8 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
         elif cvxpy and not GP:
             sinkDelay, newConstraints = MaximumF(sink)
             AllConstr.extend(newConstraints)
+        elif cvxpy and GP:
+            sinkDelay, AllConstr = MaximumF(sink, AllConstr)
         else:
             sinkDelay = MaximumF(sink)
 
@@ -192,16 +193,18 @@ def Convolution_McCormick(x1: cvxpyVariable.RandomVariableCVXPY,
     return x1.convolution_McCormick(x2)
 
 def Convolution_GP(x1: cvxpyVariable.RandomVariableCVXPY,
-                      x2: cvxpyVariable.RandomVariableCVXPY) -> cvxpyVariable.RandomVariableCVXPY:
+                      x2: cvxpyVariable.RandomVariableCVXPY, constr) -> (cvxpyVariable.RandomVariableCVXPY, []):
     """
     Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.
 
     :param x1: RandomVariableCVXPY class
     :param x2: RandomVariableCVXPY class
+    :param constr: old constraints
     :return convolution: RandomVariableCVXPY class
+    :return constr: new constraints
     """
 
-    return x1.convolution_GP(x2)
+    return x1.convolution_GP_OPT(x2, constr)
 
 def maxOfDistributionsMOSEK_UNARY(withSymmetryConstr=False) -> cp.Variable:
     """
@@ -268,22 +271,24 @@ def maxOfDistributionsCVXPY_McCormick(delays: [cvxpyVariable.RandomVariableCVXPY
 
     return maximum
 
-def maxOfDistributionsCVXPY_GP(delays: [cvxpyVariable.RandomVariableCVXPY]) -> cp.Variable:
+def maxOfDistributionsCVXPY_GP(delays: [cvxpyVariable.RandomVariableCVXPY], constr) -> (cp.Variable, []):
     """
     Calculates maximum of an array of PDFs of cvxpy variable
 
     :param delays: array of cvxpy variables (n, m), n gates, m bins
+    :param constr: old constraints
     :return maximum:  cvxpy variable (1, m)
+    :return constr: new constraints
     """
 
     size = len(delays)
     for i in range(0, size - 1):
-        newRV = delays[i].maximum_GP(delays[i + 1])
+        newRV, constr = delays[i].maximum_GP_OPT(delays[i + 1], constr)
         delays[i + 1] = newRV
 
     maximum = delays[-1]
 
-    return maximum
+    return maximum, constr
 
 
 def maxOfDistributionsELEMENTWISE(delays: [RandomVariable]) -> RandomVariable:
