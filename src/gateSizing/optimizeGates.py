@@ -710,7 +710,7 @@ def optimizeCVXPY_GP():
 
     coef = np.load('Inputs.outputs/model.npz')
     model = coef['coef']
-
+ 
     f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
     e = np.array([1, 2, 1, 1.5, 1.5, 1])
     a = np.ones(numberOfGates - 2)
