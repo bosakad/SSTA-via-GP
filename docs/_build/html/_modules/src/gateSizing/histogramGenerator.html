@@ -174,9 +174,56 @@
     <span class="k">return</span> <span class="n">result</span></div>
 
 
+<div class="viewcode-block" id="getValuesForMonteCarlo"><a class="viewcode-back" href="../../../index.html#src.gateSizing.histogramGenerator.getValuesForMonteCarlo">[docs]</a><span class="k">def</span> <span class="nf">getValuesForMonteCarlo</span><span class="p">(</span><span class="n">rv</span><span class="p">:</span> <span class="n">RandomVariable</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return of [1, count] array of numbers generated with prob. of histogram</span>
+
+<span class="sd">    :param rv: Random Variable with histogram class</span>
+<span class="sd">    :param count: number of values</span>
+<span class="sd">    :return random_from_cdf: array of values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># data = np.random.normal(size=1000)</span>
+    <span class="c1"># hist, bins = np.histogram(data, bins=50)</span>
+    <span class="c1"># print(hist)</span>
+
+
+    <span class="n">bin_midpoints</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+    <span class="n">cdf</span> <span class="o">=</span> <span class="n">cdf</span> <span class="o">/</span> <span class="n">cdf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+    <span class="n">value_bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">cdf</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+    <span class="n">random_from_cdf</span> <span class="o">=</span> <span class="n">bin_midpoints</span><span class="p">[</span><span class="n">value_bins</span><span class="p">]</span>
+
+    <span class="n">randomIndices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">random_from_cdf</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">count</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">))</span>
+    <span class="n">random_from_cdf</span><span class="p">[</span><span class="n">randomIndices</span><span class="p">[:</span><span class="n">randomIndices</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">+=</span> <span class="p">((</span><span class="n">rv</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">rv</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">(</span><span class="n">randomIndices</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">random_from_cdf</span><span class="p">[</span><span class="n">randomIndices</span><span class="p">[</span><span class="n">randomIndices</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">:]]</span> <span class="o">-=</span> <span class="p">((</span><span class="n">rv</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">rv</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_sample</span><span class="p">(</span><span class="n">randomIndices</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">random_from_cdf</span></div>
+
+    <span class="c1"># import matplotlib.pyplot as plt</span>
+    <span class="c1"># plt.subplot(121)</span>
+    <span class="c1"># # plt.hist(data, 50)</span>
+    <span class="c1"># plt.hist(rv.edges[:-1], rv.edges, weights=rv.bins, alpha=0.2, color=&#39;orange&#39;)</span>
+    <span class="c1"># plt.subplot(122)</span>
+    <span class="c1"># # plt.hist(random_from_cdf, 30)</span>
+    <span class="c1"># _ = plt.hist(random_from_cdf, bins=30, density=&#39;PDF&#39;, alpha=0.7)</span>
+    <span class="c1"># plt.show()</span>
+
+
+
 <div class="viewcode-block" id="generateAccordingToModel"><a class="viewcode-back" href="../../../index.html#src.gateSizing.histogramGenerator.generateAccordingToModel">[docs]</a><span class="k">def</span> <span class="nf">generateAccordingToModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">a_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">x_i</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nUnaries</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates distribution according to a linear regression model</span>
+
+<span class="sd">    :param model: model</span>
+<span class="sd">    :param a_i: area</span>
+<span class="sd">    :param p_i: power</span>
+<span class="sd">    :param x_i: sizing of the gate</span>
+<span class="sd">    :param int: interval</span>
+<span class="sd">    :param nUnaries: number of unary variables</span>
+<span class="sd">    :return RandomVariable: new generated random variable</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">numberOfBins</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -191,8 +238,11 @@
             <span class="n">p2</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
             <span class="c1"># binP = model[bin, 0] + model[bin, 1] * a_i * x_i + model[bin, 2] * p_i * x_i</span>
 
-            <span class="n">binP</span> <span class="o">=</span> <span class="n">a1</span><span class="o">*</span><span class="n">a_i</span><span class="o">*</span><span class="n">x_i</span> <span class="o">+</span> <span class="n">p1</span><span class="o">*</span><span class="n">p_i</span><span class="o">*</span><span class="n">x_i</span> <span class="o">+</span> <span class="n">a2</span><span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span> <span class="p">(</span><span class="n">a_i</span><span class="o">*</span><span class="n">x_i</span><span class="p">))</span> <span class="o">+</span> <span class="n">p2</span><span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">p_i</span><span class="o">*</span><span class="n">x_i</span><span class="p">))</span>
-            <span class="c1"># distr[bin] = max(binP, 0)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="p">:]</span> <span class="o">==</span> <span class="mf">1.00000000e-27</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">binP</span> <span class="o">=</span> <span class="mf">1.00000000e-27</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">binP</span> <span class="o">=</span> <span class="n">a1</span><span class="o">*</span><span class="n">a_i</span><span class="o">*</span><span class="n">x_i</span> <span class="o">+</span> <span class="n">p1</span><span class="o">*</span><span class="n">p_i</span><span class="o">*</span><span class="n">x_i</span> <span class="o">+</span> <span class="n">a2</span><span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span> <span class="p">(</span><span class="n">a_i</span><span class="o">*</span><span class="n">x_i</span><span class="p">))</span> <span class="o">+</span> <span class="n">p2</span><span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">p_i</span><span class="o">*</span><span class="n">x_i</span><span class="p">))</span>
+
             <span class="n">distr</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">binP</span>
 
         <span class="n">STATIC_BINS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">int</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>

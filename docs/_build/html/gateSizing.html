@@ -41,7 +41,6 @@
 <li><a class="reference internal" href="#gatesizing-test-mosekoperations-module">gateSizing.test_mosekOperations module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.distrFitter">gateSizing.distrFitter module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.mosekVariable">gateSizing.mosekVariable module</a></li>
-<li><a class="reference internal" href="#module-src.gateSizing.Dmytro_script">gateSizing.Dmytro_script module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.Parser_Matrix">gateSizing.Parser_Matrix module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.Plotter">gateSizing.Plotter module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.SSTA">gateSizing.SSTA module</a></li>
@@ -49,11 +48,10 @@
 <li><a class="reference internal" href="#module-src.gateSizing.deterministicDelay">gateSizing.deterministicDelay module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.histogramGenerator">gateSizing.histogramGenerator module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.examples_monteCarlo.infinite_ladder_montecarlo">gateSizing.infinite_ladder_montecarlo module</a></li>
-<li><a class="reference internal" href="#gatesizing-main-module">gateSizing.main module</a></li>
 <li><a class="reference internal" href="#gatesizing-examples-montecarlo-montecarlo-module">gateSizing.examples_monteCarlo.montecarlo module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.node">gateSizing.node module</a></li>
-<li><a class="reference internal" href="#module-src.gateSizing.optimizeGatesSimple">gateSizing.optimizeGatesSimple module</a></li>
-<li><a class="reference internal" href="#module-src.gateSizing.optimizeGatesVectorized">gateSizing.optimizeGatesVectorized module</a></li>
+<li><a class="reference internal" href="#gatesizing-optimizegatessimple-boyd-module">gateSizing.optimizeGatesSimple_Boyd module</a></li>
+<li><a class="reference internal" href="#gatesizing-optimizegatesvectorized-boyd-module">gateSizing.optimizeGatesVectorized_Boyd module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.randomVariableHist_Numpy">gateSizing.randomVariableHist_Numpy module</a></li>
 <li><a class="reference internal" href="#module-src.gateSizing.test_Operations_Cvxpy">gateSizing.test_Operations_Cvxpy module</a></li>
 <li><a class="reference internal" href="#gatesizing-test-rv-numpy-module">gateSizing.test_RV_Numpy module</a></li>
@@ -558,14 +556,6 @@ Is in MOSEK environment.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-src.gateSizing.Dmytro_script">
-<span id="gatesizing-dmytro-script-module"></span><h2>gateSizing.Dmytro_script module<a class="headerlink" href="#module-src.gateSizing.Dmytro_script" title="Permalink to this headline"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.Dmytro_script.main">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.Dmytro_script.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/Dmytro_script.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.Dmytro_script.main" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</div>
 <div class="section" id="module-src.gateSizing.Parser_Matrix">
 <span id="gatesizing-parser-matrix-module"></span><h2>gateSizing.Parser_Matrix module<a class="headerlink" href="#module-src.gateSizing.Parser_Matrix" title="Permalink to this headline"></a></h2>
 <dl class="py function">
@@ -662,6 +652,11 @@ no errors appeared.</p>
 <span class="sig-prename descclassname"><span class="pre">src.gateSizing.Plotter.</span></span><span class="sig-name descname"><span class="pre">plotPresolve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/Plotter.html#plotPresolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.Plotter.plotPresolve" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.Plotter.plotScalingOptimization">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.Plotter.</span></span><span class="sig-name descname"><span class="pre">plotScalingOptimization</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/Plotter.html#plotScalingOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.Plotter.plotScalingOptimization" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </div>
 <div class="section" id="module-src.gateSizing.SSTA">
 <span id="gatesizing-ssta-module"></span><h2>gateSizing.SSTA module<a class="headerlink" href="#module-src.gateSizing.SSTA" title="Permalink to this headline"></a></h2>
@@ -753,7 +748,7 @@ no errors appeared.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.SSTA.calculateCircuitDelay">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">calculateCircuitDelay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootNodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="p"><span class="pre">[</span></span><a class="reference internal" href="index.html#src.gateSizing.node.Node" title="src.gateSizing.node.Node"><span class="pre">node.Node</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cvxpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mosekStatus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-</span> <span class="pre">1,</span> <span class="pre">-</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mosekTRI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="p"><span class="pre">[</span></span><a class="reference internal" href="index.html#src.gateSizing.node.Node" title="src.gateSizing.node.Node"><span class="pre">node.Node</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#calculateCircuitDelay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.calculateCircuitDelay" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">calculateCircuitDelay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rootNodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="p"><span class="pre">[</span></span><a class="reference internal" href="index.html#src.gateSizing.node.Node" title="src.gateSizing.node.Node"><span class="pre">node.Node</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cvxpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mosekStatus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-</span> <span class="pre">1,</span> <span class="pre">-</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mosekTRI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monteCarlo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="p"><span class="pre">[</span></span><a class="reference internal" href="index.html#src.gateSizing.node.Node" title="src.gateSizing.node.Node"><span class="pre">node.Node</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#calculateCircuitDelay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.calculateCircuitDelay" title="Permalink to this definition"></a></dt>
 <dd><p>Compute circuit delay using PDFs algorithm
 Function executes the algorithm for finding out the PDF of a circuit delay.</p>
 <dl class="field-list simple">
@@ -775,6 +770,20 @@ Function executes the algorithm for finding out the PDF of a circuit delay.</p>
 </dd>
 <dt class="field-even">Return newDelays</dt>
 <dd class="field-even"><p>array of new RVs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.SSTA.maxMonteCarlo">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.SSTA.</span></span><span class="sig-name descname"><span class="pre">maxMonteCarlo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delays</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/SSTA.html#maxMonteCarlo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.SSTA.maxMonteCarlo" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates maximum for monte carlo</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>delays</strong> – 2d array of numbers</p>
+</dd>
+<dt class="field-even">Return maximum</dt>
+<dd class="field-even"><p>maximum delay</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1345,6 +1354,38 @@ This is an old implementation.</p>
 <dt class="sig sig-object py" id="src.gateSizing.histogramGenerator.generateAccordingToModel">
 <span class="sig-prename descclassname"><span class="pre">src.gateSizing.histogramGenerator.</span></span><span class="sig-name descname"><span class="pre">generateAccordingToModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nUnaries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/histogramGenerator.html#generateAccordingToModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.histogramGenerator.generateAccordingToModel" title="Permalink to this definition"></a></dt>
 <dd><p>Generates distribution according to a linear regression model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – model</p></li>
+<li><p><strong>a_i</strong> – area</p></li>
+<li><p><strong>p_i</strong> – power</p></li>
+<li><p><strong>x_i</strong> – sizing of the gate</p></li>
+<li><p><strong>int</strong> – interval</p></li>
+<li><p><strong>nUnaries</strong> – number of unary variables</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return RandomVariable</dt>
+<dd class="field-even"><p>new generated random variable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.histogramGenerator.getValuesForMonteCarlo">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.histogramGenerator.</span></span><span class="sig-name descname"><span class="pre">getValuesForMonteCarlo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable" title="src.gateSizing.randomVariableHist_Numpy.RandomVariable"><span class="pre">randomVariableHist_Numpy.RandomVariable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/histogramGenerator.html#getValuesForMonteCarlo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.histogramGenerator.getValuesForMonteCarlo" title="Permalink to this definition"></a></dt>
+<dd><p>Return of [1, count] array of numbers generated with prob. of histogram</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rv</strong> – Random Variable with histogram class</p></li>
+<li><p><strong>count</strong> – number of values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return random_from_cdf</dt>
+<dd class="field-even"><p>array of values</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1480,9 +1521,6 @@ gate’s operation time is assumed to have a Gaussian distribution</p></li>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="gatesizing-main-module">
-<h2>gateSizing.main module<a class="headerlink" href="#gatesizing-main-module" title="Permalink to this headline"></a></h2>
-</div>
 <div class="section" id="gatesizing-examples-montecarlo-montecarlo-module">
 <h2>gateSizing.examples_monteCarlo.montecarlo module<a class="headerlink" href="#gatesizing-examples-montecarlo-montecarlo-module" title="Permalink to this headline"></a></h2>
 <span class="target" id="module-src.gateSizing.examples_monteCarlo.montecarlo"></span><dl class="py function">
@@ -1552,11 +1590,11 @@ array of previous gates</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-src.gateSizing.optimizeGatesSimple">
-<span id="gatesizing-optimizegatessimple-module"></span><h2>gateSizing.optimizeGatesSimple module<a class="headerlink" href="#module-src.gateSizing.optimizeGatesSimple" title="Permalink to this headline"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple.computeGateDelays">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple.</span></span><span class="sig-name descname"><span class="pre">computeGateDelays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capLoad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple.html#computeGateDelays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple.computeGateDelays" title="Permalink to this definition"></a></dt>
+<div class="section" id="gatesizing-optimizegatessimple-boyd-module">
+<h2>gateSizing.optimizeGatesSimple_Boyd module<a class="headerlink" href="#gatesizing-optimizegatessimple-boyd-module" title="Permalink to this headline"></a></h2>
+<span class="target" id="module-src.gateSizing.optimizeGatesSimple_Boyd"></span><dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple_Boyd.computeGateDelays">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeGateDelays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capLoad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple_Boyd.html#computeGateDelays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple_Boyd.computeGateDelays" title="Permalink to this definition"></a></dt>
 <dd><p>Delay on each gate is computed as (load capacitance * gamma) / resistance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1573,8 +1611,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple.computeInputCapacitance">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple.</span></span><span class="sig-name descname"><span class="pre">computeInputCapacitance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple.html#computeInputCapacitance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple.computeInputCapacitance" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple_Boyd.computeInputCapacitance">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeInputCapacitance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple_Boyd.html#computeInputCapacitance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple_Boyd.computeInputCapacitance" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate input capacitance as affine function … alpha + beta * x</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1591,8 +1629,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple.computeLoadCapacitance">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple.</span></span><span class="sig-name descname"><span class="pre">computeLoadCapacitance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputCapacitance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadCapacitances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfGates</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple.html#computeLoadCapacitance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple.computeLoadCapacitance" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple_Boyd.computeLoadCapacitance">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeLoadCapacitance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputCapacitance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadCapacitances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfGates</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple_Boyd.html#computeLoadCapacitance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple_Boyd.computeLoadCapacitance" title="Permalink to this definition"></a></dt>
 <dd><p>Load capacitance is computed as a sum of a fanout.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1609,8 +1647,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple.computeTotalArea">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple.</span></span><span class="sig-name descname"><span class="pre">computeTotalArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gateScales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple.html#computeTotalArea"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple.computeTotalArea" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple_Boyd.computeTotalArea">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeTotalArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gateScales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple_Boyd.html#computeTotalArea"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple_Boyd.computeTotalArea" title="Permalink to this definition"></a></dt>
 <dd><p>Compute total area as sum_i ( gateScale_i * x_i )</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1626,8 +1664,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple.computeTotalPower">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple.</span></span><span class="sig-name descname"><span class="pre">computeTotalPower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energyLoss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple.html#computeTotalPower"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple.computeTotalPower" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple_Boyd.computeTotalPower">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeTotalPower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energyLoss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple_Boyd.html#computeTotalPower"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple_Boyd.computeTotalPower" title="Permalink to this definition"></a></dt>
 <dd><p>Compute total power as sum_i ( f_i * e_i * x_i )</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1644,16 +1682,16 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple.getDelaySSTA">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple.</span></span><span class="sig-name descname"><span class="pre">getDelaySSTA</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple.html#getDelaySSTA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple.getDelaySSTA" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple_Boyd.getDelaySSTA">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple_Boyd.</span></span><span class="sig-name descname"><span class="pre">getDelaySSTA</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple_Boyd.html#getDelaySSTA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple_Boyd.getDelaySSTA" title="Permalink to this definition"></a></dt>
 <dd><p>Just a test function
 :return delay: array of delays for each gate
 :return constr: constraints for the delays</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple.getMaximumDelay">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple.</span></span><span class="sig-name descname"><span class="pre">getMaximumDelay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathDelays</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple.html#getMaximumDelay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple.getMaximumDelay" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple_Boyd.getMaximumDelay">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple_Boyd.</span></span><span class="sig-name descname"><span class="pre">getMaximumDelay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathDelays</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple_Boyd.html#getMaximumDelay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple_Boyd.getMaximumDelay" title="Permalink to this definition"></a></dt>
 <dd><blockquote>
 <div><p>Delay on each gate is computed as (load capacitance * gamma) / resistance</p>
 </div></blockquote>
@@ -1668,8 +1706,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple.getPathDelays">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple.</span></span><span class="sig-name descname"><span class="pre">getPathDelays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gateDelays</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple.html#getPathDelays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple.getPathDelays" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple_Boyd.getPathDelays">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple_Boyd.</span></span><span class="sig-name descname"><span class="pre">getPathDelays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gateDelays</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple_Boyd.html#getPathDelays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple_Boyd.getPathDelays" title="Permalink to this definition"></a></dt>
 <dd><p>Delay on each gate is computed as (load capacitance * gamma) / resistance</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1682,16 +1720,16 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple.optimizeGates">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple.</span></span><span class="sig-name descname"><span class="pre">optimizeGates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energyLoss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gateScales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxArea</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxPower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadCapacitances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfGates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delaysRVs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple.html#optimizeGates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple.optimizeGates" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesSimple_Boyd.optimizeGates">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesSimple_Boyd.</span></span><span class="sig-name descname"><span class="pre">optimizeGates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energyLoss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gateScales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxArea</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxPower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadCapacitances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfGates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delaysRVs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesSimple_Boyd.html#optimizeGates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesSimple_Boyd.optimizeGates" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="module-src.gateSizing.optimizeGatesVectorized">
-<span id="gatesizing-optimizegatesvectorized-module"></span><h2>gateSizing.optimizeGatesVectorized module<a class="headerlink" href="#module-src.gateSizing.optimizeGatesVectorized" title="Permalink to this headline"></a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.computeGateDelays">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">computeGateDelays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capLoad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.expression.Expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#computeGateDelays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.computeGateDelays" title="Permalink to this definition"></a></dt>
+<div class="section" id="gatesizing-optimizegatesvectorized-boyd-module">
+<h2>gateSizing.optimizeGatesVectorized_Boyd module<a class="headerlink" href="#gatesizing-optimizegatesvectorized-boyd-module" title="Permalink to this headline"></a></h2>
+<span class="target" id="module-src.gateSizing.optimizeGatesVectorized_Boyd"></span><dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.computeGateDelays">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeGateDelays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capLoad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.expression.Expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#computeGateDelays"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.computeGateDelays" title="Permalink to this definition"></a></dt>
 <dd><p>Load capacitance is computed as a sum of a fanout.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1708,8 +1746,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.computeIncidenceMatrices">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">computeIncidenceMatrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#computeIncidenceMatrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.computeIncidenceMatrices" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.computeIncidenceMatrices">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeIncidenceMatrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#computeIncidenceMatrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.computeIncidenceMatrices" title="Permalink to this definition"></a></dt>
 <dd><p>Get standard cell-edge incidence matrix of the circuit</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1720,8 +1758,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.computeInputCapacitance">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">computeInputCapacitance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alphas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#computeInputCapacitance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.computeInputCapacitance" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.computeInputCapacitance">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeInputCapacitance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alphas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#computeInputCapacitance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.computeInputCapacitance" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate input capacitance as affine function … alpha + beta * x</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1738,8 +1776,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.computeLoadCapacitance">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">computeLoadCapacitance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Aout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputCapacitance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.expression.Expression</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#computeLoadCapacitance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.computeLoadCapacitance" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.computeLoadCapacitance">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeLoadCapacitance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Aout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inputCapacitance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.expression.Expression</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#computeLoadCapacitance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.computeLoadCapacitance" title="Permalink to this definition"></a></dt>
 <dd><p>Load capacitance is computed as a sum of a fanout.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1756,8 +1794,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.computeTotalArea">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">computeTotalArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gateScales</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#computeTotalArea"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.computeTotalArea" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.computeTotalArea">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeTotalArea</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gateScales</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#computeTotalArea"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.computeTotalArea" title="Permalink to this definition"></a></dt>
 <dd><p>Compute total area as sum_i ( gateScale_i * x_i )</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1773,8 +1811,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.computeTotalPower">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">computeTotalPower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energyLoss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#computeTotalPower"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.computeTotalPower" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.computeTotalPower">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">computeTotalPower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energyLoss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#computeTotalPower"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.computeTotalPower" title="Permalink to this definition"></a></dt>
 <dd><p>Compute total power as sum_i ( f_i * e_i * x_i )</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1791,8 +1829,8 @@ array of previous gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.getConstrCload">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">getConstrCload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capLoad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadCapacitances</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#getConstrCload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.getConstrCload" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.getConstrCload">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">getConstrCload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capLoad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadCapacitances</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#getConstrCload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.getConstrCload" title="Permalink to this definition"></a></dt>
 <dd><p>Function gets capacitance load constraint.
 Load capacitances of end gates are given, cannot set due
 to cvxpy expression - it is set as an constraint instead.</p>
@@ -1810,8 +1848,8 @@ to cvxpy expression - it is set as an constraint instead.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.getConstrTiming">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">getConstrTiming</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Aout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gateDelays</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#getConstrTiming"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.getConstrTiming" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.getConstrTiming">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">getConstrTiming</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Aout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gateDelays</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#getConstrTiming"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.getConstrTiming" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Timing constraints.</dt><dd><p>Aout’ * t + Ain’ * gateDelays &lt;= Ain’ * t</p>
 </dd>
@@ -1835,8 +1873,8 @@ over all gates j that drive gate i.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.getInputTimingConstr">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">getInputTimingConstr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gateDelays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.expression.Expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">[&lt;class</span> <span class="pre">'bool'&gt;]</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#getInputTimingConstr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.getInputTimingConstr" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.getInputTimingConstr">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">getInputTimingConstr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gateDelays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.expression.Expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">[&lt;class</span> <span class="pre">'bool'&gt;]</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#getInputTimingConstr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.getInputTimingConstr" title="Permalink to this definition"></a></dt>
 <dd><p>Get timing constraints for gate delays</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1852,8 +1890,8 @@ over all gates j that drive gate i.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.getMaximumDelay">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">getMaximumDelay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#getMaximumDelay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.getMaximumDelay" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.getMaximumDelay">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">getMaximumDelay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">cvxpy.expressions.variable.Variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">cvxpy.expressions.expression.Expression</span></span></span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#getMaximumDelay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.getMaximumDelay" title="Permalink to this definition"></a></dt>
 <dd><p>Get maximum delay - that is the upper bound
 on the overall delay and that is the max of
 arrival times for output gates</p>
@@ -1868,8 +1906,8 @@ arrival times for output gates</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized.optimizeGates">
-<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized.</span></span><span class="sig-name descname"><span class="pre">optimizeGates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energyLoss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gateScales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxArea</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxPower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadCapacitances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfCells</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized.html#optimizeGates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized.optimizeGates" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="src.gateSizing.optimizeGatesVectorized_Boyd.optimizeGates">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.optimizeGatesVectorized_Boyd.</span></span><span class="sig-name descname"><span class="pre">optimizeGates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energyLoss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gateScales</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gammas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxArea</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxPower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadCapacitances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfCells</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/optimizeGatesVectorized_Boyd.html#optimizeGates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.optimizeGatesVectorized_Boyd.optimizeGates" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </div>
@@ -2352,6 +2390,11 @@ Edges are considered to have the same difference and same length.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.test_algorithms.scalingBins_CVXPY_GP">
 <span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_algorithms.</span></span><span class="sig-name descname"><span class="pre">scalingBins_CVXPY_GP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_algorithms.html#scalingBins_CVXPY_GP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_algorithms.scalingBins_CVXPY_GP" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.gateSizing.test_algorithms.scalingOptimization_CVXPY_GP">
+<span class="sig-prename descclassname"><span class="pre">src.gateSizing.test_algorithms.</span></span><span class="sig-name descname"><span class="pre">scalingOptimization_CVXPY_GP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/test_algorithms.html#scalingOptimization_CVXPY_GP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.test_algorithms.scalingOptimization_CVXPY_GP" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">

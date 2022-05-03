@@ -4,12 +4,13 @@ from randomVariableHist_Numpy import RandomVariable
 from node import Node
 import cvxpy as cp
 from mosekVariable import RandomVariableMOSEK
+import numpy as np
 
 import cvxpyVariable
 
 
 def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStatus=(-1, -1),
-                                                            withSymmetryConstr=False, mosekTRI=False, GP=False) -> [Node]:
+                                        withSymmetryConstr=False, mosekTRI=False, GP=False, monteCarlo=False) -> [Node]:
     """
     Compute circuit delay using PDFs algorithm
     Function executes the algorithm for finding out the PDF of a circuit delay.
@@ -32,12 +33,14 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
     elif cvxpy and not unary and not GP: MaximumF = maxOfDistributionsCVXPY_McCormick
     elif cvxpy and GP:        MaximumF = maxOfDistributionsCVXPY_GP
     elif not cvxpy and unary and not mosekTRI: MaximumF = maxOfDistributionsUNARY
+    elif monteCarlo:          MaximumF = maxMonteCarlo
     else:                     MaximumF = maxOfDistributionsFORM
     if mosekStatus[0] >= 0:  ConvolutionF = Convolution_UNARY_MOSEK(withSymmetryConstr)
     elif cvxpy and unary:     ConvolutionF = Convolution_UNARY(withSymmetryConstr)
     elif cvxpy and not unary and not GP: ConvolutionF = Convolution_McCormick
     elif cvxpy and GP:        ConvolutionF = Convolution_GP
     elif not cvxpy and unary: ConvolutionF = RandomVariable.convolutionOfTwoVarsNaiveSAME_UNARY
+    elif monteCarlo:          ConvolutionF = np.add
     else:                     ConvolutionF = RandomVariable.convolutionOfTwoVarsShift
 
     if mosekStatus[0] >= 0:
@@ -323,6 +326,26 @@ def maxOfDistributionsUNARY(delays: [RandomVariable]) -> RandomVariable:
 
     for i in range(0, size - 1):
         newRV = delays[i].maxOfDistributionsQUAD_FORMULA_UNARY(delays[i + 1])
+        delays[i + 1] = newRV
+
+    maximum = delays[-1]
+
+    return maximum
+
+
+def maxMonteCarlo(delays):
+    """
+    Calculates maximum for monte carlo
+
+    :param delays: 2d array of numbers
+    :return maximum:  maximum delay
+    """
+
+
+    size = len(delays)
+
+    for i in range(0, size - 1):
+        newRV = np.maximum(delays[i], delays[i + 1])
         delays[i + 1] = newRV
 
     maximum = delays[-1]

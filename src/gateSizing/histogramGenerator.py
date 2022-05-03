@@ -111,9 +111,56 @@ def get_Histogram_from_UNARY(unaryHist):
     return result
 
 
+def getValuesForMonteCarlo(rv: RandomVariable, count):
+    """
+    Return of [1, count] array of numbers generated with prob. of histogram
+
+    :param rv: Random Variable with histogram class
+    :param count: number of values
+    :return random_from_cdf: array of values
+    """
+
+    # data = np.random.normal(size=1000)
+    # hist, bins = np.histogram(data, bins=50)
+    # print(hist)
+
+
+    bin_midpoints = rv.edges[:-1] + np.diff(rv.edges) / 2
+    cdf = np.cumsum(rv.bins)
+    cdf = cdf / cdf[-1]
+    values = np.random.rand(count)
+    value_bins = np.searchsorted(cdf, values)
+    random_from_cdf = bin_midpoints[value_bins]
+
+    randomIndices = np.random.choice(np.arange(random_from_cdf.size), int(count * 0.8))
+    random_from_cdf[randomIndices[:randomIndices.size // 2]] += ((rv.edges[1] - rv.edges[0]) / 2)*np.random.random_sample(randomIndices.size // 2)
+    random_from_cdf[randomIndices[randomIndices.size // 2:]] -= ((rv.edges[1] - rv.edges[0]) / 2)*np.random.random_sample(randomIndices.size // 2)
+
+
+    return random_from_cdf
+
+    # import matplotlib.pyplot as plt
+    # plt.subplot(121)
+    # # plt.hist(data, 50)
+    # plt.hist(rv.edges[:-1], rv.edges, weights=rv.bins, alpha=0.2, color='orange')
+    # plt.subplot(122)
+    # # plt.hist(random_from_cdf, 30)
+    # _ = plt.hist(random_from_cdf, bins=30, density='PDF', alpha=0.7)
+    # plt.show()
+
+
+
 def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries=0):
     """
     Generates distribution according to a linear regression model
+
+    :param model: model
+    :param a_i: area
+    :param p_i: power
+    :param x_i: sizing of the gate
+    :param int: interval
+    :param nUnaries: number of unary variables
+    :return RandomVariable: new generated random variable
     """
 
     numberOfBins = model.shape[0]
@@ -128,8 +175,11 @@ def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries=0):
             p2 = model[bin, 3]
             # binP = model[bin, 0] + model[bin, 1] * a_i * x_i + model[bin, 2] * p_i * x_i
 
-            binP = a1*a_i*x_i + p1*p_i*x_i + a2* (1/ (a_i*x_i)) + p2* (1/(p_i*x_i))
-            # distr[bin] = max(binP, 0)
+            if (model[bin, :] == 1.00000000e-27).all():
+                binP = 1.00000000e-27
+            else:
+                binP = a1*a_i*x_i + p1*p_i*x_i + a2* (1/ (a_i*x_i)) + p2* (1/(p_i*x_i))
+
             distr[bin] = binP
 
         STATIC_BINS = np.linspace(int[0], int[1], numberOfBins + 1)

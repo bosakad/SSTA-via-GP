@@ -410,6 +410,257 @@ def mainCVXPY_GP(numberOfGates=8, numberOfBins=25, interval=(-4, 25)):
     # print(actual)
 
 
+def mainCVXPY_GP_Sizing(numberOfGates=4, numberOfBins=20, interval=(0, 28)):
+
+    """
+        Computes SSTA using unary encoding, can be computed in a 'precise' or non-precise way
+        Sizes the gates
+    """
+
+    n_samples = 2000000
+    seed = 0
+
+    # numberOfBins = 10
+    # numberOfUnaries = 8
+    # interval = (-8, 35)
+
+    gateParams = [0.0, 1.0]
+
+    # fix a random seed seed exists
+    if seed != None:
+        seed = seed
+        np.random.seed(seed)
+
+
+    ####################################
+    ####### Generate Input data ########
+    ####################################
+
+    # list with inputs' mean values
+    input_means = [np.random.randint(20, 70) / 10 for _ in range(numberOfGates + 1)]
+    # list with inputs' stds
+    input_stds = [np.random.randint(20, 130) / 100 for _ in range(numberOfGates + 1)]
+
+    # CVXPY
+
+    constraints = []
+
+    # generate inputs
+    startingNodes = []
+    xs_starting = {}
+    for i in range(0, numberOfGates + 1):
+        g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples,
+                                                    interval, forGP=True)
+
+        xs_starting[i] = {}
+
+        for bin in range(0, numberOfBins):
+            xs_starting[i][bin] = cp.Variable(pos=True)
+
+            constraints.append(xs_starting[i][bin] >= g.bins[bin])
+
+        node = Node(RandomVariableCVXPY(xs_starting[i], g.edges))
+        startingNodes.append(node)
+
+
+    # create sizing parameters
+
+    Amax = 30
+    Pmax = 55
+
+    f = np.ones(numberOfGates) * 2
+    e = np.ones(numberOfGates) * 1.2
+    a = np.ones(numberOfGates)
+
+    sizingVariables = cp.Variable((numberOfGates,), pos=True)
+    constraints.append(sizingVariables >= 1)
+
+    power = cp.sum(cp.multiply((cp.multiply(f, sizingVariables)), e))
+    area = cp.sum(cp.multiply(a, sizingVariables))
+
+    constraints.append(power <= Pmax)
+    constraints.append(area <= Amax)
+
+    coef = np.load('Inputs.outputs/model.npz')
+    model = coef['coef']
+
+        # generetate nodes
+    generatedNodes = []
+    xs_generated = {}
+    for i in range(0, numberOfGates):
+        g = histogramGenerator.get_gauss_bins(gateParams[0], gateParams[1], numberOfBins, n_samples, interval,
+                                                    forGP=True)
+        xs_generated[i] = {}
+
+        x_i = sizingVariables[i]
+        a_i = a[i]
+        f_i = f[i]
+        e_i = e[i]
+
+        for bin in range(0, numberOfBins):
+            xs_generated[i][bin] = cp.Variable(pos=True)
+
+            # constraints.append(xs_generated[i][bin] >= g.bins[bin])
+
+            a1 = model[bin, 0]
+            p1 = model[bin, 1]
+            a2 = model[bin, 2]
+            p2 = model[bin, 3]
+
+            # if the gate is zero, no sizing should be applied
+            if (model[bin, :] == 1.00000000e-27).all():
+                prob = 1.00000000e-27
+
+            else:
+                prob = a1 * x_i * a_i + p1 * x_i * e_i * f_i + a2 * (1 / (x_i * a_i)) + p2 * (1 / (x_i * e_i * f_i))
+
+            constraints.append(xs_generated[i][bin] >= prob)
+
+        node = Node(RandomVariableCVXPY(xs_generated[i], g.edges))
+        generatedNodes.append(node)
+
+    # set circuit design
+
+    # start
+    startingNodes[0].setNextNodes([generatedNodes[0]])
+
+    # upper part
+    for i in range(1, numberOfGates + 1):
+        start = startingNodes[i]
+        start.setNextNodes([generatedNodes[i - 1]])
+
+        # lower part
+    for i in range(0, numberOfGates - 1):
+        node = generatedNodes[i]
+        node.setNextNodes([generatedNodes[i + 1]])
+
+    delays, newConstr = SSTA.calculateCircuitDelay(startingNodes, cvxpy=True, GP=True)
+    delays = delays[numberOfGates + 1:]
+
+    constraints.extend(newConstr)
+
+    # setting objective
+
+
+    midPoints = 0.5 * (delays[-1].edges[1:] + delays[-1].edges[:-1])  # midpoints of the edges of hist.
+    nLast = 5
+    finalMidPoints = np.append(np.ones((numberOfBins - nLast,))*1.0e-4, np.power(midPoints[-nLast:], 2))
+
+    sum = 0
+    for bin in range(0, numberOfBins):
+            sum += delays[-1].bins[bin] * finalMidPoints[bin]
+
+    # solve
+
+    objective = cp.Minimize(sum)
+    prob = cp.Problem(objective, constraints)
+
+    prob.solve(verbose=True, solver=cp.MOSEK, gp=True,
+               mosek_params={  'MSK_DPAR_INTPNT_CO_TOL_MU_RED': 0.1,
+               'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}
+                               # , mosek.iparam.intpnt_solve_form: mosek.solveform.dual}  # max time
+                )
+
+    # num_nonZeros = prob.solver_stats.extra_stats.getAttr("NumNZs")
+    # ObjVal = prob.solver_stats.extra_stats.getAttr("ObjVal")
+    # time = prob.solver_stats.extra_stats.getAttr("Runtime")
+    # time = prob.solver_stats.extra_stats.getAttr("dinfitem.optimizer_time")
+    time = prob.solver_stats.solve_time
+
+
+    # print out the values
+    # print("PROBLEM VALUE: ", prob.value)
+
+    rvs = []
+
+    for gate in range(0, len(delays)):  # construct RVs
+
+        finalBins = np.zeros(numberOfBins)
+        for bin in range(0, numberOfBins):
+            # if ((delays[gate].bins)[bin]) != 0:
+            finalBins[bin] = ((delays[gate].bins)[bin]).value
+            # else:
+            #     finalBins[bin] = 0
+
+        rvs.append(RandomVariable(finalBins, generatedNodes[0].randVar.edges))
+
+
+    print('Sizing parameters')
+    print(sizingVariables.value)
+    print('total area:')
+    print(np.sum(np.multiply(sizingVariables.value, a)))
+    print('total power:')
+    print(np.sum(np.multiply(sizingVariables.value, np.multiply(f, e))))
+
+    print("\n APRX. VALUES: \n")
+    for i in range(0, len(delays)):
+        print(rvs[i].mean, rvs[i].std)
+
+
+    lastGate = (rvs[-1].mean, rvs[-1].std)
+    return (lastGate, time)
+
+    # NUMPY
+
+    # startingNodes = []
+    # for i in range(0, numberOfGates + 1):
+    #     g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval,
+    #                                           forGP=True)
+    #     node = Node(g)
+    #     startingNodes.append(node)
+    #
+    # # generate inputs
+    # startingNodes = []
+    # for i in range(0, numberOfGates + 1):
+    #     g = histogramGenerator.get_gauss_bins(input_means[i], input_stds[i], numberOfBins, n_samples, interval,
+    #                                           forGP=True)
+    #     node = Node(g)
+    #     startingNodes.append(node)
+    #
+    #     # generetate nodes
+    # generatedNodes = []
+    # for i in range(0, numberOfGates):
+    #     # g = histogramGenerator.get_gauss_bins(gateParams[0], gateParams[1], numberOfBins, n_samples, interval,
+    #     #                                       forGP=True)
+    #
+    #     g = histogramGenerator.generateAccordingToModel(model, 1, f[0]*e[0], 8, interval)
+    #     node = Node(g)
+    #     generatedNodes.append(node)
+    #
+    # # set circuit design cvxpy
+    #
+    # # start
+    # startingNodes[0].setNextNodes([generatedNodes[0]])
+    #
+    # # upper part
+    # for i in range(1, numberOfGates + 1):
+    #     start = startingNodes[i]
+    #     start.setNextNodes([generatedNodes[i - 1]])
+    #
+    #     # lower part
+    # for i in range(0, numberOfGates - 1):
+    #     node = generatedNodes[i]
+    #     node.setNextNodes([generatedNodes[i + 1]])
+    #
+    # delays = SSTA.calculateCircuitDelay(startingNodes)
+    # delays = delays[numberOfGates + 1:]
+    #
+    # values = delays[-1].bins
+    #
+    # actual = putTuplesIntoArray(rvs=delays)
+    # print(actual)
+    #
+    # # monte carlo
+    # # lastGate, values = MonteCarlo(numberOfGates, True)
+    # # print(lastGate)
+    #
+    # # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins,alpha=0.2, color='orange')
+    #
+    # plt.hist(rvs[-1].edges[:-1], rvs[-1].edges, weights=rvs[-1].bins, density="PDF",alpha=0.2, color='blue')
+    # plt.hist(rvs[-1].edges[:-1], rvs[-1].edges, weights=values, density="PDF", alpha=0.2, color='orange')
+    # # _ = plt.hist(values, bins=numberOfBins, density='PDF', alpha=0.7)
+    # plt.show()
+
 
 def mainCVXPYMcCormick(numberOfGates=1, numberOfUnaries=10, numberOfBins=20, interval=(-5, 18)):
 
@@ -1558,7 +1809,8 @@ if __name__ == "__main__":
         # dec param is Desired precision
 
     # mainCVXPY()
-    mainCVXPY_GP()
+    # mainCVXPY_GP()
+    mainCVXPY_GP_Sizing()
     # mainCVXPYMcCormick()
     # LadderNumpy()
     # LadderMOSEK_test()

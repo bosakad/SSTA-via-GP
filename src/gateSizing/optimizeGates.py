@@ -10,13 +10,14 @@ import SSTA
 import networkx as nx
 import mosek
 from test_SSTA_Numpy import putTuplesIntoArray
+from examples_monteCarlo.infinite_ladder_montecarlo import MonteCarlo_inputs, MonteCarlo_nodes, get_moments_from_simulations
+
 from randomVariableHist_Numpy import RandomVariable
 from mosek import *
 import sys
 from mosekVariable import RandomVariableMOSEK
 import matplotlib.pyplot as plt
 
-from examples_monteCarlo.montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
 
 
 
@@ -441,7 +442,6 @@ def optimizeGates_MIXED_INT():
                         # Set the bounds on variable
                         # 0 <= x_j <= 1
 
-                        # if gate == 6 or gate == 7 or gate == 1 or gate == 2 or gate == 3 or gate == 4 or gate == 5:
                         if gate >= 6:
                             task.putvarbound(variableIndex, mosek.boundkey.ra, g.bins[bin][unary], 1)
                         else:
@@ -505,13 +505,11 @@ def optimizeGates_MIXED_INT():
 
             # task.putclist(sum, np.square(midPoints))
             task.putclist(sum, weights)
-                # todo: zkus maly vahy na zacatku, velky na konci
-            # task.putclist(sum, [1] * sum.shape[0])
 
 
             # set the area and power constraints
-            Amax = 300
-            Pmax = 550
+            Amax = 30
+            Pmax = 55
 
 
             numberOfGates = 6
@@ -718,12 +716,13 @@ def optimizeCVXPY_GP():
     a = np.ones(numberOfGates - 2)
 
     # generate gates
-    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=2.13, int=binsInterval)
-    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=2.4, int=binsInterval)
-    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=4.14, int=binsInterval)
-    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=8, int=binsInterval)
-    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=8, int=binsInterval)
-    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=7, int=binsInterval)
+    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=2.11, int=binsInterval)
+    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=4.4, int=binsInterval)
+    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=5.1, int=binsInterval)
+    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=5.5, int=binsInterval)
+    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=3.6, int=binsInterval)
+    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=9.1, int=binsInterval)
+
 
     # generate inputs
     in1 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=20, int=binsInterval)
@@ -778,19 +777,15 @@ def optimizeCVXPY_GP():
     sum = 0
     for bin in range(0, numberOfBins):
         sum += delays[-1].bins[bin] * finalMidPoints[bin]                # minimize the mean value
-    # for bin in range(0, 28):
-    #     sum += 1 / delays[-1].bins[bin]
+
 
     # create sizing parameters
-
     Amax = 30
     Pmax = 55
 
     sizingVariables = cp.Variable((6,), pos=True)
     constr.append(sizingVariables >= 1)
-    # constr.append(sizingVariables[0] >= 10)
 
-    # a[5] = 3
     power = cp.sum(cp.multiply((cp.multiply(f, sizingVariables)), e))
     area = cp.sum(cp.multiply(a, sizingVariables))
 
@@ -798,7 +793,7 @@ def optimizeCVXPY_GP():
     constr.append(area <= Amax)
 
     model = loadModel('Inputs.outputs/model.npz')
-    # print(model)
+
 
     for gate in range(0, 6):
         curGate = gateNodes[gate]
@@ -810,9 +805,6 @@ def optimizeCVXPY_GP():
         e_i = e[gate]
 
         for bin in range(0, numberOfBins):
-
-            # constr.append(bins[bin] >= rv1.bins[bin])
-
 
             a1 = model[bin, 0]
             p1 = model[bin, 1]
@@ -877,15 +869,40 @@ def optimizeCVXPY_GP():
     ######NUMPY############
     #######################
 
-    n1 = Node(rv1)
-    n2 = Node(rv2)
-    n3 = Node(rv3)
-    n4 = Node(rv4)
-    n5 = Node(rv5)
-    n6 = Node(rv6)
+    # n1 = Node(rv1)
+    # n2 = Node(rv2)
+    # n3 = Node(rv3)
+    # n4 = Node(rv4)
+    # n5 = Node(rv5)
+    # n6 = Node(rv6)
+    #
+    # IN1 = Node(in1)
+    # IN2 = Node(in2)
+    #
+    # # set circuit design
+    # n1.setNextNodes([n5])
+    # # n2.setNextNodes([n3, n3, n4, n4])
+    # IN1.setNextNodes([n4])
+    # IN2.setNextNodes([n3])
+    # n2.setNextNodes([n3, n4])
+    # n3.setNextNodes([n6])
+    # n4.setNextNodes([n5, n6])
+    #
+    # delays = SSTA.calculateCircuitDelay([n2, IN1, IN2, n1])
 
-    IN1 = Node(in1)
-    IN2 = Node(in2)
+    # monte carlo
+
+    n_samples = 3000000
+
+    n1 = Node(histogramGenerator.getValuesForMonteCarlo(rv1, n_samples))
+    n2 = Node(histogramGenerator.getValuesForMonteCarlo(rv2, n_samples))
+    n3 = Node(histogramGenerator.getValuesForMonteCarlo(rv3, n_samples))
+    n4 = Node(histogramGenerator.getValuesForMonteCarlo(rv4, n_samples))
+    n5 = Node(histogramGenerator.getValuesForMonteCarlo(rv5, n_samples))
+    n6 = Node(histogramGenerator.getValuesForMonteCarlo(rv6, n_samples))
+
+    IN1 = Node(histogramGenerator.getValuesForMonteCarlo(in1, n_samples))
+    IN2 = Node(histogramGenerator.getValuesForMonteCarlo(in2, n_samples))
 
     # set circuit design
     n1.setNextNodes([n5])
@@ -896,23 +913,27 @@ def optimizeCVXPY_GP():
     n3.setNextNodes([n6])
     n4.setNextNodes([n5, n6])
 
+    mc = SSTA.calculateCircuitDelay([n2, IN1, IN2, n1], monteCarlo=True)
+    values = mc[-1]
 
 
-    delays = SSTA.calculateCircuitDelay([n2, IN1, IN2, n1])
+    result = []
+    for data in mc:
+        result.append([np.mean(data), np.std(data)])
 
-    # print(np.sum(delays[-1].bins))
+    print("Monte carlo")
+    print(result)
 
-    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
-    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, alpha=0.2, color='blue')
-    plt.show()
+        # plot
+    # fig, ax = plt.subplots(1, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
+    # # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, density="PDF", color='blue')
+    # _ = plt.hist(values, bins=numberOfBins, density='PDF', alpha=0.8, color='orange')
+    # ax.set_xlabel('Delay')
+    # ax.set_ylabel('Probability')
+    # # plt.show()
+    # plt.savefig("Inputs.outputs/delayComparison.jpeg", dpi=800, bbox_inches='tight')
 
-    sum = 0
-    for bin in range(numberOfBins - nLast, numberOfBins):
-        sum += delays[-1].bins[bin]
-    print(sum)
-
-    actual = putTuplesIntoArray(rvs=delays)
-    print(actual)
 
 
 def loadModel(path):

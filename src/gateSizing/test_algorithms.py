@@ -360,6 +360,35 @@ def scalingBins_CVXPY_GP():
         # print results
         print("\n\n" + str(results))
 
+def scalingOptimization_CVXPY_GP():
+
+    # number of testing
+    numberOfBins = 20
+
+    interval = (0, 28)
+
+    results = {}
+
+
+    GATES = [1, 4, 7, 10, 12]
+    numberOfIterations = len(GATES)
+    # test precise
+    for iter in range(0, numberOfIterations):
+        print("\n\n" + str(iter) + ". iteration: \n\n")
+
+        # numBins = numBinsStart + iter * step
+        numGates = GATES[iter]
+        print(numGates)
+        # lastGate, time = test_infiniteLadder.mainCVXPY_GP_Sizing(numGates, numberOfBins, interval)
+        lastGate, time = test_infiniteLadder.mainCVXPY_GP   (numGates, numberOfBins, interval)
+
+        results[(numGates, False)] = (-1, -1, time, 0, 0, -1, -1, -1,
+                                     -1, -1)
+
+        # print results
+        print("\n\n" + str(results))
+
+
 def testAlgorithms_PRESOLVE():
 
     # number of testing
@@ -435,7 +464,9 @@ if __name__ == "__main__":
     # testAlgorithms()
     # testAlgorithms_MOSEK()
     # testAlgorithms_CVXPY_GP()
-    scalingBins_CVXPY_GP()
+    # scalingBins_CVXPY_GP()
+    scalingOptimization_CVXPY_GP()
+
     # testAlgorithms_PRESOLVE()
 
 

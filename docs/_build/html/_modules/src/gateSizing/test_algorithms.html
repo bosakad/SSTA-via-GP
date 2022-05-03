@@ -423,6 +423,35 @@
         <span class="c1"># print results</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
 
+<div class="viewcode-block" id="scalingOptimization_CVXPY_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.scalingOptimization_CVXPY_GP">[docs]</a><span class="k">def</span> <span class="nf">scalingOptimization_CVXPY_GP</span><span class="p">():</span>
+
+    <span class="c1"># number of testing</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">20</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+    <span class="n">GATES</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span>
+    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">GATES</span><span class="p">)</span>
+    <span class="c1"># test precise</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">iter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. iteration: </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># numBins = numBinsStart + iter * step</span>
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">GATES</span><span class="p">[</span><span class="nb">iter</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">numGates</span><span class="p">)</span>
+        <span class="c1"># lastGate, time = test_infiniteLadder.mainCVXPY_GP_Sizing(numGates, numberOfBins, interval)</span>
+        <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">mainCVXPY_GP</span>   <span class="p">(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span><span class="p">,</span> <span class="kc">False</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># print results</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+
+
 <div class="viewcode-block" id="testAlgorithms_PRESOLVE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.testAlgorithms_PRESOLVE">[docs]</a><span class="k">def</span> <span class="nf">testAlgorithms_PRESOLVE</span><span class="p">():</span>
 
     <span class="c1"># number of testing</span>
@@ -498,7 +527,9 @@
     <span class="c1"># testAlgorithms()</span>
     <span class="c1"># testAlgorithms_MOSEK()</span>
     <span class="c1"># testAlgorithms_CVXPY_GP()</span>
-    <span class="n">scalingBins_CVXPY_GP</span><span class="p">()</span>
+    <span class="c1"># scalingBins_CVXPY_GP()</span>
+    <span class="n">scalingOptimization_CVXPY_GP</span><span class="p">()</span>
+
     <span class="c1"># testAlgorithms_PRESOLVE()</span>
 
 

@@ -29,15 +29,6 @@ gateSizing.mosekVariable module
    :undoc-members:
    :show-inheritance:
 
-
-gateSizing.Dmytro\_script module
---------------------------------
-
-.. automodule:: src.gateSizing.Dmytro_script
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 gateSizing.Parser\_Matrix module
 --------------------------------
 
@@ -94,14 +85,6 @@ gateSizing.infinite\_ladder\_montecarlo module
    :undoc-members:
    :show-inheritance:
 
-gateSizing.main module
-----------------------
-
-.. automodule:: src.gateSizing.main
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 gateSizing.examples_monteCarlo.montecarlo module
 ----------------------------
 
@@ -118,18 +101,18 @@ gateSizing.node module
    :undoc-members:
    :show-inheritance:
 
-gateSizing.optimizeGatesSimple module
+gateSizing.optimizeGatesSimple_Boyd module
 -------------------------------------
 
-.. automodule:: src.gateSizing.optimizeGatesSimple
+.. automodule:: src.gateSizing.optimizeGatesSimple_Boyd
    :members:
    :undoc-members:
    :show-inheritance:
 
-gateSizing.optimizeGatesVectorized module
+gateSizing.optimizeGatesVectorized_Boyd module
 -----------------------------------------
 
-.. automodule:: src.gateSizing.optimizeGatesVectorized
+.. automodule:: src.gateSizing.optimizeGatesVectorized_Boyd
    :members:
    :undoc-members:
    :show-inheritance:

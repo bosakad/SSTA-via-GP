@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>src.gateSizing.optimizeGatesVectorized &mdash; Gate Sizing  documentation</title>
+  <title>src.gateSizing.optimizeGatesVectorized_Boyd &mdash; Gate Sizing  documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -51,7 +51,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>src.gateSizing.optimizeGatesVectorized</li>
+      <li>src.gateSizing.optimizeGatesVectorized_Boyd</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -60,7 +60,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for src.gateSizing.optimizeGatesVectorized</h1><div class="highlight"><pre>
+  <h1>Source code for src.gateSizing.optimizeGatesVectorized_Boyd</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
 
@@ -76,7 +76,7 @@
 <span class="c1"># cin = alpha + beta*x</span>
 
 
-<div class="viewcode-block" id="computeIncidenceMatrices"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeIncidenceMatrices">[docs]</a><span class="k">def</span> <span class="nf">computeIncidenceMatrices</span><span class="p">(</span><span class="n">A</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+<div class="viewcode-block" id="computeIncidenceMatrices"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.computeIncidenceMatrices">[docs]</a><span class="k">def</span> <span class="nf">computeIncidenceMatrices</span><span class="p">(</span><span class="n">A</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get standard cell-edge incidence matrix of the circuit</span>
 
@@ -111,7 +111,7 @@
 
 
 
-<div class="viewcode-block" id="computeInputCapacitance"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeInputCapacitance">[docs]</a><span class="k">def</span> <span class="nf">computeInputCapacitance</span><span class="p">(</span><span class="n">alphas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">betas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+<div class="viewcode-block" id="computeInputCapacitance"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.computeInputCapacitance">[docs]</a><span class="k">def</span> <span class="nf">computeInputCapacitance</span><span class="p">(</span><span class="n">alphas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">betas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate input capacitance as affine function ... alpha + beta * x</span>
 
@@ -131,7 +131,7 @@
 
 
 
-<div class="viewcode-block" id="computeLoadCapacitance"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeLoadCapacitance">[docs]</a><span class="k">def</span> <span class="nf">computeLoadCapacitance</span><span class="p">(</span><span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">inputCapacitance</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+<div class="viewcode-block" id="computeLoadCapacitance"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.computeLoadCapacitance">[docs]</a><span class="k">def</span> <span class="nf">computeLoadCapacitance</span><span class="p">(</span><span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">inputCapacitance</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load capacitance is computed as a sum of a fanout.</span>
 
@@ -174,7 +174,7 @@
 <span class="c1"># d = cload * gamma/x</span>
 
 
-<div class="viewcode-block" id="computeGateDelays"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeGateDelays">[docs]</a><span class="k">def</span> <span class="nf">computeGateDelays</span><span class="p">(</span><span class="n">capLoad</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">,</span> <span class="n">gammas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+<div class="viewcode-block" id="computeGateDelays"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.computeGateDelays">[docs]</a><span class="k">def</span> <span class="nf">computeGateDelays</span><span class="p">(</span><span class="n">capLoad</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">,</span> <span class="n">gammas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load capacitance is computed as a sum of a fanout.</span>
 
@@ -221,7 +221,7 @@
 <span class="c1"># problem.solve(gp=True)</span>
 
 
-<div class="viewcode-block" id="getConstrCload"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.getConstrCload">[docs]</a><span class="k">def</span> <span class="nf">getConstrCload</span><span class="p">(</span><span class="n">capLoad</span><span class="p">,</span> <span class="n">loadCapacitances</span><span class="p">):</span>
+<div class="viewcode-block" id="getConstrCload"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.getConstrCload">[docs]</a><span class="k">def</span> <span class="nf">getConstrCload</span><span class="p">(</span><span class="n">capLoad</span><span class="p">,</span> <span class="n">loadCapacitances</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function gets capacitance load constraint.</span>
 <span class="sd">    Load capacitances of end gates are given, cannot set due</span>
@@ -239,7 +239,7 @@
 
 
 
-<div class="viewcode-block" id="getConstrTiming"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.getConstrTiming">[docs]</a><span class="k">def</span> <span class="nf">getConstrTiming</span><span class="p">(</span><span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">gateDelays</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="getConstrTiming"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.getConstrTiming">[docs]</a><span class="k">def</span> <span class="nf">getConstrTiming</span><span class="p">(</span><span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span><span class="p">,</span> <span class="n">gateDelays</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Timing constraints.</span>
 <span class="sd">        Aout&#39; * t + Ain&#39; * gateDelays &lt;= Ain&#39; * t</span>
@@ -262,7 +262,7 @@
 
 
 
-<div class="viewcode-block" id="getInputTimingConstr"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.getInputTimingConstr">[docs]</a><span class="k">def</span> <span class="nf">getInputTimingConstr</span><span class="p">(</span><span class="n">gateDelays</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+<div class="viewcode-block" id="getInputTimingConstr"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.getInputTimingConstr">[docs]</a><span class="k">def</span> <span class="nf">getInputTimingConstr</span><span class="p">(</span><span class="n">gateDelays</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get timing constraints for gate delays</span>
 
@@ -279,7 +279,7 @@
     <span class="k">return</span> <span class="n">timing_constr</span></div>
 
 
-<div class="viewcode-block" id="getMaximumDelay"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.getMaximumDelay">[docs]</a><span class="k">def</span> <span class="nf">getMaximumDelay</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+<div class="viewcode-block" id="getMaximumDelay"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.getMaximumDelay">[docs]</a><span class="k">def</span> <span class="nf">getMaximumDelay</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get maximum delay - that is the upper bound</span>
 <span class="sd">    on the overall delay and that is the max of</span>
@@ -295,7 +295,7 @@
     <span class="k">return</span> <span class="n">circuitDelay</span></div>
 
 
-<div class="viewcode-block" id="computeTotalPower"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeTotalPower">[docs]</a><span class="k">def</span> <span class="nf">computeTotalPower</span><span class="p">(</span><span class="n">frequencies</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">energyLoss</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+<div class="viewcode-block" id="computeTotalPower"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.computeTotalPower">[docs]</a><span class="k">def</span> <span class="nf">computeTotalPower</span><span class="p">(</span><span class="n">frequencies</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">energyLoss</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute total power as sum_i ( f_i * e_i * x_i )</span>
 
@@ -309,7 +309,7 @@
     <span class="k">return</span> <span class="n">power</span></div>
 
 
-<div class="viewcode-block" id="computeTotalArea"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.computeTotalArea">[docs]</a><span class="k">def</span> <span class="nf">computeTotalArea</span><span class="p">(</span><span class="n">gateScales</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
+<div class="viewcode-block" id="computeTotalArea"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.computeTotalArea">[docs]</a><span class="k">def</span> <span class="nf">computeTotalArea</span><span class="p">(</span><span class="n">gateScales</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Expression</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute total area as sum_i ( gateScale_i * x_i )</span>
 
@@ -324,7 +324,7 @@
 
 
 
-<div class="viewcode-block" id="optimizeGates"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized.optimizeGates">[docs]</a><span class="k">def</span> <span class="nf">optimizeGates</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">energyLoss</span><span class="p">,</span> <span class="n">gateScales</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">betas</span><span class="p">,</span> <span class="n">gammas</span><span class="p">,</span> <span class="n">maxArea</span><span class="p">,</span> <span class="n">maxPower</span><span class="p">,</span>
+<div class="viewcode-block" id="optimizeGates"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.optimizeGates">[docs]</a><span class="k">def</span> <span class="nf">optimizeGates</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">energyLoss</span><span class="p">,</span> <span class="n">gateScales</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">betas</span><span class="p">,</span> <span class="n">gammas</span><span class="p">,</span> <span class="n">maxArea</span><span class="p">,</span> <span class="n">maxPower</span><span class="p">,</span>
                   <span class="n">loadCapacitances</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">numberOfCells</span><span class="p">):</span>
     <span class="c1"># optimization variables</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">numberOfCells</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># sizes</span>
