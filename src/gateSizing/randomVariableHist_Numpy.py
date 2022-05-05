@@ -778,15 +778,15 @@ class RandomVariable:
 
         if E[0] > 0:  # cut bins
 
-            numberOfBinsNeeded = math.floor(abs(E[0]) / diff)
-            alpha[numberOfBinsNeeded:] = alpha[:-numberOfBinsNeeded]
-            alpha[:numberOfBinsNeeded] = 0
+            s = math.floor(abs(E[0]) / diff)
+            alpha[s:] = alpha[:-s]
+            alpha[:s] = 0
 
         elif E[0] < 0:  # cut bins
 
-            numberOfBinsNeeded = math.floor(abs(E[0]) / diff)
-            alpha[:-numberOfBinsNeeded] = alpha[numberOfBinsNeeded:]
-            alpha[-numberOfBinsNeeded:] = 0
+            s = math.floor(abs(E[0]) / diff)
+            alpha[:-s] = alpha[s:]
+            alpha[-s:] = 0
 
 
     def calculateMean(self):
