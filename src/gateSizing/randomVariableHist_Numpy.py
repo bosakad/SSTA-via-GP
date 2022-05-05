@@ -763,30 +763,30 @@ class RandomVariable:
                     bins[i, unary] = 0
 
     @staticmethod
-    def cutBins(edges, bins):
+    def cutBins(E, alpha):
         """
         Cuts bins depending on edge[0]
         if edge[0] < 0: cuts left bins and adds zeros to the end
         if edge[0] > 0: cuts right bins and adds zeros to the beginning
 
-        :param edges: (1, n+1) numpy array of edges
-        :param bins: (1, n) numpy array of bins
+        :param E: (1, n+1) numpy array of edges
+        :param alpha: (1, n) numpy array of bins
         :returns None
         """
 
-        diff = edges[1] - edges[0]
+        diff = E[1] - E[0]
 
-        if edges[0] > 0:  # cut bins
+        if E[0] > 0:  # cut bins
 
-            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
-            bins[numberOfBinsNeeded:] = bins[:-numberOfBinsNeeded]
-            bins[:numberOfBinsNeeded] = 0
+            numberOfBinsNeeded = math.floor(abs(E[0]) / diff)
+            alpha[numberOfBinsNeeded:] = alpha[:-numberOfBinsNeeded]
+            alpha[:numberOfBinsNeeded] = 0
 
-        elif edges[0] < 0:  # cut bins
+        elif E[0] < 0:  # cut bins
 
-            numberOfBinsNeeded = math.floor(abs(edges[0]) / diff)
-            bins[:-numberOfBinsNeeded] = bins[numberOfBinsNeeded:]
-            bins[-numberOfBinsNeeded:] = 0
+            numberOfBinsNeeded = math.floor(abs(E[0]) / diff)
+            alpha[:-numberOfBinsNeeded] = alpha[numberOfBinsNeeded:]
+            alpha[-numberOfBinsNeeded:] = 0
 
 
     def calculateMean(self):
