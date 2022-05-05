@@ -2,15 +2,11 @@ import numpy as np
 import cvxpy as cp
 
 
-# Aout = np.where(A<=0, 0, A)
-# Ain  = np.where(A>=0, 0, 1)
 
-# # optimization variables
-# x = cp.Variable(m, pos=True)         # sizes
-# t = cp.Variable(m, pos=True)         # arrival times
-
-# input capacitance is an affine function of sizes
-# cin = alpha + beta*x
+"""
+This module includes vectorized deterministic optimization of the circuit using Boyds RC-model.
+Does NOT work with CVXPY.
+"""
 
 
 def computeIncidenceMatrices(A: np.array):
@@ -28,23 +24,6 @@ def computeIncidenceMatrices(A: np.array):
 
     return Aout, Ain
 
-    # AoutParam = cp.Variable(Aout.shape, pos=True)
-    # AoutParam = cp.Parameter(Aout.shape, pos=True)
-    # AoutParam.value = Aout
-    # AoutParam = cp.Constant(Aout)
-
-    # AinParam = cp.expressions.constants.Constant(cp.bmat(Ain))
-    # AinParam.value = Ain
-    # AinParam = cp.Parameter(shape=Ain.shape, pos=True)
-    # AinParam.value = Ain
-    # AinParam = cp.Constant(Ain)
-
-
-    # AinParam = cp.Variable(Ain.shape, pos=True)
-
-    return AoutParam, AinParam
-
-    # return cp.bmat(Aout), cp.bmat(Ain)
 
 
 

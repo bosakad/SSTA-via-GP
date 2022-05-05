@@ -6,7 +6,7 @@ import numpy as np
 """
   This module includes same functions as module 'cvxpyVariable'. Is coded in MOSEK API for speed-up purposes.
   Unary variable is represented by numpy [n, m], where n is number of bins, m is number of unaries. For a MOSEK 
-  variable bins is represented by [n, m] list of indices.
+  variable bins is represented by [n, m] list of indices. Does not include the GP model - only mixed-integer model.
 """
 
 
@@ -29,7 +29,719 @@ class RandomVariableMOSEK:
 
         self.inf = 0.0   # symbolic purposes
 
+    def maximum_AND_Convolution(self, secondVariable, thirdVariable, curNofVariables, curNofConstr):
+        """ Calculates maximum of 2 PDFs of random variable and a convolution with the third afterwards.
+        Works only for 2 identical edges. Is computed
+        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
+        Is in MOSEK environment.
 
+        :param self: class RandomVariableMOSEK - one of maximums
+        :param secondVariable: class RandomVariableMOSEK - one of maximums
+        :param thirdVariable: class RandomVariableMOSEK - one to convolve
+        :param curNofVariables: current number of MOSEK variables - to know the indices
+        :param curNofConstr: current number of MOSEK constraints - to know the indices
+        :return resultClass:  class RandomVariableMOSEK with mosek variables
+        :return newNofVariables: integer, new total number of MOSEK variables
+        :return newNofConstr: integer, new total number of MOSEK constraints
+        """
+
+        # get data
+        x1 = self.bins
+        x2 = secondVariable.bins
+        numberOfBins, numberOfUnaries = x1.shape
+
+        # allocate dict for sum of multiplications
+        sumOfMaxs = {}
+
+        for i in range(0, numberOfBins):
+            sumOfMaxs[i] = []
+            for j in range(0, i + 1):
+
+                for unary in range(0, numberOfUnaries):
+                    for unary2 in range(0, numberOfUnaries):
+
+                        # help constraints
+                        xIndex = x1[i, unary]
+                        yIndex = x2[j, unary2]
+
+                        # save the multiplication for later
+                        sumOfMaxs[i].append([xIndex, yIndex])
+
+                        if i != j:
+                            # help constraints
+                            xIndex = x1[j, unary]
+                            yIndex = x2[i, unary2]
+
+                            # save the multiplication for later
+                            sumOfMaxs[i].append([xIndex, yIndex])
+
+        ############# CONVOLUTION ##################
+
+        # get data
+        x3 = thirdVariable.bins
+        task = self.task
+        newNofVariables = curNofVariables
+
+        sum = 0
+        for z in range(0, numberOfBins):
+            for k in range(0, z + 1):
+                sum += numberOfUnaries * len(sumOfMaxs[z - k])
+
+        # create auxiliary multiplications
+        nAuxMult = int(sum)
+        auxMult = np.array(range(newNofVariables, newNofVariables + nAuxMult))
+        newNofVariables += nAuxMult
+
+        # create result variables
+        nResults = numberOfBins * numberOfUnaries
+        convolution = np.array(range(newNofVariables, newNofVariables + nResults))
+        newNofVariables += nResults
+        convolutionBins = np.reshape(convolution, (numberOfBins, numberOfUnaries))  # reshape bins
+
+        # append variables
+        numberToCreate = nAuxMult + nResults
+        varsToCreateExtended = np.append(auxMult, convolution)
+        task.appendvars(numberToCreate)
+        task.putvartypelist(varsToCreateExtended, [mosek.variabletype.type_int] * numberToCreate)  # integer
+        task.putvarboundlist(varsToCreateExtended, [mosek.boundkey.ra] * numberToCreate,
+                             [0.0] * numberToCreate, [1.0] * numberToCreate)  # binary
+
+        # convolution
+
+        # allocate dict for sum of multiplications
+        sumOfConvs = {}
+
+        # append constraints
+        symN = (numberOfUnaries - 1) * numberOfBins
+        task.appendcons(numberOfBins + 3 * nAuxMult + symN)
+
+        offset = curNofConstr + numberOfBins
+
+        indexToAux = 0
+
+        for z in range(0, numberOfBins):
+            sumOfConvs[z] = np.array([]).astype(int)
+            for k in range(0, z + 1):
+
+                for unary in range(0, numberOfUnaries):
+                    for unary2 in range(0, len(sumOfMaxs[z - k])):
+                        curAuxMult = auxMult[indexToAux]
+                        indexToAux += 1
+                        sumOfConvs[z] = np.append(sumOfConvs[z], np.array([curAuxMult]))
+
+                        # help constraints
+                        xIndex = x3[k, unary]
+                        yIndex = sumOfMaxs[z - k][unary2][0]
+                        zIndex = sumOfMaxs[z - k][unary2][1]
+
+                        # slackMult <= x
+                        task.putaij(offset + 3 * indexToAux, xIndex, -1)
+                        task.putaij(offset + 3 * indexToAux, curAuxMult, 1)
+
+                        task.putconbound(offset + 3 * indexToAux, mosek.boundkey.up, -self.inf, 0)
+
+                        # slackMult <= y
+                        task.putaij(offset + 3 * indexToAux + 1, yIndex, -1)
+                        task.putaij(offset + 3 * indexToAux + 1, curAuxMult, 1)
+
+                        task.putconbound(offset + 3 * indexToAux + 1, mosek.boundkey.up, -self.inf, 0)
+
+                        # slackMult <= z
+                        task.putaij(offset + 3 * indexToAux + 2, zIndex, -1)
+                        task.putaij(offset + 3 * indexToAux + 2, curAuxMult, 1)
+
+                        task.putconbound(offset + 3 * indexToAux + 2, mosek.boundkey.up, -self.inf, 0)
+
+                        # slackMult >= x + y + z - 2
+
+                        # task.putaij(offset + 4 * indexToAux + 3, yIndex, -1)
+                        # task.putaij(offset + 4 * indexToAux + 3, xIndex, -1)
+                        # task.putaij(offset + 4 * indexToAux + 3, zIndex, -1)
+                        # task.putaij(offset + 4 * indexToAux + 3, curAuxMult, 1)
+                        #
+                        # task.putconbound(offset + 4 * indexToAux + 3, mosek.boundkey.lo, -2, self.inf)
+
+        self.cutBins(self.edges, sumOfConvs)
+
+        roundScalar = 0.5
+        # division = numberOfUnaries * numberOfBins / 14
+        division = 3
+
+        offset = curNofConstr
+
+        for bin in range(0, numberOfBins):
+            row = convolutionBins[bin, :]
+            sumOfMultiplicationsRow = sumOfConvs[bin][:]
+
+            nSums = sumOfMultiplicationsRow.size
+
+            # sumOfNewVariables <= sumOfMultiplications[i] / divisor + ceil
+            task.putaijlist([bin + offset] * numberOfUnaries, row, [1] * numberOfUnaries)
+            if sumOfMultiplicationsRow.size != 0:
+                task.putaijlist([bin + offset] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
+
+            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, roundScalar)
+
+        newNofConstr = curNofConstr + numberOfBins + 3 * nAuxMult
+
+        # symmetry constraints
+        for bin in range(0, numberOfBins):
+            for unary in range(0, numberOfUnaries - 1):
+                offset = bin * (numberOfUnaries - 1) + unary
+
+                # (maximum[bin])[unary] >= (maximum[bin])[unary + 1])
+                task.putaij(newNofConstr + offset, convolutionBins[bin, unary], 1)
+                task.putaij(newNofConstr + offset, convolutionBins[bin, unary + 1], -1)
+
+                task.putconbound(newNofConstr + offset, mosek.boundkey.lo, 0, self.inf)
+
+        newNofConstr += (numberOfUnaries - 1) * numberOfBins
+
+        resultClass = RandomVariableMOSEK(convolutionBins, self.edges, task)
+
+        return resultClass, newNofVariables, newNofConstr
+
+    def maximum_AND_Convolution_VECTORIZED(self, secondVariable, thirdVariable, curNofVariables, curNofConstr):
+        """ Calculates maximum of 2 PDFs of random variable and a convolution with the third afterwards.
+        Works only for 2 identical edges. Is computed
+        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
+        Is in MOSEK environment.
+
+        :param self: class RandomVariableMOSEK - one of maximums
+        :param secondVariable: class RandomVariableMOSEK - one of maximums
+        :param thirdVariable: class RandomVariableMOSEK - one to convolve
+        :param curNofVariables: current number of MOSEK variables - to know the indices
+        :param curNofConstr: current number of MOSEK constraints - to know the indices
+        :return resultClass:  class RandomVariableMOSEK with mosek variables
+        :return newNofVariables: integer, new total number of MOSEK variables
+        :return newNofConstr: integer, new total number of MOSEK constraints
+        """
+
+        # get data
+        x1 = self.bins
+        x2 = secondVariable.bins
+        numberOfBins, numberOfUnaries = x1.shape
+
+        # allocate dict for sum of multiplications
+        sumOfMaxs = {}
+
+        def myZip(x, y):
+            return [x, y]
+
+        for i in range(0, numberOfBins):
+            sumOfMaxs[i] = []
+            for j in range(0, i + 1):
+
+                # help constraints
+
+                unary = np.array(range(0, numberOfUnaries))
+                unary = np.transpose(np.tile(unary, (numberOfUnaries, 1)))
+                unary2 = np.array(range(0, numberOfUnaries))
+                unary2 = np.tile(unary2, (numberOfUnaries, 1))
+
+                # help constraints
+                xIndex = np.concatenate(x1[i, unary])
+                yIndex = np.concatenate(x2[j, unary2])
+
+                xy = list(map(myZip, xIndex, yIndex))
+
+                # save the multiplication for later
+                sumOfMaxs[i].extend(xy)
+
+                if i != j:
+                    # help constraints
+                    xIndex = np.concatenate(x1[j, unary])
+                    yIndex = np.concatenate(x2[i, unary2])
+
+                    xy = list(map(myZip, xIndex, yIndex))
+
+                    # save the multiplication for later
+                    sumOfMaxs[i].extend(xy)
+
+        ############# CONVOLUTION ##################
+
+        # get data
+        x3 = thirdVariable.bins
+        task = self.task
+        newNofVariables = curNofVariables
+
+        sum = 0
+        for z in range(0, numberOfBins):
+            for k in range(0, z + 1):
+                sumOfMaxs[z - k] = np.array(sumOfMaxs[z - k])
+                sum += numberOfUnaries * sumOfMaxs[z - k].shape[0]
+
+        # create auxiliary multiplications
+        nAuxMult = int(sum)
+        auxMult = np.array(range(newNofVariables, newNofVariables + nAuxMult))
+        newNofVariables += nAuxMult
+
+        # create result variables
+        nResults = numberOfBins * numberOfUnaries
+        convolution = np.array(range(newNofVariables, newNofVariables + nResults))
+        newNofVariables += nResults
+        convolutionBins = np.reshape(convolution, (numberOfBins, numberOfUnaries))  # reshape bins
+
+        # append variables
+        numberToCreate = nAuxMult + nResults
+        varsToCreateExtended = np.append(auxMult, convolution)
+        task.appendvars(numberToCreate)
+        task.putvartypelist(varsToCreateExtended, [mosek.variabletype.type_int] * numberToCreate)  # integer
+        task.putvarboundlist(varsToCreateExtended, [mosek.boundkey.ra] * numberToCreate,
+                             [0.0] * numberToCreate, [1.0] * numberToCreate)  # binary
+
+        # convolution
+
+        # allocate dict for sum of multiplications
+        sumOfConvs = {}
+
+        # append constraints
+        symN = (numberOfUnaries - 1) * numberOfBins
+        task.appendcons(numberOfBins + 3 * nAuxMult + symN)
+
+        offset = curNofConstr + numberOfBins
+
+        blockIndex = 0
+
+        for z in range(0, numberOfBins):
+            sumOfConvs[z] = np.array([]).astype(int)
+            for k in range(0, z + 1):
+                size = sumOfMaxs[z - k].shape[0]
+
+                unary = np.array(range(0, numberOfUnaries))
+                unary = np.transpose(np.tile(unary, (size, 1)))
+                unary2 = np.array(range(0, size))
+                unary2 = np.tile(unary2, (numberOfUnaries, 1))
+
+                index = blockIndex + unary * size + unary2
+
+                curAuxMult = np.concatenate(auxMult[index])
+
+                index = np.concatenate(index)
+                sumOfConvs[z] = np.append(sumOfConvs[z], np.array([curAuxMult]))
+
+                # help constraints
+                xIndex = np.concatenate(x3[k, unary])
+                yIndex = np.concatenate(sumOfMaxs[z - k][unary2][:, :, 0])
+                zIndex = np.concatenate(sumOfMaxs[z - k][unary2][:, :, 1])
+
+                numberOfElements = index.size
+
+                # slackMult <= x
+                # task.putaijlist([1, 0], [0, 0], [-1, 1])
+                task.putaijlist(offset + 3 * index, xIndex, [-1] * numberOfElements)
+                task.putaijlist(offset + 3 * index, curAuxMult, [1] * numberOfElements)
+
+                task.putconboundlist(offset + 3 * index, [mosek.boundkey.up] * numberOfElements,
+                                     [-self.inf] * numberOfElements, [0] * numberOfElements)
+
+                # slackMult <= y
+                task.putaijlist(offset + 3 * index + 1, yIndex, [-1] * numberOfElements)
+                task.putaijlist(offset + 3 * index + 1, curAuxMult, [1] * numberOfElements)
+
+                task.putconboundlist(offset + 3 * index + 1, [mosek.boundkey.up] * numberOfElements,
+                                     [-self.inf] * numberOfElements, [0] * numberOfElements)
+
+                # slackMult <= z
+                task.putaijlist(offset + 3 * index + 2, zIndex, [-1] * numberOfElements)
+                task.putaijlist(offset + 3 * index + 2, curAuxMult, [1] * numberOfElements)
+
+                task.putconboundlist(offset + 3 * index + 2, [mosek.boundkey.up] * numberOfElements,
+                                     [-self.inf] * numberOfElements, [0] * numberOfElements)
+
+                # slackMult >= x + y + z - 2
+
+                # task.putaijlist(offset + 4 * index + 3, yIndex, [-1]*numberOfElements)
+                # task.putaijlist(offset + 4 * index + 3, xIndex, [-1]*numberOfElements)
+                # task.putaijlist(offset + 4 * index + 3, zIndex, [-1]*numberOfElements)
+                # task.putaijlist(offset + 4 * index + 3, curAuxMult, [1]*numberOfElements)
+                #
+                # task.putconboundlist(offset + 4 * index + 3, [mosek.boundkey.lo]*numberOfElements, [-2]*numberOfElements,
+                #                                 [self.inf]*numberOfElements)
+
+                blockIndex += size * numberOfUnaries
+
+        self.cutBins(self.edges, sumOfConvs)
+
+        roundScalar = 0.5
+        # division = numberOfUnaries * numberOfBins / 14
+        # division = 54
+        division = 50
+
+        offset = curNofConstr
+
+        for bin in range(0, numberOfBins):
+            row = convolutionBins[bin, :]
+            sumOfMultiplicationsRow = sumOfConvs[bin][:]
+
+            nSums = sumOfMultiplicationsRow.size
+
+            # sumOfNewVariables <= sumOfMultiplications[i] / divisor + ceil
+            task.putaijlist([bin + offset] * numberOfUnaries, row, [1] * numberOfUnaries)
+            if sumOfMultiplicationsRow.size != 0:
+                task.putaijlist([bin + offset] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
+
+            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, roundScalar)
+            # task.putconbound(bin + offset, mosek.boundkey.fx, roundScalar, roundScalar)
+
+        newNofConstr = curNofConstr + numberOfBins + 3 * nAuxMult
+
+        # symmetry constraints
+        for bin in range(0, numberOfBins):
+            for unary in range(0, numberOfUnaries - 1):
+                offset = bin * (numberOfUnaries - 1) + unary
+
+                # (maximum[bin])[unary] >= (maximum[bin])[unary + 1])
+                task.putaij(newNofConstr + offset, convolutionBins[bin, unary], 1)
+                task.putaij(newNofConstr + offset, convolutionBins[bin, unary + 1], -1)
+
+                task.putconbound(newNofConstr + offset, mosek.boundkey.lo, 0, self.inf)
+
+        newNofConstr += (numberOfUnaries - 1) * numberOfBins
+
+        resultClass = RandomVariableMOSEK(convolutionBins, self.edges, task)
+
+        return resultClass, newNofVariables, newNofConstr
+
+    def maximum_AND_Convolution_VECTORIZED_MIN(self, secondVariable, thirdVariable, curNofVariables, curNofConstr,
+                                               VAR=False):
+        """ Calculates maximum of 2 PDFs of random variable and a convolution with the third afterwards.
+        Works only for 2 identical edges. Is computed
+        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
+        Is in MOSEK environment. This implementation works only for a maximization problem.
+
+        :param self: class RandomVariableMOSEK - one of maximums
+        :param secondVariable: class RandomVariableMOSEK - one of maximums
+        :param thirdVariable: class RandomVariableMOSEK - one to convolve
+        :param curNofVariables: current number of MOSEK variables - to know the indices
+        :param curNofConstr: current number of MOSEK constraints - to know the indices
+        :return resultClass:  class RandomVariableMOSEK with mosek variables
+        :return newNofVariables: integer, new total number of MOSEK variables
+        :return newNofConstr: integer, new total number of MOSEK constraints
+        """
+
+        # get data
+        x1 = self.bins
+        x2 = secondVariable.bins
+        numberOfBins, numberOfUnaries = x1.shape
+
+        # allocate dict for sum of multiplications
+        sumOfMaxs = {}
+
+        def myZip(x, y):
+            return [x, y]
+
+        for i in range(0, numberOfBins):
+            sumOfMaxs[i] = []
+            for j in range(0, i + 1):
+
+                # help constraints
+
+                unary = np.array(range(0, numberOfUnaries))
+                unary = np.transpose(np.tile(unary, (numberOfUnaries, 1)))
+                unary2 = np.array(range(0, numberOfUnaries))
+                unary2 = np.tile(unary2, (numberOfUnaries, 1))
+
+                # help constraints
+                xIndex = np.concatenate(x1[i, unary])
+                yIndex = np.concatenate(x2[j, unary2])
+
+                xy = list(map(myZip, xIndex, yIndex))
+
+                # save the multiplication for later
+                sumOfMaxs[i].extend(xy)
+
+                if i != j:
+                    # help constraints
+                    xIndex = np.concatenate(x1[j, unary])
+                    yIndex = np.concatenate(x2[i, unary2])
+
+                    xy = list(map(myZip, xIndex, yIndex))
+
+                    # save the multiplication for later
+                    sumOfMaxs[i].extend(xy)
+
+        ############# CONVOLUTION ##################
+
+        # get data
+        x3 = thirdVariable.bins
+        task = self.task
+        newNofVariables = curNofVariables
+
+        sum = 0
+        for z in range(0, numberOfBins):
+            for k in range(0, z + 1):
+                sumOfMaxs[z - k] = np.array(sumOfMaxs[z - k])
+                sum += numberOfUnaries * sumOfMaxs[z - k].shape[0]
+
+        # create auxiliary multiplications
+        nAuxMult = int(sum)
+        auxMult = np.array(range(newNofVariables, newNofVariables + nAuxMult))
+        newNofVariables += nAuxMult
+
+        # create result variables
+        nResults = numberOfBins * numberOfUnaries
+        convolution = np.array(range(newNofVariables, newNofVariables + nResults))
+        newNofVariables += nResults
+        convolutionBins = np.reshape(convolution, (numberOfBins, numberOfUnaries))  # reshape bins
+
+        # append variables
+        numberToCreate = nAuxMult + nResults
+        varsToCreateExtended = np.append(auxMult, convolution)
+        task.appendvars(numberToCreate)
+        task.putvartypelist(varsToCreateExtended, [mosek.variabletype.type_int] * numberToCreate)  # integer
+        task.putvarboundlist(varsToCreateExtended, [mosek.boundkey.ra] * numberToCreate,
+                             [0.0] * numberToCreate, [1.0] * numberToCreate)  # binary
+
+        # convolution
+
+        # allocate dict for sum of multiplications
+        sumOfConvs = {}
+
+        # append constraints
+        symN = (numberOfUnaries - 1) * numberOfBins
+        if VAR:
+            task.appendcons(2 * numberOfBins + 4 * nAuxMult + symN)
+        else:
+            task.appendcons(2 * numberOfBins + nAuxMult + symN)
+
+        offset = curNofConstr + numberOfBins
+
+        blockIndex = 0
+
+        for z in range(0, numberOfBins):
+            sumOfConvs[z] = np.array([]).astype(int)
+            for k in range(0, z + 1):
+
+                size = sumOfMaxs[z - k].shape[0]
+
+                unary = np.array(range(0, numberOfUnaries))
+                unary = np.transpose(np.tile(unary, (size, 1)))
+                unary2 = np.array(range(0, size))
+                unary2 = np.tile(unary2, (numberOfUnaries, 1))
+
+                index = blockIndex + unary * size + unary2
+
+                curAuxMult = np.concatenate(auxMult[index])
+
+                index = np.concatenate(index)
+                sumOfConvs[z] = np.append(sumOfConvs[z], np.array([curAuxMult]))
+
+                # help constraints
+                xIndex = np.concatenate(x3[k, unary])
+                yIndex = np.concatenate(sumOfMaxs[z - k][unary2][:, :, 0])
+                zIndex = np.concatenate(sumOfMaxs[z - k][unary2][:, :, 1])
+
+                numberOfElements = index.size
+
+                if VAR:
+                    # slackMult <= x
+                    task.putaijlist(offset + 4 * index, xIndex, [-1] * numberOfElements)
+                    task.putaijlist(offset + 4 * index, curAuxMult, [1] * numberOfElements)
+
+                    task.putconboundlist(offset + 4 * index, [mosek.boundkey.up] * numberOfElements,
+                                         [-self.inf] * numberOfElements, [0] * numberOfElements)
+
+                    # slackMult <= y
+                    task.putaijlist(offset + 4 * index + 1, yIndex, [-1] * numberOfElements)
+                    task.putaijlist(offset + 4 * index + 1, curAuxMult, [1] * numberOfElements)
+
+                    task.putconboundlist(offset + 4 * index + 1, [mosek.boundkey.up] * numberOfElements,
+                                         [-self.inf] * numberOfElements, [0] * numberOfElements)
+
+                    # slackMult <= z
+                    task.putaijlist(offset + 4 * index + 2, zIndex, [-1] * numberOfElements)
+                    task.putaijlist(offset + 4 * index + 2, curAuxMult, [1] * numberOfElements)
+
+                    task.putconboundlist(offset + 4 * index + 2, [mosek.boundkey.up] * numberOfElements,
+                                         [-self.inf] * numberOfElements, [0] * numberOfElements)
+
+                    # slackMult >= x + y + z - 2
+
+                    task.putaijlist(offset + 4 * index + 3, yIndex, [-1] * numberOfElements)
+                    task.putaijlist(offset + 4 * index + 3, xIndex, [-1] * numberOfElements)
+                    task.putaijlist(offset + 4 * index + 3, zIndex, [-1] * numberOfElements)
+                    task.putaijlist(offset + 4 * index + 3, curAuxMult, [1] * numberOfElements)
+
+                    task.putconboundlist(offset + 4 * index + 3, [mosek.boundkey.lo] * numberOfElements,
+                                         [-2] * numberOfElements,
+                                         [self.inf] * numberOfElements)
+
+                else:
+                    task.putaijlist(offset + index, yIndex, [-1] * numberOfElements)
+                    task.putaijlist(offset + index, xIndex, [-1] * numberOfElements)
+                    task.putaijlist(offset + index, zIndex, [-1] * numberOfElements)
+                    task.putaijlist(offset + index, curAuxMult, [1] * numberOfElements)
+
+                    task.putconboundlist(offset + index, [mosek.boundkey.lo] * numberOfElements,
+                                         [-2] * numberOfElements,
+                                         [self.inf] * numberOfElements)
+
+                blockIndex += size * numberOfUnaries
+
+        self.cutBins(self.edges, sumOfConvs)
+
+        roundScalar = 0.5
+        # division = numberOfUnaries * numberOfBins / 14
+        division = 40
+        # division = 50
+
+        offset = curNofConstr
+        offset2 = curNofConstr + numberOfBins
+
+        for bin in range(0, numberOfBins):
+            row = convolutionBins[bin, :]
+            sumOfMultiplicationsRow = sumOfConvs[bin][:]
+
+            nSums = sumOfMultiplicationsRow.size
+
+            # sumOfNewVariables <= sumOfMultiplications[i] / divisor + ceil
+            task.putaijlist([bin + offset] * numberOfUnaries, row, [1] * numberOfUnaries)
+            # task.putaijlist([bin + offset2] * numberOfUnaries, row, [1] * numberOfUnaries)
+            if sumOfMultiplicationsRow.size != 0:
+                task.putaijlist([bin + offset] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
+                # task.putaijlist([bin + offset2] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
+
+            task.putconbound(bin + offset, mosek.boundkey.lo, -roundScalar, +self.inf)
+            # task.putconbound(bin + offset2, mosek.boundkey.up, -self.inf, +roundScalar)
+
+        if VAR:
+            newNofConstr = curNofConstr + 2 * numberOfBins + 4 * nAuxMult
+        else:
+            newNofConstr = curNofConstr + 2 * numberOfBins + nAuxMult
+
+            # symmetry constraints
+        for bin in range(0, numberOfBins):
+            for unary in range(0, numberOfUnaries - 1):
+                offset = bin * (numberOfUnaries - 1) + unary
+
+                # (maximum[bin])[unary] >= (maximum[bin])[unary + 1])
+                task.putaij(newNofConstr + offset, convolutionBins[bin, unary], 1)
+                task.putaij(newNofConstr + offset, convolutionBins[bin, unary + 1], -1)
+
+                task.putconbound(newNofConstr + offset, mosek.boundkey.lo, 0, self.inf)
+
+        newNofConstr += (numberOfUnaries - 1) * numberOfBins
+
+        resultClass = RandomVariableMOSEK(convolutionBins, self.edges, task)
+
+        return resultClass, newNofVariables, newNofConstr
+
+    def maximum_AND_Convolution_VECTORIZED_MEM_FREE(self, secondVariable, thirdVariable, curNofVariables, curNofConstr):
+        """ Calculates maximum of 2 PDFs of random variable and a convolution with the third afterwards.
+        Works only for 2 identical edges. Is computed
+        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
+        Is in MOSEK environment. This implementation works only for a maximization problem. Memory free version.
+
+        :param self: class RandomVariableMOSEK - one of maximums
+        :param secondVariable: class RandomVariableMOSEK - one of maximums
+        :param thirdVariable: class RandomVariableMOSEK - one to convolve
+        :param curNofVariables: current number of MOSEK variables - to know the indices
+        :param curNofConstr: current number of MOSEK constraints - to know the indices
+        :return resultClass:  class RandomVariableMOSEK with mosek variables
+        :return newNofVariables: integer, new total number of MOSEK variables
+        :return newNofConstr: integer, new total number of MOSEK constraints
+        """
+
+        # get data
+        x1 = self.bins
+        x2 = secondVariable.bins
+        numberOfBins = len(x1)
+
+        # allocate dict for sum of multiplications
+        sumOfMaxs = {}
+
+        for i in range(0, numberOfBins):
+            sumOfMaxs[i] = []
+            for j in range(0, i + 1):
+
+                for unary in range(0, len(x1[i])):
+                    for unary2 in range(0, len(x2[j])):
+                        # help constraints
+                        xIndex = x1[i][unary]
+                        yIndex = x2[j][unary2]
+
+                        # save the multiplication for later
+                        sumOfMaxs[i].append([xIndex, yIndex])
+
+        for i in range(0, numberOfBins):
+            for j in range(0, i + 1):
+
+                for unary in range(0, len(x1[j])):
+                    for unary2 in range(0, len(x2[i])):
+
+                        if i != j:
+                            # help constraints
+                            xIndex = x1[j, unary]
+                            yIndex = x2[i, unary2]
+
+                            # save the multiplication for later
+                            sumOfMaxs[i].append([xIndex, yIndex])
+
+        ############# CONVOLUTION ##################
+
+        # get data
+        x3 = thirdVariable.bins
+        task = self.task
+        newNofVariables = curNofVariables
+
+        sum = 0
+        for z in range(0, numberOfBins):
+            for k in range(0, z + 1):
+                sum += len(x3[k]) * len(sumOfMaxs[z - k])
+
+        # create auxiliary multiplications
+        nAuxMult = int(sum)
+        auxMult = np.array(range(newNofVariables, newNofVariables + nAuxMult))
+        newNofVariables += nAuxMult
+
+        # append variables
+        numberToCreate = nAuxMult
+        task.appendvars(numberToCreate)
+        task.putvartypelist(auxMult, [mosek.variabletype.type_int] * numberToCreate)  # integer
+        task.putvarboundlist(auxMult, [mosek.boundkey.ra] * numberToCreate,
+                             [0.0] * numberToCreate, [1.0] * numberToCreate)  # binary
+
+        # convolution
+
+        # allocate dict for sum of multiplications
+        sumOfConvs = {}
+
+        # append constraints
+        task.appendcons(nAuxMult)
+
+        offset = curNofConstr
+
+        indexToAux = 0
+
+        for z in range(0, numberOfBins):
+            sumOfConvs[z] = np.array([]).astype(int)
+            for k in range(0, z + 1):
+
+                for unary in range(0, len(x3[k])):
+                    for unary2 in range(0, len(sumOfMaxs[z - k])):
+                        curAuxMult = auxMult[indexToAux]
+                        sumOfConvs[z] = np.append(sumOfConvs[z], np.array([curAuxMult]))
+
+                        # help constraints
+                        xIndex = x3[k][unary]
+                        yIndex = sumOfMaxs[z - k][unary2][0]
+                        zIndex = sumOfMaxs[z - k][unary2][1]
+
+                        task.putaij(offset + indexToAux, yIndex, -1)
+                        task.putaij(offset + indexToAux, xIndex, -1)
+                        task.putaij(offset + indexToAux, zIndex, -1)
+                        task.putaij(offset + indexToAux, curAuxMult, 1)
+
+                        task.putconbound(offset + indexToAux, mosek.boundkey.lo, -2, self.inf)
+
+                        indexToAux += 1
+
+        self.cutBins(self.edges, sumOfConvs)
+
+        resultClass = RandomVariableMOSEK(sumOfConvs, self.edges, task)
+
+        return resultClass, newNofVariables, curNofConstr
 
     def convolution_UNARY_MAX_DIVIDE(self, secondVariable, curNofVariables, curNofConstr, withSymmetryConstr=False):
         """ Calculates convolution of 2 PDFs of random variable. Works only for 2 identical edges. Is computed
@@ -627,28 +1339,6 @@ class RandomVariableMOSEK:
 
                 blockIndex += size1 * size2
 
-                # for unary in range(0, size1):
-                #     for unary2 in range(0, size2):
-                #
-                #         # constraints for sum of multiplications
-                #         # indexToSlack = int((i / 2) * (1 + i) * numberOfUnaries ** 2
-                #         #                    + j * numberOfUnaries ** 2 + unary * numberOfUnaries + unary2)
-                #
-                #         curSlackMult = slackMult[indexToSlack]
-                #
-                #         sumOfMultiplications[i] = np.append(sumOfMultiplications[i], np.array([curSlackMult]))
-                #
-                #         # help constraints
-                #         xIndex = x1[i][unary]
-                #         yIndex = x2[j][unary2]
-                #
-                #
-                #         # slackMult >= x + y - 1
-                #         task.putaij(constrOffset + indexToSlack, yIndex, -1)
-                #         task.putaij(constrOffset + indexToSlack, xIndex, -1)
-                #         task.putaij(constrOffset + indexToSlack, curSlackMult, 1)
-                #
-                #         task.putconbound(constrOffset + indexToSlack, mosek.boundkey.lo, -1, self.inf)
 
         blockIndex = 0
         for i in range(0, numberOfBins):
@@ -684,27 +1374,6 @@ class RandomVariableMOSEK:
                                      [self.inf] * numberOfElements)
 
                 blockIndex += size1 * size2
-
-                # size1 = len(x1[j])
-                # size2 = len(x2[i])
-                # for unary in range(0, size1):
-                #     for unary2 in range(0, size2):
-                #
-                #         if i != j:
-                #             curSlackMult = slackMult2[indexToSlack]
-                #
-                #             sumOfMultiplications[i] = np.append(sumOfMultiplications[i], np.array([curSlackMult]))
-                #
-                #             # help constraints
-                #             xIndex = x1[j][unary]
-                #             yIndex = x2[i][unary2]
-                #
-                #             # slackMult >= x + y - 1
-                #             task.putaij(constrOffset2 + indexToSlack, yIndex, -1)
-                #             task.putaij(constrOffset2 + indexToSlack, xIndex, -1)
-                #             task.putaij(constrOffset2 + indexToSlack, curSlackMult, 1)
-                #
-                #             task.putconbound(constrOffset2 + indexToSlack, mosek.boundkey.lo, -1, self.inf)
 
 
         # division = numberOfBins * numberOfUnarie / 22
@@ -746,44 +1415,6 @@ class RandomVariableMOSEK:
         maximumClass = RandomVariableMOSEK(maximumBins, self.edges, task)
 
         return maximumClass, newNofVariables, newNofConstr
-
-    def maximum_GP(self, secondVariable, curNofVariables, curNofConstr):
-        """
-        Calculates maximum of 2 PDFs of random variable. Works only for 2 identical edges.
-        Is in MOSEK environment.
-
-        :param self: class RandomVariableMOSEK
-        :param secondVariable: class RandomVariableMOSEK
-        :param curNofVariables: current number of MOSEK variables - to know the indices
-        :param curNofConstr: current number of MOSEK constraints - to know the indices
-        :return maximumClass:  class RandomVariableMOSEK with variables
-        :return newNofVariables: integer, new total number of MOSEK variables
-        :return newNofConstr: integer, new total number of MOSEK constraints
-        """
-
-        x1 = self.bins
-        x2 = secondVariable.bins
-
-        numberOfBins = len(x1)
-
-        maximum = {}
-        # allocation of convolution dictionary
-        for i in range(0, numberOfBins):
-            maximum[i] = 0
-
-        # i >= j
-        for i in range(0, numberOfBins):
-            for j in range(0, i + 1):
-
-                # new variable - multiplication of x*y
-                maximum[i] += x1[i] * x2[j]
-
-                if i != j:
-                    maximum[i] += x1[j] * x2[i]
-
-        maximumClass = RandomVariableMOSEK(maximum, self.edges, self.task)  # with exact comput.
-
-        return maximumClass
 
 
     def maximum_UNARY_MAX_DIVIDE_VECTORIZED(self, secondVariable, curNofVariables, curNofConstr, withSymmetryConstr=False,
@@ -1003,753 +1634,6 @@ class RandomVariableMOSEK:
         return maximumClass, newNofVariables, newNofConstr
 
 
-    def maximum_AND_Convolution(self, secondVariable, thirdVariable, curNofVariables, curNofConstr):
-        """ Calculates maximum of 2 PDFs of random variable and a convolution with the third afterwards.
-        Works only for 2 identical edges. Is computed
-        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
-        Is in MOSEK environment.
-
-        :param self: class RandomVariableMOSEK - one of maximums
-        :param secondVariable: class RandomVariableMOSEK - one of maximums
-        :param thirdVariable: class RandomVariableMOSEK - one to convolve
-        :param curNofVariables: current number of MOSEK variables - to know the indices
-        :param curNofConstr: current number of MOSEK constraints - to know the indices
-        :return resultClass:  class RandomVariableMOSEK with mosek variables
-        :return newNofVariables: integer, new total number of MOSEK variables
-        :return newNofConstr: integer, new total number of MOSEK constraints
-        """
-
-        # get data
-        x1 = self.bins
-        x2 = secondVariable.bins
-        numberOfBins, numberOfUnaries = x1.shape
-
-        # allocate dict for sum of multiplications
-        sumOfMaxs = {}
-
-
-        for i in range(0, numberOfBins):
-            sumOfMaxs[i] = []
-            for j in range(0, i + 1):
-
-                for unary in range(0, numberOfUnaries):
-                    for unary2 in range(0, numberOfUnaries):
-
-                        # help constraints
-                        xIndex = x1[i, unary]
-                        yIndex = x2[j, unary2]
-
-                            # save the multiplication for later
-                        sumOfMaxs[i].append([xIndex, yIndex])
-
-                        if i != j:
-
-                            # help constraints
-                            xIndex = x1[j, unary]
-                            yIndex = x2[i, unary2]
-
-                            # save the multiplication for later
-                            sumOfMaxs[i].append([xIndex, yIndex])
-
-
-
-        ############# CONVOLUTION ##################
-
-
-        # get data
-        x3 = thirdVariable.bins
-        task = self.task
-        newNofVariables = curNofVariables
-
-        sum = 0
-        for z in range(0, numberOfBins):
-            for k in range(0, z + 1):
-                sum += numberOfUnaries*len(sumOfMaxs[z - k])
-
-        # create auxiliary multiplications
-        nAuxMult = int(sum)
-        auxMult = np.array(range(newNofVariables, newNofVariables + nAuxMult))
-        newNofVariables += nAuxMult
-
-
-        # create result variables
-        nResults = numberOfBins * numberOfUnaries
-        convolution = np.array(range(newNofVariables, newNofVariables + nResults))
-        newNofVariables += nResults
-        convolutionBins = np.reshape(convolution, (numberOfBins, numberOfUnaries))  # reshape bins
-
-        # append variables
-        numberToCreate = nAuxMult + nResults
-        varsToCreateExtended = np.append(auxMult, convolution)
-        task.appendvars(numberToCreate)
-        task.putvartypelist(varsToCreateExtended, [mosek.variabletype.type_int] * numberToCreate)  # integer
-        task.putvarboundlist(varsToCreateExtended, [mosek.boundkey.ra] * numberToCreate,
-                             [0.0] * numberToCreate, [1.0] * numberToCreate)  # binary
-
-        # convolution
-
-        # allocate dict for sum of multiplications
-        sumOfConvs = {}
-
-        # append constraints
-        symN = (numberOfUnaries - 1) * numberOfBins
-        task.appendcons(numberOfBins + 3 * nAuxMult + symN)
-
-        offset = curNofConstr + numberOfBins
-
-        indexToAux = 0
-
-        for z in range(0, numberOfBins):
-            sumOfConvs[z] = np.array([]).astype(int)
-            for k in range(0, z + 1):
-
-                for unary in range(0, numberOfUnaries):
-                    for unary2 in range(0, len(sumOfMaxs[z - k])):
-
-
-                        curAuxMult = auxMult[indexToAux]
-                        indexToAux += 1
-                        sumOfConvs[z] = np.append(sumOfConvs[z], np.array([curAuxMult]))
-
-                        # help constraints
-                        xIndex = x3[k, unary]
-                        yIndex = sumOfMaxs[z - k][unary2][0]
-                        zIndex = sumOfMaxs[z - k][unary2][1]
-
-
-                        # slackMult <= x
-                        task.putaij(offset + 3 * indexToAux, xIndex, -1)
-                        task.putaij(offset + 3 * indexToAux, curAuxMult, 1)
-
-                        task.putconbound(offset + 3 * indexToAux, mosek.boundkey.up, -self.inf, 0)
-
-                        # slackMult <= y
-                        task.putaij(offset + 3 * indexToAux + 1, yIndex, -1)
-                        task.putaij(offset + 3 * indexToAux + 1, curAuxMult, 1)
-
-                        task.putconbound(offset + 3 * indexToAux + 1, mosek.boundkey.up, -self.inf, 0)
-
-                        # slackMult <= z
-                        task.putaij(offset + 3 * indexToAux + 2, zIndex, -1)
-                        task.putaij(offset + 3 * indexToAux + 2, curAuxMult, 1)
-
-                        task.putconbound(offset + 3 * indexToAux + 2, mosek.boundkey.up, -self.inf, 0)
-
-                        # slackMult >= x + y + z - 2
-
-                        # task.putaij(offset + 4 * indexToAux + 3, yIndex, -1)
-                        # task.putaij(offset + 4 * indexToAux + 3, xIndex, -1)
-                        # task.putaij(offset + 4 * indexToAux + 3, zIndex, -1)
-                        # task.putaij(offset + 4 * indexToAux + 3, curAuxMult, 1)
-                        #
-                        # task.putconbound(offset + 4 * indexToAux + 3, mosek.boundkey.lo, -2, self.inf)
-
-        self.cutBins(self.edges, sumOfConvs)
-
-        roundScalar = 0.5
-        # division = numberOfUnaries * numberOfBins / 14
-        division = 3
-
-        offset = curNofConstr
-
-
-        for bin in range(0, numberOfBins):
-            row = convolutionBins[bin, :]
-            sumOfMultiplicationsRow = sumOfConvs[bin][:]
-
-            nSums = sumOfMultiplicationsRow.size
-
-            # sumOfNewVariables <= sumOfMultiplications[i] / divisor + ceil
-            task.putaijlist([bin + offset] * numberOfUnaries, row, [1] * numberOfUnaries)
-            if sumOfMultiplicationsRow.size != 0:
-
-                task.putaijlist([bin + offset] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
-
-            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, roundScalar)
-
-
-        newNofConstr = curNofConstr + numberOfBins + 3 * nAuxMult
-
-            # symmetry constraints
-        for bin in range(0, numberOfBins):
-            for unary in range(0, numberOfUnaries - 1):
-                offset = bin * (numberOfUnaries - 1) + unary
-
-                # (maximum[bin])[unary] >= (maximum[bin])[unary + 1])
-                task.putaij(newNofConstr + offset, convolutionBins[bin, unary], 1)
-                task.putaij(newNofConstr + offset, convolutionBins[bin, unary + 1], -1)
-
-                task.putconbound(newNofConstr + offset, mosek.boundkey.lo, 0, self.inf)
-
-        newNofConstr += (numberOfUnaries - 1) * numberOfBins
-
-        resultClass = RandomVariableMOSEK(convolutionBins, self.edges, task)
-
-        return resultClass, newNofVariables, newNofConstr
-
-    def maximum_AND_Convolution_VECTORIZED(self, secondVariable, thirdVariable, curNofVariables, curNofConstr):
-        """ Calculates maximum of 2 PDFs of random variable and a convolution with the third afterwards.
-        Works only for 2 identical edges. Is computed
-        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
-        Is in MOSEK environment.
-
-        :param self: class RandomVariableMOSEK - one of maximums
-        :param secondVariable: class RandomVariableMOSEK - one of maximums
-        :param thirdVariable: class RandomVariableMOSEK - one to convolve
-        :param curNofVariables: current number of MOSEK variables - to know the indices
-        :param curNofConstr: current number of MOSEK constraints - to know the indices
-        :return resultClass:  class RandomVariableMOSEK with mosek variables
-        :return newNofVariables: integer, new total number of MOSEK variables
-        :return newNofConstr: integer, new total number of MOSEK constraints
-        """
-
-        # get data
-        x1 = self.bins
-        x2 = secondVariable.bins
-        numberOfBins, numberOfUnaries = x1.shape
-
-        # allocate dict for sum of multiplications
-        sumOfMaxs = {}
-
-
-        def myZip(x, y):
-            return [x, y]
-
-
-        for i in range(0, numberOfBins):
-            sumOfMaxs[i] = []
-            for j in range(0, i + 1):
-
-                    # help constraints
-
-                    unary = np.array(range(0, numberOfUnaries))
-                    unary = np.transpose(np.tile(unary, (numberOfUnaries, 1)))
-                    unary2 = np.array(range(0, numberOfUnaries))
-                    unary2 = np.tile(unary2, (numberOfUnaries, 1))
-
-
-                    # help constraints
-                    xIndex = np.concatenate(x1[i, unary])
-                    yIndex = np.concatenate(x2[j, unary2])
-
-
-                    xy = list(map(myZip, xIndex, yIndex))
-
-                        # save the multiplication for later
-                    sumOfMaxs[i].extend(xy)
-
-                    if i != j:
-                        # help constraints
-                        xIndex = np.concatenate(x1[j, unary])
-                        yIndex = np.concatenate(x2[i, unary2])
-
-                        xy = list(map(myZip, xIndex, yIndex))
-
-                        # save the multiplication for later
-                        sumOfMaxs[i].extend(xy)
-
-
-        ############# CONVOLUTION ##################
-
-        # get data
-        x3 = thirdVariable.bins
-        task = self.task
-        newNofVariables = curNofVariables
-
-        sum = 0
-        for z in range(0, numberOfBins):
-            for k in range(0, z + 1):
-                sumOfMaxs[z-k] = np.array(sumOfMaxs[z-k])
-                sum += numberOfUnaries*sumOfMaxs[z - k].shape[0]
-
-        # create auxiliary multiplications
-        nAuxMult = int(sum)
-        auxMult = np.array(range(newNofVariables, newNofVariables + nAuxMult))
-        newNofVariables += nAuxMult
-
-        # create result variables
-        nResults = numberOfBins * numberOfUnaries
-        convolution = np.array(range(newNofVariables, newNofVariables + nResults))
-        newNofVariables += nResults
-        convolutionBins = np.reshape(convolution, (numberOfBins, numberOfUnaries))  # reshape bins
-
-        # append variables
-        numberToCreate = nAuxMult + nResults
-        varsToCreateExtended = np.append(auxMult, convolution)
-        task.appendvars(numberToCreate)
-        task.putvartypelist(varsToCreateExtended, [mosek.variabletype.type_int] * numberToCreate)  # integer
-        task.putvarboundlist(varsToCreateExtended, [mosek.boundkey.ra] * numberToCreate,
-                             [0.0] * numberToCreate, [1.0] * numberToCreate)  # binary
-
-        # convolution
-
-        # allocate dict for sum of multiplications
-        sumOfConvs = {}
-
-        # append constraints
-        symN = (numberOfUnaries - 1) * numberOfBins
-        task.appendcons(numberOfBins + 3 * nAuxMult + symN)
-
-        offset = curNofConstr + numberOfBins
-
-        blockIndex = 0
-
-        for z in range(0, numberOfBins):
-            sumOfConvs[z] = np.array([]).astype(int)
-            for k in range(0, z + 1):
-
-                    size = sumOfMaxs[z - k].shape[0]
-
-                    unary = np.array(range(0, numberOfUnaries))
-                    unary = np.transpose(np.tile(unary, (size, 1)))
-                    unary2 = np.array(range(0, size))
-                    unary2 = np.tile(unary2, (numberOfUnaries, 1))
-
-                    index = blockIndex + unary * size + unary2
-
-                    curAuxMult = np.concatenate(auxMult[index])
-
-                    index = np.concatenate(index)
-                    sumOfConvs[z] = np.append(sumOfConvs[z], np.array([curAuxMult]))
-
-                    # help constraints
-                    xIndex = np.concatenate(x3[k, unary])
-                    yIndex = np.concatenate(sumOfMaxs[z - k][unary2][:,:, 0])
-                    zIndex = np.concatenate(sumOfMaxs[z - k][unary2][:, :, 1])
-
-                    numberOfElements = index.size
-
-                    # slackMult <= x
-                    # task.putaijlist([1, 0], [0, 0], [-1, 1])
-                    task.putaijlist(offset + 3 * index, xIndex, [-1]*numberOfElements)
-                    task.putaijlist(offset + 3 * index, curAuxMult, [1]*numberOfElements)
-
-                    task.putconboundlist(offset + 3 * index, [mosek.boundkey.up]*numberOfElements,
-                                         [-self.inf]*numberOfElements, [0]*numberOfElements)
-
-                    # slackMult <= y
-                    task.putaijlist(offset + 3 * index + 1, yIndex, [-1]*numberOfElements)
-                    task.putaijlist(offset + 3 * index + 1, curAuxMult, [1]*numberOfElements)
-
-                    task.putconboundlist(offset + 3 * index + 1, [mosek.boundkey.up]*numberOfElements,
-                                         [-self.inf]*numberOfElements, [0]*numberOfElements)
-
-                    # slackMult <= z
-                    task.putaijlist(offset + 3 * index + 2, zIndex, [-1]*numberOfElements)
-                    task.putaijlist(offset + 3 * index + 2, curAuxMult, [1]*numberOfElements)
-
-                    task.putconboundlist(offset + 3 * index + 2, [mosek.boundkey.up]*numberOfElements,
-                                         [-self.inf]*numberOfElements, [0]*numberOfElements)
-
-
-
-                    # slackMult >= x + y + z - 2
-
-                    # task.putaijlist(offset + 4 * index + 3, yIndex, [-1]*numberOfElements)
-                    # task.putaijlist(offset + 4 * index + 3, xIndex, [-1]*numberOfElements)
-                    # task.putaijlist(offset + 4 * index + 3, zIndex, [-1]*numberOfElements)
-                    # task.putaijlist(offset + 4 * index + 3, curAuxMult, [1]*numberOfElements)
-                    #
-                    # task.putconboundlist(offset + 4 * index + 3, [mosek.boundkey.lo]*numberOfElements, [-2]*numberOfElements,
-                    #                                 [self.inf]*numberOfElements)
-
-                    blockIndex += size*numberOfUnaries
-
-        self.cutBins(self.edges, sumOfConvs)
-
-        roundScalar = 0.5
-        # division = numberOfUnaries * numberOfBins / 14
-        # division = 54
-        division = 50
-
-        offset = curNofConstr
-
-
-        for bin in range(0, numberOfBins):
-            row = convolutionBins[bin, :]
-            sumOfMultiplicationsRow = sumOfConvs[bin][:]
-
-            nSums = sumOfMultiplicationsRow.size
-
-            # sumOfNewVariables <= sumOfMultiplications[i] / divisor + ceil
-            task.putaijlist([bin + offset] * numberOfUnaries, row, [1] * numberOfUnaries)
-            if sumOfMultiplicationsRow.size != 0:
-
-                task.putaijlist([bin + offset] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
-
-            task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, roundScalar)
-            # task.putconbound(bin + offset, mosek.boundkey.fx, roundScalar, roundScalar)
-
-
-        newNofConstr = curNofConstr + numberOfBins + 3 * nAuxMult
-
-            # symmetry constraints
-        for bin in range(0, numberOfBins):
-            for unary in range(0, numberOfUnaries - 1):
-                offset = bin * (numberOfUnaries - 1) + unary
-
-                # (maximum[bin])[unary] >= (maximum[bin])[unary + 1])
-                task.putaij(newNofConstr + offset, convolutionBins[bin, unary], 1)
-                task.putaij(newNofConstr + offset, convolutionBins[bin, unary + 1], -1)
-
-                task.putconbound(newNofConstr + offset, mosek.boundkey.lo, 0, self.inf)
-
-        newNofConstr += (numberOfUnaries - 1) * numberOfBins
-
-        resultClass = RandomVariableMOSEK(convolutionBins, self.edges, task)
-
-        return resultClass, newNofVariables, newNofConstr
-
-    def maximum_AND_Convolution_VECTORIZED_MIN(self, secondVariable, thirdVariable, curNofVariables, curNofConstr, VAR=False):
-        """ Calculates maximum of 2 PDFs of random variable and a convolution with the third afterwards.
-        Works only for 2 identical edges. Is computed
-        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
-        Is in MOSEK environment. This implementation works only for a maximization problem.
-
-        :param self: class RandomVariableMOSEK - one of maximums
-        :param secondVariable: class RandomVariableMOSEK - one of maximums
-        :param thirdVariable: class RandomVariableMOSEK - one to convolve
-        :param curNofVariables: current number of MOSEK variables - to know the indices
-        :param curNofConstr: current number of MOSEK constraints - to know the indices
-        :return resultClass:  class RandomVariableMOSEK with mosek variables
-        :return newNofVariables: integer, new total number of MOSEK variables
-        :return newNofConstr: integer, new total number of MOSEK constraints
-        """
-
-        # get data
-        x1 = self.bins
-        x2 = secondVariable.bins
-        numberOfBins, numberOfUnaries = x1.shape
-
-        # allocate dict for sum of multiplications
-        sumOfMaxs = {}
-
-
-        def myZip(x, y):
-            return [x, y]
-
-
-        for i in range(0, numberOfBins):
-            sumOfMaxs[i] = []
-            for j in range(0, i + 1):
-
-                    # help constraints
-
-                    unary = np.array(range(0, numberOfUnaries))
-                    unary = np.transpose(np.tile(unary, (numberOfUnaries, 1)))
-                    unary2 = np.array(range(0, numberOfUnaries))
-                    unary2 = np.tile(unary2, (numberOfUnaries, 1))
-
-
-                    # help constraints
-                    xIndex = np.concatenate(x1[i, unary])
-                    yIndex = np.concatenate(x2[j, unary2])
-
-
-                    xy = list(map(myZip, xIndex, yIndex))
-
-                        # save the multiplication for later
-                    sumOfMaxs[i].extend(xy)
-
-                    if i != j:
-                        # help constraints
-                        xIndex = np.concatenate(x1[j, unary])
-                        yIndex = np.concatenate(x2[i, unary2])
-
-                        xy = list(map(myZip, xIndex, yIndex))
-
-                        # save the multiplication for later
-                        sumOfMaxs[i].extend(xy)
-
-
-        ############# CONVOLUTION ##################
-
-
-        # get data
-        x3 = thirdVariable.bins
-        task = self.task
-        newNofVariables = curNofVariables
-
-        sum = 0
-        for z in range(0, numberOfBins):
-            for k in range(0, z + 1):
-                sumOfMaxs[z-k] = np.array(sumOfMaxs[z-k])
-                sum += numberOfUnaries*sumOfMaxs[z - k].shape[0]
-
-        # create auxiliary multiplications
-        nAuxMult = int(sum)
-        auxMult = np.array(range(newNofVariables, newNofVariables + nAuxMult))
-        newNofVariables += nAuxMult
-
-        # create result variables
-        nResults = numberOfBins * numberOfUnaries
-        convolution = np.array(range(newNofVariables, newNofVariables + nResults))
-        newNofVariables += nResults
-        convolutionBins = np.reshape(convolution, (numberOfBins, numberOfUnaries))  # reshape bins
-
-        # append variables
-        numberToCreate = nAuxMult + nResults
-        varsToCreateExtended = np.append(auxMult, convolution)
-        task.appendvars(numberToCreate)
-        task.putvartypelist(varsToCreateExtended, [mosek.variabletype.type_int] * numberToCreate)  # integer
-        task.putvarboundlist(varsToCreateExtended, [mosek.boundkey.ra] * numberToCreate,
-                             [0.0] * numberToCreate, [1.0] * numberToCreate)  # binary
-
-        # convolution
-
-        # allocate dict for sum of multiplications
-        sumOfConvs = {}
-
-        # append constraints
-        symN = (numberOfUnaries - 1) * numberOfBins
-        if VAR:
-            task.appendcons(2 * numberOfBins + 4 * nAuxMult + symN)
-        else:
-            task.appendcons(2*numberOfBins + nAuxMult + symN)
-
-        offset = curNofConstr + numberOfBins
-
-        blockIndex = 0
-
-        for z in range(0, numberOfBins):
-            sumOfConvs[z] = np.array([]).astype(int)
-            for k in range(0, z + 1):
-
-                    size = sumOfMaxs[z - k].shape[0]
-
-                    unary = np.array(range(0, numberOfUnaries))
-                    unary = np.transpose(np.tile(unary, (size, 1)))
-                    unary2 = np.array(range(0, size))
-                    unary2 = np.tile(unary2, (numberOfUnaries, 1))
-
-                    index = blockIndex + unary * size + unary2
-
-                    curAuxMult = np.concatenate(auxMult[index])
-
-                    index = np.concatenate(index)
-                    sumOfConvs[z] = np.append(sumOfConvs[z], np.array([curAuxMult]))
-
-                    # help constraints
-                    xIndex = np.concatenate(x3[k, unary])
-                    yIndex = np.concatenate(sumOfMaxs[z - k][unary2][:,:, 0])
-                    zIndex = np.concatenate(sumOfMaxs[z - k][unary2][:, :, 1])
-
-                    numberOfElements = index.size
-
-                    if VAR:
-                        # slackMult <= x
-                        task.putaijlist(offset + 4 * index, xIndex, [-1]*numberOfElements)
-                        task.putaijlist(offset + 4 * index, curAuxMult, [1]*numberOfElements)
-
-                        task.putconboundlist(offset + 4 * index, [mosek.boundkey.up]*numberOfElements,
-                                             [-self.inf]*numberOfElements, [0]*numberOfElements)
-
-                        # slackMult <= y
-                        task.putaijlist(offset + 4 * index + 1, yIndex, [-1]*numberOfElements)
-                        task.putaijlist(offset + 4 * index + 1, curAuxMult, [1]*numberOfElements)
-
-                        task.putconboundlist(offset + 4 * index + 1, [mosek.boundkey.up]*numberOfElements,
-                                             [-self.inf]*numberOfElements, [0]*numberOfElements)
-
-                        # slackMult <= z
-                        task.putaijlist(offset + 4 * index + 2, zIndex, [-1]*numberOfElements)
-                        task.putaijlist(offset + 4 * index + 2, curAuxMult, [1]*numberOfElements)
-
-                        task.putconboundlist(offset + 4 * index + 2, [mosek.boundkey.up]*numberOfElements,
-                                             [-self.inf]*numberOfElements, [0]*numberOfElements)
-
-                        # slackMult >= x + y + z - 2
-
-                        task.putaijlist(offset + 4*index + 3, yIndex, [-1] * numberOfElements)
-                        task.putaijlist(offset + 4*index+ 3, xIndex, [-1] * numberOfElements)
-                        task.putaijlist(offset + 4*index+ 3, zIndex, [-1] * numberOfElements)
-                        task.putaijlist(offset + 4*index+ 3, curAuxMult, [1] * numberOfElements)
-
-                        task.putconboundlist(offset + 4*index+ 3, [mosek.boundkey.lo] * numberOfElements,
-                                             [-2] * numberOfElements,
-                                             [self.inf] * numberOfElements)
-
-                    else:
-                        task.putaijlist(offset + index, yIndex, [-1]*numberOfElements)
-                        task.putaijlist(offset + index, xIndex, [-1]*numberOfElements)
-                        task.putaijlist(offset + index, zIndex, [-1]*numberOfElements)
-                        task.putaijlist(offset + index, curAuxMult, [1]*numberOfElements)
-
-                        task.putconboundlist(offset + index, [mosek.boundkey.lo]*numberOfElements, [-2]*numberOfElements,
-                                                        [self.inf]*numberOfElements)
-
-                    blockIndex += size*numberOfUnaries
-
-        self.cutBins(self.edges, sumOfConvs)
-
-        roundScalar = 0.5
-        # division = numberOfUnaries * numberOfBins / 14
-        division = 40
-        # division = 50
-
-        offset = curNofConstr
-        offset2 = curNofConstr + numberOfBins
-
-        for bin in range(0, numberOfBins):
-            row = convolutionBins[bin, :]
-            sumOfMultiplicationsRow = sumOfConvs[bin][:]
-
-            nSums = sumOfMultiplicationsRow.size
-
-            # sumOfNewVariables <= sumOfMultiplications[i] / divisor + ceil
-            task.putaijlist([bin + offset] * numberOfUnaries, row, [1] * numberOfUnaries)
-            # task.putaijlist([bin + offset2] * numberOfUnaries, row, [1] * numberOfUnaries)
-            if sumOfMultiplicationsRow.size != 0:
-
-                task.putaijlist([bin + offset] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
-                # task.putaijlist([bin + offset2] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
-
-            task.putconbound(bin + offset, mosek.boundkey.lo, -roundScalar, +self.inf)
-            # task.putconbound(bin + offset2, mosek.boundkey.up, -self.inf, +roundScalar)
-
-        if VAR:
-            newNofConstr = curNofConstr + 2*numberOfBins + 4 * nAuxMult
-        else:
-            newNofConstr = curNofConstr + 2*numberOfBins + nAuxMult
-
-            # symmetry constraints
-        for bin in range(0, numberOfBins):
-            for unary in range(0, numberOfUnaries - 1):
-                offset = bin * (numberOfUnaries - 1) + unary
-
-                # (maximum[bin])[unary] >= (maximum[bin])[unary + 1])
-                task.putaij(newNofConstr + offset, convolutionBins[bin, unary], 1)
-                task.putaij(newNofConstr + offset, convolutionBins[bin, unary + 1], -1)
-
-                task.putconbound(newNofConstr + offset, mosek.boundkey.lo, 0, self.inf)
-
-        newNofConstr += (numberOfUnaries - 1) * numberOfBins
-
-        resultClass = RandomVariableMOSEK(convolutionBins, self.edges, task)
-
-        return resultClass, newNofVariables, newNofConstr
-
-
-    def maximum_AND_Convolution_VECTORIZED_MEM_FREE(self, secondVariable, thirdVariable, curNofVariables, curNofConstr):
-        """ Calculates maximum of 2 PDFs of random variable and a convolution with the third afterwards.
-        Works only for 2 identical edges. Is computed
-        using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
-        Is in MOSEK environment. This implementation works only for a maximization problem. Memory free version.
-
-        :param self: class RandomVariableMOSEK - one of maximums
-        :param secondVariable: class RandomVariableMOSEK - one of maximums
-        :param thirdVariable: class RandomVariableMOSEK - one to convolve
-        :param curNofVariables: current number of MOSEK variables - to know the indices
-        :param curNofConstr: current number of MOSEK constraints - to know the indices
-        :return resultClass:  class RandomVariableMOSEK with mosek variables
-        :return newNofVariables: integer, new total number of MOSEK variables
-        :return newNofConstr: integer, new total number of MOSEK constraints
-        """
-
-        # get data
-        x1 = self.bins
-        x2 = secondVariable.bins
-        numberOfBins = len(x1)
-
-        # allocate dict for sum of multiplications
-        sumOfMaxs = {}
-
-        for i in range(0, numberOfBins):
-            sumOfMaxs[i] = []
-            for j in range(0, i + 1):
-
-                for unary in range(0, len(x1[i])):
-                    for unary2 in range(0, len(x2[j])):
-
-                        # help constraints
-                        xIndex = x1[i][unary]
-                        yIndex = x2[j][unary2]
-
-                        # save the multiplication for later
-                        sumOfMaxs[i].append([xIndex, yIndex])
-
-
-        for i in range(0, numberOfBins):
-            for j in range(0, i + 1):
-
-                for unary in range(0, len(x1[j])):
-                    for unary2 in range(0, len(x2[i])):
-
-                        if i != j:
-                            # help constraints
-                            xIndex = x1[j, unary]
-                            yIndex = x2[i, unary2]
-
-                            # save the multiplication for later
-                            sumOfMaxs[i].append([xIndex, yIndex])
-
-        ############# CONVOLUTION ##################
-
-        # get data
-        x3 = thirdVariable.bins
-        task = self.task
-        newNofVariables = curNofVariables
-
-        sum = 0
-        for z in range(0, numberOfBins):
-            for k in range(0, z + 1):
-                sum += len(x3[k]) * len(sumOfMaxs[z - k])
-
-
-        # create auxiliary multiplications
-        nAuxMult = int(sum)
-        auxMult = np.array(range(newNofVariables, newNofVariables + nAuxMult))
-        newNofVariables += nAuxMult
-
-
-        # append variables
-        numberToCreate = nAuxMult
-        task.appendvars(numberToCreate)
-        task.putvartypelist(auxMult, [mosek.variabletype.type_int] * numberToCreate)  # integer
-        task.putvarboundlist(auxMult, [mosek.boundkey.ra] * numberToCreate,
-                             [0.0] * numberToCreate, [1.0] * numberToCreate)  # binary
-
-        # convolution
-
-        # allocate dict for sum of multiplications
-        sumOfConvs = {}
-
-        # append constraints
-        task.appendcons(nAuxMult)
-
-        offset = curNofConstr
-
-        indexToAux = 0
-
-        for z in range(0, numberOfBins):
-            sumOfConvs[z] = np.array([]).astype(int)
-            for k in range(0, z + 1):
-
-                for unary in range(0, len(x3[k])):
-                    for unary2 in range(0, len(sumOfMaxs[z - k])):
-                        curAuxMult = auxMult[indexToAux]
-                        sumOfConvs[z] = np.append(sumOfConvs[z], np.array([curAuxMult]))
-
-                        # help constraints
-                        xIndex = x3[k][unary]
-                        yIndex = sumOfMaxs[z - k][unary2][0]
-                        zIndex = sumOfMaxs[z - k][unary2][1]
-
-                        task.putaij(offset + indexToAux, yIndex, -1)
-                        task.putaij(offset + indexToAux, xIndex, -1)
-                        task.putaij(offset + indexToAux, zIndex, -1)
-                        task.putaij(offset + indexToAux, curAuxMult, 1)
-
-                        task.putconbound(offset + indexToAux, mosek.boundkey.lo, -2, self.inf)
-
-                        indexToAux += 1
-
-        self.cutBins(self.edges, sumOfConvs)
-
-
-        resultClass = RandomVariableMOSEK(sumOfConvs, self.edges, task)
-
-        return resultClass, newNofVariables, curNofConstr
 
     @staticmethod
     def cutBins(edges: np.array, bins: {}):

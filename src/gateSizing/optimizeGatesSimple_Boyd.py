@@ -1,7 +1,9 @@
 import numpy as np
 import cvxpy as cp
 
-
+"""
+This module includes deterministic optimization of the circuit using Boyds RC-model. 
+"""
 
 def computeInputCapacitance(alphas, betas, x):
     """

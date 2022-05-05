@@ -9,6 +9,7 @@ from randomVariableHist_Numpy import RandomVariable as RandomVariableNumpy
 class RandomVariableCVXPY:
     """
     Class representing a random variable given by histogram represented as CVXPY dictionary.
+    Class also includes functions for convolution and maximum.
 
     Class includes:
         bins: len n of frequencies, dictionary of dictionary with cvxpy variables (1, 1)
@@ -181,14 +182,12 @@ class RandomVariableCVXPY:
         for i in range(0, numberOfBins):
             convolution[i] = 0
 
-        # i >= j
-
         for z in range(0, numberOfBins):
             for k in range(0, z + 1):
                 convolution[z] += x1[k] * x2[z - k]
 
+            # shift
         constrNew = self.cutBins(self.edges, convolution, GP=True)
-
         constr.extend(constrNew)
 
         maximumClass = RandomVariableCVXPY(convolution, self.edges) # with exact comput.
@@ -198,7 +197,7 @@ class RandomVariableCVXPY:
     def convolution_GP_OPT(self, secondVariable, constr):
         """
         Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-        using the 'quadratic' algorithm and GP programming
+        using the 'quadratic' algorithm and GP programming - optimized version
 
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
@@ -221,26 +220,24 @@ class RandomVariableCVXPY:
             for k in range(0, z + 1):
                 convolution[z] += x1[k] * x2[z - k]
 
+            # shift
         constrNew = self.cutBins(self.edges, convolution, GP=True)
         constr.extend(constrNew)
 
         newConv = {}
         for bin in range(0, numberOfBins):
-            mono = cp.Variable(pos=True)        # create monomial
-            constr.append(convolution[bin] <= mono)
-            newConv[bin] = mono
+            n_i = cp.Variable(pos=True)        # create auxiliary monomial
+            constr.append(convolution[bin] <= n_i)
+            newConv[bin] = n_i
 
-        maximumClass = RandomVariableCVXPY(newConv, self.edges) # with exact comput.
-
+        maximumClass = RandomVariableCVXPY(newConv, self.edges)
 
         return maximumClass, constr
 
     def maximum_GP(self, secondVariable):
         """
         Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-        using the 'quadratic' algorithm and McCormick envelopes
-        IMPORTANT:
-                WORKS ONLY FOR MINIMIZATION PROBLEM
+        using the 'quadratic' algorithm and GP programming
 
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
@@ -255,15 +252,13 @@ class RandomVariableCVXPY:
         numberOfBins = len(x1)
 
         maximum = {}
-        # allocation of convolution dictionary
+        # allocation of maximum dictionary
         for i in range(0, numberOfBins):
             maximum[i] = 0
 
-        # i >= j
         for i in range(0, numberOfBins):
             for j in range(0, i + 1):
 
-                # new variable - multiplication of x*y
                 maximum[i] += x1[i]*x2[j]
 
                 if i != j:
@@ -277,9 +272,7 @@ class RandomVariableCVXPY:
     def maximum_GP_OPT(self, secondVariable, constr):
         """
         Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-        using the 'quadratic' algorithm and McCormick envelopes
-        IMPORTANT:
-                WORKS ONLY FOR MINIMIZATION PROBLEM
+        using the 'quadratic' algorithm and GP programming - optimized version
 
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
@@ -293,11 +286,10 @@ class RandomVariableCVXPY:
         numberOfBins = len(x1)
 
         maximum = {}
-        # allocation of convolution dictionary
+        # allocation of maximum dictionary
         for i in range(0, numberOfBins):
             maximum[i] = 0
 
-        # i >= j
         for i in range(0, numberOfBins):
             for j in range(0, i + 1):
 
@@ -308,12 +300,11 @@ class RandomVariableCVXPY:
                     maximum[i] += x1[j] * x2[i]
 
             # create upper bounds
-
         newMax = {}
         for bin in range(0, numberOfBins):
-            mono = cp.Variable(pos=True)  # create monomial
-            constr.append(maximum[bin] <= mono)
-            newMax[bin] = mono
+            n_i = cp.Variable(pos=True)  # create monomial
+            constr.append(maximum[bin] <= n_i)
+            newMax[bin] = n_i
 
         maximumClass = RandomVariableCVXPY(newMax, self.edges) # with exact comput.
 
@@ -386,13 +377,6 @@ class RandomVariableCVXPY:
         rv1 = RandomVariableNumpy(lowerBounds1, self.edges)
         rv2 = RandomVariableNumpy(lowerBounds2, self.edges)
 
-        # newBins = {}
-
-        # for i in range(0, numberOfBins):
-        #     newBins[i] = cp.Variable(nonneg=True)
-        #     ConvConstraints.append( newBins[i] >= convolution[i] )
-
-        # convClass = RandomVariableCVXPY(convolution, self.edges)
         convClass = RandomVariableCVXPY(convolution, self.edges, rv1.convolutionOfTwoVarsShift(rv2).bins)
 
 
@@ -450,51 +434,6 @@ class RandomVariableCVXPY:
 
         # cut edges
         self.cutBins(self.edges, sumOfMultiplications)
-
-
-        # get max and norm in a unarized form
-            # experimented
-        # maximum = cp.Variable(pos=True)
-        # for bin in range(0, numberOfBins):
-        #     ConvConstraints.append(sumOfMultiplications[bin] <= maximum)
-        #
-        # norm = numberOfUnaries / maximum
-        # normUnarized = {}
-        # sumOfNorm = 0
-        # worstCase = numberOfUnaries*numberOfBins
-        # for unary in range(0, worstCase):
-        #     normUnarized[unary] = cp.Variable(boolean=True)
-        #     sumOfNorm += normUnarized[unary]
-        #
-        #     # force the normalized form of the norm
-        # ConvConstraints.append( norm*numberOfUnaries <= sumOfNorm )
-        #
-        # # create a distributed form of the bins
-        # sumDistributed = {}
-        # for bin in range(0, numberOfBins):
-        #     sumDistributed[bin] = {}
-        #     sumDistrINT = 0
-        #     for unary in range(0, worstCase):
-        #         sumDistributed[bin][unary] = cp.Variable(boolean=True)
-        #         sumDistrINT += sumDistributed[bin][unary]
-        #
-        #     ConvConstraints.append(sumDistrINT >= sumOfMultiplications[bin])
-        #
-        # finalUpperBound = {}
-        # # multiplication
-        # for bin in range(0, numberOfBins):
-        #     finalUpperBound[bin] = 0
-        #     for unary in range(0, worstCase):
-        #         slackMult = cp.Variable(boolean=True)
-        #         finalUpperBound[bin] += slackMult
-        #
-        #         # help constraints
-        #         x = sumDistributed[bin][unary]
-        #         y = normUnarized[unary]
-        #
-        #         ConvConstraints.append(slackMult <= x)
-        #         ConvConstraints.append(slackMult <= y)
-        #         ConvConstraints.append(slackMult >= x + y - 1)
 
         divisor = 2
 

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.transforms as mtransforms
 
 """
-    This module includes plotting functions for numberOfGates/ number of non zeros graphs.
+    This module includes plotting functions for thesis.
 """
 
 def parseVerbose(verboseFile):

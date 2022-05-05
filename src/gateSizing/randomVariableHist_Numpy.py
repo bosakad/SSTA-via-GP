@@ -7,7 +7,7 @@ import scipy.stats
 class RandomVariable:
     """
     Class representing a random variable given by histogram.
-    Class includes:
+    Class also includes histogram operations with histograms.
 
     Class includes:
         bins: len n of frequencies
@@ -73,7 +73,7 @@ class RandomVariable:
 
     def maxOfDistributionsFORM(self, secondVariable):
         """
-        Maximum of 2 distribution functions using formula
+        Maximum of 2 distribution functions using formula. Includes vectorized version - commented
 
         :param self: random variable class
         :param secondVariable: random variable class
@@ -100,12 +100,13 @@ class RandomVariable:
         # normalize
         # maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
 
+        # vectorized code from above
         # unite
         # self.uniteEdges(secondVariable)
         # f1 = self.bins
         # f2 = secondVariable.bins
         #
-        # # vectorized code from above
+        #
         # F2 = np.cumsum(f2)
         # F1 = np.cumsum(f1)
         #
@@ -193,23 +194,6 @@ class RandomVariable:
 
 
 
-        # for i in range(0, n):
-        #     for j in range(0, i + 1):
-        #
-        #         maximum[i] += bins1[j] * bins2[i]
-
-        # calc. maximum
-        # for i in range(0, n):
-        #     for j in range(0, i + 1):
-        #
-        #         maximum[i] += bins1[i] * bins2[j]
-        #
-        # for i in range(0, n):
-        #     for j in range(i + 1, n):
-        #
-        #         maximum[j] += bins1[i] * bins2[j]
-
-
         # normalize
         maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
 
@@ -237,16 +221,6 @@ class RandomVariable:
 
         # calc. maximum
 
-        # simple, non-vectorized
-        # for i in range(0, numberOfBins):
-        #     for j in range(0, i + 1):
-        #
-        #         for unary in range(0, numberOfUnaries):
-        #             for unary2 in range(0, numberOfUnaries):
-        #                 maximum[i, unary] += binMatrix1[i, unary] * binMatrix2[j, unary2]
-        #
-        #                 if i != j:
-        #                     maximum[i, unary] += binMatrix1[j, unary] * binMatrix2[i, unary2]
 
 
             # vectorized
@@ -493,7 +467,82 @@ class RandomVariable:
 
     def uniteEdges(self, secondVariable):
         """
-        Makes a union of two histograms.
+        Makes a union of two histograms. We integrate over the histogram
+        Edges are considered to have the same difference and same length.
+
+        :param self: random variable class
+        :param secondVariable: random variable class
+        :returns None
+        """
+
+        edges_alpha = self.edges
+        alpha = self.bins
+        edges_beta = secondVariable.edges
+        beta = secondVariable.bins
+
+        numberOfBins = alpha.size
+
+        if edges_alpha[0] == edges_beta[0]:    # edges are same, no union needed
+            return None
+
+
+            # get lower and upper bounds
+        minE = min(edges_alpha[0], edges_beta[0])
+        maxE = max(edges_alpha[-1], edges_beta[-1])
+
+            # create new edges
+        edges_zeta = np.linspace(minE, maxE, numberOfBins + 1)
+        self.edges = edges_zeta
+        secondVariable.edges = edges_zeta
+
+        eIndex = 1
+        e1 = 1
+        e2 = 1
+
+        bins1New = np.zeros(numberOfBins)
+        bins2New = np.zeros(numberOfBins)
+        i = 0
+        # exact computation
+        while i != numberOfBins:
+
+            if edges_zeta[eIndex + i] > edges_alpha[e1]:
+                bins1New[i] += alpha[e1-1]*(edges_alpha[e1] - edges_alpha[e1 - 1])
+                e1 += 1
+
+            elif edges_zeta[eIndex + i] <= edges_alpha[e1]:
+                i += 1
+
+
+        i = 0
+        while i != numberOfBins:
+            if edges_zeta[eIndex + i] > edges_beta[e2]:
+                bins2New[i] += beta[e2-1]*(edges_beta[e2] - edges_beta[e2 - 1])
+                e2 += 1
+
+            elif edges_zeta[eIndex + i] <= edges_beta[e2]:
+                i += 1
+
+                # end
+            if e2 >= numberOfBins + 1:
+                bins2New[i] += beta[e2 - 2] * (edges_zeta[eIndex + i] - edges_beta[e2 - 1])
+                break
+
+        bins1 = bins1New
+        bins2 = bins2New
+
+
+        # set new bins
+        self.bins = bins1
+        secondVariable.bins = bins2
+
+        self.recalculateParams()
+        secondVariable.recalculateParams()
+
+        return None
+
+    def uniteEdges_Fitting(self, secondVariable):
+        """
+        Makes a union of two histograms. Uses a fitted CDF.
         Edges are considered to have the same difference and same length.
 
         :param self: random variable class
@@ -502,88 +551,41 @@ class RandomVariable:
         """
 
 
-        edges1 = self.edges
-        bins1 = self.bins
-        edges2 = secondVariable.edges
-        bins2 = secondVariable.bins
+        edges_alpha = self.edges
+        alpha = self.bins
+        edges_beta = secondVariable.edges
+        beta = secondVariable.bins
 
-        numberOfBins = bins1.size
+        numberOfBins = alpha.size
 
-        if edges1[0] == edges2[0]:    # edges are same, no union needed
+        if edges_alpha[0] == edges_beta[0]:    # edges are same, no union needed
             return None
 
 
             # get lower and upper bounds
-        minE = min(edges1[0], edges2[0])
-        maxE = max(edges1[-1], edges2[-1])
+        minE = min(edges_alpha[0], edges_beta[0])
+        maxE = max(edges_alpha[-1], edges_beta[-1])
 
             # create new edges
-        edgesN = np.linspace(minE, maxE, numberOfBins + 1)
-        self.edges = edgesN
-        secondVariable.edges = edgesN
+        edges_zeta = np.linspace(minE, maxE, numberOfBins + 1)
+        self.edges = edges_zeta
+        secondVariable.edges = edges_zeta
 
             # create new values
-        cdf1 = scipy.stats.rv_histogram((bins1, edges1)).cdf
-        cdf2 = scipy.stats.rv_histogram((bins2, edges2)).cdf
-        pdf1 = scipy.stats.rv_histogram((bins1, edges1)).pdf
-        pdf2 = scipy.stats.rv_histogram((bins2, edges2)).pdf
+        cdf1 = scipy.stats.rv_histogram((alpha, edges_alpha)).cdf
+        cdf2 = scipy.stats.rv_histogram((beta, edges_beta)).cdf
 
-        # for i in range(0, numberOfBins):
-        #     value1 = (cdf1(edgesN[i+1]) - cdf1(edgesN[i]))
-        #     value2 = (cdf2(edgesN[i+1]) - cdf2(edgesN[i]))
-        #     # value1 = pdf1((edgesN[i+1] + edgesN[i]) / 2)
-        #     # value2 = pdf2((edgesN[i+1] + edgesN[i]) / 2)
-        #
-        #     bins1[i] = value1
-        #     bins2[i] = value2for i in range(0, numberOfBins):
+        for i in range(0, numberOfBins):
+            value1 = (cdf1(edges_zeta[i+1]) - cdf1(edges_zeta[i]))
+            value2 = (cdf2(edges_zeta[i+1]) - cdf2(edges_zeta[i]))
 
-
-        eIndex = 1
-        e1 = 1
-        diff1 = edges1[1] - edges1[0]
-        e2 = 1
-        diff2 = edges2[1] - edges2[0]
-
-        bins1New = np.zeros(numberOfBins)
-        bins2New = np.zeros(numberOfBins)
-        i = 0
-        # exact computation
-        while i != numberOfBins:
-
-            if edgesN[eIndex + i] > edges1[e1]:
-                bins1New[i] += bins1[e1-1]*(edges1[e1] - edges1[e1 - 1])
-                e1 += 1
-
-            elif edgesN[eIndex + i] <= edges1[e1]:
-                # bins1New[i] += bins1[e1-1]* (edgesN[eIndex + i] - edges1[e1 - 1])
-                # e1 += 1
-                i += 1
-
-
-        i = 0
-        while i != numberOfBins:
-            if edgesN[eIndex + i] > edges2[e2]:
-                bins2New[i] += bins2[e2-1]*(edges2[e2] - edges2[e2 - 1])
-                e2 += 1
-
-            elif edgesN[eIndex + i] <= edges2[e2]:
-                # bins2New[i] += bins2[e2-1]* (edgesN[eIndex + i] - edges2[e2 - 1])
-                # e2 += 1
-                i += 1
-
-                # end
-            if e2 >= numberOfBins + 1:
-                bins2New[i] += bins2[e2 - 2] * (edgesN[eIndex + i] - edges2[e2 - 1])
-                break
-
-        bins1 = bins1New
-        bins2 = bins2New
-
+            alpha[i] = value1
+            beta[i] = value2
 
 
         # set new bins
-        self.bins = bins1
-        secondVariable.bins = bins2
+        self.bins = alpha
+        secondVariable.bins = beta
 
         self.recalculateParams()
         secondVariable.recalculateParams()

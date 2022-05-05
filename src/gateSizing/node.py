@@ -1,7 +1,7 @@
 
 class Node:
     """
-    Class representing a node.
+    Class representing a node in a circuit.
 
     Class includes:
         class 'RandomVariable' or cvxpy variable,

@@ -65,15 +65,11 @@
 <span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
 
 
-<span class="c1"># Aout = np.where(A&lt;=0, 0, A)</span>
-<span class="c1"># Ain  = np.where(A&gt;=0, 0, 1)</span>
 
-<span class="c1"># # optimization variables</span>
-<span class="c1"># x = cp.Variable(m, pos=True)         # sizes</span>
-<span class="c1"># t = cp.Variable(m, pos=True)         # arrival times</span>
-
-<span class="c1"># input capacitance is an affine function of sizes</span>
-<span class="c1"># cin = alpha + beta*x</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module includes vectorized deterministic optimization of the circuit using Boyds RC-model.</span>
+<span class="sd">Does NOT work with CVXPY.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="computeIncidenceMatrices"><a class="viewcode-back" href="../../../index.html#src.gateSizing.optimizeGatesVectorized_Boyd.computeIncidenceMatrices">[docs]</a><span class="k">def</span> <span class="nf">computeIncidenceMatrices</span><span class="p">(</span><span class="n">A</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
@@ -89,25 +85,8 @@
 
 
 
-    <span class="k">return</span> <span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span>
+    <span class="k">return</span> <span class="n">Aout</span><span class="p">,</span> <span class="n">Ain</span></div>
 
-    <span class="c1"># AoutParam = cp.Variable(Aout.shape, pos=True)</span>
-    <span class="c1"># AoutParam = cp.Parameter(Aout.shape, pos=True)</span>
-    <span class="c1"># AoutParam.value = Aout</span>
-    <span class="c1"># AoutParam = cp.Constant(Aout)</span>
-
-    <span class="c1"># AinParam = cp.expressions.constants.Constant(cp.bmat(Ain))</span>
-    <span class="c1"># AinParam.value = Ain</span>
-    <span class="c1"># AinParam = cp.Parameter(shape=Ain.shape, pos=True)</span>
-    <span class="c1"># AinParam.value = Ain</span>
-    <span class="c1"># AinParam = cp.Constant(Ain)</span>
-
-
-    <span class="c1"># AinParam = cp.Variable(Ain.shape, pos=True)</span>
-
-    <span class="k">return</span> <span class="n">AoutParam</span><span class="p">,</span> <span class="n">AinParam</span></div>
-
-    <span class="c1"># return cp.bmat(Aout), cp.bmat(Ain)</span>
 
 
 

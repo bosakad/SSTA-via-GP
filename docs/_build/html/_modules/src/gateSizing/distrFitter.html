@@ -317,14 +317,11 @@
 
             <span class="n">distr</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">prob</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="n">distr</span><span class="p">)</span>
         <span class="n">STATIC_BINS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">STATIC_BINS</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">STATIC_BINS</span><span class="p">[:],</span> <span class="n">weights</span><span class="o">=</span><span class="n">distr</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="s2">&quot;PDF&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
 
         <span class="n">rv</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">distr</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">STATIC_BINS</span><span class="p">)</span>
-
-        <span class="nb">print</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">rv</span><span class="o">.</span><span class="n">std</span><span class="p">)</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)])</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
@@ -346,7 +343,7 @@
     <span class="n">power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span> <span class="o">**</span> <span class="mf">1.6</span>
 
     <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
-    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">45</span>
     <span class="n">asGp</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">distros</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">generateDistr</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">shouldSave</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="n">asGp</span><span class="p">)</span>

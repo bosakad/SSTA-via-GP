@@ -72,6 +72,7 @@
 <div class="viewcode-block" id="RandomVariableCVXPY"><a class="viewcode-back" href="../../../index.html#src.gateSizing.cvxpyVariable.RandomVariableCVXPY">[docs]</a><span class="k">class</span> <span class="nc">RandomVariableCVXPY</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class representing a random variable given by histogram represented as CVXPY dictionary.</span>
+<span class="sd">    Class also includes functions for convolution and maximum.</span>
 
 <span class="sd">    Class includes:</span>
 <span class="sd">        bins: len n of frequencies, dictionary of dictionary with cvxpy variables (1, 1)</span>
@@ -244,14 +245,12 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
             <span class="n">convolution</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="c1"># i &gt;= j</span>
-
         <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">convolution</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">+=</span> <span class="n">x1</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">x2</span><span class="p">[</span><span class="n">z</span> <span class="o">-</span> <span class="n">k</span><span class="p">]</span>
 
+            <span class="c1"># shift</span>
         <span class="n">constrNew</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutBins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">convolution</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
         <span class="n">constr</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">constrNew</span><span class="p">)</span>
 
         <span class="n">maximumClass</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">convolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span> <span class="c1"># with exact comput.</span>
@@ -261,7 +260,7 @@
 <div class="viewcode-block" id="RandomVariableCVXPY.convolution_GP_OPT"><a class="viewcode-back" href="../../../index.html#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_GP_OPT">[docs]</a>    <span class="k">def</span> <span class="nf">convolution_GP_OPT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">,</span> <span class="n">constr</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed</span>
-<span class="sd">        using the &#39;quadratic&#39; algorithm and GP programming</span>
+<span class="sd">        using the &#39;quadratic&#39; algorithm and GP programming - optimized version</span>
 
 <span class="sd">        :param self: class RandomVariableCVXPY</span>
 <span class="sd">        :param secondVariable: class RandomVariableCVXPY</span>
@@ -284,26 +283,24 @@
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">convolution</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">+=</span> <span class="n">x1</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">x2</span><span class="p">[</span><span class="n">z</span> <span class="o">-</span> <span class="n">k</span><span class="p">]</span>
 
+            <span class="c1"># shift</span>
         <span class="n">constrNew</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutBins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">convolution</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">constr</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">constrNew</span><span class="p">)</span>
 
         <span class="n">newConv</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
-            <span class="n">mono</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>        <span class="c1"># create monomial</span>
-            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">convolution</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">mono</span><span class="p">)</span>
-            <span class="n">newConv</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">mono</span>
+            <span class="n">n_i</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>        <span class="c1"># create auxiliary monomial</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">convolution</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">n_i</span><span class="p">)</span>
+            <span class="n">newConv</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_i</span>
 
-        <span class="n">maximumClass</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">newConv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span> <span class="c1"># with exact comput.</span>
-
+        <span class="n">maximumClass</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">newConv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">maximumClass</span><span class="p">,</span> <span class="n">constr</span></div>
 
 <div class="viewcode-block" id="RandomVariableCVXPY.maximum_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_GP">[docs]</a>    <span class="k">def</span> <span class="nf">maximum_GP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed</span>
-<span class="sd">        using the &#39;quadratic&#39; algorithm and McCormick envelopes</span>
-<span class="sd">        IMPORTANT:</span>
-<span class="sd">                WORKS ONLY FOR MINIMIZATION PROBLEM</span>
+<span class="sd">        using the &#39;quadratic&#39; algorithm and GP programming</span>
 
 <span class="sd">        :param self: class RandomVariableCVXPY</span>
 <span class="sd">        :param secondVariable: class RandomVariableCVXPY</span>
@@ -318,15 +315,13 @@
         <span class="n">numberOfBins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
 
         <span class="n">maximum</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># allocation of convolution dictionary</span>
+        <span class="c1"># allocation of maximum dictionary</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
             <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="c1"># i &gt;= j</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
 
-                <span class="c1"># new variable - multiplication of x*y</span>
                 <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">x1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">x2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
@@ -340,9 +335,7 @@
 <div class="viewcode-block" id="RandomVariableCVXPY.maximum_GP_OPT"><a class="viewcode-back" href="../../../index.html#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_GP_OPT">[docs]</a>    <span class="k">def</span> <span class="nf">maximum_GP_OPT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">,</span> <span class="n">constr</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed</span>
-<span class="sd">        using the &#39;quadratic&#39; algorithm and McCormick envelopes</span>
-<span class="sd">        IMPORTANT:</span>
-<span class="sd">                WORKS ONLY FOR MINIMIZATION PROBLEM</span>
+<span class="sd">        using the &#39;quadratic&#39; algorithm and GP programming - optimized version</span>
 
 <span class="sd">        :param self: class RandomVariableCVXPY</span>
 <span class="sd">        :param secondVariable: class RandomVariableCVXPY</span>
@@ -356,11 +349,10 @@
         <span class="n">numberOfBins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
 
         <span class="n">maximum</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># allocation of convolution dictionary</span>
+        <span class="c1"># allocation of maximum dictionary</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
             <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="c1"># i &gt;= j</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
 
@@ -371,12 +363,11 @@
                     <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">x1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">x2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
             <span class="c1"># create upper bounds</span>
-
         <span class="n">newMax</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
-            <span class="n">mono</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># create monomial</span>
-            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">mono</span><span class="p">)</span>
-            <span class="n">newMax</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">mono</span>
+            <span class="n">n_i</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># create monomial</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">n_i</span><span class="p">)</span>
+            <span class="n">newMax</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_i</span>
 
         <span class="n">maximumClass</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">newMax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span> <span class="c1"># with exact comput.</span>
 
@@ -449,13 +440,6 @@
         <span class="n">rv1</span> <span class="o">=</span> <span class="n">RandomVariableNumpy</span><span class="p">(</span><span class="n">lowerBounds1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
         <span class="n">rv2</span> <span class="o">=</span> <span class="n">RandomVariableNumpy</span><span class="p">(</span><span class="n">lowerBounds2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
 
-        <span class="c1"># newBins = {}</span>
-
-        <span class="c1"># for i in range(0, numberOfBins):</span>
-        <span class="c1">#     newBins[i] = cp.Variable(nonneg=True)</span>
-        <span class="c1">#     ConvConstraints.append( newBins[i] &gt;= convolution[i] )</span>
-
-        <span class="c1"># convClass = RandomVariableCVXPY(convolution, self.edges)</span>
         <span class="n">convClass</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">convolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">convolutionOfTwoVarsShift</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
 
 
@@ -513,51 +497,6 @@
 
         <span class="c1"># cut edges</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cutBins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">sumOfMultiplications</span><span class="p">)</span>
-
-
-        <span class="c1"># get max and norm in a unarized form</span>
-            <span class="c1"># experimented</span>
-        <span class="c1"># maximum = cp.Variable(pos=True)</span>
-        <span class="c1"># for bin in range(0, numberOfBins):</span>
-        <span class="c1">#     ConvConstraints.append(sumOfMultiplications[bin] &lt;= maximum)</span>
-        <span class="c1">#</span>
-        <span class="c1"># norm = numberOfUnaries / maximum</span>
-        <span class="c1"># normUnarized = {}</span>
-        <span class="c1"># sumOfNorm = 0</span>
-        <span class="c1"># worstCase = numberOfUnaries*numberOfBins</span>
-        <span class="c1"># for unary in range(0, worstCase):</span>
-        <span class="c1">#     normUnarized[unary] = cp.Variable(boolean=True)</span>
-        <span class="c1">#     sumOfNorm += normUnarized[unary]</span>
-        <span class="c1">#</span>
-        <span class="c1">#     # force the normalized form of the norm</span>
-        <span class="c1"># ConvConstraints.append( norm*numberOfUnaries &lt;= sumOfNorm )</span>
-        <span class="c1">#</span>
-        <span class="c1"># # create a distributed form of the bins</span>
-        <span class="c1"># sumDistributed = {}</span>
-        <span class="c1"># for bin in range(0, numberOfBins):</span>
-        <span class="c1">#     sumDistributed[bin] = {}</span>
-        <span class="c1">#     sumDistrINT = 0</span>
-        <span class="c1">#     for unary in range(0, worstCase):</span>
-        <span class="c1">#         sumDistributed[bin][unary] = cp.Variable(boolean=True)</span>
-        <span class="c1">#         sumDistrINT += sumDistributed[bin][unary]</span>
-        <span class="c1">#</span>
-        <span class="c1">#     ConvConstraints.append(sumDistrINT &gt;= sumOfMultiplications[bin])</span>
-        <span class="c1">#</span>
-        <span class="c1"># finalUpperBound = {}</span>
-        <span class="c1"># # multiplication</span>
-        <span class="c1"># for bin in range(0, numberOfBins):</span>
-        <span class="c1">#     finalUpperBound[bin] = 0</span>
-        <span class="c1">#     for unary in range(0, worstCase):</span>
-        <span class="c1">#         slackMult = cp.Variable(boolean=True)</span>
-        <span class="c1">#         finalUpperBound[bin] += slackMult</span>
-        <span class="c1">#</span>
-        <span class="c1">#         # help constraints</span>
-        <span class="c1">#         x = sumDistributed[bin][unary]</span>
-        <span class="c1">#         y = normUnarized[unary]</span>
-        <span class="c1">#</span>
-        <span class="c1">#         ConvConstraints.append(slackMult &lt;= x)</span>
-        <span class="c1">#         ConvConstraints.append(slackMult &lt;= y)</span>
-        <span class="c1">#         ConvConstraints.append(slackMult &gt;= x + y - 1)</span>
 
         <span class="n">divisor</span> <span class="o">=</span> <span class="mi">2</span>
 

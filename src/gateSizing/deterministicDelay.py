@@ -7,7 +7,7 @@ from queue import Queue
 
 def FindMaxDelayGates():
     """
-    Computes maximum possible path. CVXPY variables as gates
+    Finds critical path of the circuit. Only works for the deterministic model. Gates are represented as cvxpy variables
     :return:
     """
 

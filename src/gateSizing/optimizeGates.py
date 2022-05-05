@@ -22,8 +22,9 @@ import matplotlib.pyplot as plt
 
 
 """
-This module includes gate sizing optimization of the c17 circuit in a function 'optimizeGates'.
-Some test for MOSEK ssta can be found aswell. 
+This module includes gate sizing optimization of the c17 circuit in functions 'optimizeCVXPY_GP'
+and 'optimizeGates_MIXED_INT'.
+Some test for MOSEK SSTA can be found aswell. 
 Implemented in MOSEK
 
 """
@@ -704,13 +705,13 @@ def optimizeCVXPY_GP():
     This function optimizes the c17 circuit using the GP model
     """
 
-    numberOfBins = 30
+    numberOfBins = 80
     binsInterval = (0, 28)
     numberOfGates = 8
 
     coef = np.load('Inputs.outputs/model.npz')
     model = coef['coef']
- 
+
     f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
     e = np.array([1, 2, 1, 1.5, 1.5, 1])
     a = np.ones(numberOfGates - 2)
@@ -771,8 +772,8 @@ def optimizeCVXPY_GP():
     constr.extend(newConstr)
 
     midPoints = 0.5 * (delays[-1].edges[1:] + delays[-1].edges[:-1])  # midpoints of the edges of hist.
-    nLast = 2
-    finalMidPoints = np.append(np.ones((numberOfBins - nLast,))*1.0e-4, np.power(midPoints[-nLast:], 2))
+    nLast = 5
+    finalMidPoints = np.append(np.ones((numberOfBins - nLast,))*1.0e-2, np.power(midPoints[-nLast:], 2))
 
     sum = 0
     for bin in range(0, numberOfBins):
@@ -925,14 +926,14 @@ def optimizeCVXPY_GP():
     print(result)
 
         # plot
-    # fig, ax = plt.subplots(1, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
-    # # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
-    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, density="PDF", color='blue')
-    # _ = plt.hist(values, bins=numberOfBins, density='PDF', alpha=0.8, color='orange')
-    # ax.set_xlabel('Delay')
-    # ax.set_ylabel('Probability')
-    # # plt.show()
-    # plt.savefig("Inputs.outputs/delayComparison.jpeg", dpi=800, bbox_inches='tight')
+    fig, ax = plt.subplots(1, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
+    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, density="PDF", color='blue')
+    _ = plt.hist(values, bins=numberOfBins, density='PDF', alpha=0.8, color='orange')
+    ax.set_xlabel('Delay')
+    ax.set_ylabel('Probability')
+    # plt.show()
+    plt.savefig("Inputs.outputs/delayComparison.jpeg", dpi=800, bbox_inches='tight')
 
 
 

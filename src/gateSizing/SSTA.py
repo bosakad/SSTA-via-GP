@@ -21,6 +21,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
     :param unary: Bool, true if unary (M 0/1-bin repr.) is used, false otherwise
     :param mosekTRI: Bool, true if trilinear constraints are used, false otherwise
     :param GP: Bool, true if using the GP version of the SSTA, false otherwise
+    :param monteCarlo: Bool, true if using the monte carlo, false otherwise
 
     :return newConstr: new constraints for CVXPY(optional)
     :return newNofVariables: new number of MOSEK variables(optional)

@@ -254,14 +254,11 @@ def plotDistrosForInputs(a, f, e, GP=False):
 
             distr[bin] = prob
 
-        print(distr)
         STATIC_BINS = np.linspace(interval[0], interval[1], numberOfBins+1)
 
         plt.hist(STATIC_BINS[:-1], STATIC_BINS[:], weights=distr, density="PDF", alpha=0.4)
 
         rv = RandomVariable(distr, edges=STATIC_BINS)
-
-        print(rv.mean, rv.std)
 
         plt.legend([str(x)])
         plt.show()
@@ -283,7 +280,7 @@ if __name__ == "__main__":
     power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.6
 
     interval = (0, 28)
-    numberOfBins = 30
+    numberOfBins = 45
     asGp = True
 
     distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=True, GP=asGp)

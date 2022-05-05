@@ -443,32 +443,6 @@ Is in MOSEK environment. This implementation works only for a maximization probl
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_GP">
-<span class="sig-name descname"><span class="pre">maximum_GP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofVariables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofConstr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.maximum_GP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_GP" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates maximum of 2 PDFs of random variable. Works only for 2 identical edges.
-Is in MOSEK environment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> – class RandomVariableMOSEK</p></li>
-<li><p><strong>secondVariable</strong> – class RandomVariableMOSEK</p></li>
-<li><p><strong>curNofVariables</strong> – current number of MOSEK variables - to know the indices</p></li>
-<li><p><strong>curNofConstr</strong> – current number of MOSEK constraints - to know the indices</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return maximumClass</dt>
-<dd class="field-even"><p>class RandomVariableMOSEK with variables</p>
-</dd>
-<dt class="field-odd">Return newNofVariables</dt>
-<dd class="field-odd"><p>integer, new total number of MOSEK variables</p>
-</dd>
-<dt class="field-even">Return newNofConstr</dt>
-<dd class="field-even"><p>integer, new total number of MOSEK constraints</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE">
 <span class="sig-name descname"><span class="pre">maximum_UNARY_MAX_DIVIDE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofVariables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curNofConstr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withSymmetryConstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/mosekVariable.html#RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.mosekVariable.RandomVariableMOSEK.maximum_UNARY_MAX_DIVIDE" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
@@ -760,6 +734,7 @@ Function executes the algorithm for finding out the PDF of a circuit delay.</p>
 <li><p><strong>unary</strong> – Bool, true if unary (M 0/1-bin repr.) is used, false otherwise</p></li>
 <li><p><strong>mosekTRI</strong> – Bool, true if trilinear constraints are used, false otherwise</p></li>
 <li><p><strong>GP</strong> – Bool, true if using the GP version of the SSTA, false otherwise</p></li>
+<li><p><strong>monteCarlo</strong> – Bool, true if using the monte carlo, false otherwise</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return newConstr</dt>
@@ -943,7 +918,8 @@ Using formula - look up function maxOfDistributionsFORM</p>
 <dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.gateSizing.cvxpyVariable.</span></span><span class="sig-name descname"><span class="pre">RandomVariableCVXPY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lowerBounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.array</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">array([],</span> <span class="pre">dtype=float64)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class representing a random variable given by histogram represented as CVXPY dictionary.</p>
+<p>Class representing a random variable given by histogram represented as CVXPY dictionary.
+Class also includes functions for convolution and maximum.</p>
 <dl class="simple">
 <dt>Class includes:</dt><dd><p>bins: len n of frequencies, dictionary of dictionary with cvxpy variables (1, 1)
 edges: len n+1 of histogram edges, dtype: 1-D np.array
@@ -975,7 +951,7 @@ using the ‘quadratic’ algorithm and GP programming</p>
 <dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_GP_OPT">
 <span class="sig-name descname"><span class="pre">convolution_GP_OPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.convolution_GP_OPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.convolution_GP_OPT" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-using the ‘quadratic’ algorithm and GP programming</p>
+using the ‘quadratic’ algorithm and GP programming - optimized version</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1180,8 +1156,7 @@ This approach is significantly slower giving the same results.
 <dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_GP">
 <span class="sig-name descname"><span class="pre">maximum_GP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.maximum_GP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_GP" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-using the ‘quadratic’ algorithm and McCormick envelopes
-.. important:: WORKS ONLY FOR MINIMIZATION PROBLEM</p>
+using the ‘quadratic’ algorithm and GP programming</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1202,8 +1177,7 @@ using the ‘quadratic’ algorithm and McCormick envelopes
 <dt class="sig sig-object py" id="src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_GP_OPT">
 <span class="sig-name descname"><span class="pre">maximum_GP_OPT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/cvxpyVariable.html#RandomVariableCVXPY.maximum_GP_OPT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.cvxpyVariable.RandomVariableCVXPY.maximum_GP_OPT" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
-using the ‘quadratic’ algorithm and McCormick envelopes
-.. important:: WORKS ONLY FOR MINIMIZATION PROBLEM</p>
+using the ‘quadratic’ algorithm and GP programming - optimized version</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1329,7 +1303,7 @@ This is an old implementation.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="src.gateSizing.deterministicDelay.FindMaxDelayGates">
 <span class="sig-prename descclassname"><span class="pre">src.gateSizing.deterministicDelay.</span></span><span class="sig-name descname"><span class="pre">FindMaxDelayGates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/deterministicDelay.html#FindMaxDelayGates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.deterministicDelay.FindMaxDelayGates" title="Permalink to this definition"></a></dt>
-<dd><p>Computes maximum possible path. CVXPY variables as gates
+<dd><p>Finds critical path of the circuit. Only works for the deterministic model. Gates are represented as cvxpy variables
 :return:</p>
 </dd></dl>
 
@@ -1560,7 +1534,7 @@ gate’s operation time is assumed to have a Gaussian distribution</p></li>
 <dt class="sig sig-object py" id="src.gateSizing.node.Node">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.gateSizing.node.</span></span><span class="sig-name descname"><span class="pre">Node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">randomVar</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/node.html#Node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.node.Node" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class representing a node.</p>
+<p>Class representing a node in a circuit.</p>
 <dl class="simple">
 <dt>Class includes:</dt><dd><p>class ‘RandomVariable’ or cvxpy variable,
 array of next gates,
@@ -1918,7 +1892,7 @@ arrival times for output gates</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.gateSizing.randomVariableHist_Numpy.</span></span><span class="sig-name descname"><span class="pre">RandomVariable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/randomVariableHist_Numpy.html#RandomVariable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.randomVariableHist_Numpy.RandomVariable" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class representing a random variable given by histogram.
-Class includes:</p>
+Class also includes histogram operations with histograms.</p>
 <dl class="simple">
 <dt>Class includes:</dt><dd><p>bins: len n of frequencies
 edges: len n+1 of histogram edges
@@ -2161,7 +2135,7 @@ Works for only unary random variable</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsFORM">
 <span class="sig-name descname"><span class="pre">maxOfDistributionsFORM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/randomVariableHist_Numpy.html#RandomVariable.maxOfDistributionsFORM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsFORM" title="Permalink to this definition"></a></dt>
-<dd><p>Maximum of 2 distribution functions using formula</p>
+<dd><p>Maximum of 2 distribution functions using formula. Includes vectorized version - commented</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -2274,7 +2248,7 @@ Please see ‘unarizeDivide’ for a better alternative.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="src.gateSizing.randomVariableHist_Numpy.RandomVariable.uniteEdges">
 <span class="sig-name descname"><span class="pre">uniteEdges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/randomVariableHist_Numpy.html#RandomVariable.uniteEdges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.randomVariableHist_Numpy.RandomVariable.uniteEdges" title="Permalink to this definition"></a></dt>
-<dd><p>Makes a union of two histograms.
+<dd><p>Makes a union of two histograms. We integrate over the histogram
 Edges are considered to have the same difference and same length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2291,6 +2265,22 @@ Edges are considered to have the same difference and same length.</p>
 <dt class="sig sig-object py" id="src.gateSizing.randomVariableHist_Numpy.RandomVariable.uniteEdgesNaive">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uniteEdgesNaive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">convolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/randomVariableHist_Numpy.html#RandomVariable.uniteEdgesNaive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.randomVariableHist_Numpy.RandomVariable.uniteEdgesNaive" title="Permalink to this definition"></a></dt>
 <dd><p>Makes a union of two histograms, Naive implementation
+Edges are considered to have the same difference and same length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – random variable class</p></li>
+<li><p><strong>secondVariable</strong> – random variable class</p></li>
+</ul>
+</dd>
+</dl>
+<p>:returns None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.gateSizing.randomVariableHist_Numpy.RandomVariable.uniteEdges_Fitting">
+<span class="sig-name descname"><span class="pre">uniteEdges_Fitting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">secondVariable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/randomVariableHist_Numpy.html#RandomVariable.uniteEdges_Fitting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.randomVariableHist_Numpy.RandomVariable.uniteEdges_Fitting" title="Permalink to this definition"></a></dt>
+<dd><p>Makes a union of two histograms. Uses a fitted CDF.
 Edges are considered to have the same difference and same length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
