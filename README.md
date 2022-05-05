@@ -4,6 +4,7 @@ Geometric programming is often used in the layout and timing problems of circuit
 
 
 Full documentation is located at: docs/_build/html
+
 Source of the project is located at: src/gate_sizing
 
 Main script is src/gate_sizing/optimizeGates.py
