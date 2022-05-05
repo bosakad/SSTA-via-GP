@@ -826,30 +826,30 @@
                     <span class="n">bins</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="RandomVariable.cutBins"><a class="viewcode-back" href="../../../index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable.cutBins">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">cutBins</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">bins</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">cutBins</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Cuts bins depending on edge[0]</span>
 <span class="sd">        if edge[0] &lt; 0: cuts left bins and adds zeros to the end</span>
 <span class="sd">        if edge[0] &gt; 0: cuts right bins and adds zeros to the beginning</span>
 
-<span class="sd">        :param edges: (1, n+1) numpy array of edges</span>
-<span class="sd">        :param bins: (1, n) numpy array of bins</span>
+<span class="sd">        :param E: (1, n+1) numpy array of edges</span>
+<span class="sd">        :param alpha: (1, n) numpy array of bins</span>
 <span class="sd">        :returns None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">diff</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">E</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">E</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># cut bins</span>
+        <span class="k">if</span> <span class="n">E</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># cut bins</span>
 
-            <span class="n">numberOfBinsNeeded</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">diff</span><span class="p">)</span>
-            <span class="n">bins</span><span class="p">[</span><span class="n">numberOfBinsNeeded</span><span class="p">:]</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="n">numberOfBinsNeeded</span><span class="p">]</span>
-            <span class="n">bins</span><span class="p">[:</span><span class="n">numberOfBinsNeeded</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">diff</span><span class="p">)</span>
+            <span class="n">alpha</span><span class="p">[</span><span class="n">s</span><span class="p">:]</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[:</span><span class="o">-</span><span class="n">s</span><span class="p">]</span>
+            <span class="n">alpha</span><span class="p">[:</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">elif</span> <span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># cut bins</span>
+        <span class="k">elif</span> <span class="n">E</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># cut bins</span>
 
-            <span class="n">numberOfBinsNeeded</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">diff</span><span class="p">)</span>
-            <span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="n">numberOfBinsNeeded</span><span class="p">]</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">numberOfBinsNeeded</span><span class="p">:]</span>
-            <span class="n">bins</span><span class="p">[</span><span class="o">-</span><span class="n">numberOfBinsNeeded</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span></div>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">diff</span><span class="p">)</span>
+            <span class="n">alpha</span><span class="p">[:</span><span class="o">-</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="n">s</span><span class="p">:]</span>
+            <span class="n">alpha</span><span class="p">[</span><span class="o">-</span><span class="n">s</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 
 <div class="viewcode-block" id="RandomVariable.calculateMean"><a class="viewcode-back" href="../../../index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable.calculateMean">[docs]</a>    <span class="k">def</span> <span class="nf">calculateMean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

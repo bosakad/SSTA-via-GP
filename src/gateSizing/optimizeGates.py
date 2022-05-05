@@ -926,14 +926,14 @@ def optimizeCVXPY_GP():
     print(result)
 
         # plot
-    fig, ax = plt.subplots(1, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
-    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
-    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, density="PDF", color='blue')
-    _ = plt.hist(values, bins=numberOfBins, density='PDF', alpha=0.8, color='orange')
-    ax.set_xlabel('Delay')
-    ax.set_ylabel('Probability')
-    # plt.show()
-    plt.savefig("Inputs.outputs/delayComparison.jpeg", dpi=800, bbox_inches='tight')
+    # fig, ax = plt.subplots(1, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
+    # # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
+    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, density="PDF", color='blue')
+    # _ = plt.hist(values, bins=numberOfBins, density='PDF', alpha=0.8, color='orange')
+    # ax.set_xlabel('Delay')
+    # ax.set_ylabel('Probability')
+    # # plt.show()
+    # plt.savefig("Inputs.outputs/delayComparison.jpeg", dpi=800, bbox_inches='tight')
 
 
 

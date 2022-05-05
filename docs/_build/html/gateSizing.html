@@ -2064,15 +2064,15 @@ Uses division to get into unary form.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="src.gateSizing.randomVariableHist_Numpy.RandomVariable.cutBins">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cutBins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/randomVariableHist_Numpy.html#RandomVariable.cutBins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.randomVariableHist_Numpy.RandomVariable.cutBins" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cutBins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/gateSizing/randomVariableHist_Numpy.html#RandomVariable.cutBins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.gateSizing.randomVariableHist_Numpy.RandomVariable.cutBins" title="Permalink to this definition"></a></dt>
 <dd><p>Cuts bins depending on edge[0]
 if edge[0] &lt; 0: cuts left bins and adds zeros to the end
 if edge[0] &gt; 0: cuts right bins and adds zeros to the beginning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>edges</strong> – (1, n+1) numpy array of edges</p></li>
-<li><p><strong>bins</strong> – (1, n) numpy array of bins</p></li>
+<li><p><strong>E</strong> – (1, n+1) numpy array of edges</p></li>
+<li><p><strong>alpha</strong> – (1, n) numpy array of bins</p></li>
 </ul>
 </dd>
 </dl>
