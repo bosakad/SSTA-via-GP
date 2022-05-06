@@ -10,7 +10,7 @@ and fits the curve (linear reg.)
 
 """
 
-def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shouldSave: bool, GP=False):
+def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shouldSave: bool, GP=False, Normal=False):
     """
     Generates a distributions with parameters and saves it into numpy file.
 
@@ -19,15 +19,19 @@ def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shoul
     :param interval: tuple - interval
     :param numberOfBins: int - number of bins
     :param shouldSave: boolean - true if should save into file, false otherwise
+    :param Normal: boolean - true if normal, false if lognormal
 
     :return distros: (numberOfDistros, NumberOfBins) np matrix of generated values
     :return edges: (1, numberOfBins + 1) np array of edges
     """
 
 
-    if GP:
+    if GP and not Normal:
         mus = [1.97, 1.95, 1.85, 1.3, 0.8, 0.5, 0.3, 0.15]
-        stds = [0.165,0.163, 0.162, 0.161, 0.16, 0.14, 0.14, 0.13]
+        stds = [0.165, 0.163, 0.162, 0.161, 0.16, 0.14, 0.14, 0.13]
+    elif GP and Normal:
+        mus = np.array([10.8, 4.8, 4.8, 4.5, 4, 3.5, 3.2, 0.3]) / 2.5
+        stds = np.array([1, 0.8, 0.72, 0.71, 0.66, 0.44, 0.31, 0.21]) * 1.5
     else:
         mus = [1.1, 1.1, 1.05, 1, 1, 0.9, 0, 0]
         stds = [0.165, 0.164, 0.163, 0.161, 0.16, 0.14, 0.13, 0.1]
@@ -35,12 +39,15 @@ def generateDistr(area: [], power: [], interval: tuple, numberOfBins: int, shoul
         # generate distr
     numberOfDistr = area.shape[0]
 
-    print(GP)
     edges = None
     distros = np.zeros((numberOfDistr, numberOfBins))
     for d in range(0, numberOfDistr):
-        rv = histogramGenerator.get_gauss_bins(mus[d], stds[d], numberOfBins, numberOfSamples=1000000,
-                                                                binsInterval=interval, distr="LogNormal")
+        if Normal:
+            rv = histogramGenerator.get_gauss_bins(mus[d], stds[d], numberOfBins, numberOfSamples=1000000,
+                                                   binsInterval=interval)
+        else:
+            rv = histogramGenerator.get_gauss_bins(mus[d], stds[d], numberOfBins, numberOfSamples=1000000,
+                                                                    binsInterval=interval, distr="LogNormal")
         distros[d, :] = rv.bins[:]
 
         edges = rv.edges
@@ -195,16 +202,20 @@ def linearRegression(distros, area, power, GP=False):
 
     return coef
 
-def saveModel(coef, GP=False):
+def saveModel(coef, GP=False, Normal=False):
     """
     Saves model
 
     :param coef: coeficients of the model
+    :param Normal: true if normal, false if lognormal
     :return: None
     """
 
     if GP:
-        outfile = "Inputs.outputs/model"
+        if Normal:
+            outfile = "Inputs.outputs/model_Normal"
+        else:
+            outfile = "Inputs.outputs/model"
     else:
         outfile = "Inputs.outputs/model_MIXED_INT"
 
@@ -218,11 +229,12 @@ def plotDistrosForInputs(a, f, e, GP=False):
 
     if not GP:
         coef = np.load("Inputs.outputs/model_MIXED_INT.npz")
+        coefs = [coef]
     else:
-        coef = np.load("Inputs.outputs/model.npz")
+        coef1 = np.load("Inputs.outputs/model.npz")
+        coef2 = np.load("Inputs.outputs/model_Normal.npz")
+        coefs = [coef1, coef2]
 
-    model = coef['coef']
-    numberOfBins = model.shape[0]
 
     gate = 5
 
@@ -230,44 +242,50 @@ def plotDistrosForInputs(a, f, e, GP=False):
     f_i = f[gate]
     e_i = e[gate]
 
-    # for x in [1, 1.5, 2, 2.5, 3, 3.5, 4]:
-    for x in [1, 2, 4, 6, 10, 15, 100]:
-    # for x in [20, 100]:
+    if GP:
+        numIter = 2
+    else:
+        numIter = 1
 
-        # x = 1 + 2*iter
+    fig, ax = plt.subplots(6, 2, gridspec_kw={'wspace': 0.5, 'hspace': 0.5}, sharex=True)
+    data = [1, 2, 5, 10, 15, 25]
 
-        distr = np.zeros(numberOfBins)
-        for bin in range(0, numberOfBins):
-            if GP:
-                a1 = model[bin, 0]
-                p1 = model[bin, 1]
-                a2 = model[bin, 2]
-                p2 = model[bin, 3]
+    for i in range(0, numIter):
+        model = coefs[i]['coef']
+        numberOfBins = model.shape[0]
 
-                prob = a1*a_i*x + p1*f_i*e_i*x + a2* (1/ np.power((a_i*x), 1)) + p2* (1/np.power((f_i*e_i*x), 1))
-            else:
-                shift = model[bin, 0]
-                ac = model[bin, 1]
-                pc = model[bin, 2]
+        STATIC_BINS = np.linspace(interval[0] / 1e11, interval[1] / 1e11, numberOfBins + 1)
 
-                prob = shift + ac * a_i * x + pc * f_i * e_i * x
+        for j in range(0, len(data)):
+            x = data[j]
+            distr = np.zeros(numberOfBins)
+            for bin in range(0, numberOfBins):
+                if GP:
+                    a1 = model[bin, 0]
+                    p1 = model[bin, 1]
+                    a2 = model[bin, 2]
+                    p2 = model[bin, 3]
 
-            distr[bin] = prob
+                    prob = a1*a_i*x + p1*f_i*e_i*x + a2* (1/ np.power((a_i*x), 1)) + p2* (1/np.power((f_i*e_i*x), 1))
+                else:
+                    shift = model[bin, 0]
+                    ac = model[bin, 1]
+                    pc = model[bin, 2]
 
-        STATIC_BINS = np.linspace(interval[0], interval[1], numberOfBins+1)
+                    prob = shift + ac * a_i * x + pc * f_i * e_i * x
 
-        plt.hist(STATIC_BINS[:-1], STATIC_BINS[:], weights=distr, density="PDF", alpha=0.4)
-
-        rv = RandomVariable(distr, edges=STATIC_BINS)
-
-        plt.legend([str(x)])
-        plt.show()
-
-    # plt.legend(["1", '2', '3', '4'])
+                distr[bin] = prob
 
 
-    # plt.show()
+            first = 18
 
+            ax[j, i].hist(STATIC_BINS[:-(1+first)], STATIC_BINS[:-first], weights=distr[:-first], density="PDF", alpha=0.4)
+
+            rv = RandomVariable(distr, edges=STATIC_BINS)
+
+            # plt.legend(["Scaling factor: " + str(x)])
+
+    plt.show()
 
 if __name__ == "__main__":
 
@@ -280,16 +298,17 @@ if __name__ == "__main__":
     power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.6
 
     interval = (0, 28)
-    numberOfBins = 45
+    numberOfBins = 30
     asGp = True
+    Normal = True
 
-    distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=True, GP=asGp)
+    distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=True, GP=asGp, Normal=Normal)
     plotDistros(distros, edges)
     coef = linearRegression(distros, area, power, GP=asGp)
 
     plotLinesForBin(distros, area, power, coef, 0, GP=asGp)
 
-    saveModel(coef, GP=asGp)
+    saveModel(coef, GP=asGp, Normal=Normal)
 
     f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
     e = np.array([1, 2, 1, 1.5, 1.5, 1])

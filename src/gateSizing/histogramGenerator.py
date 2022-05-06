@@ -132,21 +132,26 @@ def getValuesForMonteCarlo(rv: RandomVariable, count):
     value_bins = np.searchsorted(cdf, values)
     random_from_cdf = bin_midpoints[value_bins]
 
-    randomIndices = np.random.choice(np.arange(random_from_cdf.size), int(count * 0.8))
-    random_from_cdf[randomIndices[:randomIndices.size // 2]] += ((rv.edges[1] - rv.edges[0]) / 2)*np.random.random_sample(randomIndices.size // 2)
-    random_from_cdf[randomIndices[randomIndices.size // 2:]] -= ((rv.edges[1] - rv.edges[0]) / 2)*np.random.random_sample(randomIndices.size // 2)
-
+    randomIndices = np.random.choice(np.arange(random_from_cdf.size), int(count * 1))
+    # random_from_cdf[randomIndices[:randomIndices.size]] += (2*(rv.edges[1] - rv.edges[0]))*np.random.random_sample(randomIndices.size)
+    # random_from_cdf[randomIndices[randomIndices.size // 2:]] -= ((rv.edges[1] - rv.edges[0]))*np.random.random_sample(randomIndices.size // 2)
+    noise = np.random.normal(0, 0.3, size=randomIndices.shape)
+    random_from_cdf += noise
 
     return random_from_cdf
 
-    # import matplotlib.pyplot as plt
-    # plt.subplot(121)
-    # # plt.hist(data, 50)
-    # plt.hist(rv.edges[:-1], rv.edges, weights=rv.bins, alpha=0.2, color='orange')
-    # plt.subplot(122)
-    # # plt.hist(random_from_cdf, 30)
-    # _ = plt.hist(random_from_cdf, bins=30, density='PDF', alpha=0.7)
-    # plt.show()
+    # print(np.mean(random_from_cdf))
+    # print(rv.mean)
+    # print(np.std(random_from_cdf))
+    # print(rv.std)
+    import matplotlib.pyplot as plt
+    plt.subplot(121)
+    # plt.hist(data, 50)
+    plt.hist(rv.edges[:-1], rv.edges, weights=rv.bins, alpha=0.2, color='orange')
+    plt.subplot(122)
+    # plt.hist(random_from_cdf, 30)
+    _ = plt.hist(random_from_cdf, bins=30, density='PDF', alpha=0.7)
+    plt.show()
 
 
 
