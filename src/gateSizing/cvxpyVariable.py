@@ -168,8 +168,8 @@ class RandomVariableCVXPY:
 
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
-        :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
-        :return MaxConstraints: python array with inequalities - for computing the maximum
+        :return convClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
+        :return constr: python array with inequalities - for computing the convolution
         """
 
         x1 = self.bins
@@ -190,9 +190,9 @@ class RandomVariableCVXPY:
         constrNew = self.cutBins(self.edges, convolution, GP=True)
         constr.extend(constrNew)
 
-        maximumClass = RandomVariableCVXPY(convolution, self.edges) # with exact comput.
+        convClass = RandomVariableCVXPY(convolution, self.edges) # with exact comput.
 
-        return maximumClass, constr
+        return convClass, constr
 
     def convolution_GP_OPT(self, secondVariable, constr):
         """
@@ -201,8 +201,8 @@ class RandomVariableCVXPY:
 
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
-        :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
-        :return MaxConstraints: python array with inequalities - for computing the maximum
+        :return convClass: class RandomVariableCVXPY with cvxpy auxiliary variables (1, 1)
+        :return constr: python array with inequalities - for computing the convolution
         """
 
         x1 = self.bins
@@ -230,9 +230,9 @@ class RandomVariableCVXPY:
             constr.append(convolution[bin] <= n_i)
             newConv[bin] = n_i
 
-        maximumClass = RandomVariableCVXPY(newConv, self.edges)
+        convClass = RandomVariableCVXPY(newConv, self.edges)
 
-        return maximumClass, constr
+        return convClass, constr
 
     def maximum_GP(self, secondVariable):
         """
@@ -242,7 +242,6 @@ class RandomVariableCVXPY:
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
         :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
-        :return MaxConstraints: python array with inequalities - for computing the maximum
         """
 
         x1 = self.bins
@@ -277,7 +276,7 @@ class RandomVariableCVXPY:
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
         :return maximumClass: class RandomVariableCVXPY with cvxpy slack variables (1, 1)
-        :return MaxConstraints: python array with inequalities - for computing the maximum
+        :return constr: python array with inequalities - for computing the maximum
         """
 
         x1 = self.bins
