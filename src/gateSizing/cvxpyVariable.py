@@ -163,7 +163,7 @@ class RandomVariableCVXPY:
 
     def convolution_GP(self, secondVariable, constr):
         """
-        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+        Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
         using the 'quadratic' algorithm and GP programming
 
         :param self: class RandomVariableCVXPY
@@ -196,7 +196,7 @@ class RandomVariableCVXPY:
 
     def convolution_GP_OPT(self, secondVariable, constr):
         """
-        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+        Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
         using the 'quadratic' algorithm and GP programming - optimized version
 
         :param self: class RandomVariableCVXPY
