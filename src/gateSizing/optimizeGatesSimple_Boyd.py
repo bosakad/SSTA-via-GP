@@ -213,7 +213,7 @@ if __name__ == "__main__":
     beta = np.ones(numberOfGates)
     gamma = np.ones(numberOfGates)
 
-    Amax = 30
+    Amax = 35
     Pmax = 55
 
 

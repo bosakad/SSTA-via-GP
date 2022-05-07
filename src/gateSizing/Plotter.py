@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.transforms as mtransforms
+import optimizeGates
 
 """
     This module includes plotting functions for thesis.
@@ -806,9 +807,40 @@ def plotForThesis():
 
     # plt.show()
 
+
+def plotDelays():
+
+    # plot
+    fig, axs = plt.subplots(2, 1, gridspec_kw={'wspace': 0.5, 'hspace': 0.5})
+    models = ["Gauss", "LogNormal"]
+    for i in range(0, 2):
+        Sizing = [[ 2.88992964,  5.3002286,   6.39230527,  6.04825413,  4.13713269, 10.23214329],
+                  [2.68734118, 6.10676087, 5.98733808, 6.39787868, 4.1761852,  9.64449589]]
+        delay, mc = optimizeGates.optimizeCVXPY_GP(models[i], Sizing[i])
+
+        # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
+        axs[i].hist(delay.edges[:-1], delay.edges, weights=delay.bins, density="PDF", color='blue')
+        _ = axs[i].hist(mc / 1e11, bins=len(delay.edges[:-1])-1, density='PDF', alpha=0.8, color='orange')
+        axs[i].set_xlabel('Delay')
+        axs[i].set_ylabel('PDF')
+
+
+    labels = ['a', 'b']
+    j = 0
+    for ax in axs:
+        # label physical distance in and down:
+        trans = mtransforms.ScaledTranslation(10 / 72, -5 / 72, fig.dpi_scale_trans)
+        ax.text(0.0, 1.0, labels[j], transform=ax.transAxes + trans,
+                fontsize='medium', verticalalignment='top', fontfamily='DejaVu Sans', weight='bold',
+                bbox=dict(facecolor='1', edgecolor='none', pad=3.0))
+        j += 1
+    # plt.show()
+    plt.savefig("Inputs.outputs/delayComparison2.jpeg", dpi=800, bbox_inches='tight')
+
 if __name__ == "__main__":
     # plotNonzeros()
-    plotScalingOptimization()
+    # plotScalingOptimization()
+    plotDelays()
     # plotPresolve()
     # plotForThesis()
     # plotForThesis2()

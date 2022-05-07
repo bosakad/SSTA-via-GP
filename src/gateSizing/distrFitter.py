@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from randomVariableHist_Numpy import RandomVariable
 import cvxpy as cp
+import matplotlib.transforms as mtransforms
 
 """
 This module has funtions that generate distribution with a given parameters (such as area of the circuit or max power)
@@ -225,7 +226,7 @@ def saveModel(coef, GP=False, Normal=False):
 
 def plotDistrosForInputs(a, f, e, GP=False):
 
-    interval = (0, 20)
+    interval = (0, 35)
 
     if not GP:
         coef = np.load("Inputs.outputs/model_MIXED_INT.npz")
@@ -247,7 +248,7 @@ def plotDistrosForInputs(a, f, e, GP=False):
     else:
         numIter = 1
 
-    fig, ax = plt.subplots(6, 2, gridspec_kw={'wspace': 0.5, 'hspace': 0.5}, sharex=True)
+    fig, axs = plt.subplots(6, 2, gridspec_kw={'wspace': 0.5, 'hspace': 0.5}, sharex=True)
     data = [1, 2, 5, 10, 15, 25]
 
     for i in range(0, numIter):
@@ -277,36 +278,65 @@ def plotDistrosForInputs(a, f, e, GP=False):
                 distr[bin] = prob
 
 
-            first = 18
+            first = 28
 
-            ax[j, i].hist(STATIC_BINS[:-(1+first)], STATIC_BINS[:-first], weights=distr[:-first], density="PDF", alpha=0.4)
+            axs[j, i].hist(STATIC_BINS[:-(1+first)], STATIC_BINS[:-first], weights=distr[:-first], density="PDF", alpha=0.4)
 
             rv = RandomVariable(distr, edges=STATIC_BINS)
 
             # plt.legend(["Scaling factor: " + str(x)])
 
-    plt.show()
+    axs[5, 0].set_xlabel('Delay')
+    axs[2, 0].set_ylabel('PDF')
+    axs[5, 1].set_xlabel('Delay')
+    axs[2, 1].set_ylabel('PDF')
+
+    axs[0, 0].set_title("LogNormal")
+    axs[0, 1].set_title("Guassian")
+
+    labels = ['a', 'b', 'c', 'd','e', 'f', 'a\'', 'b\'', 'c\'', 'd\'', 'e\'', 'f\'']
+    j = 0
+    for ax in axs[:, 0]:
+
+        # print(ax.xlabel)
+        trans = mtransforms.ScaledTranslation(120 / 72, -5 / 72, fig.dpi_scale_trans)
+        ax.text(0.0, 1.0, labels[j], transform=ax.transAxes + trans,
+                fontsize='medium', verticalalignment='top', fontfamily='DejaVu Sans', weight='bold',
+                bbox=dict(facecolor='1', edgecolor='none', pad=3.0))
+        j += 1
+
+    for ax in axs[:, 1]:
+        # print(ax.xlabel)
+        trans = mtransforms.ScaledTranslation(120 / 72, -5 / 72, fig.dpi_scale_trans)
+        ax.text(0.0, 1.0, labels[j], transform=ax.transAxes + trans,
+                fontsize='medium', verticalalignment='top', fontfamily='DejaVu Sans', weight='bold',
+                bbox=dict(facecolor='1', edgecolor='none', pad=3.0))
+        j += 1
+
+    # plt.show()
+    plt.savefig("Inputs.outputs/distributionFactors.jpeg", dpi=800, bbox_inches='tight')
 
 if __name__ == "__main__":
 
     # parameters
 
-    # area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 2
+    # area = np.array([1, 2, 3, 4, 5, 6, 7]) ** 2
     # power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 2
 
-    area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 1.6
-    power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.6
+    area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 1.9
+    power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.9
 
-    interval = (0, 28)
-    numberOfBins = 30
+    interval = (0, 35)
+    numberOfBins = 35
+    # numberOfBins = 50
     asGp = True
-    Normal = True
+    Normal = False
 
     distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=True, GP=asGp, Normal=Normal)
-    plotDistros(distros, edges)
+    # plotDistros(distros, edges)
     coef = linearRegression(distros, area, power, GP=asGp)
 
-    plotLinesForBin(distros, area, power, coef, 0, GP=asGp)
+    # plotLinesForBin(distros, area, power, coef, 0, GP=asGp)
 
     saveModel(coef, GP=asGp, Normal=Normal)
 

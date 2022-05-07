@@ -53,7 +53,7 @@ xHelp = np.linspace(xmin, xmax, 31)
 data = df.iloc[:,0] * 10000000000000
 hist, edges = np.histogram(data, xHelp, normed=True)
 
-plt.hist(x[:-1], x, weights=hist, alpha=0.2, color='blue')
+plt.hist(x[:-1], x, weights=hist * 10000000000000, alpha=0.2, color='blue')
 
 xmin = np.min(df.iloc[:,0] * 10000000000000)
 xmax = np.max(df.iloc[:,0] * 10000000000000)
@@ -63,11 +63,11 @@ mu, std = norm.fit(df.iloc[:,0] * 10000000000000)
 xmin = np.min(df.iloc[:,0])
 xmax = np.max(df.iloc[:,0])
 x = np.linspace(xmin, xmax, 100)
-p = norm.pdf(xHelp, mu, std)
+p = norm.pdf(xHelp, mu, std) * 10000000000000
 
 plt.plot(x, p, 'k', linewidth=2)
 ax.set_xlabel('Delay')
-ax.set_ylabel('Probability')
+ax.set_ylabel('PDF')
 # plt.show()
 plt.savefig("Inputs.outputs/inverterReal.jpeg", dpi=800, bbox_inches='tight')
 

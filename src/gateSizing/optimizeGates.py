@@ -699,44 +699,54 @@ def optimizeGates_MIXED_INT():
     actual = putTuplesIntoArray(rvs=delays)
     print(actual)
 
-def optimizeCVXPY_GP():
+def optimizeCVXPY_GP(modelType='Gauss', precomputedSizing=[2.11, 5.1, 5.0, 5.39, 3.55, 8.78]):
 
     """
     This function optimizes the c17 circuit using the GP model
+
+    :param modelType: 'Gauss' or 'LogNormal' - type of least squares model
+    :param precomputedSizing: precomputed sizing factors for monte carlo
+    :return delay: delay distribution of the last gate
+    :return values: monte carlo values
     """
 
-    numberOfBins = 30
-    binsInterval = (0, 28)
-    numberOfGates = 8
+    numberOfBins = 35
+    binsInterval = (0, 35)
+    numberOfGates = 11
 
         # lognormals model
-    # coef = np.load('Inputs.outputs/model.npz')
-        # normal model
-    coef = np.load('Inputs.outputs/model_Normal.npz')
+    if modelType == "LogNormal":
+        coef = np.load('Inputs.outputs/model.npz')
+    elif modelType == "Gauss":
+            # normal model
+        coef = np.load('Inputs.outputs/model_Normal.npz')
 
     model = coef['coef']
 
     f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
     e = np.array([1, 2, 1, 1.5, 1.5, 1])
-    a = np.ones(numberOfGates - 2)
+    a = np.ones(6)
 
     # generate gates
-    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=2.11, int=binsInterval)
-    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=5.1, int=binsInterval)
-    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=5.0, int=binsInterval)
-    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=5.39, int=binsInterval)
-    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=3.55, int=binsInterval)
-    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=8.78, int=binsInterval)
+    rv1 = histogramGenerator.generateAccordingToModel(model, 1, f[0] * e[0], x_i=precomputedSizing[0], int=binsInterval)
+    rv2 = histogramGenerator.generateAccordingToModel(model, 1, f[1] * e[1], x_i=precomputedSizing[1], int=binsInterval)
+    rv3 = histogramGenerator.generateAccordingToModel(model, 1, f[2] * e[2], x_i=precomputedSizing[2], int=binsInterval)
+    rv4 = histogramGenerator.generateAccordingToModel(model, 1, f[3] * e[3], x_i=precomputedSizing[3], int=binsInterval)
+    rv5 = histogramGenerator.generateAccordingToModel(model, 1, f[4] * e[4], x_i=precomputedSizing[4], int=binsInterval)
+    rv6 = histogramGenerator.generateAccordingToModel(model, 1, f[5] * e[5], x_i=precomputedSizing[5], int=binsInterval)
 
 
-    # generate inputs
-    in1 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=20, int=binsInterval)
-    in2 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=20, int=binsInterval)
+    # generate random inputs
+    in1 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=40, int=binsInterval)
+    in2 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=35, int=binsInterval)
+    in3 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=35, int=binsInterval)
+    in4 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=35, int=binsInterval)
+    in5 = histogramGenerator.generateAccordingToModel(model, 1, 0.2, x_i=35, int=binsInterval)
 
     gateNodes = []
     constr = []
 
-    RVs = [rv1, rv2, rv3, rv4, rv5, rv6, in1, in2]
+    RVs = [rv1, rv2, rv3, rv4, rv5, rv6, in1, in2, in3, in4, in5]
 
     for gate in range(0, numberOfGates):
         bins = {}
@@ -763,20 +773,29 @@ def optimizeCVXPY_GP():
     gateNodes[2].setNextNodes([gateNodes[5]])
     gateNodes[3].setNextNodes([gateNodes[4], gateNodes[5]])
 
-    IN1 = gateNodes[-2]
-    IN2 = gateNodes[-1]
+    IN1 = gateNodes[-5]
+    IN2 = gateNodes[-4]
+    IN3 = gateNodes[-3]
 
-    IN1.setNextNodes([gateNodes[3]])
-    IN2.setNextNodes([gateNodes[2]])
+    IN1.setNextNodes([gateNodes[0]])
+    IN2.setNextNodes([gateNodes[0], gateNodes[1]])
+    IN3.setNextNodes([gateNodes[1]])
 
-    startingNodes = [gateNodes[1], IN1, IN2, gateNodes[0]]
+    IN4 = gateNodes[-2]
+    IN5 = gateNodes[-1]
+
+    IN4.setNextNodes([gateNodes[3]])
+    IN5.setNextNodes([gateNodes[2]])
+
+    # startingNodes = [gateNodes[1], IN4, IN5, gateNodes[0]]
+    startingNodes = [IN1, IN2, IN3, IN4, IN5]
 
     # calculate delay
     delays, newConstr = SSTA.calculateCircuitDelay(startingNodes, cvxpy=True, GP=True)
     constr.extend(newConstr)
 
     midPoints = 0.5 * (delays[-1].edges[1:] + delays[-1].edges[:-1])  # midpoints of the edges of hist.
-    nLast = 7
+    nLast = 9
     finalMidPoints = np.append(np.ones((numberOfBins - nLast,))*1.0e-2, np.power(midPoints[-nLast:], 2))
 
     sum = 0
@@ -785,7 +804,7 @@ def optimizeCVXPY_GP():
 
 
     # create sizing parameters
-    Amax = 30
+    Amax = 35
     Pmax = 55
 
     sizingVariables = cp.Variable((6,), pos=True)
@@ -904,19 +923,25 @@ def optimizeCVXPY_GP():
     n5 = Node(histogramGenerator.getValuesForMonteCarlo(rv5, n_samples))
     n6 = Node(histogramGenerator.getValuesForMonteCarlo(rv6, n_samples))
 
+    IN4 = Node(histogramGenerator.getValuesForMonteCarlo(in1, n_samples))
+    IN5 = Node(histogramGenerator.getValuesForMonteCarlo(in2, n_samples))
     IN1 = Node(histogramGenerator.getValuesForMonteCarlo(in1, n_samples))
     IN2 = Node(histogramGenerator.getValuesForMonteCarlo(in2, n_samples))
+    IN3 = Node(histogramGenerator.getValuesForMonteCarlo(in1, n_samples))
 
     # set circuit design
     n1.setNextNodes([n5])
-    # n2.setNextNodes([n3, n3, n4, n4])
-    IN1.setNextNodes([n4])
-    IN2.setNextNodes([n3])
+    IN4.setNextNodes([n4])
+    IN4.setNextNodes([n3])
+    IN1.setNextNodes([n1])
+    IN2.setNextNodes([n1, n2])
+    IN3.setNextNodes([n2])
     n2.setNextNodes([n3, n4])
     n3.setNextNodes([n6])
     n4.setNextNodes([n5, n6])
 
-    mc = SSTA.calculateCircuitDelay([n2, IN1, IN2, n1], monteCarlo=True)
+    # mc = SSTA.calculateCircuitDelay([n2, IN1, IN2, n1], monteCarlo=True)
+    mc = SSTA.calculateCircuitDelay([IN1, IN2, IN3, IN4, IN5], monteCarlo=True)
     values = mc[-1]
 
 
@@ -928,17 +953,19 @@ def optimizeCVXPY_GP():
     print(result)
 
         # set it real edges
-    delays[-1].edges = delays[-1].edges / 1e11
+    rvs[-1].edges = delays[-1].edges / 1e11
+
+    return rvs[-1], values
 
         # plot
-    fig, ax = plt.subplots(1, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
-    # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
-    plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=last, density="PDF", color='blue')
-    _ = plt.hist(values / 1e11, bins=numberOfBins, density='PDF', alpha=0.8, color='orange')
-    ax.set_xlabel('Delay')
-    ax.set_ylabel('Probability')
-    plt.show()
-    plt.savefig("Inputs.outputs/delayComparison2.jpeg", dpi=800, bbox_inches='tight')
+    # fig, ax = plt.subplots(1, 1, gridspec_kw={'wspace':0.5,'hspace':0.5})
+    # # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
+    # plt.hist(rvs[-1].edges[:-1], rvs[-1].edges, weights=rvs[-1].bins, density="PDF", color='blue')
+    # _ = plt.hist(values / 1e11, bins=numberOfBins, density='PDF', alpha=0.8, color='orange')
+    # ax.set_xlabel('Delay')
+    # ax.set_ylabel('Probability')
+    # plt.show()
+    # plt.savefig("Inputs.outputs/delayComparison2.jpeg", dpi=800, bbox_inches='tight')
 
 
 
@@ -961,4 +988,4 @@ if __name__ == "__main__":
     # test_SSTA_MIN()
 
     # optimizeGates_MIXED_INT()
-    optimizeCVXPY_GP()
+    optimizeCVXPY_GP(modelType="Gauss")

@@ -4,7 +4,7 @@ import numpy as np
 
 """
     This Module includes functions that test infiniteLadder on on 2 algorithms and dependant on number of gates.
-    Indicator is number of nonzero constraints dependant on number of gates
+    Indicator is number of nonzero constraints dependant on number of gates. Also tests optimization of the circuit. 
 """
 
 def testAlgorithms():
@@ -380,14 +380,13 @@ def scalingOptimization_CVXPY_GP():
         numGates = GATES[iter]
         print(numGates)
         # lastGate, time = test_infiniteLadder.mainCVXPY_GP_Sizing(numGates, numberOfBins, interval)
-        lastGate, time = test_infiniteLadder.mainCVXPY_GP   (numGates, numberOfBins, interval)
+        lastGate, time = test_infiniteLadder.mainCVXPY_GP(numGates, numberOfBins, interval)
 
         results[(numGates, False)] = (-1, -1, time, 0, 0, -1, -1, -1,
                                      -1, -1)
 
         # print results
         print("\n\n" + str(results))
-
 
 def testAlgorithms_PRESOLVE():
 
