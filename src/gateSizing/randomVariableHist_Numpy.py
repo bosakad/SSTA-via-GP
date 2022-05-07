@@ -570,17 +570,17 @@ class RandomVariable:
         maxE = max(edges_alpha[-1], edges_beta[-1])
 
             # create new edges
-        edges_zeta = np.linspace(minE, maxE, numberOfBins + 1)
-        self.edges = edges_zeta
-        secondVariable.edges = edges_zeta
+        edges = np.linspace(minE, maxE, numberOfBins + 1)
+        self.edges = edges
+        secondVariable.edges = edges
 
             # create new values
         cdf1 = scipy.stats.rv_histogram((alpha, edges_alpha)).cdf
         cdf2 = scipy.stats.rv_histogram((beta, edges_beta)).cdf
 
         for i in range(0, numberOfBins):
-            value1 = (cdf1(edges_zeta[i+1]) - cdf1(edges_zeta[i]))
-            value2 = (cdf2(edges_zeta[i+1]) - cdf2(edges_zeta[i]))
+            value1 = (cdf1(edges[i+1]) - cdf1(edges[i]))
+            value2 = (cdf2(edges[i+1]) - cdf2(edges[i]))
 
             alpha[i] = value1
             beta[i] = value2
