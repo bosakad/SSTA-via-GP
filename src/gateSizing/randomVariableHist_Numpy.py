@@ -491,13 +491,13 @@ class RandomVariable:
         maxE = max(edges_alpha[-1], edges_beta[-1])
 
             # create new edges
-        edges_zeta = np.linspace(minE, maxE, numberOfBins + 1)
-        self.edges = edges_zeta
-        secondVariable.edges = edges_zeta
+        edges = np.linspace(minE, maxE, numberOfBins + 1)
+        self.edges = edges
+        secondVariable.edges = edges
 
         eIndex = 1
-        e1 = 1
-        e2 = 1
+        tmp_e1 = 1
+        tmp_e2 = 1
 
         bins1New = np.zeros(numberOfBins)
         bins2New = np.zeros(numberOfBins)
@@ -505,26 +505,29 @@ class RandomVariable:
         # exact computation
         while i != numberOfBins:
 
-            if edges_zeta[eIndex + i] > edges_alpha[e1]:
-                bins1New[i] += alpha[e1-1]*(edges_alpha[e1] - edges_alpha[e1 - 1])
-                e1 += 1
+                # integrate
+            if edges[eIndex + i] > edges_alpha[tmp_e1]:
+                bins1New[i] += alpha[tmp_e1-1]*(edges_alpha[tmp_e1] - edges_alpha[tmp_e1 - 1])
+                tmp_e1 += 1
 
-            elif edges_zeta[eIndex + i] <= edges_alpha[e1]:
+            elif edges[eIndex + i] <= edges_alpha[tmp_e1]:
                 i += 1
 
 
         i = 0
         while i != numberOfBins:
-            if edges_zeta[eIndex + i] > edges_beta[e2]:
-                bins2New[i] += beta[e2-1]*(edges_beta[e2] - edges_beta[e2 - 1])
-                e2 += 1
 
-            elif edges_zeta[eIndex + i] <= edges_beta[e2]:
+                # integrate
+            if edges[eIndex + i] > edges_beta[tmp_e2]:
+                bins2New[i] += beta[tmp_e2-1]*(edges_beta[tmp_e2] - edges_beta[tmp_e2 - 1])
+                tmp_e2 += 1
+
+            elif edges[eIndex + i] <= edges_beta[tmp_e2]:
                 i += 1
 
                 # end
-            if e2 >= numberOfBins + 1:
-                bins2New[i] += beta[e2 - 2] * (edges_zeta[eIndex + i] - edges_beta[e2 - 1])
+            if tmp_e2 >= numberOfBins + 1:
+                bins2New[i] += beta[tmp_e2 - 2] * (edges[eIndex + i] - edges_beta[tmp_e2 - 1])
                 break
 
         bins1 = bins1New
