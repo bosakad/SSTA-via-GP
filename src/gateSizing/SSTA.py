@@ -28,7 +28,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
     :return newDelays: array of new RVs
     """
 
-    # pointer to a max and convolution functions
+        # pointer to a max and convolution functions - depend on current tool and algorithm
     if mosekStatus[0] >= 0:  MaximumF = maxOfDistributionsMOSEK_UNARY(withSymmetryConstr)
     elif cvxpy and unary:     MaximumF = maxOfDistributionsCVXPY_UNARY(withSymmetryConstr)
     elif cvxpy and not unary and not GP: MaximumF = maxOfDistributionsCVXPY_McCormick
@@ -52,16 +52,17 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
         usingMosek = False
         curNofConstr = 0
 
-    # init. data structures
+        # init. data structures
     queue = Queue()
     sink = []
     newDelays = []
     closedList = set()
     AllConstr = []
 
-    # put root nodes into Queue
+        # put root nodes into Queue
     putIntoQueue(queue, rootNodes)
 
+        # BFS
     while not queue.empty():
 
         tmpNode = queue.get()                                       # get data
@@ -70,76 +71,84 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
         if tmpNode in closedList:
             continue
 
-        if tmpNode.prevDelays:                                      # get maximum + convolution
+        if tmpNode.prevDelays:                                      # calculate maximum + convolution - depends on the tool
 
+                # two-term multiplication alg. - unary encoding
             if usingMosek and not mosekTRI:
 
                 maxDelay, curNofVariables, curNofConstr = MaximumF(tmpNode.prevDelays, curNofVariables, curNofConstr)
-
                 currentRandVar, curNofVariables, curNofConstr = ConvolutionF(currentRandVar, maxDelay, curNofVariables, curNofConstr)
 
+                #  - unary encoding
             elif usingMosek and mosekTRI:
-                        # just for 2 inputs for maximum
+                        # works just for 2 inputs for maximum
                 RV1 = tmpNode.prevDelays[0]
                 RV2 = tmpNode.prevDelays[1]
                 RV3 = currentRandVar
                 currentRandVar, curNofVariables, curNofConstr = RV1.maximum_AND_Convolution_VECTORIZED_MIN(RV2, RV3, curNofVariables, curNofConstr)
 
-            elif not usingMosek and mosekTRI:   # numpy version of the tri
+                # numpy version of the three-term multiplication alg.- unary encoding
+            elif not usingMosek and mosekTRI:
 
                 RV1 = tmpNode.prevDelays[0]
                 RV2 = tmpNode.prevDelays[1]
                 RV3 = currentRandVar
                 currentRandVar = RV1.maximum_AND_Convolution_UNARY(RV2, RV3)
 
+                # two-term multiplication alg. - unary encoding in CVXPY
             elif cvxpy and not GP:
                 maxDelay, newConstraints = MaximumF(tmpNode.prevDelays)
                 AllConstr.extend(newConstraints)
                 currentRandVar, newConstraints = ConvolutionF(currentRandVar, maxDelay)
                 AllConstr.extend(newConstraints)
 
+                # SSTA using GP in CVXPY tool
             elif cvxpy and GP:
                 maxDelay, AllConstr = MaximumF(tmpNode.prevDelays, AllConstr)
                 currentRandVar, AllConstr = ConvolutionF(currentRandVar, maxDelay, AllConstr)
 
+                # SSTA using exact computation
             else:
                 maxDelay = MaximumF(tmpNode.prevDelays)
                 currentRandVar = ConvolutionF(currentRandVar, maxDelay)
 
+
+
         for nextNode in tmpNode.nextNodes:                          # append this node as a previous
             nextNode.appendPrevDelays(currentRandVar)
-            # print(len(nextNode.prevDelays))
 
         if not tmpNode.nextNodes:                                   # save for later ouput delays
             sink.append(currentRandVar)
 
+            # continue BFS
         closedList.add(tmpNode)
         putIntoQueue(queue, tmpNode.nextNodes)
         newDelays.append(currentRandVar)
 
 
-        # if more output gate
+        # if more output gates - calculate maximum
     if (len(sink) != 1):
 
-        # make max into sink
         if usingMosek:
             sinkDelay, curNofVariables, curNofConstr = MaximumF(sink, curNofVariables, curNofConstr)
+
         elif not usingMosek and mosekTRI:
             sinkDelay = maxOfDistributionsUNARY(sink)
 
         elif cvxpy and not GP:
             sinkDelay, newConstraints = MaximumF(sink)
             AllConstr.extend(newConstraints)
+
         elif cvxpy and GP:
             sinkDelay, AllConstr = MaximumF(sink, AllConstr)
+
         else:
             sinkDelay = MaximumF(sink)
 
         newDelays.append(sinkDelay)
-    else:
-        pass
-        # newDelays.append(sink[0])
 
+
+        # return depends on the current tool
     if usingMosek:
         return newDelays, curNofVariables, curNofConstr
     elif cvxpy:
@@ -151,7 +160,7 @@ def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStat
 
 def Convolution_UNARY_MOSEK(withSymmetryConstr=False):
     """
-    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.
+    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code.
 
     :param x1: RandomVariableMOSEK class
     :param x2: RandomVariableMOSEK class
