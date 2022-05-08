@@ -12,7 +12,7 @@ import cvxpyVariable
 def calculateCircuitDelay(rootNodes: [Node], cvxpy=False, unary=False, mosekStatus=(-1, -1),
                                         withSymmetryConstr=False, mosekTRI=False, GP=False, monteCarlo=False) -> [Node]:
     """
-    Compute circuit delay using PDFs algorithm
+    Compute circuit delay using SSTA algorithm
     Function executes the algorithm for finding out the PDF of a circuit delay.
 
     :param rootNodes: array of root nodes, [Node], Node includes next nodes and previous nodes
