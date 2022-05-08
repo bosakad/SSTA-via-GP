@@ -39,7 +39,7 @@ def optimizeGates_MIXED_INT(dec=3):
     Optimizes a toy circuit using Mixed-integer programming
     """
 
-    numberOfGates = 4
+    numberOfGates = 3
     interval = (0, 16)
     numberOfBins = 10
     numberOfUnaries = 10
@@ -51,7 +51,6 @@ def optimizeGates_MIXED_INT(dec=3):
     rv1 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=1.5, int=interval, nUnaries=numberOfUnaries)
     rv2 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=1, int=interval, nUnaries=numberOfUnaries)
     rv3 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=1, int=interval, nUnaries=numberOfUnaries)
-    rv4 = histogramGenerator.generateAccordingToModel(model, 1, 4, x_i=1, int=interval, nUnaries=numberOfUnaries)
 
 
     # Make a MOSEK environment
@@ -77,13 +76,12 @@ def optimizeGates_MIXED_INT(dec=3):
             bins1 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins2 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins3 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
-            bins4 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
 
-            gates = [rv1, rv2, rv3, rv4]
-            bins = [bins1, bins2, bins3, bins4]
+            gates = [rv1, rv2, rv3]
+            bins = [bins1, bins2, bins3]
 
             # set fitting constraints
-            for gate in range(0, 4):
+            for gate in range(0, 3):
                 currentBins = bins[gate]
                 generatedRV = gates[gate]
                 for bin in range(0, numberOfBins):
@@ -163,7 +161,7 @@ def optimizeGates_MIXED_INT(dec=3):
 
             task.appendcons(numberOfGates * numberOfBins * 2)
 
-            gateNodes = [bins1, bins2, bins3, bins4]
+            gateNodes = [bins1, bins2, bins3]
 
                 # set sizing constraints
             numberOfGates = 1
@@ -198,7 +196,7 @@ def optimizeGates_MIXED_INT(dec=3):
 
             newNofConstr = newNofConstr + numberOfGates * numberOfBins * 2
 
-            numberOfGates = 4
+            numberOfGates = 3
             task.appendcons(numberOfGates * numberOfBins * (numberOfUnaries - 1))
 
             for gate in range(0, numberOfGates):
