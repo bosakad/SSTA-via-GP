@@ -46,7 +46,7 @@ class RandomVariable:
 
     def maxOfDistributionsELEMENTWISE(self, secondVariable):
         """
-        Maximum of 2 distribution functions using elementwise max
+        Maximum of 2 distribution functions using elementwise max - not working very well
 
         :param self: random variable class
         :param secondVariable: random variable class
@@ -73,49 +73,28 @@ class RandomVariable:
 
     def maxOfDistributionsFORM(self, secondVariable):
         """
-        Maximum of 2 distribution functions using formula. Includes vectorized version - commented
+        Maximum of 2 distribution functions using formula. Vectorized version
 
         :param self: random variable class
         :param secondVariable: random variable class
-        :return maxDelay: random variable class, maximum of 2 histograms
+        :return maxRV: random variable class, maximum of 2 histograms
         """
 
-
-        # unite
-        # self.uniteEdges(secondVariable)
         f1 = self.bins
         f2 = secondVariable.bins
 
+        F2 = np.cumsum(f2)
+        F1 = np.cumsum(f1)
 
-        n = self.bins.shape[0]
-
-        # f1 = f1 / (np.sum(f1) * (self.edges[1] - self.edges[0]))
-        # f2 = f2 / (np.sum(f2) * (self.edges[1] - self.edges[0]))
-        maximum = np.zeros(n)
-        for i in range(0, n):
-            F2 = np.sum(f2[:i+1])
-            F1 = np.sum(f1[:i])                 # only for discrete - not to count with 1 number twice
-            maximum[i] = f1[i] * F2 + f2[i] * F1
+        F1[1:] = F1[:-1]
+        F1[0] = 0
+        maximum = np.multiply(f1, F2) + np.multiply(f2, F1)
 
         # normalize
-        # maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
+        maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
 
-        # vectorized code from above
-        # unite
-        # self.uniteEdges(secondVariable)
-        # f1 = self.bins
-        # f2 = secondVariable.bins
-        #
-        #
-        # F2 = np.cumsum(f2)
-        # F1 = np.cumsum(f1)
-        #
-        # F1[1:] = F1[:-1]
-        # F1[0] = 0
-        # maximum = np.multiply(f1, F2) + np.multiply(f2, F1)
-
-        maxDelay = RandomVariable(maximum, self.edges)
-        return maxDelay
+        maxRV = RandomVariable(maximum, self.edges)
+        return maxRV
 
     def maxOfDistributionsQUAD(self, secondVariable):
         """
@@ -164,40 +143,40 @@ class RandomVariable:
 
     def maxOfDistributionsQUAD_FORMULA(self, secondVariable):
         """
-        Maximum of 2 distribution functions using quadratic algorithm and simplified version - in formula
+        Maximum of 2 distribution functions using quadratic algorithm and simplified version - in formula - not vectorized
 
         :param self: random variable class
         :param secondVariable: random variable class
-        :return maxDelay: random variable class, maximum of 2 histograms
+        :return maxRV: random variable class, maximum of 2 histograms
         """
 
         # unite
         self.uniteEdges(secondVariable)
 
         # get data
-        n = len(self.bins)
+        N = len(self.bins)
 
-        bins1 = self.bins
-        bins2 = secondVariable.bins
+        x = self.bins
+        y = secondVariable.bins
 
 
         # prealloc
-        maximum = np.zeros(n, dtype=np.double)
+        maximum = np.zeros(N, dtype=np.double)
 
-        for i in range(0, n):
+        for i in range(0, N):
             for j in range(0, i + 1):
 
-                maximum[i] += bins1[i] * bins2[j]
+                maximum[i] += x[i] * y[j]
 
                 if i != j:
-                    maximum[i] += bins1[j] * bins2[i]
-
+                    maximum[i] += x[j] * y[i]
 
 
         # normalize
         maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
+        maxRV = RandomVariable(maximum, self.edges)
 
-        return RandomVariable(maximum, self.edges)
+        return maxRV
 
     def maxOfDistributionsQUAD_FORMULA_UNARY(self, secondVariable):
         """
@@ -393,17 +372,17 @@ class RandomVariable:
         :return convolution: random variable class of convolution
         """
 
-        f = self.bins
-        g = secondVariable.bins
+        x = self.bins
+        y = secondVariable.bins
 
-        finalSize = len(f)
-        convolution = np.array([0.] * finalSize)
+        N = len(x)
+        convolution = np.array([0.] * N)
 
-        for z in range(0, finalSize):
+        for z in range(0, N):
             for k in range(0, z + 1):
-                convolution[z] += f[k] * g[z - k]
+                convolution[z] += x[k] * y[z - k]
 
-        # Deal With Edges
+            # Deal With Edges
         self.cutBins(self.edges, convolution)
 
         return RandomVariable(convolution, self.edges)
