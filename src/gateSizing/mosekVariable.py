@@ -888,7 +888,7 @@ class RandomVariableMOSEK:
     def convolution_UNARY_MAX_DIVIDE_VECTORIZED(self, secondVariable, curNofVariables, curNofConstr, withSymmetryConstr=False, asMin=False):
         """ Calculates convolution of 2 PDFs of random variable. Works only for 2 identical edges. Is computed
         using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
-        Is in MOSEK environment. Does not work
+        Is in MOSEK environment.
 
         :param self: class RandomVariableMOSEK
         :param secondVariable: class RandomVariableMOSEK
@@ -937,9 +937,7 @@ class RandomVariableMOSEK:
         else:
             symN = 0
 
-        # task.appendcons(2 * numberOfBins + 3 * nSlackMult + symN)
         task.appendcons(numberOfBins + 3 * nSlackMult + symN)
-
         offset = curNofConstr + numberOfBins
 
 
@@ -957,7 +955,6 @@ class RandomVariableMOSEK:
                                    + k * numberOfUnaries ** 2 + unary * numberOfUnaries + unary2).astype(int)
                 curSlackMult = np.concatenate(slackMult[indexToSlack])
 
-                # task.putaij(z, curSlackMult, - 1 / division)
                 indexToSlack = np.concatenate(indexToSlack)
                 sumOfMultiplications[z] = np.append(sumOfMultiplications[z], np.array([curSlackMult]))
 
@@ -1016,10 +1013,6 @@ class RandomVariableMOSEK:
             else:
                 task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, round)
 
-            # sumOfNewVariables <= numberOfUnaries
-            # task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
-            # task.putconbound(bin + offset + numberOfBins, mosek.boundkey.up, -self.inf, numberOfUnaries)
-
         newNofConstr = curNofConstr + numberOfBins + 3*nSlackMult
 
         if withSymmetryConstr:
@@ -1043,7 +1036,7 @@ class RandomVariableMOSEK:
 
     def maximum_UNARY_MAX_DIVIDE(self, secondVariable, curNofVariables, curNofConstr, withSymmetryConstr=False):
         """
-        Calculates maximum of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
+        Calculates maximum of 2 PDFs of variable. Works only for 2 identical edges. Is computed
         using the 'quadratic' algorithm and unary representation of bins - M 0/1-bins for each bin.
         Unarization is kept using the divison.
         Is in MOSEK environment.
@@ -1149,7 +1142,6 @@ class RandomVariableMOSEK:
 
                         if i != j:
                             # constraints for sum of multiplications
-                            # print(slackMult2Offset)
                             indexToSlack = int(((i-1) / 2) * (1 + i-1) * numberOfUnaries ** 2
                                                + j * numberOfUnaries ** 2 + unary * numberOfUnaries + unary2)
                             curSlackMult = slackMult2[indexToSlack]
@@ -1231,7 +1223,8 @@ class RandomVariableMOSEK:
                                           withSymmetryConstr=False):
         """ Calculates maximum of 2 PDFs of random variable. Works only for 2 identical edges. Is computed
         using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
-        Is in MOSEK environment.
+        Is in MOSEK environment. Memory free means we do not create new matrix - instead pass the indicies - too big scaling,
+        and does not work well
 
         :param self: class RandomVariableMOSEK
         :param secondVariable: class RandomVariableMOSEK
@@ -1484,7 +1477,6 @@ class RandomVariableMOSEK:
             constrOffset = curNofConstr + numberOfBins
             constrOffset2 = constrOffset +  2* nSlackMult
 
-        # task.appendcons(numberOfBins + 3 * nSlackMult + 2 * nSlackMult2 + symN)
 
         # set offsets
 
@@ -1606,9 +1598,6 @@ class RandomVariableMOSEK:
             else:
                 task.putconbound(bin + offset, mosek.boundkey.up, -self.inf, round)
 
-            # sumOfNewVariables <= numberOfUnaries
-            # task.putaijlist([bin + offset + numberOfBins] * numberOfUnaries, row, [1] * numberOfUnaries)
-            # task.putconbound(bin + offset + numberOfBins, mosek.boundkey.up, -self.inf, numberOfUnaries)
 
 
         if asMin:

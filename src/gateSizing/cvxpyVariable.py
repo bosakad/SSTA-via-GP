@@ -383,14 +383,14 @@ class RandomVariableCVXPY:
 
 
 
-    def convolution_UNARY_DIVIDE(self, secondVariable, withSymmetryConstr=False, asMin=False):
+    def convolution_UNARY_DIVIDE(self, secondVariable, withSepConstr=False, asMin=False):
         """ Calculates convolution of 2 PDFs of cvxpy variable. Works only for 2 identical edges. Is computed
         using the unary representation of bins - M 0/1-bins for each bin. Unarization is kept using the divison.
 
         :param self: class RandomVariableCVXPY
         :param secondVariable: class RandomVariableCVXPY
         :param asMin: boolean, true for minimization problem, false for maximization problem
-        :param withSymmetryConstr: boolean whether a symmetry constraints should be included
+        :param withSepConstr: boolean whether a separation constraints should be included
         :return convolutionClass:  class RandomVariableCVXPY with cvxpy slack variables
         :return ConvConstraints: python array with inequalities - for computing the convolution
         """
@@ -410,7 +410,6 @@ class RandomVariableCVXPY:
 
 
         # convolution
-
         for z in range(0, numberOfBins):
             for k in range(0, z + 1):
 
@@ -425,6 +424,7 @@ class RandomVariableCVXPY:
                         x = (x1[k])[unary]
                         y = (x2[z - k])[unary2]
 
+                        # two-term multiplication constraints
                         ConvConstraints.append(slackMult <= x)
                         ConvConstraints.append(slackMult <= y)
                         ConvConstraints.append(slackMult >= x + y - 1)
@@ -446,7 +446,6 @@ class RandomVariableCVXPY:
                 sumOfNewVariables += (convolution[i])[unary]
 
             if asMin:
-                # ConvConstraints.append(sumOfNewVariables >= finalUpperBound[i])
                 ConvConstraints.append(sumOfNewVariables >= sumOfMultiplications[i] / divisor)    # as a min possible
             elif not asMin:
 
@@ -454,13 +453,12 @@ class RandomVariableCVXPY:
                 ConvConstraints.append(sumOfNewVariables <= sumOfMultiplications[i] / divisor + ceil)  # as a max possible
                 ConvConstraints.append(sumOfNewVariables <= numberOfUnaries)
 
-        # symmetry constraints
-        if withSymmetryConstr:
+        # separation constraints
+        if withSepConstr:
             for bin in range(0, numberOfBins):
                 for unary in range(0, numberOfUnaries - 1):
                     ConvConstraints.append(
                         (convolution[bin])[unary] >= (convolution[bin])[unary + 1])  # set lower constr.
-
 
 
         convolutionClass = RandomVariableCVXPY(convolution, self.edges)
