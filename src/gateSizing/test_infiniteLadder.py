@@ -410,7 +410,7 @@ def mainCVXPY_GP(numberOfGates=8, numberOfBins=25, interval=(-4, 25)):
     # print(actual)
 
 
-def mainCVXPY_GP_Sizing(numberOfGates=4, numberOfBins=20, interval=(0, 28)):
+def mainCVXPY_GP_Sizing(numberOfGates=3, numberOfBins=20, interval=(0, 28)):
 
     """
         Computes SSTA using unary encoding, can be computed in a 'precise' or non-precise way

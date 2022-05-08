@@ -189,7 +189,7 @@ def Convolution_UNARY(withSymmetryConstr=False):
     """
 
     def convolutionF(x1: cvxpyVariable.RandomVariableCVXPY, x2: cvxpyVariable.RandomVariableCVXPY):
-        return x1.convolution_UNARY_DIVIDE(x2, withSymmetryConstr=withSymmetryConstr, asMin=False)
+        return x1.convolution_UNARY_DIVIDE(x2, withSepConstr=withSymmetryConstr, asMin=False)
 
     return convolutionF
 

@@ -2,7 +2,7 @@ import numpy
 import numpy as np
 import histogramGenerator
 from randomVariableHist_Numpy import RandomVariable
-import matplotlib.pyplotplot as plt
+import matplotlib.pyplot as plt
 
 
 
@@ -853,7 +853,7 @@ if __name__ == "__main__":
 
     # testConvolutionUnion(dec=2)
     # testConvolutionUniformShift(dec=4)
-    # testConvolutionGaussShift(dec=4)
+    testConvolutionGaussShift(dec=2)
 
     # testConvolutionNaive(1)
     # testMAX_QUAD_FORMULA(3)
@@ -864,6 +864,6 @@ if __name__ == "__main__":
 
     # test_Convolution_UNARY(2)
 
-    test_convANDmax(2)
+    # test_convANDmax(2)
 
     print("All tests passed!")

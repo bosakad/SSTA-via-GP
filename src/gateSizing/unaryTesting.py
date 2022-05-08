@@ -9,10 +9,11 @@ from test_SSTA_Numpy import putTuplesIntoArray
 from randomVariableHist_Numpy import RandomVariable
 
 from examples_monteCarlo.infinite_ladder_montecarlo import MonteCarlo_inputs, MonteCarlo_nodes, get_moments_from_simulations
-
-
 from node import Node
 
+"""
+Test for unary encoded algorithms
+"""
 
 # test max computation
 
