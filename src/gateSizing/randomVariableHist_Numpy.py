@@ -150,9 +150,6 @@ class RandomVariable:
         :return maxRV: random variable class, maximum of 2 histograms
         """
 
-        # unite
-        self.uniteEdges(secondVariable)
-
         # get data
         N = len(self.bins)
 
