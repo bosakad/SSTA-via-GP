@@ -359,7 +359,7 @@ def optimizeCVXPY_GP(modelType='Gauss', precomputedSizing=[2.11, 5.1, 5.0, 5.39,
 
     sum = 0
     for bin in range(0, numberOfBins):
-        sum += delays[-1].bins[bin] * finalMidPoints[bin]                # minimize the mean value
+        sum += delays[-1].bins[bin] * finalMidPoints[bin]                # minimize the CVaR value
 
 
     # create sizing parameters
