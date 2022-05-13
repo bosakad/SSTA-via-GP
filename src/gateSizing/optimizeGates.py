@@ -257,7 +257,7 @@ def optimizeGates_MIXED_INT(dec=3):
 
 
 
-def optimizeCVXPY_GP(modelType='Gauss', precomputedSizing=[2.11, 5.1, 5.0, 5.39, 3.55, 8.78]):
+def optimizeCVXPY_GP(modelType='Gauss', precomputedSizing=[2.68734118, 6.10676087, 5.98733808, 6.39787868, 4.1761852,  9.64449589]):
 
     """
     This function optimizes the c17 circuit using the GP model
@@ -354,7 +354,7 @@ def optimizeCVXPY_GP(modelType='Gauss', precomputedSizing=[2.11, 5.1, 5.0, 5.39,
 
         # formulate the objective function
     midPoints = 0.5 * (delays[-1].edges[1:] + delays[-1].edges[:-1])  # midpoints of the edges of hist.
-    nLast = 9
+    nLast = 15
     finalMidPoints = np.append(np.ones((numberOfBins - nLast,))*1.0e-2, np.power(midPoints[-nLast:], 2))
 
     sum = 0
@@ -451,17 +451,22 @@ def optimizeCVXPY_GP(modelType='Gauss', precomputedSizing=[2.11, 5.1, 5.0, 5.39,
     #
     # IN1 = Node(in1)
     # IN2 = Node(in2)
+    # IN3 = Node(in3)
+    # IN4 = Node(in4)
+    # IN5 = Node(in5)
     #
     # # set circuit design
     # n1.setNextNodes([n5])
-    # # n2.setNextNodes([n3, n3, n4, n4])
-    # IN1.setNextNodes([n4])
-    # IN2.setNextNodes([n3])
+    # IN4.setNextNodes([n4])
+    # IN4.setNextNodes([n3])
+    # IN1.setNextNodes([n1])
+    # IN2.setNextNodes([n1, n2])
+    # IN3.setNextNodes([n2])
     # n2.setNextNodes([n3, n4])
     # n3.setNextNodes([n6])
     # n4.setNextNodes([n5, n6])
     #
-    # delays = SSTA.calculateCircuitDelay([n2, IN1, IN2, n1])
+    # delays = SSTA.calculateCircuitDelay([IN1, IN2, IN3, IN4, IN5])
 
     #######################
     ######Monte Carlo############
@@ -530,4 +535,5 @@ def loadModel(path):
 if __name__ == "__main__":
 
     # optimizeGates_MIXED_INT()
-    optimizeCVXPY_GP(modelType="Gauss")
+    # optimizeCVXPY_GP(modelType="Gauss")
+    optimizeCVXPY_GP(modelType="LogNormal")

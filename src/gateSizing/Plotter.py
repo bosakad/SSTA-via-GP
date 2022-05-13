@@ -834,6 +834,7 @@ def plotDelays():
                 fontsize='medium', verticalalignment='top', fontfamily='DejaVu Sans', weight='bold',
                 bbox=dict(facecolor='1', edgecolor='none', pad=3.0))
         j += 1
+
     # plt.show()
     plt.savefig("Inputs.outputs/delayComparison2.jpeg", dpi=800, bbox_inches='tight')
 
