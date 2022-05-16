@@ -67,7 +67,7 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This Module includes functions that test infiniteLadder on on 2 algorithms and dependant on number of gates.</span>
-<span class="sd">    Indicator is number of nonzero constraints dependant on number of gates</span>
+<span class="sd">    Indicator is number of nonzero constraints dependant on number of gates. Also tests optimization of the circuit. </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="testAlgorithms"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.testAlgorithms">[docs]</a><span class="k">def</span> <span class="nf">testAlgorithms</span><span class="p">():</span>
@@ -443,14 +443,13 @@
         <span class="n">numGates</span> <span class="o">=</span> <span class="n">GATES</span><span class="p">[</span><span class="nb">iter</span><span class="p">]</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">numGates</span><span class="p">)</span>
         <span class="c1"># lastGate, time = test_infiniteLadder.mainCVXPY_GP_Sizing(numGates, numberOfBins, interval)</span>
-        <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">mainCVXPY_GP</span>   <span class="p">(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+        <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">mainCVXPY_GP</span><span class="p">(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
 
         <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span><span class="p">,</span> <span class="kc">False</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                                      <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># print results</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
-
 
 <div class="viewcode-block" id="testAlgorithms_PRESOLVE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.testAlgorithms_PRESOLVE">[docs]</a><span class="k">def</span> <span class="nf">testAlgorithms_PRESOLVE</span><span class="p">():</span>
 

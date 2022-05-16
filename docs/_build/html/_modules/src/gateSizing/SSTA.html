@@ -75,7 +75,7 @@
 <div class="viewcode-block" id="calculateCircuitDelay"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.calculateCircuitDelay">[docs]</a><span class="k">def</span> <span class="nf">calculateCircuitDelay</span><span class="p">(</span><span class="n">rootNodes</span><span class="p">:</span> <span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="n">cvxpy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mosekStatus</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
                                         <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mosekTRI</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">monteCarlo</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Compute circuit delay using PDFs algorithm</span>
+<span class="sd">    Compute circuit delay using SSTA algorithm</span>
 <span class="sd">    Function executes the algorithm for finding out the PDF of a circuit delay.</span>
 
 <span class="sd">    :param rootNodes: array of root nodes, [Node], Node includes next nodes and previous nodes</span>
@@ -91,7 +91,7 @@
 <span class="sd">    :return newDelays: array of new RVs</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># pointer to a max and convolution functions</span>
+        <span class="c1"># pointer to a max and convolution functions - depend on current tool and algorithm</span>
     <span class="k">if</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>  <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsMOSEK_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span><span class="p">:</span>     <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsCVXPY_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">unary</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">GP</span><span class="p">:</span> <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsCVXPY_McCormick</span>
@@ -115,16 +115,17 @@
         <span class="n">usingMosek</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">curNofConstr</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1"># init. data structures</span>
+        <span class="c1"># init. data structures</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
     <span class="n">sink</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">newDelays</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">closedList</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">AllConstr</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="c1"># put root nodes into Queue</span>
+        <span class="c1"># put root nodes into Queue</span>
     <span class="n">putIntoQueue</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">rootNodes</span><span class="p">)</span>
 
+        <span class="c1"># BFS</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
 
         <span class="n">tmpNode</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>                                       <span class="c1"># get data</span>
@@ -133,76 +134,84 @@
         <span class="k">if</span> <span class="n">tmpNode</span> <span class="ow">in</span> <span class="n">closedList</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="k">if</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">:</span>                                      <span class="c1"># get maximum + convolution</span>
+        <span class="k">if</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">:</span>                                      <span class="c1"># calculate maximum + convolution - depends on the tool</span>
 
+                <span class="c1"># two-term multiplication alg. - unary encoding</span>
             <span class="k">if</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">mosekTRI</span><span class="p">:</span>
 
                 <span class="n">maxDelay</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
-
                 <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">ConvolutionF</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
 
+                <span class="c1">#  - unary encoding</span>
             <span class="k">elif</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="n">mosekTRI</span><span class="p">:</span>
-                        <span class="c1"># just for 2 inputs for maximum</span>
+                        <span class="c1"># works just for 2 inputs for maximum</span>
                 <span class="n">RV1</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">RV2</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">RV3</span> <span class="o">=</span> <span class="n">currentRandVar</span>
                 <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_VECTORIZED_MIN</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
 
-            <span class="k">elif</span> <span class="ow">not</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="n">mosekTRI</span><span class="p">:</span>   <span class="c1"># numpy version of the tri</span>
+                <span class="c1"># numpy version of the three-term multiplication alg.- unary encoding</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="n">mosekTRI</span><span class="p">:</span>
 
                 <span class="n">RV1</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">RV2</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">RV3</span> <span class="o">=</span> <span class="n">currentRandVar</span>
                 <span class="n">currentRandVar</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_UNARY</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">)</span>
 
+                <span class="c1"># two-term multiplication alg. - unary encoding in CVXPY</span>
             <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">GP</span><span class="p">:</span>
                 <span class="n">maxDelay</span><span class="p">,</span> <span class="n">newConstraints</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">)</span>
                 <span class="n">AllConstr</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newConstraints</span><span class="p">)</span>
                 <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">newConstraints</span> <span class="o">=</span> <span class="n">ConvolutionF</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">)</span>
                 <span class="n">AllConstr</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newConstraints</span><span class="p">)</span>
 
+                <span class="c1"># SSTA using GP in CVXPY tool</span>
             <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">GP</span><span class="p">:</span>
                 <span class="n">maxDelay</span><span class="p">,</span> <span class="n">AllConstr</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">,</span> <span class="n">AllConstr</span><span class="p">)</span>
                 <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">AllConstr</span> <span class="o">=</span> <span class="n">ConvolutionF</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">,</span> <span class="n">AllConstr</span><span class="p">)</span>
 
+                <span class="c1"># SSTA using exact computation</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">maxDelay</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">)</span>
                 <span class="n">currentRandVar</span> <span class="o">=</span> <span class="n">ConvolutionF</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">)</span>
 
+
+
         <span class="k">for</span> <span class="n">nextNode</span> <span class="ow">in</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">nextNodes</span><span class="p">:</span>                          <span class="c1"># append this node as a previous</span>
             <span class="n">nextNode</span><span class="o">.</span><span class="n">appendPrevDelays</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">)</span>
-            <span class="c1"># print(len(nextNode.prevDelays))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">nextNodes</span><span class="p">:</span>                                   <span class="c1"># save for later ouput delays</span>
             <span class="n">sink</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">)</span>
 
+            <span class="c1"># continue BFS</span>
         <span class="n">closedList</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tmpNode</span><span class="p">)</span>
         <span class="n">putIntoQueue</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">nextNodes</span><span class="p">)</span>
         <span class="n">newDelays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">)</span>
 
 
-        <span class="c1"># if more output gate</span>
+        <span class="c1"># if more output gates - calculate maximum</span>
     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
 
-        <span class="c1"># make max into sink</span>
         <span class="k">if</span> <span class="n">usingMosek</span><span class="p">:</span>
             <span class="n">sinkDelay</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">sink</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
+
         <span class="k">elif</span> <span class="ow">not</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="n">mosekTRI</span><span class="p">:</span>
             <span class="n">sinkDelay</span> <span class="o">=</span> <span class="n">maxOfDistributionsUNARY</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">GP</span><span class="p">:</span>
             <span class="n">sinkDelay</span><span class="p">,</span> <span class="n">newConstraints</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span>
             <span class="n">AllConstr</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newConstraints</span><span class="p">)</span>
+
         <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">GP</span><span class="p">:</span>
             <span class="n">sinkDelay</span><span class="p">,</span> <span class="n">AllConstr</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">sink</span><span class="p">,</span> <span class="n">AllConstr</span><span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sinkDelay</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span>
 
         <span class="n">newDelays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sinkDelay</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">pass</span>
-        <span class="c1"># newDelays.append(sink[0])</span>
 
+
+        <span class="c1"># return depends on the current tool</span>
     <span class="k">if</span> <span class="n">usingMosek</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">newDelays</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span>
     <span class="k">elif</span> <span class="n">cvxpy</span><span class="p">:</span>
@@ -214,7 +223,7 @@
 
 <div class="viewcode-block" id="Convolution_UNARY_MOSEK"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.Convolution_UNARY_MOSEK">[docs]</a><span class="k">def</span> <span class="nf">Convolution_UNARY_MOSEK</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.</span>
+<span class="sd">    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code.</span>
 
 <span class="sd">    :param x1: RandomVariableMOSEK class</span>
 <span class="sd">    :param x2: RandomVariableMOSEK class</span>
@@ -243,7 +252,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">convolutionF</span><span class="p">(</span><span class="n">x1</span><span class="p">:</span> <span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">x1</span><span class="o">.</span><span class="n">convolution_UNARY_DIVIDE</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="n">withSymmetryConstr</span><span class="p">,</span> <span class="n">asMin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x1</span><span class="o">.</span><span class="n">convolution_UNARY_DIVIDE</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">withSepConstr</span><span class="o">=</span><span class="n">withSymmetryConstr</span><span class="p">,</span> <span class="n">asMin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">convolutionF</span></div>
 

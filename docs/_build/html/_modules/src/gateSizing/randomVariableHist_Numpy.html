@@ -109,7 +109,7 @@
 
 <div class="viewcode-block" id="RandomVariable.maxOfDistributionsELEMENTWISE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsELEMENTWISE">[docs]</a>    <span class="k">def</span> <span class="nf">maxOfDistributionsELEMENTWISE</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Maximum of 2 distribution functions using elementwise max</span>
+<span class="sd">        Maximum of 2 distribution functions using elementwise max - not working very well</span>
 
 <span class="sd">        :param self: random variable class</span>
 <span class="sd">        :param secondVariable: random variable class</span>
@@ -136,49 +136,28 @@
 
 <div class="viewcode-block" id="RandomVariable.maxOfDistributionsFORM"><a class="viewcode-back" href="../../../index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsFORM">[docs]</a>    <span class="k">def</span> <span class="nf">maxOfDistributionsFORM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Maximum of 2 distribution functions using formula. Includes vectorized version - commented</span>
+<span class="sd">        Maximum of 2 distribution functions using formula. Vectorized version</span>
 
 <span class="sd">        :param self: random variable class</span>
 <span class="sd">        :param secondVariable: random variable class</span>
-<span class="sd">        :return maxDelay: random variable class, maximum of 2 histograms</span>
+<span class="sd">        :return maxRV: random variable class, maximum of 2 histograms</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-
-        <span class="c1"># unite</span>
-        <span class="c1"># self.uniteEdges(secondVariable)</span>
         <span class="n">f1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
         <span class="n">f2</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
 
+        <span class="n">F2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">f2</span><span class="p">)</span>
+        <span class="n">F1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">f1</span><span class="p">)</span>
 
-        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="c1"># f1 = f1 / (np.sum(f1) * (self.edges[1] - self.edges[0]))</span>
-        <span class="c1"># f2 = f2 / (np.sum(f2) * (self.edges[1] - self.edges[0]))</span>
-        <span class="n">maximum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-            <span class="n">F2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">f2</span><span class="p">[:</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
-            <span class="n">F1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">f1</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span>                 <span class="c1"># only for discrete - not to count with 1 number twice</span>
-            <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">f1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">F2</span> <span class="o">+</span> <span class="n">f2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">F1</span>
+        <span class="n">F1</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">F1</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">F1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">maximum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">F2</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="n">F1</span><span class="p">)</span>
 
         <span class="c1"># normalize</span>
-        <span class="c1"># maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))</span>
+        <span class="n">maximum</span> <span class="o">=</span> <span class="n">maximum</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">maximum</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
-        <span class="c1"># vectorized code from above</span>
-        <span class="c1"># unite</span>
-        <span class="c1"># self.uniteEdges(secondVariable)</span>
-        <span class="c1"># f1 = self.bins</span>
-        <span class="c1"># f2 = secondVariable.bins</span>
-        <span class="c1">#</span>
-        <span class="c1">#</span>
-        <span class="c1"># F2 = np.cumsum(f2)</span>
-        <span class="c1"># F1 = np.cumsum(f1)</span>
-        <span class="c1">#</span>
-        <span class="c1"># F1[1:] = F1[:-1]</span>
-        <span class="c1"># F1[0] = 0</span>
-        <span class="c1"># maximum = np.multiply(f1, F2) + np.multiply(f2, F1)</span>
-
-        <span class="n">maxDelay</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">maxDelay</span></div>
+        <span class="n">maxRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">maxRV</span></div>
 
 <div class="viewcode-block" id="RandomVariable.maxOfDistributionsQUAD"><a class="viewcode-back" href="../../../index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsQUAD">[docs]</a>    <span class="k">def</span> <span class="nf">maxOfDistributionsQUAD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -227,40 +206,37 @@
 
 <div class="viewcode-block" id="RandomVariable.maxOfDistributionsQUAD_FORMULA"><a class="viewcode-back" href="../../../index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsQUAD_FORMULA">[docs]</a>    <span class="k">def</span> <span class="nf">maxOfDistributionsQUAD_FORMULA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Maximum of 2 distribution functions using quadratic algorithm and simplified version - in formula</span>
+<span class="sd">        Maximum of 2 distribution functions using quadratic algorithm and simplified version - in formula - not vectorized</span>
 
 <span class="sd">        :param self: random variable class</span>
 <span class="sd">        :param secondVariable: random variable class</span>
-<span class="sd">        :return maxDelay: random variable class, maximum of 2 histograms</span>
+<span class="sd">        :return maxRV: random variable class, maximum of 2 histograms</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># unite</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">uniteEdges</span><span class="p">(</span><span class="n">secondVariable</span><span class="p">)</span>
-
         <span class="c1"># get data</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
 
-        <span class="n">bins1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
-        <span class="n">bins2</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
 
 
         <span class="c1"># prealloc</span>
-        <span class="n">maximum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+        <span class="n">maximum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
 
-                <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">bins1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">bins2</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
-                    <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">bins1</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">bins2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-
+                    <span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
 
         <span class="c1"># normalize</span>
         <span class="n">maximum</span> <span class="o">=</span> <span class="n">maximum</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">maximum</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">maxRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">maxRV</span></div>
 
 <div class="viewcode-block" id="RandomVariable.maxOfDistributionsQUAD_FORMULA_UNARY"><a class="viewcode-back" href="../../../index.html#src.gateSizing.randomVariableHist_Numpy.RandomVariable.maxOfDistributionsQUAD_FORMULA_UNARY">[docs]</a>    <span class="k">def</span> <span class="nf">maxOfDistributionsQUAD_FORMULA_UNARY</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secondVariable</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -456,17 +432,17 @@
 <span class="sd">        :return convolution: random variable class of convolution</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
-        <span class="n">g</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">secondVariable</span><span class="o">.</span><span class="n">bins</span>
 
-        <span class="n">finalSize</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-        <span class="n">convolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="n">finalSize</span><span class="p">)</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">convolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">]</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">finalSize</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">z</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">convolution</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">+=</span> <span class="n">f</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">g</span><span class="p">[</span><span class="n">z</span> <span class="o">-</span> <span class="n">k</span><span class="p">]</span>
+                <span class="n">convolution</span><span class="p">[</span><span class="n">z</span><span class="p">]</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="n">z</span> <span class="o">-</span> <span class="n">k</span><span class="p">]</span>
 
-        <span class="c1"># Deal With Edges</span>
+            <span class="c1"># Deal With Edges</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cutBins</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">convolution</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">convolution</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span></div>
@@ -554,13 +530,13 @@
         <span class="n">maxE</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">edges_alpha</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">edges_beta</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
             <span class="c1"># create new edges</span>
-        <span class="n">edges_zeta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minE</span><span class="p">,</span> <span class="n">maxE</span><span class="p">,</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">edges_zeta</span>
-        <span class="n">secondVariable</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">edges_zeta</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minE</span><span class="p">,</span> <span class="n">maxE</span><span class="p">,</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span>
+        <span class="n">secondVariable</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span>
 
         <span class="n">eIndex</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">e1</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="n">e2</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">tmp_e1</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">tmp_e2</span> <span class="o">=</span> <span class="mi">1</span>
 
         <span class="n">bins1New</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberOfBins</span><span class="p">)</span>
         <span class="n">bins2New</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberOfBins</span><span class="p">)</span>
@@ -568,26 +544,29 @@
         <span class="c1"># exact computation</span>
         <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">numberOfBins</span><span class="p">:</span>
 
-            <span class="k">if</span> <span class="n">edges_zeta</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">edges_alpha</span><span class="p">[</span><span class="n">e1</span><span class="p">]:</span>
-                <span class="n">bins1New</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">alpha</span><span class="p">[</span><span class="n">e1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">edges_alpha</span><span class="p">[</span><span class="n">e1</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges_alpha</span><span class="p">[</span><span class="n">e1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="n">e1</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># integrate</span>
+            <span class="k">if</span> <span class="n">edges</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">edges_alpha</span><span class="p">[</span><span class="n">tmp_e1</span><span class="p">]:</span>
+                <span class="n">bins1New</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">alpha</span><span class="p">[</span><span class="n">tmp_e1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">edges_alpha</span><span class="p">[</span><span class="n">tmp_e1</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges_alpha</span><span class="p">[</span><span class="n">tmp_e1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">tmp_e1</span> <span class="o">+=</span> <span class="mi">1</span>
 
-            <span class="k">elif</span> <span class="n">edges_zeta</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">edges_alpha</span><span class="p">[</span><span class="n">e1</span><span class="p">]:</span>
+            <span class="k">elif</span> <span class="n">edges</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">edges_alpha</span><span class="p">[</span><span class="n">tmp_e1</span><span class="p">]:</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
 
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">numberOfBins</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">edges_zeta</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">edges_beta</span><span class="p">[</span><span class="n">e2</span><span class="p">]:</span>
-                <span class="n">bins2New</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">beta</span><span class="p">[</span><span class="n">e2</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">edges_beta</span><span class="p">[</span><span class="n">e2</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges_beta</span><span class="p">[</span><span class="n">e2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="n">e2</span> <span class="o">+=</span> <span class="mi">1</span>
 
-            <span class="k">elif</span> <span class="n">edges_zeta</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">edges_beta</span><span class="p">[</span><span class="n">e2</span><span class="p">]:</span>
+                <span class="c1"># integrate</span>
+            <span class="k">if</span> <span class="n">edges</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">edges_beta</span><span class="p">[</span><span class="n">tmp_e2</span><span class="p">]:</span>
+                <span class="n">bins2New</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">beta</span><span class="p">[</span><span class="n">tmp_e2</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">edges_beta</span><span class="p">[</span><span class="n">tmp_e2</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges_beta</span><span class="p">[</span><span class="n">tmp_e2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">tmp_e2</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">elif</span> <span class="n">edges</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">edges_beta</span><span class="p">[</span><span class="n">tmp_e2</span><span class="p">]:</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
                 <span class="c1"># end</span>
-            <span class="k">if</span> <span class="n">e2</span> <span class="o">&gt;=</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">bins2New</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">beta</span><span class="p">[</span><span class="n">e2</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">edges_zeta</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges_beta</span><span class="p">[</span><span class="n">e2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">tmp_e2</span> <span class="o">&gt;=</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">bins2New</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">beta</span><span class="p">[</span><span class="n">tmp_e2</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="n">eIndex</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">edges_beta</span><span class="p">[</span><span class="n">tmp_e2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
                 <span class="k">break</span>
 
         <span class="n">bins1</span> <span class="o">=</span> <span class="n">bins1New</span>
@@ -630,17 +609,17 @@
         <span class="n">maxE</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">edges_alpha</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">edges_beta</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
             <span class="c1"># create new edges</span>
-        <span class="n">edges_zeta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minE</span><span class="p">,</span> <span class="n">maxE</span><span class="p">,</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">edges_zeta</span>
-        <span class="n">secondVariable</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">edges_zeta</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">minE</span><span class="p">,</span> <span class="n">maxE</span><span class="p">,</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span>
+        <span class="n">secondVariable</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span>
 
             <span class="c1"># create new values</span>
         <span class="n">cdf1</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">rv_histogram</span><span class="p">((</span><span class="n">alpha</span><span class="p">,</span> <span class="n">edges_alpha</span><span class="p">))</span><span class="o">.</span><span class="n">cdf</span>
         <span class="n">cdf2</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">rv_histogram</span><span class="p">((</span><span class="n">beta</span><span class="p">,</span> <span class="n">edges_beta</span><span class="p">))</span><span class="o">.</span><span class="n">cdf</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
-            <span class="n">value1</span> <span class="o">=</span> <span class="p">(</span><span class="n">cdf1</span><span class="p">(</span><span class="n">edges_zeta</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">cdf1</span><span class="p">(</span><span class="n">edges_zeta</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
-            <span class="n">value2</span> <span class="o">=</span> <span class="p">(</span><span class="n">cdf2</span><span class="p">(</span><span class="n">edges_zeta</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">cdf2</span><span class="p">(</span><span class="n">edges_zeta</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="n">value1</span> <span class="o">=</span> <span class="p">(</span><span class="n">cdf1</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">cdf1</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="n">value2</span> <span class="o">=</span> <span class="p">(</span><span class="n">cdf2</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="n">cdf2</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
 
             <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value1</span>
             <span class="n">beta</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value2</span>
