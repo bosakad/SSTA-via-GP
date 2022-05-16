@@ -286,9 +286,9 @@ def plotDistrosForInputs(a, f, e, GP=False):
 
             # plt.legend(["Scaling factor: " + str(x)])
 
-    axs[5, 0].set_xlabel('Delay')
+    axs[5, 0].set_xlabel('Delay(sec.)')
     axs[2, 0].set_ylabel('PDF')
-    axs[5, 1].set_xlabel('Delay')
+    axs[5, 1].set_xlabel('Delay(sec.)', fontsize=10)
     axs[2, 1].set_ylabel('PDF')
 
     axs[0, 0].set_title("LogNormal")
@@ -320,17 +320,14 @@ if __name__ == "__main__":
 
     # parameters
 
-    # area = np.array([1, 2, 3, 4, 5, 6, 7]) ** 2
-    # power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 2
-
     area = np.array([1, 2, 3, 4, 5., 6, 7]) ** 1.9
     power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.9
 
     interval = (0, 35)
-    numberOfBins = 35
-    # numberOfBins = 50
+    # numberOfBins = 35
+    numberOfBins = 50
     asGp = True
-    Normal = False
+    Normal = True
 
     distros, edges = generateDistr(area, power, interval, numberOfBins, shouldSave=True, GP=asGp, Normal=Normal)
     # plotDistros(distros, edges)

@@ -821,7 +821,7 @@ def plotDelays():
         # plt.hist(delays[-1].edges[:-1], delays[-1].edges, weights=delays[-1].bins, alpha=0.2, color='orange')
         axs[i].hist(delay.edges[:-1], delay.edges, weights=delay.bins, density="PDF", color='blue')
         _ = axs[i].hist(mc / 1e11, bins=len(delay.edges[:-1])-1, density='PDF', alpha=0.8, color='orange')
-        axs[i].set_xlabel('Delay')
+        axs[i].set_xlabel('Delay(seconds)')
         axs[i].set_ylabel('PDF')
 
 

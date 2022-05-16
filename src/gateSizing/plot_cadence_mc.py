@@ -66,12 +66,10 @@ x = np.linspace(xmin, xmax, 100)
 p = norm.pdf(xHelp, mu, std) * 10000000000000
 
 plt.plot(x, p, 'k', linewidth=2)
-ax.set_xlabel('Delay')
-ax.set_ylabel('PDF')
+ax.set_xlabel('Delay(seconds)', fontsize=12)
+ax.set_ylabel('PDF', fontsize=12)
 # plt.show()
 plt.savefig("Inputs.outputs/inverterReal.jpeg", dpi=800, bbox_inches='tight')
 
-
-# plt.show()
 
 

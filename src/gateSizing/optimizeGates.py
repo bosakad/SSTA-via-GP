@@ -535,5 +535,5 @@ def loadModel(path):
 if __name__ == "__main__":
 
     # optimizeGates_MIXED_INT()
-    # optimizeCVXPY_GP(modelType="Gauss")
-    optimizeCVXPY_GP(modelType="LogNormal")
+    optimizeCVXPY_GP(modelType="Gauss")
+    # optimizeCVXPY_GP(modelType="LogNormal")
