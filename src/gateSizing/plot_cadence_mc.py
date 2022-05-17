@@ -60,6 +60,8 @@ xmax = np.max(df.iloc[:,0] * 10000000000000)
 xHelp = np.linspace(xmin, xmax, 100)
 mu, std = norm.fit(df.iloc[:,0] * 10000000000000)
 
+print(mu / 10000000000000, std / 10000000000000)
+
 xmin = np.min(df.iloc[:,0])
 xmax = np.max(df.iloc[:,0])
 x = np.linspace(xmin, xmax, 100)
