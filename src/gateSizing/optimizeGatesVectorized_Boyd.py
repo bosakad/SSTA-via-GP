@@ -5,7 +5,7 @@ import cvxpy as cp
 
 """
 This module includes vectorized deterministic optimization of the circuit using Boyds RC-model.
-Does NOT work with CVXPY.
+Does NOT work with CVXPY - would have to be written in other tool
 """
 
 

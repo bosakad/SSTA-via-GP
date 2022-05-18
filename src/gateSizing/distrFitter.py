@@ -324,8 +324,8 @@ if __name__ == "__main__":
     power = np.array([1, 2, 3, 4, 5, 6, 7]) ** 1.9
 
     interval = (0, 35)
-    # numberOfBins = 35
-    numberOfBins = 50
+    numberOfBins = 35
+    # numberOfBins = 50
     asGp = True
     Normal = True
 
@@ -335,7 +335,7 @@ if __name__ == "__main__":
 
     # plotLinesForBin(distros, area, power, coef, 0, GP=asGp)
 
-    saveModel(coef, GP=asGp, Normal=Normal)
+    # saveModel(coef, GP=asGp, Normal=Normal)
 
     f = np.array([4, 0.8, 1, 0.8, 1.7, 0.5])
     e = np.array([1, 2, 1, 1.5, 1.5, 1])
