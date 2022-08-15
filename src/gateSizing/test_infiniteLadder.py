@@ -213,7 +213,7 @@ def mainCVXPY(numberOfGates=10, numberOfUnaries=20, numberOfBins=20, interval=(-
 def mainCVXPY_GP(numberOfGates=8, numberOfBins=25, interval=(-4, 25)):
 
     """
-        Computes SSTA using unary encoding, can be computed in a 'precise' or non-precise way
+        Computes SSTA using GP, can be computed in a 'precise' or non-precise way
     """
 
     n_samples = 2000000
@@ -665,7 +665,7 @@ def mainCVXPY_GP_Sizing(numberOfGates=3, numberOfBins=20, interval=(0, 28)):
 def mainCVXPYMcCormick(numberOfGates=1, numberOfUnaries=10, numberOfBins=20, interval=(-5, 18)):
 
     """
-        Computes SSTA using unary encoding, can be computed in a 'precise' or non-precise way
+        Computes SSTA using mccormick
     """
 
     n_samples = 2000000
@@ -854,7 +854,9 @@ def MonteCarlo(numberOfGates=10, returnGate=False):
 
 def LadderNumpy(number_of_nodes=1, numberOfBins=10, numberOfUnaries=10, interval=(-8, 20)):
 
-
+    '''
+    Does not compute as an optimization problem
+    '''
     # parse command line arguments
     # number_of_nodes = 1
     n_samples = 2000000
@@ -1809,8 +1811,8 @@ if __name__ == "__main__":
         # dec param is Desired precision
 
     # mainCVXPY()
-    # mainCVXPY_GP()
-    mainCVXPY_GP_Sizing()
+    mainCVXPY_GP()
+    # mainCVXPY_GP_Sizing()
     # mainCVXPYMcCormick()
     # LadderNumpy()
     # LadderMOSEK_test()

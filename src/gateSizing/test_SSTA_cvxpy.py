@@ -46,8 +46,8 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
 
     numberOfGates = 5
 
-    numberOfBins = 20
-    numberOfUnaries = 20
+    numberOfBins = 10
+    numberOfUnaries = 4
 
     binsInterval = (0, 40)
 

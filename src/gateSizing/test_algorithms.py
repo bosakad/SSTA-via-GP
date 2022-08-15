@@ -120,7 +120,7 @@ def testAlgorithms_MOSEK():
     # number of testing
     numberOfIterations = 1
     step = 1
-    prevMape = np.array([3.0627844482985895, 31.477761094020565])
+    # prevMape = np.array([3.0627844482985895, 31.477761094020565])
 
     numberOfGatesStart = 3
     numberOfBins = 10
@@ -152,7 +152,7 @@ def testAlgorithms_MOSEK():
         numGates = numberOfGatesStart + iter * step
         numNonZeros, ObjVal, lastGate, time, numVars, numConstr, mipGapRoot,nVarsPresolve, nConstrPresolve = \
                                             test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
-                                                                            interval, TRI=True,
+                                                                            interval, TRI=False,
                                                                             withSymmetryConstr=True)
 
         # saving values
@@ -170,10 +170,10 @@ def testAlgorithms_MOSEK():
             prevError[0] = results[(numGates - step, True)][3]
             prevError[1] = results[(numGates - step, True)][4]
 
-            MAPE = (MAPE + (prevError) *(iter + 19)) / (iter + 19 + 1)
+            MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
         elif iter == 0:
 
-            MAPE = (MAPE + (prevMape) * 19) / (iter + 19 + 1)
+            MAPE = (MAPE) / (iter + 1)
 
         results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr, mipGapRoot,
                                      nVarsPresolve, nConstrPresolve)
@@ -240,8 +240,8 @@ def testAlgorithms_CVXPY_GP():
     numberOfIterations = 15
     step = 1
 
-    numberOfGatesStart = 1
-    numberOfBins = 60
+    numberOfGatesStart = 10
+    numberOfBins = 15
 
     interval = (-4, 25)
 
@@ -261,7 +261,6 @@ def testAlgorithms_CVXPY_GP():
         rvs_MonteCarlo[iter, 0] = lastGate[0]
         rvs_MonteCarlo[iter, 1] = lastGate[1]
 
-    print("SYMMETRY\n\n")
     # test precise
     for iter in range(0, numberOfIterations):
         print("\n\n" + str(iter) + ". iteration: \n\n")
@@ -461,10 +460,12 @@ def computeMAPE(n_bins, n_unaries, start, function):
 if __name__ == "__main__":
 
     # testAlgorithms()
+
     # testAlgorithms_MOSEK()
-    # testAlgorithms_CVXPY_GP()
+    testAlgorithms_CVXPY_GP()
+
     # scalingBins_CVXPY_GP()
-    scalingOptimization_CVXPY_GP()
+    # scalingOptimization_CVXPY_GP()
 
     # testAlgorithms_PRESOLVE()
 
