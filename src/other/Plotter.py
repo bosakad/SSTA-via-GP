@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.transforms as mtransforms
-import optimizeGates
+import src.sizing.optimizeGates as optimizeGates
+from src.timing.randomVariableHist_Numpy import RandomVariable
 
 """
     This module includes plotting functions for thesis.
@@ -884,7 +885,6 @@ def plotPresolve():
 
 
 def plotForThesis():
-    from randomVariableHist_Numpy import RandomVariable
 
     bins = np.array([0, 0.25, 0.5, 0.25, 0])
     edges = np.array([0, 1, 2, 3, 4, 5])

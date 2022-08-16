@@ -25,3 +25,6 @@ src/timing/mosekVariable.py
 src/timing/plot_cadence_mc.py
 src/timing/randomVariableHist_Numpy.py
 src/timing/unaryTesting.py
+src/timing/examples_monteCarlo/__init__.py
+src/timing/examples_monteCarlo/infinite_ladder_montecarlo.py
+src/timing/examples_monteCarlo/montecarlo.py

@@ -1,8 +1,6 @@
 import cvxpy as cp
-import sys
 import numpy as np
-
-from node import Node
+from src.other.node import Node
 from queue import Queue
 
 

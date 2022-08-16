@@ -1,11 +1,10 @@
 import mosek
-from mosek import *
 import sys
-import histogramGenerator
+import src.other.histogramGenerator as histogramGenerator
 import numpy as np
 
-from randomVariableHist_Numpy import RandomVariable
-from mosekVariable import RandomVariableMOSEK
+from src.timing.randomVariableHist_Numpy import RandomVariable
+from src.timing.mosekVariable import RandomVariableMOSEK
 
 """
   This module tests mosek maximum and convolution operations.

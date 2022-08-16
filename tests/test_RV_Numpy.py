@@ -1,7 +1,7 @@
 import numpy
 import numpy as np
-import histogramGenerator
-from randomVariableHist_Numpy import RandomVariable
+import src.other.histogramGenerator as histogramGenerator
+from src.timing.randomVariableHist_Numpy import RandomVariable
 
 # import matplotlib.pyplot as plt
 

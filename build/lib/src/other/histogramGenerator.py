@@ -1,6 +1,6 @@
-import math
 import numpy as np
-from randomVariableHist_Numpy import RandomVariable
+from src.timing.randomVariableHist_Numpy import RandomVariable
+import matplotlib.pyplot as plt
 
 
 def get_gauss_bins(
@@ -153,7 +153,6 @@ def getValuesForMonteCarlo(rv: RandomVariable, count):
     # print(rv.mean)
     # print(np.std(random_from_cdf))
     # print(rv.std)
-    import matplotlib.pyplot as plt
 
     plt.subplot(121)
     # plt.hist(data, 50)

@@ -1,14 +1,13 @@
 import numpy as np
 
-from node import Node
-import histogramGenerator
-import SSTA
+from src.other.node import Node
+import src.other.histogramGenerator as histogramGenerator
+import src.timing.SSTA as SSTA
 import networkx as nx
-from randomVariableHist_Numpy import RandomVariable
 
 # import matplotlib.pyplot as plt
-from infiniteLadder import putTuplesIntoArray
-from examples_monteCarlo.montecarlo import (
+from src.timing.infiniteLadder import putTuplesIntoArray
+from src.timing.examples_monteCarlo.montecarlo import (
     get_inputs,
     get_unknown_nodes,
     simulation,

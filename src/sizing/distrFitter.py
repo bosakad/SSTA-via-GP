@@ -1,7 +1,7 @@
-import histogramGenerator
+import src.other.histogramGenerator as histogramGenerator
 import numpy as np
 import matplotlib.pyplot as plt
-from randomVariableHist_Numpy import RandomVariable
+from src.timing.randomVariableHist_Numpy import RandomVariable
 import cvxpy as cp
 import matplotlib.transforms as mtransforms
 
@@ -75,7 +75,7 @@ def generateDistr(
     if shouldSave:
 
         # save data
-        outfile = "Inputs.outputs/generatedDistros"
+        outfile = "../../inputs_outputs/generatedDistros"
 
         np.savez(
             outfile,
@@ -104,7 +104,6 @@ def plotDistros(distros, edges):
         bins = distros[d, :]
         plt.hist(edges[:-1], edges, weights=bins, density="PDF")
 
-    # plt.savefig("Inputs.outputs/generatedDistros.jpeg", dpi=500)
     plt.show()
 
 
@@ -168,7 +167,6 @@ def plotLinesForBin(distros, area, power, coef, bin, GP=False):
     # print(area[:])
 
     plt.show()
-    # plt.savefig("Inputs.outputs/fitting.jpeg", dpi=500)
 
 
 def linearRegression(distros, area, power, GP=False):
@@ -239,11 +237,11 @@ def saveModel(coef, GP=False, Normal=False):
 
     if GP:
         if Normal:
-            outfile = "Inputs.outputs/model_Normal"
+            outfile = "../../inputs_outputs/model_Normal"
         else:
-            outfile = "Inputs.outputs/model"
+            outfile = "../../inputs_outputs/model"
     else:
-        outfile = "Inputs.outputs/model_MIXED_INT"
+        outfile = "../../inputs_outputs/model_MIXED_INT"
 
     np.savez(outfile, coef=coef)
 
@@ -255,11 +253,11 @@ def plotDistrosForInputs(a, f, e, GP=False):
     interval = (0, 35)
 
     if not GP:
-        coef = np.load("Inputs.outputs/model_MIXED_INT.npz")
+        coef = np.load("../../inputs_outputs/model_MIXED_INT.npz")
         coefs = [coef]
     else:
-        coef1 = np.load("Inputs.outputs/model.npz")
-        coef2 = np.load("Inputs.outputs/model_Normal.npz")
+        coef1 = np.load("../../inputs_outputs/model.npz")
+        coef2 = np.load("../../inputs_outputs/model_Normal.npz")
         coefs = [coef1, coef2]
 
     gate = 5
@@ -369,7 +367,7 @@ def plotDistrosForInputs(a, f, e, GP=False):
         j += 1
 
     # plt.show()
-    plt.savefig("Inputs.outputs/distributionFactors.jpeg", dpi=800, bbox_inches="tight")
+    plt.savefig("../../inputs_outputs/distributionFactors.jpeg", dpi=800, bbox_inches="tight")
 
 
 if __name__ == "__main__":
@@ -386,7 +384,7 @@ if __name__ == "__main__":
     Normal = True
 
     distros, edges = generateDistr(
-        area, power, interval, numberOfBins, shouldSave=True, GP=asGp, Normal=Normal
+        area, power, interval, numberOfBins, shouldSave=False, GP=asGp, Normal=Normal
     )
     # plotDistros(distros, edges)
     coef = linearRegression(distros, area, power, GP=asGp)

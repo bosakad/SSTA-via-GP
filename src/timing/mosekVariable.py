@@ -1,6 +1,5 @@
 import math
 import mosek
-import sys
 import numpy as np
 
 """

@@ -1,19 +1,18 @@
 import numpy as np
 import cvxpy as cp
-from node import Node
-from cvxpyVariable import RandomVariableCVXPY
-import histogramGenerator
-import SSTA
-import networkx as nx
+from src.other.node import Node
+from src.timing.cvxpyVariable import RandomVariableCVXPY
+import src.other.histogramGenerator as histogramGenerator
+import src.timing.SSTA as SSTA
 import mosek
-from examples_monteCarlo.infinite_ladder_montecarlo import (
+from src.timing.examples_monteCarlo.infinite_ladder_montecarlo import (
     MonteCarlo_inputs,
     MonteCarlo_nodes,
     get_moments_from_simulations,
 )
-from randomVariableHist_Numpy import RandomVariable
+from src.timing.randomVariableHist_Numpy import RandomVariable
 import sys
-from mosekVariable import RandomVariableMOSEK
+from  src.timing.mosekVariable import RandomVariableMOSEK
 import matplotlib.pyplot as plt
 
 
@@ -39,7 +38,7 @@ def optimizeGates_MIXED_INT(dec=3):
     numberOfBins = 10
     numberOfUnaries = 10
 
-    coef = np.load("Inputs.outputs/model_MIXED_INT.npz")
+    coef = np.load("../../inputs_outputs/model_MIXED_INT.npz")
     model = coef["coef"]
 
     # generate inputs and 2 for control
@@ -311,10 +310,10 @@ def optimizeCVXPY_GP(
 
     # lognormals model
     if modelType == "LogNormal":
-        coef = np.load("Inputs.outputs/model.npz")
+        coef = np.load("../../inputs_outputs/model.npz")
     elif modelType == "Gauss":
         # normal model
-        coef = np.load("Inputs.outputs/model_Normal.npz")
+        coef = np.load("../../inputs_outputs/model_Normal.npz")
 
     model = coef["coef"]
 

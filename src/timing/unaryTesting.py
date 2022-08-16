@@ -1,18 +1,15 @@
-import histogramGenerator
-import infiniteLadder
+import src.other.histogramGenerator
 import numpy as np
-from ScalingAlgorithms import computeMAPE
+from src.timing.ScalingAlgorithms import computeMAPE
 import matplotlib.pyplot as plt
-import SSTA
-
-from randomVariableHist_Numpy import RandomVariable
-
-from examples_monteCarlo.infinite_ladder_montecarlo import (
+import src.timing.SSTA as SSTA
+from src.timing.randomVariableHist_Numpy import RandomVariable
+from src.timing.examples_monteCarlo.infinite_ladder_montecarlo import (
     MonteCarlo_inputs,
     MonteCarlo_nodes,
     get_moments_from_simulations,
 )
-from node import Node
+from src.other.node import Node
 
 """
 Test for unary encoded algorithms

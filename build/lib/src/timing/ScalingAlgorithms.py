@@ -1,4 +1,4 @@
-import infiniteLadder
+import src.timing.infiniteLadder as infiniteLadder
 import numpy as np
 
 

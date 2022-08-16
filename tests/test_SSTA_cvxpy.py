@@ -1,16 +1,16 @@
 import numpy as np
 import cvxpy as cp
 
-from node import Node
+from src.other.node import Node
 
-from cvxpyVariable import RandomVariableCVXPY
+from src.timing.cvxpyVariable import RandomVariableCVXPY
 
-import histogramGenerator
-import SSTA
+import src.other.histogramGenerator as histogramGenerator
+import src.timing.SSTA as SSTA
 import networkx as nx
-from randomVariableHist_Numpy import RandomVariable
+from src.timing.randomVariableHist_Numpy import RandomVariable
 
-from examples_monteCarlo.montecarlo import (
+from src.timing.examples_monteCarlo.montecarlo import (
     get_inputs,
     get_unknown_nodes,
     simulation,

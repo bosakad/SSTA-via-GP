@@ -1,26 +1,22 @@
 import numpy as np
-
-from cvxpyVariable import RandomVariableCVXPY
+from src.timing.cvxpyVariable import RandomVariableCVXPY
 import cvxpy as cp
-
-from randomVariableHist_Numpy import RandomVariable
-import histogramGenerator
-from node import Node
+from src.timing.randomVariableHist_Numpy import RandomVariable
+import src.other.histogramGenerator as histogramGenerator
+from src.other.node import Node
 from tabulate import tabulate
 import sys
-import SSTA
-from mosekVariable import RandomVariableMOSEK
+import src.timing.SSTA as SSTA
+from src.timing.mosekVariable import RandomVariableMOSEK
 
-from examples_monteCarlo.infinite_ladder_montecarlo import (
+from src.timing.examples_monteCarlo.infinite_ladder_montecarlo import (
     MonteCarlo_inputs,
     MonteCarlo_nodes,
     get_moments_from_simulations,
 )
 
 import matplotlib.pyplot as plt
-
 import mosek
-from mosek import *
 
 
 def mainCVXPY(

@@ -1,10 +1,10 @@
 import numpy as np
 
-from cvxpyVariable import RandomVariableCVXPY
+from src.timing.cvxpyVariable import RandomVariableCVXPY
 import cvxpy as cp
 
-from randomVariableHist_Numpy import RandomVariable
-import histogramGenerator
+from src.timing.randomVariableHist_Numpy import RandomVariable
+import src.other.histogramGenerator as histogramGenerator
 
 
 def test_CVXPY_MAXIMUM_McCormick(dec=2):

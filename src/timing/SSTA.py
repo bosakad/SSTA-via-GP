@@ -1,12 +1,10 @@
 from queue import Queue
-
-from randomVariableHist_Numpy import RandomVariable
-from node import Node
+from src.timing.randomVariableHist_Numpy import RandomVariable
+from src.other.node import Node
 import cvxpy as cp
-from mosekVariable import RandomVariableMOSEK
+from src.timing.mosekVariable import RandomVariableMOSEK
 import numpy as np
-
-import cvxpyVariable
+import src.timing.cvxpyVariable as cvxpyVariable
 
 
 def calculateCircuitDelay(

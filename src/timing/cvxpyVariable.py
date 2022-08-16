@@ -1,9 +1,7 @@
 import cvxpy as cp
 import math
 import numpy as np
-
-import  src.other.histogramGenerator
-from randomVariableHist_Numpy import RandomVariable as RandomVariableNumpy
+from src.timing.randomVariableHist_Numpy import RandomVariable as RandomVariableNumpy
 
 
 class RandomVariableCVXPY:
