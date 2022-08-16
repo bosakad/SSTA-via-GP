@@ -11,9 +11,11 @@ programming. In particular, a histogram approximation of the statistical approac
 employed. We apply our proposed algorithms to the ISCAS benchmark circuit and
 compare the results with the deterministic approach.
 
-`code()`
-* Bullet list
-* Nested bullet
+### Set up ###
+`pip install -r requirements.txt
+pip install .
+python3 setup.py clean
+`
 
 Full documentation is located at: docs/_build/html
 
