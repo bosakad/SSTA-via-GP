@@ -105,9 +105,6 @@ class RandomVariable:
         :return maxDelay: random variable class, maximum of 2 histograms
         """
 
-        # unite
-        self.uniteEdges(secondVariable)
-
         # get data
         n = len(self.bins)
 

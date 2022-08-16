@@ -9,7 +9,6 @@ from node import Node
 from tabulate import tabulate
 import sys
 import SSTA
-from test_SSTA_Numpy import putTuplesIntoArray
 from mosekVariable import RandomVariableMOSEK
 
 from examples_monteCarlo.infinite_ladder_montecarlo import MonteCarlo_inputs, MonteCarlo_nodes, get_moments_from_simulations
@@ -1806,6 +1805,33 @@ def LadderMOSEK_maxconv_test(number_of_nodes=1, numberOfBins=13, numberOfUnaries
 
 
     return desired
+
+
+'''
+    Puts means and stds of either array of rvs or of array of numbers from monte carlo into 
+        [n, 2] numpy array
+'''
+def putTuplesIntoArray(rvs: [RandomVariable] = None, numbers: [float] = None):
+    if rvs != None:
+        actual = np.zeros((len(rvs), 2))
+
+        size = len(rvs)
+        for i in range(0, size):
+            delay = rvs[i]
+            actual[i, 0] = delay.mean
+            actual[i, 1] = delay.std
+
+    else:
+        actual = np.zeros((len(numbers) - 1, 2))
+
+        size = len(numbers) - 1
+        for i in range(0, size):
+            delay = numbers[i + 1]
+            actual[i, 0] = np.mean(delay)
+            actual[i, 1] = np.std(delay)
+
+    return actual
+
 
 if __name__ == "__main__":
         # dec param is Desired precision

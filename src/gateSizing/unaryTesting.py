@@ -4,7 +4,6 @@ import numpy as np
 from ScalingAlgorithms import computeMAPE
 import matplotlib.pyplot as plt
 import SSTA
-from test_SSTA_Numpy import putTuplesIntoArray
 
 from randomVariableHist_Numpy import RandomVariable
 

@@ -159,7 +159,7 @@ def testConvolution_MAX(dec = 3):
 
             np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
-def testMaximum_MAX(dec = 3):
+def testMaximum_MAX(dec = 0):
     mu1 = 5.98553396
     sigma1 = 1
 
@@ -170,11 +170,11 @@ def testMaximum_MAX(dec = 3):
     numberOfGates = 2
 
 
-    interval = (-5, 15)
+    interval = (0, 10)
 
     numberOfSamples = 2000000
-    numberOfBins = 16
-    numberOfUnaries = 30
+    numberOfBins = 20
+    numberOfUnaries = 20
 
     # DESIRED
 
@@ -303,7 +303,7 @@ def testMaximum_MAX(dec = 3):
 
 
 
-def testMaximum_MAX_CONV(dec = 3):
+def testMaximum_MAX_CONV(dec = 1):
     mu1 = 5.98553396
     sigma1 = 1
 
@@ -462,9 +462,7 @@ def testMaximum_MAX_CONV(dec = 3):
 
             np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
-
-
-def testMaximum_MAX_CONV2_asmin(dec = 3):
+def testMaximum_MAX_CONV2_asmin(dec = 1):
     mu1 = 5.98553396
     sigma1 = 1
 
@@ -474,10 +472,8 @@ def testMaximum_MAX_CONV2_asmin(dec = 3):
     mu3 = 2
     sigma3 = 0.2
 
-    mu4 = 2
-    sigma4 = 0.3
 
-    numberOfGates = 4
+    numberOfGates = 3
 
 
     interval = (0, 9)
@@ -491,22 +487,12 @@ def testMaximum_MAX_CONV2_asmin(dec = 3):
     rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
     rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
     rv3 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu4, sigma4, numberOfBins, numberOfSamples, interval, numberOfUnaries)
 
-    # print(rv1.bins)
-    # print(rv2.bins)
-    # max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
-    # conv = max1.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
     conv = rv1.maximum_AND_Convolution_UNARY(rv2, rv3)
-    conv = conv.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)
-    # conv = conv.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
-    # max1 = test1.convolutionOfTwoVarsShift(test2)
 
 
     desired = [conv.mean, conv.std]
 
-    # print(desired)
-    # print(max1.bins)
 
     # Make a MOSEK environment
     with mosek.Env() as env:
@@ -536,8 +522,8 @@ def testMaximum_MAX_CONV2_asmin(dec = 3):
             bins4 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
 
 
-            gates = [rv1, rv2, rv3, rv4]
-            bins = [bins1, bins2, bins3, bins4]
+            gates = [rv1, rv2, rv3]
+            bins = [bins1, bins2, bins3]
 
             # set objective function
             for gate in range(0, numberOfGates):
@@ -566,33 +552,12 @@ def testMaximum_MAX_CONV2_asmin(dec = 3):
             RV3 = RandomVariableMOSEK(bins3, rv1.edges, task)
             RV4 = RandomVariableMOSEK(bins4, rv1.edges, task)
 
-            # maximum, newNofVariables, newNofConstr = RV1.maximum_AND_Convolution_VECTORIZED_MIN(RV2, RV3, numberVariablesRVs,
-            #                                                                                  0)
-            # maximum, newNofVariables, newNofConstr = maximum.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV4, newNofVariables, newNofConstr,withSymmetryConstr=True,
-            #                                                                                         asMin=True)
 
-            maximum, newNofVariables, newNofConstr = RV1.maximum_AND_Convolution_VECTORIZED_MEM_FREE(RV2, RV3,
+            maximum, newNofVariables, newNofConstr = RV1.maximum_AND_Convolution_VECTORIZED_MIN(RV2, RV3,
                                                                                                 numberVariablesRVs,
                                                                                                 0)
-            maximum, newNofVariables, newNofConstr = maximum.maximum_UNARY_MAX_DIVIDE_MEM_FREE(RV4, newNofVariables,
-                                                                                                 newNofConstr, numberOfUnaries,
-                                                                                                 withSymmetryConstr=True)
-
-
-
-            # maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs,
-            #                                                                       0, withSymmetryConstr=True)
-
-            # maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,
-            #                                                                       newNofConstr, withSymmetryConstr=True)
-
 
             maximumConCat = maximum.bins
-
-            print(len(maximumConCat))
-            print(len(maximumConCat[0]))
-
-            print(len(maximumConCat[3]))
 
                 # create the objective function
             maximumConCat = np.concatenate(maximumConCat)
@@ -687,262 +652,3 @@ def testMaximum_MAX_CONV2_asmin(dec = 3):
 
             np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
-def test_setting(dec = 3):
-    mu1 = 5.98553396
-    sigma1 = 1
-
-    mu2 = 3
-    sigma2 = 1.802585
-
-    mu3 = 2
-    sigma3 = 0.2
-
-    numberOfGates = 3
-
-
-    interval = (-1, 9)
-
-    numberOfSamples = 2000000
-    numberOfBins = 10
-    numberOfUnaries = 10
-
-    # DESIRED
-
-    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv3 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-
-    # print(rv1.bins)
-    # print(rv2.bins)
-    # max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
-    # conv = max1.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
-    conv = rv1.maximum_AND_Convolution_UNARY(rv2, rv3)
-    # conv = conv.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)
-    # conv = conv.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
-    # max1 = test1.convolutionOfTwoVarsShift(test2)
-
-
-    desired = [conv.mean, conv.std]
-
-    # print(desired)
-    # print(max1.bins)
-
-    # Make a MOSEK environment
-    with mosek.Env() as env:
-        # Attach a printer to the environment
-        env.set_Stream(mosek.streamtype.log, streamprinter)
-
-        # Create a task
-        with env.Task(0, 0) as task:
-            # Attach a printer to the task
-            task.set_Stream(mosek.streamtype.log, streamprinter)
-
-            numberVariablesRVs = numberOfGates*numberOfBins * numberOfUnaries
-
-            # The variables will initially be fixed at zero (x=0).
-            task.appendvars(numberVariablesRVs)
-
-            # set variables to be boolean
-            rvIndices = np.array(range(0, numberVariablesRVs))
-            task.putvartypelist(rvIndices,
-                                [mosek.variabletype.type_int] * numberVariablesRVs)
-
-
-
-            bins1 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
-            bins2 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
-            bins3 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
-
-            gates = [rv1, rv2, rv3]
-            bins = [bins1, bins2, bins3]
-
-
-            # set objective function
-            for gate in range(0, numberOfGates):
-                currentBins = bins[gate]
-                generatedRV = gates[gate]
-                for bin in range(0, numberOfBins):
-                    for unary in range(0, numberOfUnaries):
-
-                        variableIndex = gate*numberOfBins*numberOfUnaries + bin*numberOfUnaries + unary
-                        # task.putcj(variableIndex, 1)
-
-                        # Set the bounds on variable
-                        # 0 <= x_j <= 1
-
-                        # task.putvarbound(variableIndex, mosek.boundkey.ra, generatedRV.bins[bin, unary], 1)
-                        task.putvarbound(variableIndex, mosek.boundkey.ra, 0, 1)
-
-                            # save index to the bins
-                        currentBins[bin, unary] = variableIndex
-
-
-
-
-            RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
-
-                # create the objective function
-            task.putclist(np.concatenate(bins1), [1]*np.concatenate(bins1).shape[0])
-
-            task.appendcons(numberOfGates * numberOfBins)
-
-            gateNodes = [bins1, bins2, bins3]
-
-            for gate in range(0, numberOfGates):
-
-                curNode = gateNodes[gate]
-                generatedRV = gates[gate]
-
-                for bin in range(0, numberOfBins):
-                    generatedValues = np.sum(generatedRV.bins[bin, :])
-
-                    # print(generatedValues)
-
-                    row = curNode[bin, :]
-
-                    task.putarow(gate * numberOfBins + bin, row, [1] * row.size)
-                    task.putconbound(gate * numberOfBins + bin, mosek.boundkey.lo, generatedValues, 1)
-
-
-            newNofConstr = numberOfGates * numberOfBins
-
-            task.appendcons(numberOfGates * numberOfBins * (numberOfUnaries - 1))
-
-            for gate in range(0, numberOfGates):
-                curNode = gateNodes[gate]
-
-                # symmetry constraints
-                for bin in range(0, numberOfBins):
-                    for unary in range(0, numberOfUnaries - 1):
-                        offset = bin * (numberOfUnaries - 1) + unary
-
-                        # (maximum[bin])[unary] >= (maximum[bin])[unary + 1])
-                        task.putaij(newNofConstr + offset, curNode[bin, unary], 1)
-                        task.putaij(newNofConstr + offset, curNode[bin, unary + 1], -1)
-
-                        task.putconbound(newNofConstr + offset, mosek.boundkey.lo, 0, 0.0)
-
-            newNofConstr += (numberOfUnaries - 1) * numberOfBins
-
-                # solve problem
-
-            # Input the objective sense (minimize/maximize)
-            task.putobjsense(mosek.objsense.minimize)
-
-            # Solve the problem
-            task.optimize()
-            # Print a summary containing information
-            # about the solution for debugging purposes
-            task.solutionsummary(mosek.streamtype.msg)
-
-            prosta = task.getprosta(mosek.soltype.itg)
-            solsta = task.getsolsta(mosek.soltype.itg)
-
-            # Output a solution
-            xx = np.array([0.] * numberVariablesRVs)
-            task.getxx(mosek.soltype.itg, xx)
-
-            if solsta in [mosek.solsta.integer_optimal]:
-                pass
-                # print("Optimal solution: %s" % xx)
-            elif solsta == mosek.solsta.prim_feas:
-                pass
-                # print("Feasible solution: %s" % xx)
-            elif mosek.solsta.unknown:
-                if prosta == mosek.prosta.prim_infeas_or_unbounded:
-                    print("Problem status Infeasible or unbounded.\n")
-                elif prosta == mosek.prosta.prim_infeas:
-                    print("Problem status Infeasible.\n")
-                elif prosta == mosek.prosta.unkown:
-                    print("Problem status unkown.\n")
-                else:
-                    print("Other problem status.\n")
-            else:
-                print("Other solution status")
-
-            # print(conv.bins)
-            # print()
-
-
-            bins = xx[bins1]
-            print(bins)
-            print(rv1.bins)
-
-            # rv = RandomVariable(maximum.bins, edges=maximum.edges, unary=True)
-            # actual = [rv.mean, rv.std]
-
-            # print(desired)
-            # print(actual)
-
-            # np.testing.assert_almost_equal(desired, actual, decimal=dec)
-def testMult_GP():
-
-    x = 0.5
-    y = 0.5
-
-    desired = x*y
-
-    inf = 0.0
-
-    with Env() as env:
-        with env.Task(0, 0) as task:
-            task.set_Stream(streamtype.log, streamprinter)
-
-            # Add variables and constraints
-            numLinCon = 2
-            numvar = 2
-            numMono = 1
-            task.appendvars(numvar + numMono*3)
-            task.appendcons(numLinCon + numMono)
-
-
-            task.putobjsense(objsense.minimize)
-            task.putclist([2], [1])   # minimize the upper auxiliary variables
-            task.putvarboundlist([0, 1], [boundkey.ra]*numvar, [np.log(x), np.log(y)], [1, 1])
-
-            # Add the upper bounds
-            # task.putaijlist([0, 1], , aval)
-            # task.putconboundslice(0, numvar, bkc, blc, buc)
-
-            # Add linear constraints for the expressions appearing in exp(...)
-            task.putaijlist([0, 0, 0], [numvar + numMono*3 - 1, 0, 1], [1, -1, -1])
-            task.putconbound(0, boundkey.fx, 0, 0)
-
-            expStart = numvar
-
-            # aux unbounded
-            task.putvarboundlistconst(range(expStart, expStart + 3 * numMono, 3),
-                                      boundkey.fr, -inf, inf)
-
-            # slack is unbounded
-            task.putvarboundlistconst(range(expStart + 2, expStart + 2 + 3 * numMono, 3),
-                                      boundkey.fr, -inf, inf)
-
-            # t_i = 1
-            task.putvarboundlistconst(range(expStart + 1, expStart + 1 + 3 * numMono, 3),
-                                      boundkey.fx, 1.0, 1.0)
-
-            # Every triple is in an exponential cone
-            task.appendconesseq([conetype.pexp] * numMono, [0.0] * numMono, [3] * numMono, expStart)
-
-            # Solve and map to original h, w, d
-            task.optimize()
-            xyz = [0.0] * (numvar + numMono*3)
-            task.getxxslice(soltype.itr, 0, 5, xyz)
-            print(xyz)
-            print(np.exp(xyz))
-
-    print(desired)
-
-if __name__ == "__main__":
-    # testConvolution_MAX(dec=8)
-    # testMaximum_MAX(dec=8)
-
-    # testMaximum_MAX_CONV(dec=8)
-    # testMaximum_MAX_CONV2_asmin()
-
-    # test_setting()
-
-    testMult_GP()
-
-    print('All tests passed!')

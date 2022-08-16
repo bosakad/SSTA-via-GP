@@ -9,11 +9,8 @@ import histogramGenerator
 import SSTA
 import networkx as nx
 import mosek
-from test_SSTA_Numpy import putTuplesIntoArray
 from examples_monteCarlo.infinite_ladder_montecarlo import MonteCarlo_inputs, MonteCarlo_nodes, get_moments_from_simulations
-
 from randomVariableHist_Numpy import RandomVariable
-from mosek import *
 import sys
 from mosekVariable import RandomVariableMOSEK
 import matplotlib.pyplot as plt

@@ -2,11 +2,11 @@ import numpy
 import numpy as np
 import histogramGenerator
 from randomVariableHist_Numpy import RandomVariable
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 
-def maxOfDistributionsELEMENTWISE(dec: int):
+def maxOfDistributionsELEMENTWISE(dec=1):
 
     mu = 10
     sigma = 0.5
@@ -43,7 +43,7 @@ def maxOfDistributionsELEMENTWISE(dec: int):
 
     return None
 
-def maxOfDistributionsFORM_MultiMax(dec: int):
+def maxOfDistributionsFORM_MultiMax(dec=1):
 
     mu1 = 25
     sigma1 = 0.5
@@ -148,7 +148,7 @@ def maxOfDistributionsFORM_MultiMax(dec: int):
 
 
 
-def testConvolutionGaussShift(dec: int):
+def testConvolutionGaussShift(dec=1):
 
     mu1 = 12
     sigma1 = 2
@@ -193,7 +193,7 @@ def testConvolutionGaussShift(dec: int):
     return None
 
 
-def testMAX_UNARY(dec: int):
+def testMAX_UNARY(dec=1):
     mu1 = 12
     sigma1 = 2
 
@@ -244,7 +244,7 @@ def testMAX_UNARY(dec: int):
 
     return None
 
-def testUniteEdgesNormal(dec: int):
+def testUniteEdgesNormal(dec=1):
 
     mu1 = 12
     sigma1 = 2
@@ -276,7 +276,7 @@ def testUniteEdgesNormal(dec: int):
     """ Test with different edges """
 
 
-def testUniteEdgesStudent(dec: int):
+def testUniteEdgesStudent(dec=1):
 
     chi = 6
 
@@ -315,59 +315,8 @@ def testUniteEdgesStudent(dec: int):
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
-def testConvolutionUnion(dec: int):
 
-    mu1 = 40
-    sigma1 = 2
-
-    mu2 = 25
-    sigma2 = 3
-
-    numberOfSamples = 1000000
-    numberOfBins = 2000
-
-    # DESIRED
-
-    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
-    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
-
-    convolution = rv1 + rv2
-
-    desired = [np.mean(convolution), np.std(convolution)]
-
-    # ACTUAL
-
-    STATIC_BINS = np.linspace(-10, 120, numberOfBins)
-
-    # histogram1
-    data, edges = np.histogram(rv1, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h1 = RandomVariable(dataNorm, edges)
-
-
-    STATIC_BINS = np.linspace(-5, 125, numberOfBins)
-    # histogram2
-    data, edges = np.histogram(rv2, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
-    h2 = RandomVariable(dataNorm, edges)
-
-    convolution = h1.convolutionOfTwoVarsUnion(h2)
-
-    actual = [convolution.mean, convolution.std]
-
-    # TESTING
-
-    np.testing.assert_almost_equal(desired, actual, decimal=dec)
-
-    return None
-
-
-
-
-    return None
-
-
-def testMaxAndConvolution(dec: int):
+def testMaxAndConvolution(dec=1):
     mu1 = 40
     sigma1 = 0.5
 
@@ -426,7 +375,7 @@ def testMaxAndConvolution(dec: int):
     return None
 
 
-def testMeanGauss(dec: int):
+def testMeanGauss(dec=1):
 
     mu = 1
     sigma = 0.5
@@ -458,7 +407,7 @@ def testMeanGauss(dec: int):
 
     return None
 
-def testMeanUniform(dec: int):
+def testMeanUniform(dec=1):
 
     low = 2
     high = 10
@@ -486,7 +435,7 @@ def testMeanUniform(dec: int):
 
     return None
 
-def testStdGauss(dec: int):
+def testStdGauss(dec=1):
 
     mu = 1
     sigma = 0.5
@@ -514,7 +463,7 @@ def testStdGauss(dec: int):
 
     return None
 
-def testStdUniform(dec: int):
+def testStdUniform(dec=1):
 
     low = -2
     high = 8
@@ -543,28 +492,7 @@ def testStdUniform(dec: int):
     return None
 
 
-def testConvolutionNaive(dec: int):
-
-
-    edges = np.array([0, 1, 2, 3])
-    values1 = np.array([1, 2, 3])
-    values2 = np.array([0, 1, 0.5])
-
-    rv1 = RandomVariable(values1, edges)
-    rv2 = RandomVariable(values2, edges)
-
-    actual = (rv1.convolutionOfTwoVarsNaive(rv2)).bins
-
-
-    desired = np.convolve([1, 2, 3], [0, 1, 0.5])
-
-        # TESTING
-
-    np.testing.assert_almost_equal(desired, actual, decimal=dec)
-
-    return None
-
-def testmaxOfDistributionsQUAD(dec: int):
+def testmaxOfDistributionsQUAD(dec=1):
     mu1 = 21.98553396
     sigma1 = 0.76804456
 
@@ -575,7 +503,7 @@ def testmaxOfDistributionsQUAD(dec: int):
     numberOfBins = 2000
 
     STATIC_BINS1 = np.linspace(-20, 100, numberOfBins)
-    STATIC_BINS2 = np.linspace(-10, 107, numberOfBins)
+    STATIC_BINS2 = np.linspace(-20, 100, numberOfBins)
 
 
         # DESIRED
@@ -596,19 +524,7 @@ def testmaxOfDistributionsQUAD(dec: int):
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h2 = RandomVariable(dataNorm, edges)
 
-    # max2 = h1.maxOfDistributionsFORM(h2)
     max2 = h1.maxOfDistributionsQUAD(h2)
-
-    # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
-    # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
-
-    # plt.hist(max2.edges[:-1], max2.edges, weights=max2.bins, density="PDF")
-    # plt.show()
-
-    # _ = plt.hist(rv1, bins=2000, density='PDF', alpha=0.7)
-    # _ = plt.hist(rv2, bins=1000, density='PDF', alpha=0.7)
-    # _ = plt.hist(max, bins=2000, density='PDF', alpha=0.7)
-    # plt.show()
 
     actual = [max2.mean, max2.std]
 
@@ -618,7 +534,7 @@ def testmaxOfDistributionsQUAD(dec: int):
 
     return None
 
-def testMAX_QUAD_FORMULA(dec: int):
+def testMAX_QUAD_FORMULA(dec=1):
     mu1 = 12.98553396
     sigma1 = 0.76804456
 
@@ -629,7 +545,7 @@ def testMAX_QUAD_FORMULA(dec: int):
     numberOfBins = 2000
 
     STATIC_BINS1 = np.linspace(-20, 100, numberOfBins)
-    STATIC_BINS2 = np.linspace(-10, 107, numberOfBins)
+    STATIC_BINS2 = np.linspace(-20, 100, numberOfBins)
 
     # DESIRED
 
@@ -659,7 +575,7 @@ def testMAX_QUAD_FORMULA(dec: int):
 
     return None
 
-def testMAX_QUAD_FORMULA_UNARY(dec: int):
+def testMAX_QUAD_FORMULA_UNARY(dec=0):
 
     mu1 = 12.98553396
     sigma1 = 4.76804456
@@ -695,10 +611,7 @@ def testMAX_QUAD_FORMULA_UNARY(dec: int):
 
     return None
 
-
-
-
-def testMAX_QUAD_FORMULA_UNARY2(dec: int):
+def testMAX_QUAD_FORMULA_UNARY2(dec=0):
 
     mu1 = 12.98553396
     sigma1 = 4.76804456
@@ -742,69 +655,18 @@ def testMAX_QUAD_FORMULA_UNARY2(dec: int):
 
     return None
 
-def test_convANDmax(dec: int):
-    mu1 = 12.98553396
-    sigma1 = 2.76804456
-
-    mu2 = 13.98483475
-    sigma2 = 2.802585
-
-    mu3 = 20.98483475
-    sigma3 = 0.802585
-
-
-    interval = (4, 45)
-
-    numberOfSamples = 2000000
-    numberOfBins = 30
-    numberOfUnaries = 30
-
-    # DESIRED
-
-    rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
-    rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
-    rv3 = np.random.normal(mu3, sigma3, numberOfSamples)
-
-    max = np.maximum(rv1, rv2)
-    max = max + rv3
-    desired = [np.mean(max), np.std(max)]
-
-    # ACTUAL
-
-    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv5 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv6 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-
-
-
-    # max2 = rv4.maxOfDistributionsQUAD_FORMULA_UNARY(rv5)
-    # max2 = max2.convolutionOfTwoVarsNaiveSAME_UNARY(rv6)
-    max2 = rv4.maximum_AND_Convolution_UNARY(rv5, rv6)
-    max2 = histogramGenerator.get_Histogram_from_UNARY(max2)
-    actual = [max2.mean, max2.std]
-
-    plt.hist(max2.edges[:-1], max2.edges, weights=max2.bins, density="PDF", color='blue')
-    _ = plt.hist(max, bins=2000, density='PDF', alpha=0.7, color='orange')
-    plt.show()
-
-    # TESTING
-
-    np.testing.assert_almost_equal(desired, actual, decimal=dec)
-
-    return None
-
-def test_Convolution_UNARY(dec: int):
+def test_Convolution_UNARY(dec=0):
 
     mu1 = 22.98553396
     sigma1 = 2.76804456
 
-    mu2 = 18.98483475
+    mu2 = 22.98483475
     sigma2 = 2.802585
 
     interval = (-2, 50)
 
     numberOfSamples = 2000000
-    numberOfBins = 50
+    numberOfBins = 100
     numberOfUnaries = 100
 
     # DESIRED
@@ -831,39 +693,3 @@ def test_Convolution_UNARY(dec: int):
 
 
 
-if __name__ == "__main__":
-
-        # dec param is Desired precision
-
-    # testMeanGauss(dec=2)
-    # testMeanUniform(dec=2)
-    #
-    # testStdGauss(dec=2)
-    # testStdUniform(dec=2)
-    #
-    # maxOfDistributionsELEMENTWISE(dec=0)
-    # maxOfDistributionsFORM_MultiMax(dec=5)
-    # testmaxOfDistributionsQUAD(dec=5)
-
-    # testUniteEdges(dec=2)   # failed test
-    # testUniteEdgesNormal(dec=2)
-    # testUniteEdgesStudent(dec=2)
-    #
-    # testMaxAndConvolution(dec=1)
-
-    # testConvolutionUnion(dec=2)
-    # testConvolutionUniformShift(dec=4)
-    testConvolutionGaussShift(dec=2)
-
-    # testConvolutionNaive(1)
-    # testMAX_QUAD_FORMULA(3)
-    # testMAX_QUAD_FORMULA_UNARY(3)
-    # test_Convolution_UNARY(3)
-
-    # testMAX_UNARY(5)
-
-    # test_Convolution_UNARY(2)
-
-    # test_convANDmax(2)
-
-    print("All tests passed!")
