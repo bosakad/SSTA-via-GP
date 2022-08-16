@@ -11,14 +11,14 @@ programming. In particular, a histogram approximation of the statistical approac
 employed. We apply our proposed algorithms to the ISCAS benchmark circuit and
 compare the results with the deterministic approach.
 
-### Set up ###
-`pip install -r requirements.txt
-pip install .
-python3 setup.py clean
-`
+### Set up: ###
+`pip install -r requirements.txt`
+`pip install .`
+`python3 setup.py clean`
 
-Full documentation is located at: docs/_build/html
+### Other info: ###
+* Full documentation is located at: docs/_build/html
 
-Source of the project is located at: src/gateSizing
+* Source of the project is located at: src/gateSizing
 
-Main script is src/gateSizing/optimizeGates.py
+* Main script is src/gateSizing/optimizeGates.py
