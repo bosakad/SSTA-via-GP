@@ -1,7 +1,7 @@
 import histogramGenerator
-import test_infiniteLadder
+import infiniteLadder
 import numpy as np
-from test_algorithms import computeMAPE
+from ScalingAlgorithms import computeMAPE
 import matplotlib.pyplot as plt
 import SSTA
 from test_SSTA_Numpy import putTuplesIntoArray

@@ -1,13 +1,13 @@
-import test_infiniteLadder
+import infiniteLadder
 import numpy as np
 
 
 """
-    This Module includes functions that test infiniteLadder on on 2 algorithms and dependant on number of gates.
+    This Module includes functions that test scalability infiniteLadder on on 2 algorithms and dependant on number of gates.
     Indicator is number of nonzero constraints dependant on number of gates. Also tests optimization of the circuit. 
 """
 
-def testAlgorithms():
+def AlgorithmsScaling():
 
         # number of testing
     numberOfIterations = 1
@@ -30,7 +30,7 @@ def testAlgorithms():
     for iter in range(0, numberOfIterations):
 
         numGates = numberOfGatesStart + iter * step
-        lastGate = test_infiniteLadder.MonteCarlo(numGates)
+        lastGate = infiniteLadder.MonteCarlo(numGates)
 
         # saving values
         rvs_MonteCarlo[iter, 0] = lastGate[0]
@@ -43,7 +43,7 @@ def testAlgorithms():
         print("\n\n" + str(iter) + ". iteration: \n\n")
 
         numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate, time = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins,
+        numNonZeros, ObjVal, lastGate, time = infiniteLadder.main(numGates, numberOfUnaries, numberOfBins,
                                                                        interval,
                                                                        withSymmetryConstr=True)
 
@@ -69,7 +69,7 @@ def testAlgorithms():
 
             # calculating
         numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate, time = test_infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
+        numNonZeros, ObjVal, lastGate, time = infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
                                                                 withSymmetryConstr=False)
         print(time)
             # saving values
@@ -115,7 +115,7 @@ def testAlgorithms():
     print("\n\n" + str(results))
 
 
-def testAlgorithms_MOSEK():
+def AlgorithmsScaling_MOSEK():
 
     # number of testing
     numberOfIterations = 1
@@ -138,7 +138,7 @@ def testAlgorithms_MOSEK():
     # MonteCarlo
     for iter in range(0, numberOfIterations):
         numGates = numberOfGatesStart + iter * step
-        lastGate = test_infiniteLadder.MonteCarlo(numGates)
+        lastGate = infiniteLadder.MonteCarlo(numGates)
 
         # saving values
         rvs_MonteCarlo[iter, 0] = lastGate[0]
@@ -151,7 +151,7 @@ def testAlgorithms_MOSEK():
 
         numGates = numberOfGatesStart + iter * step
         numNonZeros, ObjVal, lastGate, time, numVars, numConstr, mipGapRoot,nVarsPresolve, nConstrPresolve = \
-                                            test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
+                                            infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
                                                                             interval, TRI=False,
                                                                             withSymmetryConstr=True)
 
@@ -255,7 +255,7 @@ def testAlgorithms_CVXPY_GP():
     # MonteCarlo
     for iter in range(0, numberOfIterations):
         numGates = numberOfGatesStart + iter * step
-        lastGate = test_infiniteLadder.MonteCarlo(numGates)
+        lastGate = infiniteLadder.MonteCarlo(numGates)
 
         # saving values
         rvs_MonteCarlo[iter, 0] = lastGate[0]
@@ -266,7 +266,7 @@ def testAlgorithms_CVXPY_GP():
         print("\n\n" + str(iter) + ". iteration: \n\n")
 
         numGates = numberOfGatesStart + iter * step
-        lastGate, time = test_infiniteLadder.mainCVXPY_GP(numGates, numberOfBins, interval)
+        lastGate, time = infiniteLadder.mainCVXPY_GP(numGates, numberOfBins, interval)
 
         # saving values
         rvs_Precise[iter, 0] = lastGate[0]
@@ -313,7 +313,7 @@ def scalingBins_CVXPY_GP():
     # MonteCarlo
     for iter in range(0, 1):
         numGates = numberOfGates
-        lastGate = test_infiniteLadder.MonteCarlo(numGates)
+        lastGate = infiniteLadder.MonteCarlo(numGates)
 
         # saving values
         rvs_MonteCarlo[iter, 0] = lastGate[0]
@@ -330,7 +330,7 @@ def scalingBins_CVXPY_GP():
         # numBins = numBinsStart + iter * step
         numBins = BINS[iter]
         print(numBins)
-        lastGate, time = test_infiniteLadder.mainCVXPY_GP(numberOfGates, numBins, interval)
+        lastGate, time = infiniteLadder.mainCVXPY_GP(numberOfGates, numBins, interval)
 
         # saving values
         rvs_Precise[iter, 0] = lastGate[0]
@@ -379,7 +379,7 @@ def scalingOptimization_CVXPY_GP():
         numGates = GATES[iter]
         print(numGates)
         # lastGate, time = test_infiniteLadder.mainCVXPY_GP_Sizing(numGates, numberOfBins, interval)
-        lastGate, time = test_infiniteLadder.mainCVXPY_GP(numGates, numberOfBins, interval)
+        lastGate, time = infiniteLadder.mainCVXPY_GP(numGates, numberOfBins, interval)
 
         results[(numGates, False)] = (-1, -1, time, 0, 0, -1, -1, -1,
                                      -1, -1)
@@ -416,7 +416,7 @@ def testAlgorithms_PRESOLVE():
             print("\n\n" + str(iter) + ". iteration: \n\n")
 
             numGates = numberOfGatesStart + iter * step
-            numNonZeros, ObjVal, lastGate, time, numVars, numConstr = test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
+            numNonZeros, ObjVal, lastGate, time, numVars, numConstr = infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
                                                                                 interval,
                                                                                 withSymmetryConstr=True, presolvePasses=curPasses)
 
@@ -459,12 +459,8 @@ def computeMAPE(n_bins, n_unaries, start, function):
 
 if __name__ == "__main__":
 
-    # testAlgorithms()
 
-    # testAlgorithms_MOSEK()
-    testAlgorithms_CVXPY_GP()
-
-    # scalingBins_CVXPY_GP()
+    scalingBins_CVXPY_GP()
     # scalingOptimization_CVXPY_GP()
 
     # testAlgorithms_PRESOLVE()
