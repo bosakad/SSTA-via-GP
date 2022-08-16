@@ -11,7 +11,7 @@ programming. In particular, a histogram approximation of the statistical approac
 employed. We apply our proposed algorithms to the ISCAS benchmark circuit and
 compare the results with the deterministic approach.
 
- Markup : * Bullet list
+# * Bullet list
 
 Full documentation is located at: docs/_build/html
 
