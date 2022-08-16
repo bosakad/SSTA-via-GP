@@ -18,16 +18,14 @@ def streamprinter(text):
     sys.stdout.flush()
 
 
-def testConvolution_MAX(dec = 3):
+def testConvolution_MAX(dec=3):
     mu1 = 7
     sigma1 = 2
 
     mu2 = 10
     sigma2 = 1
 
-
     numberOfGates = 2
-
 
     interval = (-10, 40)
 
@@ -37,9 +35,12 @@ def testConvolution_MAX(dec = 3):
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-
+    rv1 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv2 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
     # max1 = test1.convolutionOfTwoVarsShift(test2)
@@ -58,7 +59,7 @@ def testConvolution_MAX(dec = 3):
             # Attach a printer to the task
             task.set_Stream(mosek.streamtype.log, streamprinter)
 
-            numberVariablesRVs = numberOfGates*numberOfBins * numberOfUnaries
+            numberVariablesRVs = numberOfGates * numberOfBins * numberOfUnaries
 
             # The constraints will initially have no bounds.
             # task.appendcons(numberVariablesRVs)
@@ -67,10 +68,9 @@ def testConvolution_MAX(dec = 3):
 
             # set variables to be boolean
             rvIndices = np.array(range(0, numberVariablesRVs))
-            task.putvartypelist(rvIndices,
-                                [mosek.variabletype.type_int] * numberVariablesRVs)
-
-
+            task.putvartypelist(
+                rvIndices, [mosek.variabletype.type_int] * numberVariablesRVs
+            )
 
             bins1 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins2 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
@@ -85,32 +85,45 @@ def testConvolution_MAX(dec = 3):
                 for bin in range(0, numberOfBins):
                     for unary in range(0, numberOfUnaries):
 
-                        variableIndex = gate*numberOfBins*numberOfUnaries + bin*numberOfUnaries + unary
+                        variableIndex = (
+                            gate * numberOfBins * numberOfUnaries
+                            + bin * numberOfUnaries
+                            + unary
+                        )
                         # task.putcj(variableIndex, 1)
 
                         # Set the bounds on variable
                         # 0 <= x_j <= 1
 
                         # task.putvarbound(variableIndex, mosek.boundkey.ra, 0.0, generatedRV.bins[bin, unary])
-                        task.putvarbound(variableIndex, mosek.boundkey.ra, generatedRV.bins[bin, unary], 1)
+                        task.putvarbound(
+                            variableIndex,
+                            mosek.boundkey.ra,
+                            generatedRV.bins[bin, unary],
+                            1,
+                        )
 
-                            # save index to the bins
+                        # save index to the bins
                         currentBins[bin, unary] = variableIndex
-
 
             RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
             RV2 = RandomVariableMOSEK(bins2, rv1.edges, task)
 
-            convolution, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs, 0
-                                                                                                     ,asMin=True, withSymmetryConstr=True)
+            (
+                convolution,
+                newNofVariables,
+                newNofConstr,
+            ) = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(
+                RV2, numberVariablesRVs, 0, asMin=True, withSymmetryConstr=True
+            )
             # print(newNofConstr)
             convolutionConCat = convolution.bins
 
-                # create the objective function
+            # create the objective function
             convolutionConCat = np.concatenate(convolutionConCat)
-            task.putclist(convolutionConCat, [1]*convolutionConCat.shape[0])
+            task.putclist(convolutionConCat, [1] * convolutionConCat.shape[0])
 
-                # solve problem
+            # solve problem
 
             # Input the objective sense (minimize/maximize)
             task.putobjsense(mosek.objsense.minimize)
@@ -126,7 +139,7 @@ def testConvolution_MAX(dec = 3):
             solsta = task.getsolsta(mosek.soltype.itg)
 
             # Output a solution
-            xx = np.array([0.] * newNofVariables)
+            xx = np.array([0.0] * newNofVariables)
             task.getxx(mosek.soltype.itg, xx)
 
             if solsta in [mosek.solsta.integer_optimal]:
@@ -147,7 +160,6 @@ def testConvolution_MAX(dec = 3):
             else:
                 print("Other solution status")
 
-
             convolution.bins = xx[convolution.bins]
             print(convolution.bins)
 
@@ -159,7 +171,8 @@ def testConvolution_MAX(dec = 3):
 
             np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
-def testMaximum_MAX(dec = 0):
+
+def testMaximum_MAX(dec=0):
     mu1 = 5.98553396
     sigma1 = 1
 
@@ -169,7 +182,6 @@ def testMaximum_MAX(dec = 0):
     sigma2 = 1
     numberOfGates = 2
 
-
     interval = (0, 10)
 
     numberOfSamples = 2000000
@@ -178,9 +190,12 @@ def testMaximum_MAX(dec = 0):
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-
+    rv1 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv2 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)
     # max1 = test1.convolutionOfTwoVarsShift(test2)
@@ -203,17 +218,16 @@ def testMaximum_MAX(dec = 0):
             # Attach a printer to the task
             task.set_Stream(mosek.streamtype.log, streamprinter)
 
-            numberVariablesRVs = numberOfGates*numberOfBins * numberOfUnaries
+            numberVariablesRVs = numberOfGates * numberOfBins * numberOfUnaries
 
             # The variables will initially be fixed at zero (x=0).
             task.appendvars(numberVariablesRVs)
 
             # set variables to be boolean
             rvIndices = np.array(range(0, numberVariablesRVs))
-            task.putvartypelist(rvIndices,
-                                [mosek.variabletype.type_int] * numberVariablesRVs)
-
-
+            task.putvartypelist(
+                rvIndices, [mosek.variabletype.type_int] * numberVariablesRVs
+            )
 
             bins1 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins2 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
@@ -228,32 +242,43 @@ def testMaximum_MAX(dec = 0):
                 for bin in range(0, numberOfBins):
                     for unary in range(0, numberOfUnaries):
 
-                        variableIndex = gate*numberOfBins*numberOfUnaries + bin*numberOfUnaries + unary
+                        variableIndex = (
+                            gate * numberOfBins * numberOfUnaries
+                            + bin * numberOfUnaries
+                            + unary
+                        )
                         # task.putcj(variableIndex, 1)
 
                         # Set the bounds on variable
                         # 0 <= x_j <= 1
 
-                        task.putvarbound(variableIndex, mosek.boundkey.ra, 0.0, generatedRV.bins[bin, unary])
+                        task.putvarbound(
+                            variableIndex,
+                            mosek.boundkey.ra,
+                            0.0,
+                            generatedRV.bins[bin, unary],
+                        )
 
-                            # save index to the bins
+                        # save index to the bins
                         currentBins[bin, unary] = variableIndex
-
-
-
 
             RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
             RV2 = RandomVariableMOSEK(bins2, rv1.edges, task)
 
-            maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs,
-                                                                                             0, withSymmetryConstr=True)
+            (
+                maximum,
+                newNofVariables,
+                newNofConstr,
+            ) = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(
+                RV2, numberVariablesRVs, 0, withSymmetryConstr=True
+            )
             maximumConCat = maximum.bins
 
-                # create the objective function
+            # create the objective function
             maximumConCat = np.concatenate(maximumConCat)
-            task.putclist(maximumConCat, [1]*maximumConCat.shape[0])
+            task.putclist(maximumConCat, [1] * maximumConCat.shape[0])
 
-                # solve problem
+            # solve problem
 
             # Input the objective sense (minimize/maximize)
             task.putobjsense(mosek.objsense.maximize)
@@ -268,7 +293,7 @@ def testMaximum_MAX(dec = 0):
             solsta = task.getsolsta(mosek.soltype.itg)
 
             # Output a solution
-            xx = np.array([0.] * newNofVariables)
+            xx = np.array([0.0] * newNofVariables)
             task.getxx(mosek.soltype.itg, xx)
 
             if solsta in [mosek.solsta.integer_optimal]:
@@ -289,7 +314,6 @@ def testMaximum_MAX(dec = 0):
             else:
                 print("Other solution status")
 
-
             maximum.bins = xx[maximum.bins]
             # print(maximum.bins)
 
@@ -302,8 +326,7 @@ def testMaximum_MAX(dec = 0):
             np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
 
-
-def testMaximum_MAX_CONV(dec = 1):
+def testMaximum_MAX_CONV(dec=1):
     mu1 = 5.98553396
     sigma1 = 1
 
@@ -315,7 +338,6 @@ def testMaximum_MAX_CONV(dec = 1):
 
     numberOfGates = 3
 
-
     interval = (-1, 9)
 
     numberOfSamples = 2000000
@@ -324,9 +346,15 @@ def testMaximum_MAX_CONV(dec = 1):
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv3 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv1 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv2 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv3 = histogramGenerator.get_gauss_bins_UNARY(
+        mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     # print(rv1.bins)
     # print(rv2.bins)
@@ -336,7 +364,6 @@ def testMaximum_MAX_CONV(dec = 1):
     # conv = conv.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)
     # conv = conv.convolutionOfTwoVarsNaiveSAME_UNARY(rv3)
     # max1 = test1.convolutionOfTwoVarsShift(test2)
-
 
     desired = [conv.mean, conv.std]
 
@@ -353,17 +380,16 @@ def testMaximum_MAX_CONV(dec = 1):
             # Attach a printer to the task
             task.set_Stream(mosek.streamtype.log, streamprinter)
 
-            numberVariablesRVs = numberOfGates*numberOfBins * numberOfUnaries
+            numberVariablesRVs = numberOfGates * numberOfBins * numberOfUnaries
 
             # The variables will initially be fixed at zero (x=0).
             task.appendvars(numberVariablesRVs)
 
             # set variables to be boolean
             rvIndices = np.array(range(0, numberVariablesRVs))
-            task.putvartypelist(rvIndices,
-                                [mosek.variabletype.type_int] * numberVariablesRVs)
-
-
+            task.putvartypelist(
+                rvIndices, [mosek.variabletype.type_int] * numberVariablesRVs
+            )
 
             bins1 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins2 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
@@ -379,26 +405,35 @@ def testMaximum_MAX_CONV(dec = 1):
                 for bin in range(0, numberOfBins):
                     for unary in range(0, numberOfUnaries):
 
-                        variableIndex = gate*numberOfBins*numberOfUnaries + bin*numberOfUnaries + unary
+                        variableIndex = (
+                            gate * numberOfBins * numberOfUnaries
+                            + bin * numberOfUnaries
+                            + unary
+                        )
                         # task.putcj(variableIndex, 1)
 
                         # Set the bounds on variable
                         # 0 <= x_j <= 1
 
-                        task.putvarbound(variableIndex, mosek.boundkey.ra, 0.0, generatedRV.bins[bin, unary])
+                        task.putvarbound(
+                            variableIndex,
+                            mosek.boundkey.ra,
+                            0.0,
+                            generatedRV.bins[bin, unary],
+                        )
 
-                            # save index to the bins
+                        # save index to the bins
                         currentBins[bin, unary] = variableIndex
-
-
-
 
             RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
             RV2 = RandomVariableMOSEK(bins2, rv1.edges, task)
             RV3 = RandomVariableMOSEK(bins3, rv1.edges, task)
 
-            maximum, newNofVariables, newNofConstr = RV1.maximum_AND_Convolution_VECTORIZED(RV2, RV3, numberVariablesRVs,
-                                                                                             0)
+            (
+                maximum,
+                newNofVariables,
+                newNofConstr,
+            ) = RV1.maximum_AND_Convolution_VECTORIZED(RV2, RV3, numberVariablesRVs, 0)
 
             # maximum, newNofVariables, newNofConstr = RV1.maximum_UNARY_MAX_DIVIDE_VECTORIZED(RV2, numberVariablesRVs,
             #                                                                       0, withSymmetryConstr=True)
@@ -406,14 +441,13 @@ def testMaximum_MAX_CONV(dec = 1):
             # maximum, newNofVariables, newNofConstr = maximum.convolution_UNARY_MAX_DIVIDE_VECTORIZED(RV3, newNofVariables,
             #                                                                       newNofConstr, withSymmetryConstr=True)
 
-
             maximumConCat = maximum.bins
 
-                # create the objective function
+            # create the objective function
             maximumConCat = np.concatenate(maximumConCat)
-            task.putclist(maximumConCat, [1]*maximumConCat.shape[0])
+            task.putclist(maximumConCat, [1] * maximumConCat.shape[0])
 
-                # solve problem
+            # solve problem
 
             # Input the objective sense (minimize/maximize)
             task.putobjsense(mosek.objsense.maximize)
@@ -428,7 +462,7 @@ def testMaximum_MAX_CONV(dec = 1):
             solsta = task.getsolsta(mosek.soltype.itg)
 
             # Output a solution
-            xx = np.array([0.] * newNofVariables)
+            xx = np.array([0.0] * newNofVariables)
             task.getxx(mosek.soltype.itg, xx)
 
             if solsta in [mosek.solsta.integer_optimal]:
@@ -462,7 +496,8 @@ def testMaximum_MAX_CONV(dec = 1):
 
             np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
-def testMaximum_MAX_CONV2_asmin(dec = 1):
+
+def testMaximum_MAX_CONV2_asmin(dec=1):
     mu1 = 5.98553396
     sigma1 = 1
 
@@ -472,9 +507,7 @@ def testMaximum_MAX_CONV2_asmin(dec = 1):
     mu3 = 2
     sigma3 = 0.2
 
-
     numberOfGates = 3
-
 
     interval = (0, 9)
 
@@ -484,15 +517,19 @@ def testMaximum_MAX_CONV2_asmin(dec = 1):
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv3 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv1 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv2 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv3 = histogramGenerator.get_gauss_bins_UNARY(
+        mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     conv = rv1.maximum_AND_Convolution_UNARY(rv2, rv3)
 
-
     desired = [conv.mean, conv.std]
-
 
     # Make a MOSEK environment
     with mosek.Env() as env:
@@ -504,23 +541,21 @@ def testMaximum_MAX_CONV2_asmin(dec = 1):
             # Attach a printer to the task
             task.set_Stream(mosek.streamtype.log, streamprinter)
 
-            numberVariablesRVs = numberOfGates*numberOfBins * numberOfUnaries
+            numberVariablesRVs = numberOfGates * numberOfBins * numberOfUnaries
 
             # The variables will initially be fixed at zero (x=0).
             task.appendvars(numberVariablesRVs)
 
             # set variables to be boolean
             rvIndices = np.array(range(0, numberVariablesRVs))
-            task.putvartypelist(rvIndices,
-                                [mosek.variabletype.type_int] * numberVariablesRVs)
-
-
+            task.putvartypelist(
+                rvIndices, [mosek.variabletype.type_int] * numberVariablesRVs
+            )
 
             bins1 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins2 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins3 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
             bins4 = np.zeros((numberOfBins, numberOfUnaries)).astype(int)
-
 
             gates = [rv1, rv2, rv3]
             bins = [bins1, bins2, bins3]
@@ -532,40 +567,49 @@ def testMaximum_MAX_CONV2_asmin(dec = 1):
                 for bin in range(0, numberOfBins):
                     for unary in range(0, numberOfUnaries):
 
-                        variableIndex = gate*numberOfBins*numberOfUnaries + bin*numberOfUnaries + unary
+                        variableIndex = (
+                            gate * numberOfBins * numberOfUnaries
+                            + bin * numberOfUnaries
+                            + unary
+                        )
                         # task.putcj(variableIndex, 1)
 
                         # Set the bounds on variable
                         # 0 <= x_j <= 1
 
-                        task.putvarbound(variableIndex, mosek.boundkey.ra, generatedRV.bins[bin, unary], 1)
+                        task.putvarbound(
+                            variableIndex,
+                            mosek.boundkey.ra,
+                            generatedRV.bins[bin, unary],
+                            1,
+                        )
                         # task.putvarbound(variableIndex, mosek.boundkey.ra, 0, 1)
 
-                            # save index to the bins
+                        # save index to the bins
                         currentBins[bin, unary] = variableIndex
-
-
-
 
             RV1 = RandomVariableMOSEK(bins1, rv1.edges, task)
             RV2 = RandomVariableMOSEK(bins2, rv1.edges, task)
             RV3 = RandomVariableMOSEK(bins3, rv1.edges, task)
             RV4 = RandomVariableMOSEK(bins4, rv1.edges, task)
 
-
-            maximum, newNofVariables, newNofConstr = RV1.maximum_AND_Convolution_VECTORIZED_MIN(RV2, RV3,
-                                                                                                numberVariablesRVs,
-                                                                                                0)
+            (
+                maximum,
+                newNofVariables,
+                newNofConstr,
+            ) = RV1.maximum_AND_Convolution_VECTORIZED_MIN(
+                RV2, RV3, numberVariablesRVs, 0
+            )
 
             maximumConCat = maximum.bins
 
-                # create the objective function
+            # create the objective function
             maximumConCat = np.concatenate(maximumConCat)
-            task.putclist(maximumConCat, [1]*maximumConCat.shape[0])
+            task.putclist(maximumConCat, [1] * maximumConCat.shape[0])
 
             task.appendcons(numberOfGates * numberOfBins)
 
-            gateNodes = [bins1, bins2, bins3, bins4 ]
+            gateNodes = [bins1, bins2, bins3, bins4]
 
             for gate in range(0, numberOfGates):
 
@@ -579,9 +623,15 @@ def testMaximum_MAX_CONV2_asmin(dec = 1):
 
                     row = curNode[bin, :]
 
-                    task.putarow(newNofConstr + gate * numberOfBins + bin, row, [1] * row.size)
-                    task.putconbound(newNofConstr + gate * numberOfBins + bin, mosek.boundkey.fx, generatedValues, generatedValues)
-
+                    task.putarow(
+                        newNofConstr + gate * numberOfBins + bin, row, [1] * row.size
+                    )
+                    task.putconbound(
+                        newNofConstr + gate * numberOfBins + bin,
+                        mosek.boundkey.fx,
+                        generatedValues,
+                        generatedValues,
+                    )
 
             newNofConstr = newNofConstr + numberOfGates * numberOfBins
 
@@ -599,11 +649,13 @@ def testMaximum_MAX_CONV2_asmin(dec = 1):
                         task.putaij(newNofConstr + offset, curNode[bin, unary], 1)
                         task.putaij(newNofConstr + offset, curNode[bin, unary + 1], -1)
 
-                        task.putconbound(newNofConstr + offset, mosek.boundkey.lo, 0, 0.0)
+                        task.putconbound(
+                            newNofConstr + offset, mosek.boundkey.lo, 0, 0.0
+                        )
 
             newNofConstr += (numberOfUnaries - 1) * numberOfBins
 
-                # solve problem
+            # solve problem
 
             # Input the objective sense (minimize/maximize)
             task.putobjsense(mosek.objsense.minimize)
@@ -618,7 +670,7 @@ def testMaximum_MAX_CONV2_asmin(dec = 1):
             solsta = task.getsolsta(mosek.soltype.itg)
 
             # Output a solution
-            xx = np.array([0.] * newNofVariables)
+            xx = np.array([0.0] * newNofVariables)
             task.getxx(mosek.soltype.itg, xx)
 
             if solsta in [mosek.solsta.integer_optimal]:
@@ -651,4 +703,3 @@ def testMaximum_MAX_CONV2_asmin(dec = 1):
             print(actual)
 
             np.testing.assert_almost_equal(desired, actual, decimal=dec)
-

@@ -2,8 +2,8 @@ import numpy
 import numpy as np
 import histogramGenerator
 from randomVariableHist_Numpy import RandomVariable
-# import matplotlib.pyplot as plt
 
+# import matplotlib.pyplot as plt
 
 
 def maxOfDistributionsELEMENTWISE(dec=1):
@@ -15,7 +15,7 @@ def maxOfDistributionsELEMENTWISE(dec=1):
 
     STATIC_BINS = np.linspace(-20, 40, numberOfBins)
 
-        # DESIRED
+    # DESIRED
 
     rv1 = np.random.normal(mu, sigma, numberOfSamples)
     rv2 = np.random.normal(mu, sigma, numberOfSamples)
@@ -23,7 +23,7 @@ def maxOfDistributionsELEMENTWISE(dec=1):
     max = np.maximum(rv1, rv2)
     desired = [np.mean(max), np.std(max)]
 
-       # ACTUAL
+    # ACTUAL
 
     data, edges = np.histogram(rv1, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
@@ -37,11 +37,12 @@ def maxOfDistributionsELEMENTWISE(dec=1):
 
     actual = [max2.mean, max2.std]
 
-        # TESTING
+    # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
+
 
 def maxOfDistributionsFORM_MultiMax(dec=1):
 
@@ -65,14 +66,13 @@ def maxOfDistributionsFORM_MultiMax(dec=1):
 
     STATIC_BINS = np.linspace(40, 250, numberOfBins)
 
-        # DESIRED
+    # DESIRED
 
     rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
     rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
     rv3 = np.random.normal(mu3, sigma3, numberOfSamples)
     rv4 = np.random.normal(mu4, sigma4, numberOfSamples)
     rv5 = np.random.normal(mu5, sigma5, numberOfSamples)
-
 
     desired = np.zeros((4, 2))
 
@@ -85,7 +85,6 @@ def maxOfDistributionsFORM_MultiMax(dec=1):
     # desired[1, :] = [np.mean(max2), np.std(max2)]
     # desired[2, :] = [np.mean(max3), np.std(max3)]
     desired[3, :] = [np.mean(max4), np.std(max4)]
-
 
     # ACTUAL
     #
@@ -109,8 +108,6 @@ def maxOfDistributionsFORM_MultiMax(dec=1):
     # dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     # h5 = RandomVariable(dataNorm, edges)
 
-
-
     data, edges = np.histogram(max3, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
     h5 = RandomVariable(dataNorm, edges)
@@ -123,8 +120,6 @@ def maxOfDistributionsFORM_MultiMax(dec=1):
     # max22 = max21.convolutionOfTwoVarsUnion(h3)
     # max23 = max22.convolutionOfTwoVarsUnion(h4)
     max24 = max23.maxOfDistributionsFORM(h5)
-
-
 
     # plt.hist(h1.edges[:-1], h1.edges, weights=h1.bins, density="PDF")
     # plt.hist(h2.edges[:-1], h2.edges, weights=h2.bins, density="PDF")
@@ -140,12 +135,16 @@ def maxOfDistributionsFORM_MultiMax(dec=1):
     # actual[2, :] = [max23.mean, max23.std]
     actual[3, :] = [max24.mean, max24.std]
 
-        # TESTING
+    # TESTING
 
-    np.testing.assert_almost_equal(desired, actual, decimal=dec,  err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
+    np.testing.assert_almost_equal(
+        desired,
+        actual,
+        decimal=dec,
+        err_msg="Monte Carlo: \n" + str(desired) + "\n\n" + "SSTA: \n" + str(actual),
+    )
 
     return None
-
 
 
 def testConvolutionGaussShift(dec=1):
@@ -159,16 +158,16 @@ def testConvolutionGaussShift(dec=1):
     numberOfSamples = 20000000
     numberOfBins = 10000
 
-        # DESIRED
+    # DESIRED
 
     rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
     rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
 
     convolution = rv1 + rv2
-    
+
     desired = [np.mean(convolution), np.std(convolution)]
 
-        # ACTUAL
+    # ACTUAL
 
     STATIC_BINS = np.linspace(-50, 90, numberOfBins)
 
@@ -186,7 +185,7 @@ def testConvolutionGaussShift(dec=1):
 
     actual = [convolution.mean, convolution.std]
 
-        # TESTING
+    # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
@@ -215,9 +214,12 @@ def testMAX_UNARY(dec=1):
     desired = [np.mean(max1), np.std(max1)]
     print(desired)
 
-
-    h3 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
-    h4 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+    h3 = histogramGenerator.get_gauss_bins(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval
+    )
+    h4 = histogramGenerator.get_gauss_bins(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval
+    )
     max1 = h3.maxOfDistributionsFORM(h4)
 
     desired = [max1.mean, max1.std]
@@ -226,9 +228,12 @@ def testMAX_UNARY(dec=1):
     # ACTUAL
 
     # histogram1
-    h1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    h2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-
+    h1 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    h2 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     # max2 = h3.maxOfDistributionsQUAD_FORMULA(h4)
     # max2 = h3.maxOfDistributionsQUAD(h4)
@@ -237,12 +242,12 @@ def testMAX_UNARY(dec=1):
     actual = [max2.mean, max2.std]
     print(actual)
 
-
     # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
+
 
 def testUniteEdgesNormal(dec=1):
 
@@ -271,7 +276,6 @@ def testUniteEdgesNormal(dec=1):
     # TEST
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
-
 
     """ Test with different edges """
 
@@ -367,7 +371,6 @@ def testMaxAndConvolution(dec=1):
     actual[0, :] = [maximum2.mean, maximum2.std]
     actual[1, :] = [convolution2.mean, convolution2.std]
 
-
     # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
@@ -385,27 +388,29 @@ def testMeanGauss(dec=1):
 
     interval = (-10, 10)
 
-        # DESIRED
+    # DESIRED
 
     rv1 = np.random.normal(mu, sigma, numberOfSamples)
     desired = np.std(rv1)
     # desired = np.mean(rv1)
 
-        # ACTUAL
+    # ACTUAL
 
-    h1 = histogramGenerator.get_gauss_bins_UNARY(mu, sigma, numberOfBins, numberOfSamples, interval
-                                                 , numberOfUnaries)
+    h1 = histogramGenerator.get_gauss_bins_UNARY(
+        mu, sigma, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     actual = h1.std
     # actual = h1.mean
 
     print(desired)
     print(actual)
-        # TESTING
+    # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
+
 
 def testMeanUniform(dec=1):
 
@@ -416,12 +421,12 @@ def testMeanUniform(dec=1):
 
     STATIC_BINS = np.linspace(low, high, numberOfBins)
 
-        # DESIRED
+    # DESIRED
 
     rv1 = np.random.uniform(low, high, numberOfSamples)
     desired = np.mean(rv1)
 
-        # ACTUAL
+    # ACTUAL
 
     data, edges = np.histogram(rv1, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
@@ -429,11 +434,12 @@ def testMeanUniform(dec=1):
 
     actual = h1.mean
 
-        # TESTING
+    # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
+
 
 def testStdGauss(dec=1):
 
@@ -444,12 +450,12 @@ def testStdGauss(dec=1):
 
     STATIC_BINS = np.linspace(-4, 6, numberOfBins)
 
-        # DESIRED
+    # DESIRED
 
     rv1 = np.random.normal(mu, sigma, numberOfSamples)
     desired = np.std(rv1)
 
-        # ACTUAL
+    # ACTUAL
 
     data, edges = np.histogram(rv1, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
@@ -457,11 +463,12 @@ def testStdGauss(dec=1):
 
     actual = h1.std
 
-        # TESTING
+    # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
+
 
 def testStdUniform(dec=1):
 
@@ -472,12 +479,12 @@ def testStdUniform(dec=1):
 
     STATIC_BINS = np.linspace(low, high, numberOfBins)
 
-        # DESIRED
+    # DESIRED
 
     rv1 = np.random.uniform(low, high, numberOfSamples)
     desired = np.std(rv1)
 
-        # ACTUAL
+    # ACTUAL
 
     data, edges = np.histogram(rv1, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
@@ -485,7 +492,7 @@ def testStdUniform(dec=1):
 
     actual = h1.std
 
-        # TESTING
+    # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
@@ -505,8 +512,7 @@ def testmaxOfDistributionsQUAD(dec=1):
     STATIC_BINS1 = np.linspace(-20, 100, numberOfBins)
     STATIC_BINS2 = np.linspace(-20, 100, numberOfBins)
 
-
-        # DESIRED
+    # DESIRED
 
     rv1 = np.random.normal(mu1, sigma1, numberOfSamples)
     rv2 = np.random.normal(mu2, sigma2, numberOfSamples)
@@ -514,7 +520,7 @@ def testmaxOfDistributionsQUAD(dec=1):
     max = np.maximum(rv1, rv2)
     desired = [np.mean(max), np.std(max)]
 
-       # ACTUAL
+    # ACTUAL
 
     data, edges = np.histogram(rv1, bins=STATIC_BINS1)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
@@ -528,11 +534,12 @@ def testmaxOfDistributionsQUAD(dec=1):
 
     actual = [max2.mean, max2.std]
 
-        # TESTING
+    # TESTING
 
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
+
 
 def testMAX_QUAD_FORMULA(dec=1):
     mu1 = 12.98553396
@@ -575,6 +582,7 @@ def testMAX_QUAD_FORMULA(dec=1):
 
     return None
 
+
 def testMAX_QUAD_FORMULA_UNARY(dec=0):
 
     mu1 = 12.98553396
@@ -591,16 +599,24 @@ def testMAX_QUAD_FORMULA_UNARY(dec=0):
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
-    rv2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+    rv1 = histogramGenerator.get_gauss_bins(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval
+    )
+    rv2 = histogramGenerator.get_gauss_bins(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval
+    )
 
     max1 = rv1.maxOfDistributionsFORM(rv2)
     desired = [max1.mean, max1.std]
 
     # ACTUAL
 
-    rv3 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv3 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv4 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     max2 = rv3.maxOfDistributionsQUAD_FORMULA_UNARY(rv4)
     actual = [max2.mean, max2.std]
@@ -610,6 +626,7 @@ def testMAX_QUAD_FORMULA_UNARY(dec=0):
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
+
 
 def testMAX_QUAD_FORMULA_UNARY2(dec=0):
 
@@ -622,7 +639,6 @@ def testMAX_QUAD_FORMULA_UNARY2(dec=0):
     mu3 = 20.98483475
     sigma3 = 0.802585
 
-
     interval = (-10, 50)
 
     numberOfSamples = 2000000
@@ -631,9 +647,15 @@ def testMAX_QUAD_FORMULA_UNARY2(dec=0):
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
-    rv2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
-    rv3 = histogramGenerator.get_gauss_bins(mu3, sigma3, numberOfBins, numberOfSamples, interval)
+    rv1 = histogramGenerator.get_gauss_bins(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval
+    )
+    rv2 = histogramGenerator.get_gauss_bins(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval
+    )
+    rv3 = histogramGenerator.get_gauss_bins(
+        mu3, sigma3, numberOfBins, numberOfSamples, interval
+    )
 
     max1 = rv1.maxOfDistributionsFORM(rv2)
     max1 = max1.maxOfDistributionsFORM(rv3)
@@ -641,9 +663,15 @@ def testMAX_QUAD_FORMULA_UNARY2(dec=0):
 
     # ACTUAL
 
-    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv5 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv6 = histogramGenerator.get_gauss_bins_UNARY(mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv4 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv5 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv6 = histogramGenerator.get_gauss_bins_UNARY(
+        mu3, sigma3, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     max2 = rv4.maxOfDistributionsQUAD_FORMULA_UNARY(rv5)
     max2 = rv5.maxOfDistributionsQUAD_FORMULA_UNARY(rv6)
@@ -654,6 +682,7 @@ def testMAX_QUAD_FORMULA_UNARY2(dec=0):
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
+
 
 def test_Convolution_UNARY(dec=0):
 
@@ -671,16 +700,24 @@ def test_Convolution_UNARY(dec=0):
 
     # DESIRED
 
-    rv1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
-    rv2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+    rv1 = histogramGenerator.get_gauss_bins(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval
+    )
+    rv2 = histogramGenerator.get_gauss_bins(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval
+    )
 
     con1 = rv1.convolutionOfTwoVarsShift(rv2)
     desired = [con1.mean, con1.std]
 
     # ACTUAL
 
-    rv3 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    rv4 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    rv3 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    rv4 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     con2 = rv3.convolutionOfTwoVarsNaiveSAME_UNARY(rv4)
     actual = [con2.mean, con2.std]
@@ -690,6 +727,3 @@ def test_Convolution_UNARY(dec=0):
     np.testing.assert_almost_equal(desired, actual, decimal=dec)
 
     return None
-
-
-

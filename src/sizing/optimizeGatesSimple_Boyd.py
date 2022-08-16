@@ -5,6 +5,7 @@ import cvxpy as cp
 This module includes deterministic optimization of the circuit using Boyds RC-model. 
 """
 
+
 def computeInputCapacitance(alphas, betas, x):
     """
     Calculate input capacitance as affine function ... alpha + beta * x
@@ -52,8 +53,8 @@ def computeGateDelays(capLoad, gammas, x):
     :return cload: (1, n) array of load capacitances
     """
 
-    cloadTimesGamma = cp.multiply ( capLoad , gammas )
-    gateDelays = cp.multiply (cloadTimesGamma , 1 / x)
+    cloadTimesGamma = cp.multiply(capLoad, gammas)
+    gateDelays = cp.multiply(cloadTimesGamma, 1 / x)
 
     return gateDelays
 
@@ -73,24 +74,26 @@ def getPathDelays(gateDelays):
     #           gateDelays[2] + gateDelays[4] + gateDelays[5],
     #           gateDelays[2] + gateDelays[6]]
 
-    delays = [gateDelays[0] + gateDelays[4],
-              gateDelays[1] + gateDelays[3] + gateDelays[4],
-              gateDelays[1] + gateDelays[3] + gateDelays[5],
-              gateDelays[3] + gateDelays[4],
-              gateDelays[3] + gateDelays[5],
-              gateDelays[1] + gateDelays[2] + gateDelays[5],
-              gateDelays[2] + gateDelays[5]]
+    delays = [
+        gateDelays[0] + gateDelays[4],
+        gateDelays[1] + gateDelays[3] + gateDelays[4],
+        gateDelays[1] + gateDelays[3] + gateDelays[5],
+        gateDelays[3] + gateDelays[4],
+        gateDelays[3] + gateDelays[5],
+        gateDelays[1] + gateDelays[2] + gateDelays[5],
+        gateDelays[2] + gateDelays[5],
+    ]
 
     return cp.hstack(delays)
 
 
 def getMaximumDelay(pathDelays):
     """
-    Delay on each gate is computed as (load capacitance * gamma) / resistance
+     Delay on each gate is computed as (load capacitance * gamma) / resistance
 
-   :param pathDelays: (1, m) cvxpy variable of path delays
-   :return circuitDelay: cvxpy variable - max delay
-   """
+    :param pathDelays: (1, m) cvxpy variable of path delays
+    :return circuitDelay: cvxpy variable - max delay
+    """
 
     circuitDelay = cp.max(pathDelays)
     return circuitDelay
@@ -143,36 +146,47 @@ def getDelaySSTA():
             for unary in range(0, numberOfUnaries):
                 ((xs[gate])[bin])[unary] = cp.Variable(boolean=True)
 
-
     sum = 0
     for gate in range(0, numberOfGates):
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
-               sum += ((xs[gate])[bin])[unary]
+                sum += ((xs[gate])[bin])[unary]
 
     print(sum)
     obj = cp.Variable(pos=True)
-    constr = [ obj >= sum ]
+    constr = [obj >= sum]
 
     return obj, constr
 
 
-def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, maxArea, maxPower, loadCapacitances,
-                  numberOfGates, delaysRVs=None):
+def optimizeGates(
+    frequencies,
+    energyLoss,
+    gateScales,
+    alphas,
+    betas,
+    gammas,
+    maxArea,
+    maxPower,
+    loadCapacitances,
+    numberOfGates,
+    delaysRVs=None,
+):
     # defining variable
     x = cp.Variable(numberOfGates, pos=True)
 
     # computing the objective function
 
     inputCapacitance = computeInputCapacitance(alphas, betas, x)
-    loadCapacitance = computeLoadCapacitance(inputCapacitance, loadCapacitances, numberOfGates)
+    loadCapacitance = computeLoadCapacitance(
+        inputCapacitance, loadCapacitances, numberOfGates
+    )
     gateDelays = computeGateDelays(loadCapacitance, gammas, x)
 
     pathDelays = getPathDelays(gateDelays)
     circuitDelay = getMaximumDelay(pathDelays)
 
     # circuitDelay, otherConstr = getDelaySSTA() # test
-
 
     # computing the constraints
 
@@ -216,5 +230,6 @@ if __name__ == "__main__":
     Amax = 35
     Pmax = 55
 
-
-    optimizeGates(f, e, a, alpha, beta, gamma, Amax, Pmax, [Cout6, Cout7], numberOfGates)
+    optimizeGates(
+        f, e, a, alpha, beta, gamma, Amax, Pmax, [Cout6, Cout7], numberOfGates
+    )

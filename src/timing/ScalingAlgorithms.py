@@ -7,9 +7,10 @@ import numpy as np
     Indicator is number of nonzero constraints dependant on number of gates. Also tests optimization of the circuit. 
 """
 
+
 def AlgorithmsScaling():
 
-        # number of testing
+    # number of testing
     numberOfIterations = 1
     step = 1
 
@@ -19,7 +20,7 @@ def AlgorithmsScaling():
 
     interval = (0, 35)
 
-        # for saving values of the last gates and calculating error
+    # for saving values of the last gates and calculating error
     rvs_nonPrecise = np.zeros((numberOfIterations, 2))
     rvs_Precise = np.zeros((numberOfIterations, 2))
     rvs_MonteCarlo = np.zeros((numberOfIterations, 2))
@@ -36,22 +37,25 @@ def AlgorithmsScaling():
         rvs_MonteCarlo[iter, 0] = lastGate[0]
         rvs_MonteCarlo[iter, 1] = lastGate[1]
 
-
     print("SYMMETRY\n\n")
     # test precise
     for iter in range(0, numberOfIterations):
         print("\n\n" + str(iter) + ". iteration: \n\n")
 
         numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate, time = infiniteLadder.main(numGates, numberOfUnaries, numberOfBins,
-                                                                       interval,
-                                                                       withSymmetryConstr=True)
+        numNonZeros, ObjVal, lastGate, time = infiniteLadder.main(
+            numGates, numberOfUnaries, numberOfBins, interval, withSymmetryConstr=True
+        )
 
         # saving values
         rvs_Precise[iter, 0] = lastGate[0]
         rvs_Precise[iter, 1] = lastGate[1]
 
-        MAPE = 100 * np.abs(np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))
+        MAPE = 100 * np.abs(
+            np.divide(
+                rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]
+            )
+        )
 
         if iter != 0:
             prevError = np.zeros(2)
@@ -63,37 +67,38 @@ def AlgorithmsScaling():
         results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1])
 
     print("NO SYMMETRY\n\n")
-        # test non-precise
+    # test non-precise
     for iter in range(0, numberOfIterations):
         print(str(iter) + ". iteration: \n\n")
 
-            # calculating
+        # calculating
         numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate, time = infiniteLadder.main(numGates, numberOfUnaries, numberOfBins, interval,
-                                                                withSymmetryConstr=False)
+        numNonZeros, ObjVal, lastGate, time = infiniteLadder.main(
+            numGates, numberOfUnaries, numberOfBins, interval, withSymmetryConstr=False
+        )
         print(time)
-            # saving values
+        # saving values
         rvs_nonPrecise[iter, 0] = lastGate[0]
         rvs_nonPrecise[iter, 1] = lastGate[1]
 
-        MAPE = 100*np.abs( np.divide(rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]) )
+        MAPE = 100 * np.abs(
+            np.divide(
+                rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :],
+                rvs_MonteCarlo[iter, :],
+            )
+        )
 
         if iter != 0:
             prevError = np.zeros(2)
             prevError[0] = results[(numGates - step, False)][2]
             prevError[1] = results[(numGates - step, False)][3]
 
-            MAPE = ((MAPE + prevError) * iter) / (iter+1)
+            MAPE = ((MAPE + prevError) * iter) / (iter + 1)
 
         results[(numGates, False)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1])
 
         # print results
     print("\n\n" + str(results))
-
-
-
-
-
 
     print("\nNON-symmetry:\n")
     print(rvs_nonPrecise)
@@ -105,13 +110,12 @@ def AlgorithmsScaling():
     print(rvs_MonteCarlo)
 
     print("\n no symmetry MAPE:\n")
-    print(100*np.abs(np.divide(rvs_nonPrecise - rvs_MonteCarlo, rvs_MonteCarlo)))
+    print(100 * np.abs(np.divide(rvs_nonPrecise - rvs_MonteCarlo, rvs_MonteCarlo)))
 
     print("\nsymmetry MAPE:\n")
-    print(100*np.abs(np.divide(rvs_Precise - rvs_MonteCarlo, rvs_MonteCarlo)))
+    print(100 * np.abs(np.divide(rvs_Precise - rvs_MonteCarlo, rvs_MonteCarlo)))
 
-
-        # print results
+    # print results
     print("\n\n" + str(results))
 
 
@@ -150,18 +154,39 @@ def AlgorithmsScaling_MOSEK():
         print("\n\n" + str(iter) + ". iteration: \n\n")
 
         numGates = numberOfGatesStart + iter * step
-        numNonZeros, ObjVal, lastGate, time, numVars, numConstr, mipGapRoot,nVarsPresolve, nConstrPresolve = \
-                                            infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
-                                                                            interval, TRI=False,
-                                                                            withSymmetryConstr=True)
+        (
+            numNonZeros,
+            ObjVal,
+            lastGate,
+            time,
+            numVars,
+            numConstr,
+            mipGapRoot,
+            nVarsPresolve,
+            nConstrPresolve,
+        ) = infiniteLadder.mainMOSEK(
+            numGates,
+            numberOfUnaries,
+            numberOfBins,
+            interval,
+            TRI=False,
+            withSymmetryConstr=True,
+        )
 
         # saving values
         rvs_Precise[iter, 0] = lastGate[0]
         rvs_Precise[iter, 1] = lastGate[1]
 
-        print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
+        print(
+            np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :])
+            / rvs_MonteCarlo[iter, :]
+        )
 
-        MAPE = 100 * np.abs(np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))
+        MAPE = 100 * np.abs(
+            np.divide(
+                rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]
+            )
+        )
 
         print(MAPE)
 
@@ -170,17 +195,26 @@ def AlgorithmsScaling_MOSEK():
             prevError[0] = results[(numGates - step, True)][3]
             prevError[1] = results[(numGates - step, True)][4]
 
-            MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
+            MAPE = (MAPE + (prevError) * (iter)) / (iter + 1)
         elif iter == 0:
 
             MAPE = (MAPE) / (iter + 1)
 
-        results[(numGates, True)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr, mipGapRoot,
-                                     nVarsPresolve, nConstrPresolve)
+        results[(numGates, True)] = (
+            numNonZeros,
+            ObjVal,
+            time,
+            MAPE[0],
+            MAPE[1],
+            numVars,
+            numConstr,
+            mipGapRoot,
+            nVarsPresolve,
+            nConstrPresolve,
+        )
 
         # print results
         print("\n\n" + str(results))
-
 
     # print("NO SYMMETRY\n\n")
     # # test non-precise
@@ -212,8 +246,6 @@ def AlgorithmsScaling_MOSEK():
     #     # print results
     #     print("\n\n" + str(results))
 
-
-
     # print("\nNON-symmetry:\n")
     # print(rvs_nonPrecise)
     #
@@ -231,7 +263,6 @@ def AlgorithmsScaling_MOSEK():
 
     # print results
     # print("\n\n" + str(results))
-
 
 
 def testAlgorithms_CVXPY_GP():
@@ -274,7 +305,11 @@ def testAlgorithms_CVXPY_GP():
 
         # print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
 
-        MAPE = 100 * np.abs(np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))
+        MAPE = 100 * np.abs(
+            np.divide(
+                rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]
+            )
+        )
 
         print(MAPE)
 
@@ -283,10 +318,9 @@ def testAlgorithms_CVXPY_GP():
             prevError[0] = results[(numGates - step, True)][3]
             prevError[1] = results[(numGates - step, True)][4]
 
-            MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
+            MAPE = (MAPE + (prevError) * (iter)) / (iter + 1)
 
-        results[(numGates, True)] = (-1, -1, time, MAPE[0], MAPE[1], -1, -1, -1,
-                                     -1, -1)
+        results[(numGates, True)] = (-1, -1, time, MAPE[0], MAPE[1], -1, -1, -1, -1, -1)
 
         # print results
         print("\n\n" + str(results))
@@ -338,7 +372,9 @@ def scalingBins_CVXPY_GP():
 
         # print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
 
-        MAPE = 100 * np.abs(np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[0, :], rvs_MonteCarlo[0, :]))
+        MAPE = 100 * np.abs(
+            np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[0, :], rvs_MonteCarlo[0, :])
+        )
 
         print(MAPE)
 
@@ -350,14 +386,14 @@ def scalingBins_CVXPY_GP():
         #     prevError[1] = results[(lastNumBins, True)][4]
         #     prevError[0] = results[(numBins - step, True)][3]
         #     prevError[1] = results[(numBins - step, True)][4]
-            # 
-            # MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
+        #
+        # MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
 
-        results[(numBins, True)] = (-1, -1, time, MAPE[0], MAPE[1], -1, -1, -1,
-                                     -1, -1)
+        results[(numBins, True)] = (-1, -1, time, MAPE[0], MAPE[1], -1, -1, -1, -1, -1)
 
         # print results
         print("\n\n" + str(results))
+
 
 def scalingOptimization_CVXPY_GP():
 
@@ -367,7 +403,6 @@ def scalingOptimization_CVXPY_GP():
     interval = (0, 28)
 
     results = {}
-
 
     GATES = [1, 4, 7, 10, 12]
     numberOfIterations = len(GATES)
@@ -381,11 +416,11 @@ def scalingOptimization_CVXPY_GP():
         # lastGate, time = test_infiniteLadder.mainCVXPY_GP_Sizing(numGates, numberOfBins, interval)
         lastGate, time = infiniteLadder.mainCVXPY_GP(numGates, numberOfBins, interval)
 
-        results[(numGates, False)] = (-1, -1, time, 0, 0, -1, -1, -1,
-                                     -1, -1)
+        results[(numGates, False)] = (-1, -1, time, 0, 0, -1, -1, -1, -1, -1)
 
         # print results
         print("\n\n" + str(results))
+
 
 def testAlgorithms_PRESOLVE():
 
@@ -403,7 +438,6 @@ def testAlgorithms_PRESOLVE():
 
     interval = (-5, 18)
 
-
     results = {}
 
     for passes in range(0, numIterPass):
@@ -416,10 +450,21 @@ def testAlgorithms_PRESOLVE():
             print("\n\n" + str(iter) + ". iteration: \n\n")
 
             numGates = numberOfGatesStart + iter * step
-            numNonZeros, ObjVal, lastGate, time, numVars, numConstr = infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,
-                                                                                interval,
-                                                                                withSymmetryConstr=True, presolvePasses=curPasses)
-
+            (
+                numNonZeros,
+                ObjVal,
+                lastGate,
+                time,
+                numVars,
+                numConstr,
+            ) = infiniteLadder.mainMOSEK(
+                numGates,
+                numberOfUnaries,
+                numberOfBins,
+                interval,
+                withSymmetryConstr=True,
+                presolvePasses=curPasses,
+            )
 
             results[(numGates, curPasses)] = (numNonZeros, numVars, numConstr)
 
@@ -427,9 +472,8 @@ def testAlgorithms_PRESOLVE():
     print("\n\n" + str(results))
 
 
-
-
 #     np.testing.assert_almost_equal(desired, actual, decimal=5)
+
 
 def computeMAPE(n_bins, n_unaries, start, function):
 
@@ -440,29 +484,26 @@ def computeMAPE(n_bins, n_unaries, start, function):
 
     for bins in range(0, n_bins):
         for unaries in range(0, n_unaries):
-            actual, desired = function(start + jump*bins, start + jump*unaries)
+            actual, desired = function(start + jump * bins, start + jump * unaries)
 
-            print('bins:' + str(start + jump*bins))
-            print('unaries: ' + str(start + jump*unaries))
+            print("bins:" + str(start + jump * bins))
+            print("unaries: " + str(start + jump * unaries))
             print(actual)
             print(desired)
 
             curMAPE = 100 * np.abs((actual - desired) / desired)
 
             print(curMAPE)
-    
+
             MAPE_mean[bins, unaries] = curMAPE[0]
             MAPE_std[bins, unaries] = curMAPE[1]
 
-
     return MAPE_mean, MAPE_std
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
 
     scalingBins_CVXPY_GP()
     # scalingOptimization_CVXPY_GP()
 
     # testAlgorithms_PRESOLVE()
-
-

@@ -7,7 +7,11 @@ import SSTA
 
 from randomVariableHist_Numpy import RandomVariable
 
-from examples_monteCarlo.infinite_ladder_montecarlo import MonteCarlo_inputs, MonteCarlo_nodes, get_moments_from_simulations
+from examples_monteCarlo.infinite_ladder_montecarlo import (
+    MonteCarlo_inputs,
+    MonteCarlo_nodes,
+    get_moments_from_simulations,
+)
 from node import Node
 
 """
@@ -15,6 +19,7 @@ Test for unary encoded algorithms
 """
 
 # test max computation
+
 
 def testMax(numberOfBins, numberOfUnaries):
     mu1 = 12
@@ -40,8 +45,12 @@ def testMax(numberOfBins, numberOfUnaries):
     # ACTUAL
 
     # histogram1
-    h1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    h2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    h1 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    h2 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
     max2 = h1.maxOfDistributionsQUAD_FORMULA_UNARY(h2)
 
@@ -51,9 +60,11 @@ def testMax(numberOfBins, numberOfUnaries):
 
     # TESTING
 
+
 #     np.testing.assert_almost_equal(desired, actual, decimal=5)
 
 # test mean computation
+
 
 def testConvolution(numberOfBins, numberOfUnaries):
     mu1 = 12
@@ -79,11 +90,19 @@ def testConvolution(numberOfBins, numberOfUnaries):
     # ACTUAL
 
     # histogram1
-    h1 = histogramGenerator.get_gauss_bins_UNARY(mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries)
-    h2 = histogramGenerator.get_gauss_bins_UNARY(mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries)
+    h1 = histogramGenerator.get_gauss_bins_UNARY(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
+    h2 = histogramGenerator.get_gauss_bins_UNARY(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval, numberOfUnaries
+    )
 
-    rv1 = histogramGenerator.get_gauss_bins(mu1, sigma1, numberOfBins, numberOfSamples, interval)
-    rv2 = histogramGenerator.get_gauss_bins(mu2, sigma2, numberOfBins, numberOfSamples, interval)
+    rv1 = histogramGenerator.get_gauss_bins(
+        mu1, sigma1, numberOfBins, numberOfSamples, interval
+    )
+    rv2 = histogramGenerator.get_gauss_bins(
+        mu2, sigma2, numberOfBins, numberOfSamples, interval
+    )
 
     max2 = h1.convolutionOfTwoVarsNaiveSAME_UNARY(h2)
     #     max2 = rv1.convolutionOfTwoVarsShift(rv2)
@@ -94,11 +113,15 @@ def testConvolution(numberOfBins, numberOfUnaries):
 
     # TESTING
 
+
 #     np.testing.assert_almost_equal(desired, actual, decimal=5)
 
 # test infinite ladder function
 
-def LadderNumpy(numberOfBins=100, numberOfUnaries=100, number_of_nodes=1, interval=(-8, 20)):
+
+def LadderNumpy(
+    numberOfBins=100, numberOfUnaries=100, number_of_nodes=1, interval=(-8, 20)
+):
     n_samples = 2000000
     seed = 0
 
@@ -125,8 +148,14 @@ def LadderNumpy(numberOfBins=100, numberOfUnaries=100, number_of_nodes=1, interv
     # generate inputs
     startingNodes = []
     for i in range(0, number_of_nodes + 1):
-        g = histogramGenerator.get_gauss_bins_UNARY(input_means[i], input_stds[i], numberOfBins, n_samples,
-                                                    interval, numberOfUnaries)
+        g = histogramGenerator.get_gauss_bins_UNARY(
+            input_means[i],
+            input_stds[i],
+            numberOfBins,
+            n_samples,
+            interval,
+            numberOfUnaries,
+        )
 
         node = Node(g)
         startingNodes.append(node)
@@ -134,8 +163,14 @@ def LadderNumpy(numberOfBins=100, numberOfUnaries=100, number_of_nodes=1, interv
         # generetate nodes
     generatedNodes = []
     for i in range(0, number_of_nodes):
-        g = histogramGenerator.get_gauss_bins_UNARY(gateParams[0], gateParams[1], numberOfBins, n_samples, interval,
-                                                    numberOfUnaries)
+        g = histogramGenerator.get_gauss_bins_UNARY(
+            gateParams[0],
+            gateParams[1],
+            numberOfBins,
+            n_samples,
+            interval,
+            numberOfUnaries,
+        )
 
         node = Node(g)
         generatedNodes.append(node)
@@ -157,7 +192,7 @@ def LadderNumpy(numberOfBins=100, numberOfUnaries=100, number_of_nodes=1, interv
 
     delays = SSTA.calculateCircuitDelay(startingNodes, cvxpy=False, unary=True)
 
-    delays = delays[number_of_nodes + 1:]
+    delays = delays[number_of_nodes + 1 :]
 
     rvs = []
 
@@ -168,27 +203,26 @@ def LadderNumpy(numberOfBins=100, numberOfUnaries=100, number_of_nodes=1, interv
             for unary in range(0, numberOfUnaries):
                 finalBins[bin, unary] = ((delays[gate].bins)[bin])[unary]
 
-        rvs.append(RandomVariable(finalBins, generatedNodes[0].randVar.edges, unary=True))
+        rvs.append(
+            RandomVariable(finalBins, generatedNodes[0].randVar.edges, unary=True)
+        )
 
     # simulate inputs
     nodes_simulation = [0 for _ in range(number_of_nodes)]
-    inputs_simulation = MonteCarlo_inputs(input_means, input_stds, n_samples, 'Normal')
+    inputs_simulation = MonteCarlo_inputs(input_means, input_stds, n_samples, "Normal")
 
     # traverse the circuit
-    nodes_simulation[0] = MonteCarlo_nodes(inputs_simulation[0], inputs_simulation[1], gateParams, n_samples)
+    nodes_simulation[0] = MonteCarlo_nodes(
+        inputs_simulation[0], inputs_simulation[1], gateParams, n_samples
+    )
     for i in range(1, number_of_nodes):
-        nodes_simulation[i] = MonteCarlo_nodes(nodes_simulation[i - 1], inputs_simulation[i + 1], gateParams,
-                                               n_samples)
+        nodes_simulation[i] = MonteCarlo_nodes(
+            nodes_simulation[i - 1], inputs_simulation[i + 1], gateParams, n_samples
+        )
 
     desired = get_moments_from_simulations(nodes_simulation)
 
     return np.array([rvs[-1].mean, rvs[-1].std]), np.array(desired[0])
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -219,19 +253,18 @@ if __name__ == "__main__":
     #                        ha="center", va="center", color="w")
 
     locs, labels = plt.xticks()  # Get the current locations and labels.
-    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
+    plt.xticks(np.arange(0, unaries), np.arange(start, start + unaries * 2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start + bins * 2, step=2)))
 
-    plt.xlabel('Number of unary variables')
-    plt.ylabel('Number of bins')
-    plt.title('Convolution, MAPE of mean')
+    plt.xlabel("Number of unary variables")
+    plt.ylabel("Number of bins")
+    plt.title("Convolution, MAPE of mean")
 
     pc = plt.colorbar()
 
     plt.savefig("Convolution_meanHeatMap.jpeg", dpi=300)
-    #plt.show()
+    # plt.show()
     pc.remove()
-
 
     # fig, ax = plt.subplots(figsize=(13, 13), dpi=80)
     im = plt.imshow(stdMAPE)
@@ -242,24 +275,19 @@ if __name__ == "__main__":
     #                        ha="center", va="center", color="w")
 
     locs, labels = plt.xticks()  # Get the current locations and labels.
-    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
+    plt.xticks(np.arange(0, unaries), np.arange(start, start + unaries * 2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start + bins * 2, step=2)))
 
-
-
-    plt.xlabel('Number of unary variables')
-    plt.ylabel('Number of bins')
-    plt.title('Convolution, MAPE of std')
-
+    plt.xlabel("Number of unary variables")
+    plt.ylabel("Number of bins")
+    plt.title("Convolution, MAPE of std")
 
     pc = plt.colorbar()
     plt.savefig("Convolution_stdHeatMap.jpeg", dpi=300)
-    #plt.show()
+    # plt.show()
     pc.remove()
 
-
     # compute MAPE heatmap for MAXIMUM - takes a long time to compute
-
 
     bins = 2
     unaries = 2
@@ -285,20 +313,17 @@ if __name__ == "__main__":
     #                        ha="center", va="center", color="w")
 
     locs, labels = plt.xticks()  # Get the current locations and labels.
-    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
+    plt.xticks(np.arange(0, unaries), np.arange(start, start + unaries * 2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start + bins * 2, step=2)))
 
-
-    plt.xlabel('Number of unary variables')
-    plt.ylabel('Number of bins')
-    plt.title('MAX, MAPE of mean')
-
+    plt.xlabel("Number of unary variables")
+    plt.ylabel("Number of bins")
+    plt.title("MAX, MAPE of mean")
 
     pc = plt.colorbar()
     plt.savefig("Max_meanHeatMap.jpeg", dpi=300)
-    #plt.show()
+    # plt.show()
     pc.remove()
-
 
     # fig, ax = plt.subplots(figsize=(13, 13), dpi=80)
     im = plt.imshow(stdMAPE)
@@ -309,13 +334,12 @@ if __name__ == "__main__":
     #                        ha="center", va="center", color="w")
 
     locs, labels = plt.xticks()  # Get the current locations and labels.
-    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
+    plt.xticks(np.arange(0, unaries), np.arange(start, start + unaries * 2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start + bins * 2, step=2)))
 
-    plt.xlabel('Number of unary variables')
-    plt.ylabel('Number of bins')
-    plt.title('MAX, MAPE of std')
-
+    plt.xlabel("Number of unary variables")
+    plt.ylabel("Number of bins")
+    plt.title("MAX, MAPE of std")
 
     pc = plt.colorbar()
     plt.savefig("Max_stdHeatMap.jpeg", dpi=300)
@@ -348,20 +372,17 @@ if __name__ == "__main__":
     #                        ha="center", va="center", color="w")
 
     locs, labels = plt.xticks()  # Get the current locations and labels.
-    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
+    plt.xticks(np.arange(0, unaries), np.arange(start, start + unaries * 2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start + bins * 2, step=2)))
 
-
-    plt.xlabel('Number of unary variables')
-    plt.ylabel('Number of bins')
-    plt.title('SSTA, MAPE of mean')
-
+    plt.xlabel("Number of unary variables")
+    plt.ylabel("Number of bins")
+    plt.title("SSTA, MAPE of mean")
 
     pc = plt.colorbar()
     plt.savefig("Ladder_meanHeatMap.jpeg", dpi=300)
-    #plt.show()
+    # plt.show()
     pc.remove()
-
 
     # fig, ax = plt.subplots(figsize=(15, 15), dpi=80)
     im = plt.imshow(stdMAPE)
@@ -372,15 +393,14 @@ if __name__ == "__main__":
     #                        ha="center", va="center", color="w")
 
     locs, labels = plt.xticks()  # Get the current locations and labels.
-    plt.xticks(np.arange(0, unaries), np.arange(start, start+unaries*2, step=2))
-    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start+bins*2, step=2)))
+    plt.xticks(np.arange(0, unaries), np.arange(start, start + unaries * 2, step=2))
+    plt.yticks(np.arange(0, bins), np.flip(np.arange(start, start + bins * 2, step=2)))
 
-    plt.xlabel('Number of unary variables')
-    plt.ylabel('Number of bins')
-    plt.title('SSTA, MAPE of std')
-
+    plt.xlabel("Number of unary variables")
+    plt.ylabel("Number of bins")
+    plt.title("SSTA, MAPE of std")
 
     pc = plt.colorbar()
     plt.savefig("Ladder_stdHeatMap.jpeg", dpi=300)
-    #plt.show()
+    # plt.show()
     pc.remove()

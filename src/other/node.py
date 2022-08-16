@@ -1,4 +1,3 @@
-
 class Node:
     """
     Class representing a node in a circuit.

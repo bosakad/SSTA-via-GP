@@ -5,6 +5,7 @@ import numpy as np
 from node import Node
 from queue import Queue
 
+
 def FindMaxDelayGates():
     """
     Finds critical path of the circuit. Only works for the deterministic model. Gates are represented as cvxpy variables
@@ -48,13 +49,12 @@ def FindMaxDelayGates():
         nextNodes = currentGate.nextNodes
         prevNodes = currentGate.prevDelays
 
-        if len(nextNodes) == 0:          # reached sink
+        if len(nextNodes) == 0:  # reached sink
             sum = 0
             for prevGate in prevNodes:
                 sum += prevGate.randVar[1]
-            constr.append( sum <= 1 )       # only 1 edge into the sink
+            constr.append(sum <= 1)  # only 1 edge into the sink
             continue
-
 
         # compute fanout
         fanout = 0
@@ -70,10 +70,10 @@ def FindMaxDelayGates():
                 closedList.add(nextGate)
 
         # only 1 path can be chosen
-        constr.append( fanout <= 1 )
+        constr.append(fanout <= 1)
 
-        if len(prevNodes) == 0: continue     # reached source
-
+        if len(prevNodes) == 0:
+            continue  # reached source
 
         gateCost = currentGate.randVar[1]
 
@@ -82,20 +82,16 @@ def FindMaxDelayGates():
         for prevGate in prevNodes:
             fanin += prevGate.randVar[1]
 
-
         # set driving constraint
-        constr.append( fanin - gateCost >= 0 )
-
+        constr.append(fanin - gateCost >= 0)
 
     # formulate LP
 
-    obj = cp.Maximize( cp.sum( cp.multiply(path, values) ) )
-
+    obj = cp.Maximize(cp.sum(cp.multiply(path, values)))
 
     # solve
     problem = cp.Problem(obj, constr)
     problem.solve(solver=cp.MOSEK)
-
 
     # print out values
     print("prob value: ", problem.value)
@@ -108,7 +104,6 @@ def FindMaxDelayEdges(source):
     :param: Source of the graph - Node class
     :return: integer, maximum delay
     """
-
 
     # set constraints for fan-out
 
@@ -128,19 +123,18 @@ def FindMaxDelayEdges(source):
 
         numOfNextNodes = len(nextNodes)
 
-        if numOfNextNodes == 0:          # reached sink
+        if numOfNextNodes == 0:  # reached sink
             sum = 0
             for prevEdge in prevEdges:
                 sum += prevEdge
-            constr.append( sum <= 1 )       # only 1 edge into the sink
+            constr.append(sum <= 1)  # only 1 edge into the sink
             continue
-
 
         # compute fanout
         fanout = 0
         for nextGate in nextNodes:
 
-            edge = cp.Variable((1, ), nonneg=True)
+            edge = cp.Variable((1,), nonneg=True)
             variables.append(edge)
 
             fanout += edge
@@ -153,42 +147,38 @@ def FindMaxDelayEdges(source):
             # add prev gates
             nextGate.appendPrevDelays(edge)
 
-
             # update queue
             if nextGate not in closedList:
                 queue.put(nextGate)
                 closedList.add(nextGate)
 
         # only 1 path can be chosen
-        constr.append( fanout <= 1 )
+        constr.append(fanout <= 1)
 
-        if len(prevEdges) == 0: continue     # reached source
+        if len(prevEdges) == 0:
+            continue  # reached source
 
         # compute fanin
         fanin = 0
         for prevEdge in prevEdges:
             fanin += prevEdge
 
-
         # set driving constraint
-        constr.append( fanin - fanout >= 0 )
-
+        constr.append(fanin - fanout >= 0)
 
     # formulate LP
 
-    obj = cp.Maximize( circuitDelay )
+    obj = cp.Maximize(circuitDelay)
 
     # solve
     problem = cp.Problem(obj, constr)
     problem.solve(solver=cp.MOSEK)
-
 
     # print out values
     print("prob value: ", problem.value)
     print("path: \n")
     for variable in variables:
         print(variable.value)
-
 
     return problem.value
 
@@ -203,8 +193,6 @@ def putIntoQueue(queue: Queue, list: [Node]) -> None:
 
     for item in list:
         queue.put(item)
-
-
 
 
 # call function

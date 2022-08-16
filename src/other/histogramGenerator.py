@@ -1,11 +1,17 @@
 import math
-
 import numpy as np
 from randomVariableHist_Numpy import RandomVariable
 
 
-def get_gauss_bins(mu: float, sigma: float, numberOfBins: int, numberOfSamples: int, binsInterval: tuple
-                                                                            , distr="Gauss", forGP=False) -> RandomVariable:
+def get_gauss_bins(
+    mu: float,
+    sigma: float,
+    numberOfBins: int,
+    numberOfSamples: int,
+    binsInterval: tuple,
+    distr="Gauss",
+    forGP=False,
+) -> RandomVariable:
     """
     Generates a randomly generated gaussian histogram with given mean and standard deviation.
 
@@ -23,13 +29,12 @@ def get_gauss_bins(mu: float, sigma: float, numberOfBins: int, numberOfSamples: 
     elif distr == "LogNormal":
         s = np.random.lognormal(mu, sigma, numberOfSamples)
 
-
-    STATIC_BINS = np.linspace(binsInterval[0], binsInterval[1], numberOfBins+1)
+    STATIC_BINS = np.linspace(binsInterval[0], binsInterval[1], numberOfBins + 1)
 
     data, edges = np.histogram(s, bins=STATIC_BINS)
     dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
 
-        # no zeros allowed
+    # no zeros allowed
     if forGP:
         dataNorm[dataNorm == 0] += 0.00000000000000000001
 
@@ -37,8 +42,16 @@ def get_gauss_bins(mu: float, sigma: float, numberOfBins: int, numberOfSamples: 
 
     return randomVar
 
-def get_gauss_bins_UNARY(mu: float, sigma: float, numberOfBins: int, numberOfSamples: int, binsInterval: tuple,
-                         numberOfUnaries: int, distr="Gauss") -> RandomVariable:
+
+def get_gauss_bins_UNARY(
+    mu: float,
+    sigma: float,
+    numberOfBins: int,
+    numberOfSamples: int,
+    binsInterval: tuple,
+    numberOfUnaries: int,
+    distr="Gauss",
+) -> RandomVariable:
     """
     Generates a randomly generated gaussian histogram with given mean and standard deviation.
     Each bin is represented by M 0/1-bins.
@@ -58,18 +71,16 @@ def get_gauss_bins_UNARY(mu: float, sigma: float, numberOfBins: int, numberOfSam
     elif distr == "LogNormal":
         s = np.random.lognormal(mu, sigma, numberOfSamples)
 
-    STATIC_BINS = np.linspace(binsInterval[0], binsInterval[1], numberOfBins+1)
+    STATIC_BINS = np.linspace(binsInterval[0], binsInterval[1], numberOfBins + 1)
 
     data, edges = np.histogram(s, bins=STATIC_BINS)
-    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]) )
+    dataNorm = np.array(data) / (np.sum(data) * (edges[1] - edges[0]))
 
-
-        #testing
+    # testing
     # import matplotlib.pyplot as plt
     # plt.hist(edges[:-1], edges, weights=dataNorm)
 
     finalBins = np.zeros((numberOfBins, numberOfUnaries))
-
 
     for bin in range(0, numberOfBins):
 
@@ -83,7 +94,7 @@ def get_gauss_bins_UNARY(mu: float, sigma: float, numberOfBins: int, numberOfSam
 
     randomVar = RandomVariable(finalBins, edges, unary=True)
 
-        # testing
+    # testing
     # rv = get_Histogram_from_UNARY(randomVar)
     # plt.hist(rv.edges[:-1], rv.edges, weights=rv.bins)
 
@@ -95,7 +106,6 @@ def get_Histogram_from_UNARY(unaryHist):
     :param unaryHist: unary encoded histogram, dtype = RV
     :return result: normal bin approximation derived from unary encoded histogram
     """
-
 
     numberOfBins, numberOfUnaries = unaryHist.bins.shape
 
@@ -124,7 +134,6 @@ def getValuesForMonteCarlo(rv: RandomVariable, count):
     # hist, bins = np.histogram(data, bins=50)
     # print(hist)
 
-
     bin_midpoints = rv.edges[:-1] + np.diff(rv.edges) / 2
     cdf = np.cumsum(rv.bins)
     cdf = cdf / cdf[-1]
@@ -145,14 +154,14 @@ def getValuesForMonteCarlo(rv: RandomVariable, count):
     # print(np.std(random_from_cdf))
     # print(rv.std)
     import matplotlib.pyplot as plt
+
     plt.subplot(121)
     # plt.hist(data, 50)
-    plt.hist(rv.edges[:-1], rv.edges, weights=rv.bins, alpha=0.2, color='orange')
+    plt.hist(rv.edges[:-1], rv.edges, weights=rv.bins, alpha=0.2, color="orange")
     plt.subplot(122)
     # plt.hist(random_from_cdf, 30)
-    _ = plt.hist(random_from_cdf, bins=30, density='PDF', alpha=0.7)
+    _ = plt.hist(random_from_cdf, bins=30, density="PDF", alpha=0.7)
     plt.show()
-
 
 
 def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries=0):
@@ -183,7 +192,12 @@ def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries=0):
             if (model[bin, :] == 1.00000000e-27).all():
                 binP = 1.00000000e-27
             else:
-                binP = a1*a_i*x_i + p1*p_i*x_i + a2* (1/ (a_i*x_i)) + p2* (1/(p_i*x_i))
+                binP = (
+                    a1 * a_i * x_i
+                    + p1 * p_i * x_i
+                    + a2 * (1 / (a_i * x_i))
+                    + p2 * (1 / (p_i * x_i))
+                )
 
             distr[bin] = binP
 
@@ -198,14 +212,12 @@ def generateAccordingToModel(model, a_i, p_i, x_i, int, nUnaries=0):
 
         for bin in range(0, numberOfBins):
 
-            binP = model[bin, 0] + model[bin, 1]*a_i*x_i + model[bin, 2]*p_i*x_i
+            binP = model[bin, 0] + model[bin, 1] * a_i * x_i + model[bin, 2] * p_i * x_i
 
-            numberOfOnes = round(binP*nUnaries)
+            numberOfOnes = round(binP * nUnaries)
 
             distr[bin, :numberOfOnes] = 1
 
-        STATIC_BINS = np.linspace(int[0], int[1], numberOfBins+1)
+        STATIC_BINS = np.linspace(int[0], int[1], numberOfBins + 1)
 
         return RandomVariable(distr, STATIC_BINS, unary=True)
-
-

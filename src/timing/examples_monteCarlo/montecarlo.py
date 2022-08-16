@@ -1,11 +1,13 @@
 import numpy as np
 import networkx as nx
-#import matplotlib.pyplot as plt
+
+# import matplotlib.pyplot as plt
 
 
 #####################
 ## Reading a Graph ##
 #####################
+
 
 def get_inputs(adjacency):
     inputs = []
@@ -28,9 +30,11 @@ def get_ordered_paths(G, input_nodes, disordered_nodes):
     unknown_nodes = disordered_nodes.copy()
     temp = []
     ordered_list = []
-    while (len(ordered_list) != len(disordered_nodes)):
+    while len(ordered_list) != len(disordered_nodes):
         for node in unknown_nodes:
-            if (list(G.predecessors(node))[0] in predecessors) and (list(G.predecessors(node))[1] in predecessors):
+            if (list(G.predecessors(node))[0] in predecessors) and (
+                list(G.predecessors(node))[1] in predecessors
+            ):
                 predecessors.append(node)
                 ordered_list.append(node)
             else:
@@ -44,24 +48,27 @@ def get_ordered_paths(G, input_nodes, disordered_nodes):
 #### Monte Carlo ####
 #####################
 
-def preprocess(input_nodes, input_means, input_stds, unknown_nodes, gate, n_samples, distribution):
+
+def preprocess(
+    input_nodes, input_means, input_stds, unknown_nodes, gate, n_samples, distribution
+):
     m0 = gate[0]
     s0 = gate[1]
 
     # create an empty list of lists to store the simulation data
     montecarlo = [[] for _ in range(len(input_nodes + unknown_nodes) + 1)]
 
-    if distribution == 'Normal':
+    if distribution == "Normal":
         # get the data for input nodes
         for i in input_nodes:
             montecarlo[i] = np.random.normal(input_means[i], input_stds[i], n_samples)
 
-    if distribution == 'Gamma':
-        # 
+    if distribution == "Gamma":
+        #
         """
         mean = shape * scale
         var  = shape * scale**2
-        
+
         The input stds are used as scale parameters here.
         """
         # get the data for input nodes
@@ -70,12 +77,12 @@ def preprocess(input_nodes, input_means, input_stds, unknown_nodes, gate, n_samp
             shape = input_means[i] / scale
             montecarlo[i] = np.random.gamma(shape, scale, n_samples)
 
-    if distribution == 'LogNormal':
+    if distribution == "LogNormal":
         # get the data for input nodes
         for i in input_nodes:
             # get corresponding mu and sigma for the logrnomal pdf
             sigma = np.sqrt(np.log(input_stds[i] ** 2 / (input_means[i] ** 2) + 1))
-            mu = np.log(input_means[i]) - sigma ** 2 / 2
+            mu = np.log(input_means[i]) - sigma**2 / 2
             # generate lognormal samples
             montecarlo[i] = np.random.lognormal(mu, sigma, n_samples)
 
@@ -85,7 +92,6 @@ def preprocess(input_nodes, input_means, input_stds, unknown_nodes, gate, n_samp
 def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
     m0 = gate[0]
     s0 = gate[1]
-
 
     # list that contains simulation data for inputs
     montecarlo = input_simulation_data
@@ -99,7 +105,7 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
         # print(np.mean(montecarlo[a]), np.std(montecarlo[a]))
         # print(np.mean(montecarlo[b]), np.std(montecarlo[a]))
 
-        np.random.shuffle(montecarlo[a])    # to secure randomness
+        np.random.shuffle(montecarlo[a])  # to secure randomness
         np.random.shuffle(montecarlo[b])
 
         max = np.maximum(montecarlo[a], montecarlo[b])
@@ -113,7 +119,6 @@ def simulation(G, input_simulation_data, unknown_nodes, gate, n_samples):
 
         # print("mean, std of convolution: " + str(np.mean(montecarlo[node])) + ", " + str(np.std(montecarlo[node])))
 
-
     return montecarlo
 
 
@@ -121,7 +126,7 @@ def main():
     # number of sample for MC
     n_samples = int(100000)
     # n_samples = int(5)
-    distribution = 'Normal'  # try 'LogNormal' and 'Gamma'
+    distribution = "Normal"  # try 'LogNormal' and 'Gamma'
     #
 
     # adjacency = np.array([[0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
@@ -138,14 +143,18 @@ def main():
     #                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     #                       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
-        # test case
-    adjacency = np.array([  [0, 1, 1, 0, 0, 0, 0],
-                            [0, 0, 0, 1, 1, 0, 0],
-                            [0, 0, 0, 1, 0, 1, 0],
-                            [0, 0, 0, 0, 1, 1, 0],
-                            [0, 0, 0, 0, 0, 0, 1],
-                            [0, 0, 0, 0, 0, 0, 1],
-                            [0, 0, 0, 0, 0, 0, 0]])
+    # test case
+    adjacency = np.array(
+        [
+            [0, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0],
+            [0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0],
+        ]
+    )
 
     G = nx.from_numpy_matrix(adjacency, create_using=nx.DiGraph())
 
@@ -165,13 +174,18 @@ def main():
     input_means = [0, 1, 0.5]
     input_stds = [0, 0.45, 0.3]
 
-
-    inputs_simulation = preprocess(list_of_inputs, input_means, input_stds, unknown_nodes, gate, n_samples,
-                                   distribution)
+    inputs_simulation = preprocess(
+        list_of_inputs,
+        input_means,
+        input_stds,
+        unknown_nodes,
+        gate,
+        n_samples,
+        distribution,
+    )
 
     mc = simulation(G, inputs_simulation, unknown_nodes, gate, n_samples)
     maxdelay = mc[-1]
-
 
     # print out the results
 
@@ -179,7 +193,6 @@ def main():
     #
     #     delay = mc[i]
     #     print('Mean of ' + str(i) + 'th delay is: ' + str(np.mean(delay)) + ', std: ' + str(np.std(delay)) )
-
 
     # print(f'The mean delay is {np.mean(maxdelay)}')
     # print(f'The std of a delay is {np.std(maxdelay)}')

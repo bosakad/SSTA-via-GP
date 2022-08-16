@@ -16,23 +16,19 @@ class RandomVariable:
         variance: computed sample variance
     """
 
-
     def __init__(self, bins, edges, unary=False):
 
-
-        if (unary == True):
+        if unary == True:
             self.bins = np.array(bins)
             self.edges = np.array(edges)
             self.mean = self.calculateMean_UNARY()
             self.std = self.calculateSTD_UNARY()
 
-        else:   # normal histogram
+        else:  # normal histogram
             self.bins = np.array(bins)
             self.edges = np.array(edges)
             self.mean = self.calculateMean()
             self.std = self.calculateSTD()
-
-
 
     def recalculateParams(self):
         """
@@ -41,8 +37,6 @@ class RandomVariable:
         """
         self.mean = self.calculateMean()
         self.std = self.calculateSTD()
-
-
 
     def maxOfDistributionsELEMENTWISE(self, secondVariable):
         """
@@ -59,17 +53,17 @@ class RandomVariable:
         self.bins = self.bins / (np.sum(self.bins) * (self.edges[1] - self.edges[0]))
 
         # normalize
-        secondVariable.bins = secondVariable.bins / (np.sum(secondVariable.bins) * (self.edges[1] - self.edges[0]))
+        secondVariable.bins = secondVariable.bins / (
+            np.sum(secondVariable.bins) * (self.edges[1] - self.edges[0])
+        )
 
         maxBins = np.maximum(self.bins, secondVariable.bins)
-
 
         # normalize
         maxBins = maxBins / (np.sum(maxBins) * (self.edges[1] - self.edges[0]))
 
         maxDelay = RandomVariable(maxBins, self.edges)
         return maxDelay
-
 
     def maxOfDistributionsFORM(self, secondVariable):
         """
@@ -108,15 +102,13 @@ class RandomVariable:
         # get data
         n = len(self.bins)
 
-
         bins1 = self.bins
         edges1 = self.edges
-        midPoints1 = 0.5 * (edges1[1:] + edges1[:-1])    # midpoints of the edges of hist.
+        midPoints1 = 0.5 * (edges1[1:] + edges1[:-1])  # midpoints of the edges of hist.
 
         bins2 = secondVariable.bins
         edges2 = secondVariable.edges
         midPoints2 = 0.5 * (edges2[1:] + edges2[:-1])  # midpoints of the edges of hist.
-
 
         # prealloc
         maximum = np.zeros(n, dtype=np.double)
@@ -137,7 +129,6 @@ class RandomVariable:
 
         return RandomVariable(maximum, self.edges)
 
-
     def maxOfDistributionsQUAD_FORMULA(self, secondVariable):
         """
         Maximum of 2 distribution functions using quadratic algorithm and simplified version - in formula - not vectorized
@@ -153,7 +144,6 @@ class RandomVariable:
         x = self.bins
         y = secondVariable.bins
 
-
         # prealloc
         maximum = np.zeros(N, dtype=np.double)
 
@@ -164,7 +154,6 @@ class RandomVariable:
 
                 if i != j:
                     maximum[i] += x[j] * y[i]
-
 
         # normalize
         maximum = maximum / (np.sum(maximum) * (self.edges[1] - self.edges[0]))
@@ -194,9 +183,7 @@ class RandomVariable:
 
         # calc. maximum
 
-
-
-            # vectorized
+        # vectorized
         for i in range(0, numberOfBins):
             for j in range(0, i + 1):
 
@@ -204,7 +191,6 @@ class RandomVariable:
 
                 if i != j:
                     maximum[i, :] += binMatrix1[j, :] * np.sum(binMatrix2[i, :])
-
 
         maximum = self.unarizeDivide(maximum, convolution=False)
 
@@ -241,8 +227,6 @@ class RandomVariable:
                 if i != j:
                     maximum[i, :] += binMatrix1[j, :] * np.sum(binMatrix2[i, :])
 
-
-
         # create unary matrices
 
         maximum = np.sum(maximum, axis=1).astype(int)
@@ -250,7 +234,7 @@ class RandomVariable:
 
         newMaximum = np.zeros((numberOfBins, maxNumber)).astype(int)
         for i in range(0, numberOfBins):
-            newMaximum[i, :maximum[i]] = 1
+            newMaximum[i, : maximum[i]] = 1
 
         # perform convolution
         f = thirdVariable.bins
@@ -259,7 +243,7 @@ class RandomVariable:
         for z in range(0, numberOfBins):
             for k in range(0, z + 1):
 
-                convolution[z, :] += f[k, :] * np.sum(newMaximum [z - k, :])
+                convolution[z, :] += f[k, :] * np.sum(newMaximum[z - k, :])
 
         # print('maxconv')
         # Deal With Edges
@@ -290,7 +274,7 @@ class RandomVariable:
 
         convolution = np.zeros((numberOfBins, numberOfUnaries))
 
-            # unvectorized
+        # unvectorized
         # for z in range(0, numberOfBins):
         #     for k in range(0, z + 1):
         #
@@ -298,20 +282,17 @@ class RandomVariable:
         #             for unary2 in range(0, numberOfUnaries):
         #                 convolution[z, unary] += f[k, unary] * g [z - k, unary2]
 
-
-            # vectorized
+        # vectorized
         for z in range(0, numberOfBins):
             for k in range(0, z + 1):
 
-                convolution[z, :] += f[k, :] * np.sum(g [z - k, :])
-
+                convolution[z, :] += f[k, :] * np.sum(g[z - k, :])
 
         # Deal With Edges
         self.cutBins(self.edges, convolution)
 
-            # unarize
+        # unarize
         convolution = self.unarizeDivide(convolution, convolution=True)
-
 
         return RandomVariable(convolution, self.edges, unary=True)
 
@@ -334,7 +315,7 @@ class RandomVariable:
         M = len(g)
 
         finalSize = N + M - 1
-        convolution = np.array([0.] * finalSize)
+        convolution = np.array([0.0] * finalSize)
 
         for z in range(0, finalSize):
             for k in range(0, z + 1):
@@ -345,8 +326,7 @@ class RandomVariable:
                 else:
                     convolution[z] += f[k] * g[z - k]
 
-        convolution = convolution[:f.size]    # get the wanted range
-
+        convolution = convolution[: f.size]  # get the wanted range
 
         # Deal With Edges
         self.cutBins(self.edges, convolution)
@@ -370,7 +350,7 @@ class RandomVariable:
         y = secondVariable.bins
 
         N = len(x)
-        convolution = np.array([0.] * N)
+        convolution = np.array([0.0] * N)
 
         for z in range(0, N):
             for k in range(0, z + 1):
@@ -380,7 +360,6 @@ class RandomVariable:
         self.cutBins(self.edges, convolution)
 
         return RandomVariable(convolution, self.edges)
-
 
     def convolutionOfTwoVarsShift(self, secondVariable):
         """
@@ -398,7 +377,7 @@ class RandomVariable:
         diff = self.edges[1] - self.edges[0]
 
         # Convolve
-        convolution = np.convolve(f, g, mode="full")[:f.size]   # get the same range
+        convolution = np.convolve(f, g, mode="full")[: f.size]  # get the same range
 
         # Deal With Edges
         self.cutBins(self.edges, convolution)
@@ -407,7 +386,6 @@ class RandomVariable:
         # convolution = convolution / (np.sum(convolution) * diff)
 
         return RandomVariable(convolution, self.edges)
-
 
     def convolutionOfTwoVarsUnion(self, secondVariable):
         """
@@ -419,7 +397,6 @@ class RandomVariable:
         :return convolution: random variable class of convolution
         """
 
-
         # Unite Edges
         self.uniteEdges(secondVariable)
 
@@ -428,15 +405,14 @@ class RandomVariable:
         diff = self.edges[1] - self.edges[0]
 
         # Convolve
-        convolution = np.convolve(f, g, mode="full")[:f.size]  # get the same range
+        convolution = np.convolve(f, g, mode="full")[: f.size]  # get the same range
 
         # Deal With Edges
-        edges = self.edges + self.edges[0]    # shift made by indexing from 0
+        edges = self.edges + self.edges[0]  # shift made by indexing from 0
 
         convolution = convolution / (np.sum(convolution) * diff)
 
         return RandomVariable(convolution, edges)
-
 
     def uniteEdges(self, secondVariable):
         """
@@ -455,15 +431,14 @@ class RandomVariable:
 
         numberOfBins = alpha.size
 
-        if edges_alpha[0] == edges_beta[0]:    # edges are same, no union needed
+        if edges_alpha[0] == edges_beta[0]:  # edges are same, no union needed
             return None
-
 
             # get lower and upper bounds
         minE = min(edges_alpha[0], edges_beta[0])
         maxE = max(edges_alpha[-1], edges_beta[-1])
 
-            # create new edges
+        # create new edges
         edges = np.linspace(minE, maxE, numberOfBins + 1)
         self.edges = edges
         secondVariable.edges = edges
@@ -478,21 +453,24 @@ class RandomVariable:
         # exact computation
         while i != numberOfBins:
 
-                # integrate
+            # integrate
             if edges[eIndex + i] > edges_alpha[tmp_e1]:
-                bins1New[i] += alpha[tmp_e1-1]*(edges_alpha[tmp_e1] - edges_alpha[tmp_e1 - 1])
+                bins1New[i] += alpha[tmp_e1 - 1] * (
+                    edges_alpha[tmp_e1] - edges_alpha[tmp_e1 - 1]
+                )
                 tmp_e1 += 1
 
             elif edges[eIndex + i] <= edges_alpha[tmp_e1]:
                 i += 1
 
-
         i = 0
         while i != numberOfBins:
 
-                # integrate
+            # integrate
             if edges[eIndex + i] > edges_beta[tmp_e2]:
-                bins2New[i] += beta[tmp_e2-1]*(edges_beta[tmp_e2] - edges_beta[tmp_e2 - 1])
+                bins2New[i] += beta[tmp_e2 - 1] * (
+                    edges_beta[tmp_e2] - edges_beta[tmp_e2 - 1]
+                )
                 tmp_e2 += 1
 
             elif edges[eIndex + i] <= edges_beta[tmp_e2]:
@@ -500,12 +478,13 @@ class RandomVariable:
 
                 # end
             if tmp_e2 >= numberOfBins + 1:
-                bins2New[i] += beta[tmp_e2 - 2] * (edges[eIndex + i] - edges_beta[tmp_e2 - 1])
+                bins2New[i] += beta[tmp_e2 - 2] * (
+                    edges[eIndex + i] - edges_beta[tmp_e2 - 1]
+                )
                 break
 
         bins1 = bins1New
         bins2 = bins2New
-
 
         # set new bins
         self.bins = bins1
@@ -526,7 +505,6 @@ class RandomVariable:
         :returns None
         """
 
-
         edges_alpha = self.edges
         alpha = self.bins
         edges_beta = secondVariable.edges
@@ -534,30 +512,28 @@ class RandomVariable:
 
         numberOfBins = alpha.size
 
-        if edges_alpha[0] == edges_beta[0]:    # edges are same, no union needed
+        if edges_alpha[0] == edges_beta[0]:  # edges are same, no union needed
             return None
-
 
             # get lower and upper bounds
         minE = min(edges_alpha[0], edges_beta[0])
         maxE = max(edges_alpha[-1], edges_beta[-1])
 
-            # create new edges
+        # create new edges
         edges = np.linspace(minE, maxE, numberOfBins + 1)
         self.edges = edges
         secondVariable.edges = edges
 
-            # create new values
+        # create new values
         cdf1 = scipy.stats.rv_histogram((alpha, edges_alpha)).cdf
         cdf2 = scipy.stats.rv_histogram((beta, edges_beta)).cdf
 
         for i in range(0, numberOfBins):
-            value1 = (cdf1(edges[i+1]) - cdf1(edges[i]))
-            value2 = (cdf2(edges[i+1]) - cdf2(edges[i]))
+            value1 = cdf1(edges[i + 1]) - cdf1(edges[i])
+            value2 = cdf2(edges[i + 1]) - cdf2(edges[i])
 
             alpha[i] = value1
             beta[i] = value2
-
 
         # set new bins
         self.bins = alpha
@@ -568,11 +544,10 @@ class RandomVariable:
 
         return None
 
-
     @staticmethod
     def unarizeDivide(bins, convolution, TRI=False):
         """
-            Make a non unarized histogram in the unary form. This is done using the divison of the numbers.
+        Make a non unarized histogram in the unary form. This is done using the divison of the numbers.
         """
 
         numberOfBins, numberOfUnaries = bins.shape
@@ -581,16 +556,15 @@ class RandomVariable:
         # old version - does not work with cvxpy
         sum = np.sum(bins, axis=1)
         maximum = np.max(sum)
-        norm =  maximum / numberOfUnaries
+        norm = maximum / numberOfUnaries
         # print(norm)
         # bins = bins / norm    # non-unarized version
         # print(convolution)
         # print(norm)
 
-
-            # technique with maximum possible
+        # technique with maximum possible
         if not TRI and convolution:
-            divisor = numberOfUnaries*numberOfBins / 30
+            divisor = numberOfUnaries * numberOfBins / 30
 
         elif TRI and convolution:
             # divisor = (numberOfUnaries*numberOfBins) / 2.4
@@ -601,12 +575,10 @@ class RandomVariable:
             # print(norm)
             # divisor = 239
 
-        else:   # maximum
-            divisor = numberOfBins*numberOfUnaries / 22
+        else:  # maximum
+            divisor = numberOfBins * numberOfUnaries / 22
             # divisor = 1
         bins = bins / divisor
-
-
 
         # doableSum = np.ceil(np.sum(bins, axis=1)).astype(int)
         doableSum = np.sum(bins, axis=1)
@@ -615,18 +587,16 @@ class RandomVariable:
 
         for bin in range(0, numberOfBins):
             # newBins[bin, :int(round(doableSum[bin]))] = 1
-            newBins[bin, :round(doableSum[bin])] = 1
+            newBins[bin, : round(doableSum[bin])] = 1
 
         return newBins
-
 
     @staticmethod
     def unarizeCut(bins):
         """
-            Make a non unarized histogram in the unary form. This is done using cutting the additional information.
-            Please see 'unarizeDivide' for a better alternative.
+        Make a non unarized histogram in the unary form. This is done using cutting the additional information.
+        Please see 'unarizeDivide' for a better alternative.
         """
-
 
         numberOfBins, numberOfUnaries = bins.shape
         newBins = np.zeros((numberOfBins, numberOfUnaries))
@@ -640,7 +610,6 @@ class RandomVariable:
             else:
                 newBins[bin, :sum] = 1
 
-
         return newBins
 
     @staticmethod
@@ -653,7 +622,6 @@ class RandomVariable:
         :param secondVariable: random variable class
         :returns None
         """
-
 
         # pick the largest edges
         if edges2.size > edges1.size:
@@ -727,7 +695,6 @@ class RandomVariable:
                 for unary in range(0, numberOfUnaries):
                     bins[i, unary] = 0
 
-
         elif edges[0] < 0:  # cut bins
 
             for i in range(numberOfBinsNeeded, numberOfBins):
@@ -764,7 +731,6 @@ class RandomVariable:
             alpha[:-s] = alpha[s:]
             alpha[-s:] = 0
 
-
     def calculateMean(self):
         """
         Function calculates sample mean of the random variable.
@@ -774,10 +740,11 @@ class RandomVariable:
         :returns mean: double value
         """
 
-        midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
+        midPoints = 0.5 * (
+            self.edges[1:] + self.edges[:-1]
+        )  # midpoints of the edges of hist.
         mean = np.average(midPoints, weights=self.bins)
         return mean
-
 
     def calculateSTD(self):
         """
@@ -788,7 +755,9 @@ class RandomVariable:
         :returns std: double value
         """
 
-        midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
+        midPoints = 0.5 * (
+            self.edges[1:] + self.edges[:-1]
+        )  # midpoints of the edges of hist.
         variance = np.average(np.square(midPoints - self.mean), weights=self.bins)
         return np.sqrt(variance)
 
@@ -807,16 +776,17 @@ class RandomVariable:
         estimatedBins = np.zeros(numberOfBins)
         norm = np.sum(binMatrix) * (self.edges[1] - self.edges[0])
 
-            # calculate prob. of each bin
+        # calculate prob. of each bin
         for bin in range(0, numberOfBins):
-            numberOfOnes = np.sum( binMatrix[bin, :] )
+            numberOfOnes = np.sum(binMatrix[bin, :])
             estimatedBins[bin] = numberOfOnes / norm
 
-        midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])  # midpoints of the edges of hist.
+        midPoints = 0.5 * (
+            self.edges[1:] + self.edges[:-1]
+        )  # midpoints of the edges of hist.
         mean = np.average(midPoints, weights=estimatedBins)
 
         return mean
-
 
     def calculateSTD_UNARY(self):
         """
@@ -839,15 +809,8 @@ class RandomVariable:
             numberOfOnes = np.sum(binMatrix[bin, :])
             estimatedBins[bin] = numberOfOnes / norm
 
-        midPoints = 0.5 * (self.edges[1:] + self.edges[:-1])    # midpoints of the edges of hist.
+        midPoints = 0.5 * (
+            self.edges[1:] + self.edges[:-1]
+        )  # midpoints of the edges of hist.
         variance = np.average(np.square(midPoints - self.mean), weights=estimatedBins)
         return np.sqrt(variance)
-
-
-
-
-
-
-
-
-

@@ -5,42 +5,37 @@ import histogramGenerator
 import SSTA
 import networkx as nx
 from randomVariableHist_Numpy import RandomVariable
-#import matplotlib.pyplot as plt
+
+# import matplotlib.pyplot as plt
 from infiniteLadder import putTuplesIntoArray
-from examples_monteCarlo.montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+from examples_monteCarlo.montecarlo import (
+    get_inputs,
+    get_unknown_nodes,
+    simulation,
+    preprocess,
+)
 
 
 def testSSTA_1(dec=0):
 
     numberOfSamples = int(1000000)
     numberOfBins = 70
-    distribution = 'Normal'
+    distribution = "Normal"
     binsInterval = (0, 25)
 
-        # DESIRED - monte carlo
+    # DESIRED - monte carlo
 
-    adjacency = np.array([[0, 1, 1, 0, 0, 0, 0],
-                          [0, 0, 0, 1, 1, 0, 0],
-                          [0, 0, 0, 1, 0, 1, 0],
-                          [0, 0, 0, 0, 1, 1, 0],
-                          [0, 0, 0, 0, 0, 0, 1],
-                          [0, 0, 0, 0, 0, 0, 1],
-                          [0, 0, 0, 0, 0, 0, 0]])
+    adjacency = np.array(
+        [
+            [0, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0],
+            [0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0],
+        ]
+    )
 
     G = nx.from_numpy_matrix(adjacency, create_using=nx.DiGraph())
 
@@ -52,21 +47,37 @@ def testSSTA_1(dec=0):
     input_means = [0, 8, 12]
     input_stds = [0, 0.45, 0.3]
 
-    inputs_simulation = preprocess(list_of_inputs, input_means, input_stds, unknown_nodes, gate, numberOfSamples,
-                                   distribution)
+    inputs_simulation = preprocess(
+        list_of_inputs,
+        input_means,
+        input_stds,
+        unknown_nodes,
+        gate,
+        numberOfSamples,
+        distribution,
+    )
 
     mc = simulation(G, inputs_simulation, unknown_nodes, gate, numberOfSamples)
 
     desired = putTuplesIntoArray(numbers=mc)
 
+    # ACTUAL - ssta
 
-        # ACTUAL - ssta
-
-    g1 = histogramGenerator.get_gauss_bins(8, 0.45, numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
-    g2 = histogramGenerator.get_gauss_bins(12, 0.3, numberOfBins, numberOfSamples, binsInterval)  # g4 output - inputs: g3 g1
-    g3 = histogramGenerator.get_gauss_bins(3, 0.5, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
-    g4 = histogramGenerator.get_gauss_bins(3, 0.5, numberOfBins, numberOfSamples, binsInterval)
-    g5 = histogramGenerator.get_gauss_bins(3, 0.5, numberOfBins, numberOfSamples, binsInterval)
+    g1 = histogramGenerator.get_gauss_bins(
+        8, 0.45, numberOfBins, numberOfSamples, binsInterval
+    )  # g1, g2 INPUT gates, g3 middle
+    g2 = histogramGenerator.get_gauss_bins(
+        12, 0.3, numberOfBins, numberOfSamples, binsInterval
+    )  # g4 output - inputs: g3 g1
+    g3 = histogramGenerator.get_gauss_bins(
+        3, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )  # g5 output - inputs: g3, g2
+    g4 = histogramGenerator.get_gauss_bins(
+        3, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )
+    g5 = histogramGenerator.get_gauss_bins(
+        3, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )
 
     n1 = Node(g1)
     n2 = Node(g2)
@@ -83,28 +94,38 @@ def testSSTA_1(dec=0):
 
     actual = putTuplesIntoArray(rvs=delays)
 
-        # TESTING
+    # TESTING
 
-    np.testing.assert_almost_equal(desired, actual, decimal=dec, err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
+    np.testing.assert_almost_equal(
+        desired,
+        actual,
+        decimal=dec,
+        err_msg="Monte Carlo: \n" + str(desired) + "\n\n" + "SSTA: \n" + str(actual),
+    )
 
     return None
+
 
 def testSSTA_2(dec=0):
 
     numberOfSamples = 5000000
     numberOfBins = 50
-    distribution = 'Normal'
+    distribution = "Normal"
     binsInterval = (-2, 30)
 
-        # DESIRED - monte carlo
+    # DESIRED - monte carlo
 
-    adjacency = np.array([[0, 1, 1, 0, 0, 0, 0],
-                          [0, 0, 0, 1, 1, 0, 0],
-                          [0, 0, 0, 1, 0, 1, 0],
-                          [0, 0, 0, 0, 1, 1, 0],
-                          [0, 0, 0, 0, 0, 0, 1],
-                          [0, 0, 0, 0, 0, 0, 1],
-                          [0, 0, 0, 0, 0, 0, 0]])
+    adjacency = np.array(
+        [
+            [0, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0],
+            [0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0],
+        ]
+    )
 
     G = nx.from_numpy_matrix(adjacency, create_using=nx.DiGraph())
 
@@ -116,20 +137,37 @@ def testSSTA_2(dec=0):
     input_means = [0, 10, 12]
     input_stds = [0, 0.45, 0.3]
 
-    inputs_simulation = preprocess(list_of_inputs, input_means, input_stds, unknown_nodes, gate, numberOfSamples,
-                                   distribution)
+    inputs_simulation = preprocess(
+        list_of_inputs,
+        input_means,
+        input_stds,
+        unknown_nodes,
+        gate,
+        numberOfSamples,
+        distribution,
+    )
 
     mc = simulation(G, inputs_simulation, unknown_nodes, gate, numberOfSamples)
 
     desired = putTuplesIntoArray(numbers=mc)
     # print()
-        # ACTUAL - ssta
+    # ACTUAL - ssta
 
-    g1 = histogramGenerator.get_gauss_bins(10, 0.45, numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
-    g2 = histogramGenerator.get_gauss_bins(12, 0.3, numberOfBins, numberOfSamples, binsInterval)  # g4 output - inputs: g3 g1
-    g3 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
-    g4 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
-    g5 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
+    g1 = histogramGenerator.get_gauss_bins(
+        10, 0.45, numberOfBins, numberOfSamples, binsInterval
+    )  # g1, g2 INPUT gates, g3 middle
+    g2 = histogramGenerator.get_gauss_bins(
+        12, 0.3, numberOfBins, numberOfSamples, binsInterval
+    )  # g4 output - inputs: g3 g1
+    g3 = histogramGenerator.get_gauss_bins(
+        5, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )  # g5 output - inputs: g3, g2
+    g4 = histogramGenerator.get_gauss_bins(
+        5, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )
+    g5 = histogramGenerator.get_gauss_bins(
+        5, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )
 
     n1 = Node(g1)
     n2 = Node(g2)
@@ -146,10 +184,14 @@ def testSSTA_2(dec=0):
 
     actual = putTuplesIntoArray(rvs=delays)
 
-        # TESTING
+    # TESTING
 
-        # test whole
-    np.testing.assert_almost_equal(desired, actual, decimal=dec, err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
+    # test whole
+    np.testing.assert_almost_equal(
+        desired,
+        actual,
+        decimal=dec,
+        err_msg="Monte Carlo: \n" + str(desired) + "\n\n" + "SSTA: \n" + str(actual),
+    )
 
     return None
-

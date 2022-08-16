@@ -2,7 +2,6 @@ import numpy as np
 import cvxpy as cp
 
 
-
 """
 This module includes vectorized deterministic optimization of the circuit using Boyds RC-model.
 Does NOT work with CVXPY - would have to be written in other tool
@@ -20,14 +19,12 @@ def computeIncidenceMatrices(A: np.array):
     Aout = np.where(A > 0, 1, 0)
     Ain = np.where(A < 0, 1, 0)
 
-
-
     return Aout, Ain
 
 
-
-
-def computeInputCapacitance(alphas: np.array, betas: np.array, x: cp.Variable) -> cp.Expression:
+def computeInputCapacitance(
+    alphas: np.array, betas: np.array, x: cp.Variable
+) -> cp.Expression:
     """
     Calculate input capacitance as affine function ... alpha + beta * x
 
@@ -44,7 +41,6 @@ def computeInputCapacitance(alphas: np.array, betas: np.array, x: cp.Variable) -
 #
 # given by Fout = Aout*Ain'
 # cload = (Aout @ Ain.T) * cin
-
 
 
 def computeLoadCapacitance(Aout, Ain, inputCapacitance: cp.Expression) -> cp.Expression:
@@ -74,10 +70,11 @@ def computeLoadCapacitance(Aout, Ain, inputCapacitance: cp.Expression) -> cp.Exp
     cload[5] = Cout6
     cload[6] = Cout7
 
-    #return cload
+    # return cload
     # return inputCapacitance
     return cp.hstack(cload)
     # return cp.bmat(cload)
+
 
 # Create an array of constraints
 # constr_cload = []
@@ -90,7 +87,9 @@ def computeLoadCapacitance(Aout, Ain, inputCapacitance: cp.Expression) -> cp.Exp
 # d = cload * gamma/x
 
 
-def computeGateDelays(capLoad: cp.Expression, gammas: np.array, x: cp.Variable) -> cp.Expression:
+def computeGateDelays(
+    capLoad: cp.Expression, gammas: np.array, x: cp.Variable
+) -> cp.Expression:
     """
     Load capacitance is computed as a sum of a fanout.
 
@@ -154,7 +153,6 @@ def getConstrCload(capLoad, loadCapacitances):
     return constr_cload
 
 
-
 def getConstrTiming(Aout, Ain, gateDelays, t: cp.Variable, x):
     """
     Timing constraints.
@@ -174,8 +172,7 @@ def getConstrTiming(Aout, Ain, gateDelays, t: cp.Variable, x):
 
     input_timing = getInputTimingConstr(gateDelays, t)
 
-    return constr_timing , input_timing
-
+    return constr_timing, input_timing
 
 
 def getInputTimingConstr(gateDelays: cp.Expression, t: cp.Variable) -> [bool]:
@@ -211,7 +208,9 @@ def getMaximumDelay(t: cp.Variable) -> cp.Expression:
     return circuitDelay
 
 
-def computeTotalPower(frequencies: np.array, energyLoss: np.array, x: cp.Variable) -> cp.Expression:
+def computeTotalPower(
+    frequencies: np.array, energyLoss: np.array, x: cp.Variable
+) -> cp.Expression:
     """
     Compute total power as sum_i ( f_i * e_i * x_i )
 
@@ -238,10 +237,19 @@ def computeTotalArea(gateScales: np.array, x: cp.Variable) -> cp.Expression:
     return area
 
 
-
-
-def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, maxArea, maxPower,
-                  loadCapacitances, A, numberOfCells):
+def optimizeGates(
+    frequencies,
+    energyLoss,
+    gateScales,
+    alphas,
+    betas,
+    gammas,
+    maxArea,
+    maxPower,
+    loadCapacitances,
+    A,
+    numberOfCells,
+):
     # optimization variables
     x = cp.Variable(numberOfCells, pos=True)  # sizes
     t = cp.Variable(numberOfCells, pos=True)  # arrival times
@@ -273,16 +281,19 @@ def optimizeGates(frequencies, energyLoss, gateScales, alphas, betas, gammas, ma
     # get constraints
 
     cloadConstr = getConstrCload(computedLCapacitance, loadCapacitances)
-    timingConstr, inputTimingConstr = getConstrTiming(Aout, Ain, gateDelays, t, x   )
+    timingConstr, inputTimingConstr = getConstrTiming(Aout, Ain, gateDelays, t, x)
 
     posX = x >= 1  # all sizes greater than 1 (normalized)expr
 
-
     # formulate the GGP
 
-
     # constraints = [totalPower <= maxPower, totalArea <= maxArea, timingConstr, posX] + inputTimingConstr
-    constraints = [totalPower <= maxPower, totalArea <= maxArea, posX, timingConstr] + inputTimingConstr
+    constraints = [
+        totalPower <= maxPower,
+        totalArea <= maxArea,
+        posX,
+        timingConstr,
+    ] + inputTimingConstr
 
     objective = cp.Minimize(maxDelay)
 
@@ -334,4 +345,8 @@ if __name__ == "__main__":
     Amax = 25
     Pmax = 50
 
-    print(optimizeGates(f, e, a, alpha, beta, gamma, Amax, Pmax, [Cout6, Cout7], A, numberOfCells))
+    print(
+        optimizeGates(
+            f, e, a, alpha, beta, gamma, Amax, Pmax, [Cout6, Cout7], A, numberOfCells
+        )
+    )

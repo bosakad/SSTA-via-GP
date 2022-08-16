@@ -10,13 +10,18 @@ import SSTA
 import networkx as nx
 from randomVariableHist_Numpy import RandomVariable
 
-from examples_monteCarlo.montecarlo import get_inputs, get_unknown_nodes, simulation, preprocess
+from examples_monteCarlo.montecarlo import (
+    get_inputs,
+    get_unknown_nodes,
+    simulation,
+    preprocess,
+)
 
 
 def putTuplesIntoArray(rvs: [RandomVariable] = None, numbers: [float] = None):
 
     if rvs != None:
-        actual = np.zeros( (len(rvs), 2))
+        actual = np.zeros((len(rvs), 2))
 
         size = len(rvs)
         for i in range(0, size):
@@ -25,7 +30,7 @@ def putTuplesIntoArray(rvs: [RandomVariable] = None, numbers: [float] = None):
             actual[i, 1] = delay.std
 
     else:
-        actual = np.zeros( (len(numbers) - 1, 2) )
+        actual = np.zeros((len(numbers) - 1, 2))
 
         size = len(numbers) - 1
         for i in range(0, size):
@@ -34,6 +39,7 @@ def putTuplesIntoArray(rvs: [RandomVariable] = None, numbers: [float] = None):
             actual[i, 1] = np.std(delay)
 
     return actual
+
 
 def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
     """
@@ -65,26 +71,44 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
 
         # ACTUAL - ssta
 
+    g1 = histogramGenerator.get_gauss_bins(
+        10, 0.45, numberOfBins, numberOfSamples, binsInterval
+    )  # g1, g2 INPUT gates, g3 middle
+    g2 = histogramGenerator.get_gauss_bins(
+        12, 0.3, numberOfBins, numberOfSamples, binsInterval
+    )  # g4 output - inputs: g3 g1
+    g3 = histogramGenerator.get_gauss_bins(
+        5, 3, numberOfBins, numberOfSamples, binsInterval
+    )  # g5 output - inputs: g3, g2
+    g4 = histogramGenerator.get_gauss_bins(
+        5, 2, numberOfBins, numberOfSamples, binsInterval
+    )
+    g5 = histogramGenerator.get_gauss_bins(
+        5, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )
 
-    g1 = histogramGenerator.get_gauss_bins(10, 0.45, numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
-    g2 = histogramGenerator.get_gauss_bins(12, 0.3, numberOfBins, numberOfSamples, binsInterval)  # g4 output - inputs: g3 g1
-    g3 = histogramGenerator.get_gauss_bins(5, 3, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
-    g4 = histogramGenerator.get_gauss_bins(5, 2, numberOfBins, numberOfSamples, binsInterval)
-    g5 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
-
-    g1U = histogramGenerator.get_gauss_bins_UNARY(10, 0.45, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g2U = histogramGenerator.get_gauss_bins_UNARY(12, 0.3, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g3U = histogramGenerator.get_gauss_bins_UNARY(5, 3, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g4U = histogramGenerator.get_gauss_bins_UNARY(5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g5U = histogramGenerator.get_gauss_bins_UNARY(5, 0.5, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
+    g1U = histogramGenerator.get_gauss_bins_UNARY(
+        10, 0.45, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
+    g2U = histogramGenerator.get_gauss_bins_UNARY(
+        12, 0.3, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
+    g3U = histogramGenerator.get_gauss_bins_UNARY(
+        5, 3, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
+    g4U = histogramGenerator.get_gauss_bins_UNARY(
+        5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
+    g5U = histogramGenerator.get_gauss_bins_UNARY(
+        5, 0.5, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
     generatedDistros = [g1U, g2U, g3U, g4U, g5U]
 
-
-    n1 = Node( RandomVariableCVXPY(xs[0], g1.edges) )
-    n2 = Node( RandomVariableCVXPY(xs[1], g1.edges) )
-    n3 = Node( RandomVariableCVXPY(xs[2], g1.edges) )
-    n4 = Node( RandomVariableCVXPY(xs[3], g1.edges) )
-    n5 = Node( RandomVariableCVXPY(xs[4], g1.edges) )
+    n1 = Node(RandomVariableCVXPY(xs[0], g1.edges))
+    n2 = Node(RandomVariableCVXPY(xs[1], g1.edges))
+    n3 = Node(RandomVariableCVXPY(xs[2], g1.edges))
+    n4 = Node(RandomVariableCVXPY(xs[3], g1.edges))
+    n5 = Node(RandomVariableCVXPY(xs[4], g1.edges))
 
     # set circuit design
     n1.setNextNodes([n3, n4])
@@ -99,7 +123,10 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
     for gate in range(0, numberOfGates):
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
-                constraints.append( ((xs[gate])[bin])[unary] >= (generatedDistros[gate].bins[bin])[unary] )    # set lower constr.
+                constraints.append(
+                    ((xs[gate])[bin])[unary]
+                    >= (generatedDistros[gate].bins[bin])[unary]
+                )  # set lower constr.
 
         # old constr.
     # constraints = [x[0, :] >= g1.bins, x[1, :] >= g2.bins, x[2, :] >= g3.bins, x[3, :] >= g4.bins, x[4, :] >= g5.bins]
@@ -110,34 +137,30 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
     for gate in range(0, numberOfGates + 1):
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
-               sum += ((delays[gate].bins)[bin])[unary]
+                sum += ((delays[gate].bins)[bin])[unary]
 
     # solve
-    objective = cp.Minimize( sum )
+    objective = cp.Minimize(sum)
     prob = cp.Problem(objective, constraints)
     prob.solve(verbose=True, solver=cp.MOSEK)
-
-
 
     # print out the values
     print("PROBLEM VALUE: ", prob.value)
 
     rvs = []
 
-    for gate in range(0, numberOfGates):    # construct RVs
+    for gate in range(0, numberOfGates):  # construct RVs
 
         finalBins = np.zeros((numberOfBins, numberOfUnaries))
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
                 finalBins[bin, unary] = ((delays[gate].bins)[bin])[unary].value
 
-        rvs.append( RandomVariable(finalBins, generatedDistros[gate].edges, unary=True) )
-
+        rvs.append(RandomVariable(finalBins, generatedDistros[gate].edges, unary=True))
 
     print("\n APRX. VALUES: \n")
     for i in range(0, numberOfGates):
-        print( rvs[i].mean, rvs[i].std )
-
+        print(rvs[i].mean, rvs[i].std)
 
     # calculate with numpy
 
@@ -161,15 +184,12 @@ def SSTA_CVXPY_UNARY_AS_MIN(dec: int):
         desired[i, 0] = delay.mean
         desired[i, 1] = delay.std
 
-
     print("\n REAL VALUES: \n")
     for i in range(0, numberOfGates):
-        print( desired[i, 0], desired[i, 1] )
-
+        print(desired[i, 0], desired[i, 1])
 
         # test whole
     # np.testing.assert_almost_equal(desired, actual, decimal=dec, err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
-
 
     return None
 
@@ -180,8 +200,6 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
     :param dec:
     :return:
     """
-
-
 
     numberOfSamples = 2000000
 
@@ -206,26 +224,44 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
 
         # ACTUAL - ssta
 
+    g1 = histogramGenerator.get_gauss_bins(
+        10, 0.45, numberOfBins, numberOfSamples, binsInterval
+    )  # g1, g2 INPUT gates, g3 middle
+    g2 = histogramGenerator.get_gauss_bins(
+        12, 0.3, numberOfBins, numberOfSamples, binsInterval
+    )  # g4 output - inputs: g3 g1
+    g3 = histogramGenerator.get_gauss_bins(
+        5, 2, numberOfBins, numberOfSamples, binsInterval
+    )  # g5 output - inputs: g3, g2
+    g4 = histogramGenerator.get_gauss_bins(
+        5, 2, numberOfBins, numberOfSamples, binsInterval
+    )
+    g5 = histogramGenerator.get_gauss_bins(
+        5, 2, numberOfBins, numberOfSamples, binsInterval
+    )
 
-    g1 = histogramGenerator.get_gauss_bins(10, 0.45, numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
-    g2 = histogramGenerator.get_gauss_bins(12, 0.3, numberOfBins, numberOfSamples, binsInterval)  # g4 output - inputs: g3 g1
-    g3 = histogramGenerator.get_gauss_bins(5, 2, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
-    g4 = histogramGenerator.get_gauss_bins(5, 2, numberOfBins, numberOfSamples, binsInterval)
-    g5 = histogramGenerator.get_gauss_bins(5, 2, numberOfBins, numberOfSamples, binsInterval)
-
-    g1U = histogramGenerator.get_gauss_bins_UNARY(10, 0.45, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g2U = histogramGenerator.get_gauss_bins_UNARY(12, 0.3, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g3U = histogramGenerator.get_gauss_bins_UNARY(5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g4U = histogramGenerator.get_gauss_bins_UNARY(5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
-    g5U = histogramGenerator.get_gauss_bins_UNARY(5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries)
+    g1U = histogramGenerator.get_gauss_bins_UNARY(
+        10, 0.45, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
+    g2U = histogramGenerator.get_gauss_bins_UNARY(
+        12, 0.3, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
+    g3U = histogramGenerator.get_gauss_bins_UNARY(
+        5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
+    g4U = histogramGenerator.get_gauss_bins_UNARY(
+        5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
+    g5U = histogramGenerator.get_gauss_bins_UNARY(
+        5, 2, numberOfBins, numberOfSamples, binsInterval, numberOfUnaries
+    )
     generatedDistros = [g1U, g2U, g3U, g4U, g5U]
 
-
-    n1 = Node( RandomVariableCVXPY(xs[0], g1.edges) )
-    n2 = Node( RandomVariableCVXPY(xs[1], g1.edges) )
-    n3 = Node( RandomVariableCVXPY(xs[2], g1.edges) )
-    n4 = Node( RandomVariableCVXPY(xs[3], g1.edges) )
-    n5 = Node( RandomVariableCVXPY(xs[4], g1.edges) )
+    n1 = Node(RandomVariableCVXPY(xs[0], g1.edges))
+    n2 = Node(RandomVariableCVXPY(xs[1], g1.edges))
+    n3 = Node(RandomVariableCVXPY(xs[2], g1.edges))
+    n4 = Node(RandomVariableCVXPY(xs[3], g1.edges))
+    n5 = Node(RandomVariableCVXPY(xs[4], g1.edges))
 
     # set circuit design
     n1.setNextNodes([n3, n4])
@@ -240,7 +276,10 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
     for gate in range(0, numberOfGates):
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
-                constraints.append( ((xs[gate])[bin])[unary] <= (generatedDistros[gate].bins[bin])[unary] )    # set lower constr.
+                constraints.append(
+                    ((xs[gate])[bin])[unary]
+                    <= (generatedDistros[gate].bins[bin])[unary]
+                )  # set lower constr.
 
     # set objective
 
@@ -248,10 +287,10 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
     for gate in range(0, numberOfGates + 1):
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
-               sum += ((delays[gate].bins)[bin])[unary]
+                sum += ((delays[gate].bins)[bin])[unary]
 
     # solve
-    objective = cp.Maximize( sum )
+    objective = cp.Maximize(sum)
     prob = cp.Problem(objective, constraints)
 
     # prob.solve(verbose=True, solver=cp.MOSEK,
@@ -259,31 +298,30 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
     #                          'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200 }         # max time
     #            )
 
-    prob.solve(verbose=True, solver=cp.GUROBI,
-                                MIPGAP = 0.01,                   # relative gap
-                                TimeLimit = 1200            # 'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}  # max time
-               )
-
+    prob.solve(
+        verbose=True,
+        solver=cp.GUROBI,
+        MIPGAP=0.01,  # relative gap
+        TimeLimit=1200,  # 'MSK_DPAR_OPTIMIZER_MAX_TIME': 1200}  # max time
+    )
 
     # print out the values
     print("PROBLEM VALUE: ", prob.value)
 
     rvs = []
 
-    for gate in range(0, numberOfGates + 1):    # construct RVs
+    for gate in range(0, numberOfGates + 1):  # construct RVs
 
         finalBins = np.zeros((numberOfBins, numberOfUnaries))
         for bin in range(0, numberOfBins):
             for unary in range(0, numberOfUnaries):
                 finalBins[bin, unary] = ((delays[gate].bins)[bin])[unary].value
 
-        rvs.append( RandomVariable(finalBins, generatedDistros[0].edges, unary=True) )
-
+        rvs.append(RandomVariable(finalBins, generatedDistros[0].edges, unary=True))
 
     print("\n APRX. VALUES: \n")
     for i in range(0, numberOfGates + 1):
-        print( rvs[i].mean, rvs[i].std )
-
+        print(rvs[i].mean, rvs[i].std)
 
     # calculate with numpy
 
@@ -307,20 +345,23 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
         desired[i, 0] = delay.mean
         desired[i, 1] = delay.std
 
-
     print("\n NUMPY VALUES: \n")
     for i in range(0, numberOfGates + 1):
-        print( desired[i, 0], desired[i, 1] )
+        print(desired[i, 0], desired[i, 1])
 
     # monte carlo
 
-    adjacency = np.array([[0, 1, 1, 0, 0, 0, 0],
-                          [0, 0, 0, 1, 1, 0, 0],
-                          [0, 0, 0, 1, 0, 1, 0],
-                          [0, 0, 0, 0, 1, 1, 0],
-                          [0, 0, 0, 0, 0, 0, 1],
-                          [0, 0, 0, 0, 0, 0, 1],
-                          [0, 0, 0, 0, 0, 0, 0]])
+    adjacency = np.array(
+        [
+            [0, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0],
+            [0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0],
+        ]
+    )
 
     G = nx.from_numpy_matrix(adjacency, create_using=nx.DiGraph())
 
@@ -332,8 +373,15 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
     input_means = [0, 10, 12]
     input_stds = [0, 0.45, 0.3]
 
-    inputs_simulation = preprocess(list_of_inputs, input_means, input_stds, unknown_nodes, gate, numberOfSamples,
-                                   'Normal')
+    inputs_simulation = preprocess(
+        list_of_inputs,
+        input_means,
+        input_stds,
+        unknown_nodes,
+        gate,
+        numberOfSamples,
+        "Normal",
+    )
 
     mc = simulation(G, inputs_simulation, unknown_nodes, gate, numberOfSamples)
 
@@ -342,11 +390,11 @@ def SSTA_CVXPY_UNARY_AS_MAX(dec: int):
     print("\nMONTE CARLO VALUES (GROUND-TRUTH):")
     print(desired2)
 
-        # test whole
+    # test whole
     # np.testing.assert_almost_equal(desired, actual, decimal=dec, err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
 
-
     return None
+
 
 def SSTA_CVXPY_McCormick(dec: int):
     """
@@ -374,22 +422,32 @@ def SSTA_CVXPY_McCormick(dec: int):
 
         # ACTUAL - ssta
 
-
-    g1 = histogramGenerator.get_gauss_bins(10, 0.45, numberOfBins, numberOfSamples, binsInterval)  # g1, g2 INPUT gates, g3 middle
-    g2 = histogramGenerator.get_gauss_bins(12, 0.3, numberOfBins, numberOfSamples, binsInterval)  # g4 output - inputs: g3 g1
-    g3 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)  # g5 output - inputs: g3, g2
-    g4 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
-    g5 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
-    g6 = histogramGenerator.get_gauss_bins(5, 0.5, numberOfBins, numberOfSamples, binsInterval)
+    g1 = histogramGenerator.get_gauss_bins(
+        10, 0.45, numberOfBins, numberOfSamples, binsInterval
+    )  # g1, g2 INPUT gates, g3 middle
+    g2 = histogramGenerator.get_gauss_bins(
+        12, 0.3, numberOfBins, numberOfSamples, binsInterval
+    )  # g4 output - inputs: g3 g1
+    g3 = histogramGenerator.get_gauss_bins(
+        5, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )  # g5 output - inputs: g3, g2
+    g4 = histogramGenerator.get_gauss_bins(
+        5, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )
+    g5 = histogramGenerator.get_gauss_bins(
+        5, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )
+    g6 = histogramGenerator.get_gauss_bins(
+        5, 0.5, numberOfBins, numberOfSamples, binsInterval
+    )
     generatedDistros = [g1, g2, g3, g4, g5, g6]
 
-    n1 = Node( RandomVariableCVXPY(xs[0], g1.edges, g1.bins) )
-    n2 = Node( RandomVariableCVXPY(xs[1], g1.edges, g2.bins) )
-    n3 = Node( RandomVariableCVXPY(xs[2], g1.edges, g3.bins) )
-    n4 = Node( RandomVariableCVXPY(xs[3], g1.edges, g4.bins) )
-    n5 = Node( RandomVariableCVXPY(xs[4], g1.edges, g5.bins) )
-    n6 = Node( RandomVariableCVXPY(xs[5], g1.edges, g6.bins) )
-
+    n1 = Node(RandomVariableCVXPY(xs[0], g1.edges, g1.bins))
+    n2 = Node(RandomVariableCVXPY(xs[1], g1.edges, g2.bins))
+    n3 = Node(RandomVariableCVXPY(xs[2], g1.edges, g3.bins))
+    n4 = Node(RandomVariableCVXPY(xs[3], g1.edges, g4.bins))
+    n5 = Node(RandomVariableCVXPY(xs[4], g1.edges, g5.bins))
+    n6 = Node(RandomVariableCVXPY(xs[5], g1.edges, g6.bins))
 
     # n1 = Node( RandomVariableCVXPY(xs[0], g1.edges) )
     # n2 = Node( RandomVariableCVXPY(xs[1], g1.edges) )
@@ -416,39 +474,34 @@ def SSTA_CVXPY_McCormick(dec: int):
     #     for bin in range(0, numberOfBins):
     #         constraints.append( (xs[gate])[bin] >= generatedDistros[gate].bins[bin] )    # set lower constr.
 
-
     # set objective
 
     sum = 0
     for gate in range(0, numberOfGates + 1):
         for bin in range(0, numberOfBins):
-               sum += (delays[gate].bins)[bin]
+            sum += (delays[gate].bins)[bin]
 
     # solve
-    objective = cp.Minimize( sum )
+    objective = cp.Minimize(sum)
     prob = cp.Problem(objective, constraints)
     prob.solve(verbose=False, solver=cp.MOSEK)
-
-
 
     # print out the values
     print("PROBLEM VALUE: ", prob.value)
 
     rvs = []
 
-    for gate in range(0, numberOfGates + 1):    # construct RVs
+    for gate in range(0, numberOfGates + 1):  # construct RVs
 
         finalBins = np.zeros(numberOfBins)
         for bin in range(0, numberOfBins):
-                finalBins[bin] = (delays[gate].bins)[bin].value
+            finalBins[bin] = (delays[gate].bins)[bin].value
 
-        rvs.append( RandomVariable(finalBins, g1.edges, unary=False) )
-
+        rvs.append(RandomVariable(finalBins, g1.edges, unary=False))
 
     print("\n APRX. VALUES: \n")
     for i in range(0, numberOfGates + 1):
-        print( rvs[i].mean, rvs[i].std )
-
+        print(rvs[i].mean, rvs[i].std)
 
     # calculate with numpy
 
@@ -468,7 +521,6 @@ def SSTA_CVXPY_McCormick(dec: int):
     n3.setNextNodes([n6, n5])
     n4.setNextNodes([n6])
 
-
     delays = SSTA.calculateCircuitDelay([n1, n2], unary=False, cvxpy=False)
     desired = putTuplesIntoArray(rvs=delays)
     #
@@ -479,20 +531,23 @@ def SSTA_CVXPY_McCormick(dec: int):
     #     desired[i, 0] = delay.mean
     #     desired[i, 1] = delay.std
 
-
     print("\n NUMPY VALUES: \n")
     for i in range(0, numberOfGates + 1):
-        print( desired[i, 0], desired[i, 1] )
+        print(desired[i, 0], desired[i, 1])
 
     # monte carlo
 
-    adjacency = np.array([[0, 1, 1, 0, 0, 0, 0],
-                          [0, 0, 0, 1, 1, 0, 0],
-                          [0, 0, 0, 1, 0, 1, 0],
-                          [0, 0, 0, 0, 1, 1, 0],
-                          [0, 0, 0, 0, 0, 0, 1],
-                          [0, 0, 0, 0, 0, 0, 1],
-                          [0, 0, 0, 0, 0, 0, 0]])
+    adjacency = np.array(
+        [
+            [0, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 1, 0, 0],
+            [0, 0, 0, 1, 0, 1, 0],
+            [0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0],
+        ]
+    )
 
     G = nx.from_numpy_matrix(adjacency, create_using=nx.DiGraph())
 
@@ -504,8 +559,15 @@ def SSTA_CVXPY_McCormick(dec: int):
     input_means = [0, 10, 12]
     input_stds = [0, 0.45, 0.3]
 
-    inputs_simulation = preprocess(list_of_inputs, input_means, input_stds, unknown_nodes, gate, numberOfSamples,
-                                   'Normal')
+    inputs_simulation = preprocess(
+        list_of_inputs,
+        input_means,
+        input_stds,
+        unknown_nodes,
+        gate,
+        numberOfSamples,
+        "Normal",
+    )
 
     mc = simulation(G, inputs_simulation, unknown_nodes, gate, numberOfSamples)
 
@@ -514,20 +576,19 @@ def SSTA_CVXPY_McCormick(dec: int):
     print("\nMONTE CARLO VALUES (GROUND-TRUTH):")
     print(desired2)
 
-        # test whole
+    # test whole
     # np.testing.assert_almost_equal(desired, actual, decimal=dec, err_msg= "Monte Carlo: \n" + str(desired) + '\n\n' + "SSTA: \n" + str(actual))
 
     return None
 
 
-
 if __name__ == "__main__":
 
-        # dec param is Desired precision
+    # dec param is Desired precision
 
     SSTA_CVXPY_UNARY_AS_MIN(dec=5)
 
-        # one has to change functions in SSTA to change MAX and MIN
+    # one has to change functions in SSTA to change MAX and MIN
     # SSTA_CVXPY_UNARY_AS_MAX(dec=5)
 
     # SSTA_CVXPY_McCormick(dec=5)
