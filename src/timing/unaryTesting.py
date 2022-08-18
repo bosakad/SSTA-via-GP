@@ -1,4 +1,4 @@
-import src.other.histogramGenerator
+import src.utility_tools.histogramGenerator
 import numpy as np
 from src.timing.ScalingAlgorithms import computeMAPE
 import matplotlib.pyplot as plt
@@ -9,7 +9,7 @@ from src.timing.examples_monteCarlo.infinite_ladder_montecarlo import (
     MonteCarlo_nodes,
     get_moments_from_simulations,
 )
-from src.other.node import Node
+from src.utility_tools.node import Node
 
 """
 Test for unary encoded algorithms

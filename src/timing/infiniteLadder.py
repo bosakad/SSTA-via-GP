@@ -2,8 +2,8 @@ import numpy as np
 from src.timing.cvxpyVariable import RandomVariableCVXPY
 import cvxpy as cp
 from src.timing.randomVariableHist_Numpy import RandomVariable
-import src.other.histogramGenerator as histogramGenerator
-from src.other.node import Node
+import src.utility_tools.histogramGenerator as histogramGenerator
+from src.utility_tools.node import Node
 from tabulate import tabulate
 import sys
 import src.timing.SSTA as SSTA

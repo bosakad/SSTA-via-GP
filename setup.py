@@ -1,5 +1,5 @@
 import os
-from setuptools import setup, find_packages, Command
+from setuptools import setup, find_packages, Command, find_namespace_packages
 
 
 class CleanCommand(Command):
@@ -21,7 +21,7 @@ setup(
 	author_email='bosadam@seznam.cz',
 	url='https://github.com/bosakad/GP-Optimization',
 	#packages=find_packages(),
-	packages=setuptools.find_namespace_packages(exclude=["tests", "docs","examples","inputs_outputs"]),
+	packages=find_namespace_packages(exclude=["tests", "docs","examples","inputs_outputs"]),
 	install_requires=[
         "cvxpy>=1.2.1",
         "cycler>=0.11.0",

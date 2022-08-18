@@ -1,8 +1,8 @@
 import numpy as np
 import cvxpy as cp
-from src.other.node import Node
+from src.utility_tools.node import Node
 from src.timing.cvxpyVariable import RandomVariableCVXPY
-import src.other.histogramGenerator as histogramGenerator
+import src.utility_tools.histogramGenerator as histogramGenerator
 import src.timing.SSTA as SSTA
 import mosek
 from src.timing.examples_monteCarlo.infinite_ladder_montecarlo import (

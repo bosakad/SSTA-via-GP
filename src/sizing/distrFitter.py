@@ -1,4 +1,4 @@
-import src.other.histogramGenerator as histogramGenerator
+import src.utility_tools.histogramGenerator as histogramGenerator
 import numpy as np
 import matplotlib.pyplot as plt
 from src.timing.randomVariableHist_Numpy import RandomVariable

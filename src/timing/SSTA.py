@@ -1,6 +1,6 @@
 from queue import Queue
 from src.timing.randomVariableHist_Numpy import RandomVariable
-from src.other.node import Node
+from src.utility_tools.node import Node
 import cvxpy as cp
 from src.timing.mosekVariable import RandomVariableMOSEK
 import numpy as np
