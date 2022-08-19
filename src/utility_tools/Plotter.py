@@ -39,12 +39,60 @@ def parseVerbose(verboseFile):
     return np.array(nonZeros)
 
 
-def plotForThesis2():
-    file = open("Inputs.outputs/testParsing.txt")  # file with 1 line - dictionary
+def parseVerboseGP(verboseFile):
+    """
+    :return nonzeros: number of nonzeros after presolving
+    """
 
-    line = file.readline()
+    verbose = open(verboseFile)
 
-    results = eval(line)  # load dictionary
+    variables = []
+    constrs = []
+    cones = []
+
+    AlgIndex = -1
+    iterMet = False
+    opt=False
+    while True:
+        line = verbose.readline()
+        if not line:
+            break
+
+        if iterMet == False and ". iteration" in line:
+            if "0. iteration:" in line:
+                AlgIndex += 1
+            iterMet = True
+
+        if iterMet == True and "Presolve started" in line:
+            opt = True
+
+        if iterMet and opt and "Constraints" in line:
+            nonZ = [int(s) for s in line.split() if s.isdigit()]
+            constrs.append(nonZ[-1])
+
+        if iterMet and opt and "Cones" in line:
+            nonZ = [int(s) for s in line.split() if s.isdigit()]
+            cones.append(nonZ[-1])
+
+        if iterMet and opt and "Scalar variables" in line:
+            nonZ = [int(s) for s in line.split() if s.isdigit()]
+            variables.append(nonZ[-1])
+            iterMet = False
+            opt = False
+
+        # parse dict
+        if "{" in line:
+            dict = eval(line)
+
+
+    return constrs, cones, variables, dict
+
+def plotComparison(res1=None, res2=None, res3=None):
+    # file = open("Inputs.outputs/testParsing.txt")  # file with 1 line - dictionary
+
+    # line = file.readline()
+
+    # results = eval(line)  # load dictionary
 
     Gates = np.array([], dtype=int)
     mip1 = np.array([])
@@ -55,34 +103,28 @@ def plotForThesis2():
     time3 = np.array([])
 
     # store data from dictionary into numpy array
-    for gateNum, WithConstr in results:
+    for gateNum, WithConstr in res1:
 
-        time1 = np.append(time1, results[(gateNum, WithConstr)][2])
-        mip1 = np.append(mip1, results[(gateNum, WithConstr)][7])
-
-        if gateNum not in Gates:
-            Gates = np.append(Gates, gateNum)
-
-    line = file.readline()
-    results = eval(line)  # load dictionary
-
-    # store data from dictionary into numpy array
-    for gateNum, WithConstr in results:
-
-        time2 = np.append(time2, results[(gateNum, WithConstr)][2])
-        mip2 = np.append(mip2, results[(gateNum, WithConstr)][7])
+        time1 = np.append(time1, res1[(gateNum, WithConstr)][2])
+        mip1 = np.append(mip1, res1[(gateNum, WithConstr)][7])
 
         if gateNum not in Gates:
             Gates = np.append(Gates, gateNum)
 
-    line = file.readline()
-    results = eval(line)  # load dictionary
+    # store data from dictionary into numpy array
+    for gateNum, WithConstr in res2:
+
+        time2 = np.append(time2, res2[(gateNum, WithConstr)][2])
+        mip2 = np.append(mip2, res2[(gateNum, WithConstr)][7])
+
+        if gateNum not in Gates:
+            Gates = np.append(Gates, gateNum)
 
     # store data from dictionary into numpy array
-    for gateNum, WithConstr in results:
+    for gateNum, WithConstr in res3:
 
-        time3 = np.append(time3, results[(gateNum, WithConstr)][2])
-        mip3 = np.append(mip3, results[(gateNum, WithConstr)][7])
+        time3 = np.append(time3, res3[(gateNum, WithConstr)][2])
+        mip3 = np.append(mip3, res3[(gateNum, WithConstr)][7])
 
         if gateNum not in Gates:
             Gates = np.append(Gates, gateNum)
@@ -167,7 +209,7 @@ def plotForThesis2():
         time3,  # data
         marker="o",  # each marker will be rendered as a circle
         markersize=6,  # marker size
-        markerfacecolor="red",  # marker facecolor
+        markerfacecolor="red",  #    marker facecolor
         markeredgecolor="black",  # marker edgecolor
         markeredgewidth=1,  # marker edge width
         linestyle="-",  # line style will be dash line
@@ -178,21 +220,21 @@ def plotForThesis2():
     axs.flat[i].set(ylabel="Time (seconds)")
     i += 1
 
-    # plt.show()
-    plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)
+    plt.show()
+    # plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)
 
 
-def plotNonzeros():
-    file = open("Inputs.outputs/testParsing.txt")  # file with 1 line - dictionary
-    verbose = "../Inputs/verbose.stdout"  # file with verbose text, should be complex problem - so there is 'Presolved'
+def plotNonzeros(results, only1=True):
+    # file = open("Inputs.outputs/testParsing.txt")  # file with 1 line - dictionary
+    # verbose = "../Inputs/verbose.stdout"  # file with verbose text, should be complex problem - so there is 'Presolved'
     readFromVerbose = False
     plotUnder = True
-    only1 = True
     forPaper = True
 
-    line = file.readline()
 
-    results = eval(line)  # load dictionary
+    # line = file.readline()
+
+    # results = eval(line)  # load dictionary
 
     Gates = np.array([], dtype=int)
     zerosWithConstr = np.array([])
@@ -211,10 +253,10 @@ def plotNonzeros():
     mipGapWithConstr = np.array([])
     mipGapNoConstr = np.array([])
 
-    if readFromVerbose:
-        nonZ = parseVerbose(verbose)
-        zerosNoConstr = nonZ[0][:]
-        zerosWithConstr = nonZ[1][:]
+    # if readFromVerbose:
+    #     nonZ = parseVerbose(verbose)
+    #     zerosNoConstr = nonZ[0][:]
+    #     zerosWithConstr = nonZ[1][:]
 
     # store data from dictionary into numpy array
     for gateNum, WithConstr in results:
@@ -269,8 +311,12 @@ def plotNonzeros():
 
     if forPaper:
 
-        # set histograms
-        fig, axs = plt.subplots(3, 1, gridspec_kw={"wspace": 0.5, "hspace": 0.5})
+        if only1:
+            # set histograms
+            fig, axs = plt.subplots(4, 1, gridspec_kw={"wspace": 0.5, "hspace": 0.5})
+        else:
+            fig, axs = plt.subplots(3, 1, gridspec_kw={"wspace": 0.5, "hspace": 0.5})
+
         i = 0
 
         # nonzeros
@@ -328,16 +374,17 @@ def plotNonzeros():
 
         # constraints
 
-        # p2 = axs[i].plot(Gates, mipGapWithConstr,  # data
-        #                  marker='o',  # each marker will be rendered as a circle
-        #                  markersize=5,  # marker size
-        #                  markerfacecolor='red',  # marker facecolor
-        #                  markeredgecolor='black',  # marker edgecolor
-        #                  markeredgewidth=1,  # marker edge width
-        #                  linestyle='-',  # line style will be dash line
-        #                  linewidth=3.5, zorder=1)  # line width
-        # axs.flat[i].set(ylabel='Mip gap \nat root(%)')
-        # i += 1
+        if only1:
+            p2 = axs[i].plot(Gates, mipGapWithConstr,  # data
+                             marker='o',  # each marker will be rendered as a circle
+                             markersize=5,  # marker size
+                             markerfacecolor='red',  # marker facecolor
+                             markeredgecolor='black',  # marker edgecolor
+                             markeredgewidth=1,  # marker edge width
+                             linestyle='-',  # line style will be dash line
+                             linewidth=3.5, zorder=1)  # line width
+            axs.flat[i].set(ylabel='Mip gap \nat root(%)')
+            i += 1
 
         # time
         # axs[i].scatter(Gates, timeWithConstr, color='blue')
@@ -526,8 +573,8 @@ def plotNonzeros():
             if not only1:
                 axs[i].scatter(Gates, mipGapNoConstr, color="orange")
                 axs[i].plot(Gates, mipGapNoConstr, color="orange")
-            # axs.flat[i].set(ylabel='MIP gap at root')
-            axs.flat[i].set(ylabel="MIP")
+            axs.flat[i].set(ylabel='MIP gap at root')
+            # axs.flat[i].set(ylabel="MIP")
             # axs[i].legend(["With constraints", "Without constraints"])
             i += 1
 
@@ -790,99 +837,172 @@ def plotScalingOptimization():
     plt.savefig("Inputs.outputs/scaling.jpeg", dpi=800, bbox_inches="tight")
 
 
-def plotPresolve():
-    file = open("Inputs.outputs/testParsing.txt")  # file with 1 line - dictionary
-    verbose = "../Inputs/verbose.stdout"  # file with verbose text, should be complex problem - so there is 'Presolved'
-    readFromVerbose = False
+def plotPresolve(verbose, bins=False):
+    # file = open("Inputs.outputs/testParsing.txt")  # file with 1 line - dictionary
+    readFromVerbose = True
     plotUnder = True
 
-    line = file.readline()
-
-    results = eval(line)  # load dictionary
 
     Gates = np.array([], dtype=int)
 
     if readFromVerbose:
-        nonZ = parseVerbose(verbose)
-        zerosNoConstr = nonZ[0][:]
-        zerosWithConstr = nonZ[1][:]
+        constrWithConstr, zerosWithConstr, varsWithConstr, results = parseVerboseGP(verbose)
 
-    nonZeros = {}
-    vars = {}
-    constraints = {}
+    timeWithConstr = np.array([])
+    errorWithConstrM = np.array([])
+    errorWithConstrS = np.array([])
 
     # store data from dictionary into numpy array
     for gateNum, passes in results:
 
-        if passes not in nonZeros:
-            nonZeros[passes] = np.array([])
-            vars[passes] = np.array([])
-            constraints[passes] = np.array([])
+        # if passes not in zerosWithConstr:
+        #     zerosWithConstr[passes] = np.array([])
+        #     vars[passes] = np.array([])
+        #     constraints[passes] = np.array([])
 
-        nonZeros[passes] = np.append(nonZeros[passes], results[(gateNum, passes)][0])
-        vars[passes] = np.append(vars[passes], results[(gateNum, passes)][1])
-        constraints[passes] = np.append(
-            constraints[passes], results[(gateNum, passes)][2]
-        )
+        timeWithConstr = np.append(timeWithConstr, results[(gateNum, passes)][0])
+        errorWithConstrM = np.append(errorWithConstrM, results[(gateNum, passes)][1])
+        errorWithConstrS = np.append(errorWithConstrS, results[(gateNum, passes)][2])
 
         if gateNum not in Gates:
             Gates = np.append(Gates, gateNum)
 
-    # set histograms
-    fig, axs = plt.subplots(3, 1)
+
+# set histograms
+    fig, axs = plt.subplots(3, 1, gridspec_kw={"wspace": 0.5, "hspace": 0.5})
     i = 0
 
-    # non zeros
-    colors = ["blue", "orange", "green"]
-    legend = [0, 0, 0]
-    for passes in nonZeros:
-        # nonzeros
-        axs[0].plot(Gates, nonZeros[passes], color=colors[i])
-        axs[0].scatter(Gates, nonZeros[passes], color=colors[i])
-        legend[i] = passes
-        i += 1
+    # nonzeros
 
-    axs.flat[0].set(ylabel="Nonzeros")
-    axs[0].legend(legend)
+    p0 = axs[i].plot(
+        Gates,
+        zerosWithConstr,  # data
+        marker="o",  # each marker will be rendered as a circle
+        markersize=4.5,  # marker size
+        markerfacecolor="red",  # marker facecolor
+        markeredgecolor="black",  # marker edgecolor
+        markeredgewidth=1,  # marker edge width
+        linestyle="-",  # line style will be dash line
+        linewidth=3,
+        zorder=3,
+    )  # line width
 
-    # number of variables
-    colors = ["blue", "orange", "green"]
-    legend = [0, 0, 0]
-    i = 0
-    for passes in vars:
-        # nonzeros
-        axs[1].plot(Gates, vars[passes], color=colors[i])
-        axs[1].scatter(Gates, vars[passes], color=colors[i])
-        legend[i] = passes
-        i += 1
+    p1 = axs[i].plot(
+        Gates,
+        varsWithConstr,  # data
+        marker="o",  # each marker will be rendered as a circle
+        markersize=4.5,  # marker size
+        markerfacecolor="red",  # marker facecolor
+        markeredgecolor="black",  # marker edgecolor
+        markeredgewidth=1,  # marker edge width
+        linestyle="-",  # line style will be dash line
+        linewidth=3,
+        zorder=2,
+    )  # line width
 
-    axs.flat[1].set(ylabel="Variables")
-    axs[1].legend(legend)
+    p2 = axs[i].plot(
+        Gates,
+        constrWithConstr,  # data
+        marker="o",  # each marker will be rendered as a circle
+        markersize=4.5,  # marker size
+        markerfacecolor="red",  # marker facecolor
+        markeredgecolor="black",  # marker edgecolor
+        markeredgewidth=1,  # marker edge width
+        linestyle="-",  # line style will be dash line
+        linewidth=3,
+        zorder=1,
+    )  # line width
 
-    # number of constraints
-    colors = ["blue", "orange", "green"]
-    legend = [0, 0, 0]
-    i = 0
-    for passes in constraints:
-        # nonzeros
-        axs[2].plot(Gates, constraints[passes], color=colors[i])
-        axs[2].scatter(Gates, constraints[passes], color=colors[i])
-        legend[i] = passes
-        i += 1
+    axs.flat[i].set(ylabel="Count")
+    # axs[i].legend(["Nonzeros", "Variables", "Constraints"])
+    i += 1
 
-    axs.flat[2].set(ylabel="Constraints")
-    axs[2].legend(legend)
+    # constraints
+    p2 = axs[i].plot(
+        Gates,
+        timeWithConstr,  # data
+        marker="o",  # each marker will be rendered as a circle
+        markersize=5,  # marker size
+        markerfacecolor="red",  # marker facecolor
+        markeredgecolor="black",  # marker edgecolor
+        markeredgewidth=1,  # marker edge width
+        linestyle="-",  # line style will be dash line
+        linewidth=3.5,
+        zorder=1,
+    )  # line width
+    axs.flat[i].set(ylabel="Time\n(seconds)")
+    # axs[i].legend(["With constraints", "Without constraints"])
+    i += 1
+
+    # error mean
+    p2 = axs[i].plot(
+        Gates,
+        errorWithConstrM,  # data
+        marker="o",  # each marker will be rendered as a circle
+        markersize=5,  # marker size
+        markerfacecolor="red",  # marker facecolor
+        markeredgecolor="black",  # marker edgecolor
+        markeredgewidth=1,  # marker edge width
+        linestyle="-",  # line style will be dash line
+        linewidth=3.5,
+        zorder=1,
+    )  # line width
+    p2 = axs[i].plot(
+        Gates,
+        errorWithConstrS,  # data
+        marker="o",  # each marker will be rendered as a circle
+        markersize=5,  # marker size
+        markerfacecolor="red",  # marker facecolor
+        markeredgecolor="black",  # marker edgecolor
+        markeredgewidth=1,  # marker edge width
+        linestyle="-",  # line style will be dash line
+        linewidth=3.5,
+        zorder=1,
+    )  # line width
+
+    # plt.fill_between(Gates, errorWithConstr[:, 1], y2=errorWithConstr[:, 0], alpha=0.3, color='orange')
+    # plt.fill_between(Gates, errorWithConstr[:, 0], alpha=0.3, color='blue')
+    plt.fill_between(Gates, errorWithConstrM, alpha=0.3, color="orange")
+    plt.fill_between(
+        Gates, errorWithConstrM, errorWithConstrS, alpha=0.3, color="blue"
+    )
+
+    if bins:
+        axs.flat[i].set(ylabel="Relative Error(%)")
+    else:
+        axs.flat[i].set(ylabel="MAPE(%)")
+
+    i += 1
 
     for ax in axs.flat:
-        ax.set(xlabel="N")
+        if bins:
+            ax.set(xlabel="Number of bins")
+        else:
+            ax.set(xlabel="Number of gates")
 
     # Hide x labels and tick labels for top plots and y ticks for right plots.
     for ax in axs.flat:
         ax.label_outer()
 
-    # plt.show()
-    plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)
+    labels = ["a", "b", "c", "d"]
+    j = 0
+    for ax in axs:
+        # label physical distance in and down:
+        trans = mtransforms.ScaledTranslation(10 / 72, -5 / 72, fig.dpi_scale_trans)
+        ax.text(
+            0.0,
+            1.0,
+            labels[j],
+            transform=ax.transAxes + trans,
+            fontsize="medium",
+            verticalalignment="top",
+            fontfamily="DejaVu Sans",
+            weight="bold",
+            bbox=dict(facecolor="1", edgecolor="none", pad=3.0),
+        )
+        j += 1
 
+    plt.show()
 
 def plotForThesis():
 
@@ -960,7 +1080,8 @@ def plotDelays():
 if __name__ == "__main__":
     # plotNonzeros()
     # plotScalingOptimization()
-    plotDelays()
+    # plotDelays()
+    print(parseVerboseGP("testParse"))
     # plotPresolve()
     # plotForThesis()
     # plotForThesis2()
