@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.gateSizing.SSTA &mdash; Gate Sizing  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Gate Sizing
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Gate Sizing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>src.gateSizing.SSTA</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.gateSizing.SSTA</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
+
+<span class="kn">from</span> <span class="nn">randomVariableHist_Numpy</span> <span class="kn">import</span> <span class="n">RandomVariable</span>
+<span class="kn">from</span> <span class="nn">node</span> <span class="kn">import</span> <span class="n">Node</span>
+<span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
+<span class="kn">from</span> <span class="nn">mosekVariable</span> <span class="kn">import</span> <span class="n">RandomVariableMOSEK</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">cvxpyVariable</span>
+
+
+<div class="viewcode-block" id="calculateCircuitDelay"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.calculateCircuitDelay">[docs]</a><span class="k">def</span> <span class="nf">calculateCircuitDelay</span><span class="p">(</span><span class="n">rootNodes</span><span class="p">:</span> <span class="p">[</span><span class="n">Node</span><span class="p">],</span> <span class="n">cvxpy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mosekStatus</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                                        <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mosekTRI</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">GP</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">monteCarlo</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">Node</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute circuit delay using SSTA algorithm</span>
+<span class="sd">    Function executes the algorithm for finding out the PDF of a circuit delay.</span>
+
+<span class="sd">    :param rootNodes: array of root nodes, [Node], Node includes next nodes and previous nodes</span>
+<span class="sd">    :param mosekStatus: current number of MOSEK variables and constraints (tuple)</span>
+<span class="sd">    :param cvxpy: Bool, true if cvxpy objects are used, false if just RandomVariables class is used</span>
+<span class="sd">    :param unary: Bool, true if unary (M 0/1-bin repr.) is used, false otherwise</span>
+<span class="sd">    :param mosekTRI: Bool, true if trilinear constraints are used, false otherwise</span>
+<span class="sd">    :param GP: Bool, true if using the GP version of the SSTA, false otherwise</span>
+<span class="sd">    :param monteCarlo: Bool, true if using the monte carlo, false otherwise</span>
+
+<span class="sd">    :return newConstr: new constraints for CVXPY(optional)</span>
+<span class="sd">    :return newNofVariables: new number of MOSEK variables(optional)</span>
+<span class="sd">    :return newDelays: array of new RVs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+        <span class="c1"># pointer to a max and convolution functions - depend on current tool and algorithm</span>
+    <span class="k">if</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>  <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsMOSEK_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span><span class="p">:</span>     <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsCVXPY_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">unary</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">GP</span><span class="p">:</span> <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsCVXPY_McCormick</span>
+    <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">GP</span><span class="p">:</span>        <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsCVXPY_GP</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">mosekTRI</span><span class="p">:</span> <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsUNARY</span>
+    <span class="k">elif</span> <span class="n">monteCarlo</span><span class="p">:</span>          <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxMonteCarlo</span>
+    <span class="k">else</span><span class="p">:</span>                     <span class="n">MaximumF</span> <span class="o">=</span> <span class="n">maxOfDistributionsFORM</span>
+    <span class="k">if</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>  <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">Convolution_UNARY_MOSEK</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span><span class="p">:</span>     <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">Convolution_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">unary</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">GP</span><span class="p">:</span> <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">Convolution_McCormick</span>
+    <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">GP</span><span class="p">:</span>        <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">Convolution_GP</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">unary</span><span class="p">:</span> <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="o">.</span><span class="n">convolutionOfTwoVarsNaiveSAME_UNARY</span>
+    <span class="k">elif</span> <span class="n">monteCarlo</span><span class="p">:</span>          <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span>
+    <span class="k">else</span><span class="p">:</span>                     <span class="n">ConvolutionF</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="o">.</span><span class="n">convolutionOfTwoVarsShift</span>
+
+    <span class="k">if</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">usingMosek</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">curNofVariables</span> <span class="o">=</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">mosekStatus</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">usingMosek</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">curNofConstr</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># init. data structures</span>
+    <span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+    <span class="n">sink</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">newDelays</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">closedList</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">AllConstr</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># put root nodes into Queue</span>
+    <span class="n">putIntoQueue</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">rootNodes</span><span class="p">)</span>
+
+        <span class="c1"># BFS</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">queue</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+
+        <span class="n">tmpNode</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>                                       <span class="c1"># get data</span>
+        <span class="n">currentRandVar</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">randVar</span>
+
+        <span class="k">if</span> <span class="n">tmpNode</span> <span class="ow">in</span> <span class="n">closedList</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">:</span>                                      <span class="c1"># calculate maximum + convolution - depends on the tool</span>
+
+                <span class="c1"># two-term multiplication alg. - unary encoding</span>
+            <span class="k">if</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">mosekTRI</span><span class="p">:</span>
+
+                <span class="n">maxDelay</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
+                <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">ConvolutionF</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
+
+                <span class="c1">#  - unary encoding</span>
+            <span class="k">elif</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="n">mosekTRI</span><span class="p">:</span>
+                        <span class="c1"># works just for 2 inputs for maximum</span>
+                <span class="n">RV1</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">RV2</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">RV3</span> <span class="o">=</span> <span class="n">currentRandVar</span>
+                <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_VECTORIZED_MIN</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
+
+                <span class="c1"># numpy version of the three-term multiplication alg.- unary encoding</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="n">mosekTRI</span><span class="p">:</span>
+
+                <span class="n">RV1</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">RV2</span> <span class="o">=</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">RV3</span> <span class="o">=</span> <span class="n">currentRandVar</span>
+                <span class="n">currentRandVar</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_AND_Convolution_UNARY</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">RV3</span><span class="p">)</span>
+
+                <span class="c1"># two-term multiplication alg. - unary encoding in CVXPY</span>
+            <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">GP</span><span class="p">:</span>
+                <span class="n">maxDelay</span><span class="p">,</span> <span class="n">newConstraints</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">)</span>
+                <span class="n">AllConstr</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newConstraints</span><span class="p">)</span>
+                <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">newConstraints</span> <span class="o">=</span> <span class="n">ConvolutionF</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">)</span>
+                <span class="n">AllConstr</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newConstraints</span><span class="p">)</span>
+
+                <span class="c1"># SSTA using GP in CVXPY tool</span>
+            <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">GP</span><span class="p">:</span>
+                <span class="n">maxDelay</span><span class="p">,</span> <span class="n">AllConstr</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">,</span> <span class="n">AllConstr</span><span class="p">)</span>
+                <span class="n">currentRandVar</span><span class="p">,</span> <span class="n">AllConstr</span> <span class="o">=</span> <span class="n">ConvolutionF</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">,</span> <span class="n">AllConstr</span><span class="p">)</span>
+
+                <span class="c1"># SSTA using exact computation</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">maxDelay</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">tmpNode</span><span class="o">.</span><span class="n">prevDelays</span><span class="p">)</span>
+                <span class="n">currentRandVar</span> <span class="o">=</span> <span class="n">ConvolutionF</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">,</span> <span class="n">maxDelay</span><span class="p">)</span>
+
+
+
+        <span class="k">for</span> <span class="n">nextNode</span> <span class="ow">in</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">nextNodes</span><span class="p">:</span>                          <span class="c1"># append this node as a previous</span>
+            <span class="n">nextNode</span><span class="o">.</span><span class="n">appendPrevDelays</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">nextNodes</span><span class="p">:</span>                                   <span class="c1"># save for later ouput delays</span>
+            <span class="n">sink</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">)</span>
+
+            <span class="c1"># continue BFS</span>
+        <span class="n">closedList</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tmpNode</span><span class="p">)</span>
+        <span class="n">putIntoQueue</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">tmpNode</span><span class="o">.</span><span class="n">nextNodes</span><span class="p">)</span>
+        <span class="n">newDelays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currentRandVar</span><span class="p">)</span>
+
+
+        <span class="c1"># if more output gates - calculate maximum</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">usingMosek</span><span class="p">:</span>
+            <span class="n">sinkDelay</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">sink</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">usingMosek</span> <span class="ow">and</span> <span class="n">mosekTRI</span><span class="p">:</span>
+            <span class="n">sinkDelay</span> <span class="o">=</span> <span class="n">maxOfDistributionsUNARY</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">GP</span><span class="p">:</span>
+            <span class="n">sinkDelay</span><span class="p">,</span> <span class="n">newConstraints</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span>
+            <span class="n">AllConstr</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newConstraints</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">cvxpy</span> <span class="ow">and</span> <span class="n">GP</span><span class="p">:</span>
+            <span class="n">sinkDelay</span><span class="p">,</span> <span class="n">AllConstr</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">sink</span><span class="p">,</span> <span class="n">AllConstr</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sinkDelay</span> <span class="o">=</span> <span class="n">MaximumF</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span>
+
+        <span class="n">newDelays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sinkDelay</span><span class="p">)</span>
+
+
+        <span class="c1"># return depends on the current tool</span>
+    <span class="k">if</span> <span class="n">usingMosek</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">newDelays</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span>
+    <span class="k">elif</span> <span class="n">cvxpy</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">newDelays</span><span class="p">,</span> <span class="n">AllConstr</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">newDelays</span></div>
+
+
+
+<div class="viewcode-block" id="Convolution_UNARY_MOSEK"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.Convolution_UNARY_MOSEK">[docs]</a><span class="k">def</span> <span class="nf">Convolution_UNARY_MOSEK</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code.</span>
+
+<span class="sd">    :param x1: RandomVariableMOSEK class</span>
+<span class="sd">    :param x2: RandomVariableMOSEK class</span>
+<span class="sd">    :return curNofVariables: current number of variables</span>
+<span class="sd">    :return curNofVariables: current number of constraints</span>
+<span class="sd">    :param withSymmetryConstr: boolean, whether symmetry constraints should be used</span>
+
+<span class="sd">    :return convolution: RandomVariableMOSEK class</span>
+<span class="sd">    :return curNofVariables: new number of variables</span>
+<span class="sd">    :return curNofVariables: new number of constraints</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">convolutionF</span><span class="p">(</span><span class="n">x1</span><span class="p">:</span> <span class="n">RandomVariableMOSEK</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="n">RandomVariableMOSEK</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x1</span><span class="o">.</span><span class="n">convolution_UNARY_MAX_DIVIDE_VECTORIZED</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">,</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="n">withSymmetryConstr</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">convolutionF</span></div>
+
+<div class="viewcode-block" id="Convolution_UNARY"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.Convolution_UNARY">[docs]</a><span class="k">def</span> <span class="nf">Convolution_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.</span>
+
+<span class="sd">    :param x1: RandomVariableCVXPY class</span>
+<span class="sd">    :param x2: RandomVariableCVXPY class</span>
+<span class="sd">    :param withSymmetryConstr: boolean, whether symmetry constraints should be used</span>
+<span class="sd">    :return convolution: RandomVariableCVXPY class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">convolutionF</span><span class="p">(</span><span class="n">x1</span><span class="p">:</span> <span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x1</span><span class="o">.</span><span class="n">convolution_UNARY_DIVIDE</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">withSepConstr</span><span class="o">=</span><span class="n">withSymmetryConstr</span><span class="p">,</span> <span class="n">asMin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">convolutionF</span></div>
+
+<div class="viewcode-block" id="Convolution_McCormick"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.Convolution_McCormick">[docs]</a><span class="k">def</span> <span class="nf">Convolution_McCormick</span><span class="p">(</span><span class="n">x1</span><span class="p">:</span> <span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">,</span>
+                      <span class="n">x2</span><span class="p">:</span> <span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.</span>
+
+<span class="sd">    :param x1: RandomVariableCVXPY class</span>
+<span class="sd">    :param x2: RandomVariableCVXPY class</span>
+<span class="sd">    :return convolution: RandomVariableCVXPY class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">x1</span><span class="o">.</span><span class="n">convolution_McCormick</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Convolution_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.Convolution_GP">[docs]</a><span class="k">def</span> <span class="nf">Convolution_GP</span><span class="p">(</span><span class="n">x1</span><span class="p">:</span> <span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">,</span>
+                      <span class="n">x2</span><span class="p">:</span> <span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">,</span> <span class="p">[]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates convolution of an array of PDFs of cvxpy variable, is for clean code sake.</span>
+
+<span class="sd">    :param x1: RandomVariableCVXPY class</span>
+<span class="sd">    :param x2: RandomVariableCVXPY class</span>
+<span class="sd">    :param constr: old constraints</span>
+<span class="sd">    :return convolution: RandomVariableCVXPY class</span>
+<span class="sd">    :return constr: new constraints</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">x1</span><span class="o">.</span><span class="n">convolution_GP_OPT</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="maxOfDistributionsMOSEK_UNARY"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.maxOfDistributionsMOSEK_UNARY">[docs]</a><span class="k">def</span> <span class="nf">maxOfDistributionsMOSEK_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates maximum of an array of PDFs of cvxpy variable</span>
+
+<span class="sd">    :param delays: array of cvxpy variables (n, m), n gates, m bins</span>
+<span class="sd">    :return curNofVariables: current number of variables</span>
+<span class="sd">    :return curNofVariables: current number of constraints</span>
+
+<span class="sd">    :return maximum:  mosek variable (1, m)</span>
+<span class="sd">    :return curNofVariables: new number of variables</span>
+<span class="sd">    :return curNofVariables: new number of constraints</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">maximumF</span><span class="p">(</span><span class="n">delays</span><span class="p">:</span> <span class="p">[</span><span class="n">RandomVariableMOSEK</span><span class="p">],</span> <span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">):</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">newRV</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maximum_UNARY_MAX_DIVIDE_VECTORIZED</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span><span class="n">curNofVariables</span><span class="p">,</span> <span class="n">curNofConstr</span><span class="p">,</span>
+                                                                <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="n">withSymmetryConstr</span><span class="p">,</span> <span class="n">asMin</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
+
+        <span class="n">maximum</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">maximum</span><span class="p">,</span> <span class="n">newNofVariables</span><span class="p">,</span> <span class="n">newNofConstr</span>
+
+    <span class="k">return</span> <span class="n">maximumF</span></div>
+
+<div class="viewcode-block" id="maxOfDistributionsCVXPY_UNARY"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.maxOfDistributionsCVXPY_UNARY">[docs]</a><span class="k">def</span> <span class="nf">maxOfDistributionsCVXPY_UNARY</span><span class="p">(</span><span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates maximum of an array of PDFs of cvxpy variable</span>
+
+<span class="sd">    :param delays: array of cvxpy variables (n, m), n gates, m bins</span>
+<span class="sd">    :return maximum:  cvxpy variable (1, m)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">maximumF</span><span class="p">(</span><span class="n">delays</span><span class="p">:</span> <span class="p">[</span><span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">]):</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">newRV</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maximum_QUAD_UNARY_DIVIDE</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="n">withSymmetryConstr</span><span class="p">,</span> <span class="n">asMin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
+
+        <span class="n">maximum</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">maximum</span>
+
+    <span class="k">return</span> <span class="n">maximumF</span></div>
+
+<div class="viewcode-block" id="maxOfDistributionsCVXPY_McCormick"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.maxOfDistributionsCVXPY_McCormick">[docs]</a><span class="k">def</span> <span class="nf">maxOfDistributionsCVXPY_McCormick</span><span class="p">(</span><span class="n">delays</span><span class="p">:</span> <span class="p">[</span><span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates maximum of an array of PDFs of cvxpy variable</span>
+
+<span class="sd">    :param delays: array of cvxpy variables (n, m), n gates, m bins</span>
+<span class="sd">    :return maximum:  cvxpy variable (1, m)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">newRV</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maximum_McCormick</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
+
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">maximum</span></div>
+
+<div class="viewcode-block" id="maxOfDistributionsCVXPY_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.maxOfDistributionsCVXPY_GP">[docs]</a><span class="k">def</span> <span class="nf">maxOfDistributionsCVXPY_GP</span><span class="p">(</span><span class="n">delays</span><span class="p">:</span> <span class="p">[</span><span class="n">cvxpyVariable</span><span class="o">.</span><span class="n">RandomVariableCVXPY</span><span class="p">],</span> <span class="n">constr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">,</span> <span class="p">[]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates maximum of an array of PDFs of cvxpy variable</span>
+
+<span class="sd">    :param delays: array of cvxpy variables (n, m), n gates, m bins</span>
+<span class="sd">    :param constr: old constraints</span>
+<span class="sd">    :return maximum:  cvxpy variable (1, m)</span>
+<span class="sd">    :return constr: new constraints</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">newRV</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maximum_GP_OPT</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">constr</span><span class="p">)</span>
+        <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
+
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">maximum</span><span class="p">,</span> <span class="n">constr</span></div>
+
+
+<div class="viewcode-block" id="maxOfDistributionsELEMENTWISE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.maxOfDistributionsELEMENTWISE">[docs]</a><span class="k">def</span> <span class="nf">maxOfDistributionsELEMENTWISE</span><span class="p">(</span><span class="n">delays</span><span class="p">:</span> <span class="p">[</span><span class="n">RandomVariable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">RandomVariable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates maximum of an array of PDFs of cvxpy variable</span>
+<span class="sd">    Using elementwise maximum - np.maximum</span>
+
+<span class="sd">    :param delays: array of RandomVariables</span>
+<span class="sd">    :return maximum: RandomVariable - maximum delay</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">newRV</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maxOfDistributionsELEMENTWISE</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
+
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">maximum</span></div>
+
+<div class="viewcode-block" id="maxOfDistributionsUNARY"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.maxOfDistributionsUNARY">[docs]</a><span class="k">def</span> <span class="nf">maxOfDistributionsUNARY</span><span class="p">(</span><span class="n">delays</span><span class="p">:</span> <span class="p">[</span><span class="n">RandomVariable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">RandomVariable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates maximum of an array of PDFs of cvxpy variable</span>
+<span class="sd">    Using formula - look up function maxOfDistributionsFORM</span>
+
+<span class="sd">    :param delays: array of RandomVariables</span>
+<span class="sd">    :return maximum: RandomVariable - maximum delay</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">newRV</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maxOfDistributionsQUAD_FORMULA_UNARY</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
+
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">maximum</span></div>
+
+
+<div class="viewcode-block" id="maxMonteCarlo"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.maxMonteCarlo">[docs]</a><span class="k">def</span> <span class="nf">maxMonteCarlo</span><span class="p">(</span><span class="n">delays</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates maximum for monte carlo</span>
+
+<span class="sd">    :param delays: 2d array of numbers</span>
+<span class="sd">    :return maximum:  maximum delay</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">newRV</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
+
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">maximum</span></div>
+
+<div class="viewcode-block" id="maxOfDistributionsFORM"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.maxOfDistributionsFORM">[docs]</a><span class="k">def</span> <span class="nf">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">delays</span><span class="p">:</span> <span class="p">[</span><span class="n">RandomVariable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">RandomVariable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates maximum of an array of PDFs of cvxpy variable</span>
+<span class="sd">    Using formula - look up function maxOfDistributionsFORM</span>
+
+<span class="sd">    :param delays: array of RandomVariables</span>
+<span class="sd">    :return maximum: RandomVariable - maximum delay</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">newRV</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
+
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">maximum</span></div>
+
+
+<div class="viewcode-block" id="maxOfDistributionsQUAD"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.maxOfDistributionsQUAD">[docs]</a><span class="k">def</span> <span class="nf">maxOfDistributionsQUAD</span><span class="p">(</span><span class="n">delays</span><span class="p">:</span> <span class="p">[</span><span class="n">RandomVariable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">RandomVariable</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates maximum of an array of PDFs of cvxpy variable</span>
+<span class="sd">    Using maxOfDistributionsQUAD, quadratic algorithm</span>
+
+<span class="sd">    :param delays: array of RandomVariables</span>
+<span class="sd">    :return maximum: RandomVariable - maximum delay</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">delays</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+
+        <span class="n">newRV</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">maxOfDistributionsQUAD</span><span class="p">(</span><span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">delays</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">newRV</span>
+
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">delays</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">max</span></div>
+
+
+<div class="viewcode-block" id="putIntoQueue"><a class="viewcode-back" href="../../../index.html#src.gateSizing.SSTA.putIntoQueue">[docs]</a><span class="k">def</span> <span class="nf">putIntoQueue</span><span class="p">(</span><span class="n">queue</span><span class="p">:</span> <span class="n">Queue</span><span class="p">,</span> <span class="nb">list</span><span class="p">:</span> <span class="p">[</span><span class="n">Node</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function puts list into queue.</span>
+
+<span class="sd">    :param queue: Queue</span>
+<span class="sd">    :return list: array of Node class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Adam Bosak.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

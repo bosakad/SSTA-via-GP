@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.gateSizing.test_Operations_Cvxpy &mdash; Gate Sizing  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Gate Sizing
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Gate Sizing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>src.gateSizing.test_Operations_Cvxpy</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.gateSizing.test_Operations_Cvxpy</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">cvxpyVariable</span> <span class="kn">import</span> <span class="n">RandomVariableCVXPY</span>
+<span class="kn">import</span> <span class="nn">cvxpy</span> <span class="k">as</span> <span class="nn">cp</span>
+
+<span class="kn">from</span> <span class="nn">randomVariableHist_Numpy</span> <span class="kn">import</span> <span class="n">RandomVariable</span>
+<span class="kn">import</span> <span class="nn">histogramGenerator</span>
+
+
+<div class="viewcode-block" id="test_CVXPY_MAX_UNARY_OLD"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_MAX_UNARY_OLD">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_MAX_UNARY_OLD</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">12.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">4.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">13.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">4.802585</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+    <span class="n">test1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">test2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+    <span class="c1"># max1 = rv1.maxOfDistributionsQUAD_FORMULA_UNARY(rv2)</span>
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">test1</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">test2</span><span class="p">)</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+
+    <span class="c1"># ACTUAL</span>
+
+        <span class="c1"># init</span>
+
+    <span class="n">x1</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x2</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+        <span class="c1"># GET obj. function and constr</span>
+
+    <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">maximum</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_QUAD_UNARY_OLD</span><span class="p">(</span><span class="n">RV2</span><span class="p">)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span>
+
+        <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># objective function</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
+    <span class="c1"># other constraints</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">rv2</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="n">maxBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">maxBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">maxRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maxBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">maxRV</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+    <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">maxRV</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">maxRV</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="test_CVXPY_MAX_UNARY_NEW_AS_MAX_FORM"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_MAX_UNARY_NEW_AS_MAX_FORM">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_MAX_UNARY_NEW_AS_MAX_FORM</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">12.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">4.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">13.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">4.802585</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">5</span>
+
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+    <span class="n">test1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">test2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+    <span class="c1"># max1 = rv1.maxOfDistributionsFORM_UNARY(rv2)</span>
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">test1</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">test2</span><span class="p">)</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span>
+
+    <span class="c1"># ACTUAL</span>
+
+        <span class="c1"># init</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x2</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+        <span class="c1"># GET obj. function and constr</span>
+
+    <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+
+    <span class="n">maximum</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_FORM_UNARY_NEW_MAX</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">precise</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># maximum, constr = RV1.maximum_QUAD_UNARY_NEW_MAX(RV2, precise=False)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span>
+
+        <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># objective function</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
+    <span class="c1"># other constraints</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv2</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Maximize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">GUROBI</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+
+    <span class="c1"># x2_S = np.zeros((numberOfBins, numberOfUnaries))</span>
+    <span class="c1"># for bin in range(0, numberOfBins):</span>
+    <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+    <span class="c1">#         x2_S[bin, unary] = (x2[bin])[unary].value</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># x1_S = np.zeros((numberOfBins, numberOfUnaries))</span>
+    <span class="c1"># for bin in range(0, numberOfBins):</span>
+    <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+    <span class="c1">#         x1_S[bin, unary] = (x1[bin])[unary].value</span>
+
+    <span class="n">maxBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">maxBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">maxRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maxBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">maxRV</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">maxRV</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="test_CVXPY_MAX_UNARY_NEW_AS_MAX"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_MAX_UNARY_NEW_AS_MAX">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_MAX_UNARY_NEW_AS_MAX</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">12.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">4.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">25.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">3.802585</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+    <span class="n">test1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">test2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maxOfDistributionsQUAD_FORMULA_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span>
+    <span class="c1"># max1 = test1.maxOfDistributionsFORM(test2)</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span>
+
+    <span class="c1"># ACTUAL</span>
+
+        <span class="c1"># init</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x2</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+        <span class="c1"># GET obj. function and constr</span>
+
+    <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">maximum</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_QUAD_UNARY_NEW_MAX</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">precise</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span>
+
+        <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># objective function</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
+    <span class="c1"># other constraints</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv2</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Maximize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+
+    <span class="c1"># x2_S = np.zeros((numberOfBins, numberOfUnaries))</span>
+    <span class="c1"># for bin in range(0, numberOfBins):</span>
+    <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+    <span class="c1">#         x2_S[bin, unary] = (x2[bin])[unary].value</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># x1_S = np.zeros((numberOfBins, numberOfUnaries))</span>
+    <span class="c1"># for bin in range(0, numberOfBins):</span>
+    <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+    <span class="c1">#         x1_S[bin, unary] = (x1[bin])[unary].value</span>
+
+    <span class="n">maxBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">maxBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">maxRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maxBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">maxRV</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">maxRV</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="test_CVXPY_MAX_UNARY_NEW_AS_MIN"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_MAX_UNARY_NEW_AS_MIN">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_MAX_UNARY_NEW_AS_MIN</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">12.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">4.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">13.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">4.802585</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+    <span class="n">test1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">test2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maxOfDistributionsQUAD_FORMULA_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span>
+    <span class="c1"># max1 = test1.maxOfDistributionsFORM(test2)</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">max1</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span>
+
+    <span class="c1"># ACTUAL</span>
+
+        <span class="c1"># init</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x2</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+        <span class="c1"># GET obj. function and constr</span>
+
+    <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">maximum</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_QUAD_UNARY_CUT</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">asMin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span>
+
+        <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># objective function</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
+    <span class="c1"># other constraints</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv2</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Maximize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+
+    <span class="c1"># x2_S = np.zeros((numberOfBins, numberOfUnaries))</span>
+    <span class="c1"># for bin in range(0, numberOfBins):</span>
+    <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+    <span class="c1">#         x2_S[bin, unary] = (x2[bin])[unary].value</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># x1_S = np.zeros((numberOfBins, numberOfUnaries))</span>
+    <span class="c1"># for bin in range(0, numberOfBins):</span>
+    <span class="c1">#     for unary in range(0, numberOfUnaries):</span>
+    <span class="c1">#         x1_S[bin, unary] = (x1[bin])[unary].value</span>
+
+    <span class="n">maxBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">maxBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="c1"># print(maxBins)</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">maxRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">maxBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">maxRV</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">maxRV</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">maxRV</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="test_CVXPY_CONVOLUTION_UNARY_MAX"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_CONVOLUTION_UNARY_MAX">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_CONVOLUTION_UNARY_MAX</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Problem is formulated as maximization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">2.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">2.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">3.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">1.802585</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">17</span>
+
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+    <span class="n">test1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">test2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">convolutionOfTwoVarsNaiveSAME_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span>
+    <span class="c1"># max1 = test1.convolutionOfTwoVarsShift(test2)</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+    <span class="c1">#</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span>
+
+    <span class="c1"># ACTUAL</span>
+        <span class="c1"># init</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x2</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+
+        <span class="c1"># GET obj. function and constr</span>
+
+    <span class="n">convolution</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">convolution_UNARY_DIVIDE</span><span class="p">(</span><span class="n">RV2</span><span class="p">)</span>
+    <span class="n">convolution</span> <span class="o">=</span> <span class="n">convolution</span><span class="o">.</span><span class="n">bins</span>
+
+        <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># objective function</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
+
+    <span class="c1"># other constraints</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv2</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+    <span class="c1"># symmetry constraints</span>
+    <span class="c1"># for bin in range(0, numberOfBins):</span>
+    <span class="c1">#     for unary in range(0, numberOfUnaries - 1):</span>
+    <span class="c1">#         constr.append((x2[bin])[unary] &gt;= (x2[bin])[unary + 1])  # set lower constr.</span>
+    <span class="c1">#</span>
+    <span class="c1"># for bin in range(0, numberOfBins):</span>
+    <span class="c1">#     for unary in range(0, numberOfUnaries - 1):</span>
+    <span class="c1">#         constr.append((x1[bin])[unary] &gt;= (x1[bin])[unary + 1])  # set lower constr.</span>
+
+    <span class="c1"># for bin in range(0, numberOfBins):</span>
+    <span class="c1">#     for unary in range(0, numberOfUnaries - 1):</span>
+    <span class="c1">#         constr.append((convolution[bin])[unary] &gt;= (convolution[bin])[unary + 1])  # set lower constr.</span>
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Maximize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="n">convBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">convBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">convolution</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">convRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">convBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># print(convRV.bins)</span>
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">convRV</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">convRV</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="test_CVXPY_CONVOLUTION_UNARY_MIN"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_CONVOLUTION_UNARY_MIN">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_CONVOLUTION_UNARY_MIN</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Problem is formulated as maximization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">2.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">2.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">3.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">1.802585</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">50</span>
+
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">rv1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+    <span class="n">rv2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins_UNARY</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">)</span>
+
+    <span class="n">test1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">test2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">maxOfDistributionsQUAD_FORMULA_UNARY</span><span class="p">(</span><span class="n">rv2</span><span class="p">)</span>
+    <span class="c1"># max1 = test1.convolutionOfTwoVarsShift(test2)</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">max1</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="c1"># ACTUAL</span>
+        <span class="c1"># init</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x2</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">boolean</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">rv1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+
+        <span class="c1"># GET obj. function and constr</span>
+
+    <span class="n">convolution</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_QUAD_UNARY_DIVIDE</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">asMin</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">convolution</span> <span class="o">=</span> <span class="n">convolution</span><span class="o">.</span><span class="n">bins</span>
+
+        <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># objective function</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="nb">sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">convolution</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span>
+
+
+    <span class="c1"># other constraints</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv1</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">rv2</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="p">)</span>    <span class="c1"># set lower constr.</span>
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Maximize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="n">convBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">))</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unary</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">):</span>
+            <span class="n">convBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">,</span> <span class="n">unary</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">convolution</span><span class="p">[</span><span class="nb">bin</span><span class="p">])[</span><span class="n">unary</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">convRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">convBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">unary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">convRV</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">convRV</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">convRV</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="test_CVXPY_MAXIMUM_McCormick"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_MAXIMUM_McCormick">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_MAXIMUM_McCormick</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Problem is formulated as minimization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">22.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">2.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">18.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">2.802585</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">test1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">test2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">test1</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">test2</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="c1"># max1 = rv1.convolutionOfTwoVarsNaiveSAME_UNARY(rv2)</span>
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">test1</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">test2</span><span class="p">)</span>
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">max1</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="c1"># ACTUAL</span>
+        <span class="c1"># init</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x2</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+    <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">test2</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+        <span class="c1"># GET obj. function and constr</span>
+
+    <span class="n">maximum</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_McCormick</span><span class="p">(</span><span class="n">RV2</span><span class="p">)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span>
+
+        <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># objective function</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="nb">sum</span> <span class="o">+=</span> <span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span>
+
+    <span class="c1"># other constraints</span>
+
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="n">convBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberOfBins</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">convBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">maxRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">convBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">maxRV</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">maxRV</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">maxRV</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="test_CVXPY_CONVOLUTION_McCormick"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_CONVOLUTION_McCormick">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_CONVOLUTION_McCormick</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Problem is formulated as minimization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">22.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">2.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">18.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">2.802585</span>
+
+    <span class="n">mu3</span> <span class="o">=</span> <span class="mf">10.98553396</span>
+    <span class="n">sigma3</span> <span class="o">=</span> <span class="mf">3.76804456</span>
+
+    <span class="n">mu4</span> <span class="o">=</span> <span class="mf">18.98483475</span>
+    <span class="n">sigma4</span> <span class="o">=</span> <span class="mf">1.802585</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">15</span>
+
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">test1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">test2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+
+    <span class="n">test3</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu3</span><span class="p">,</span> <span class="n">sigma3</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+    <span class="n">test4</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu4</span><span class="p">,</span> <span class="n">sigma4</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">test1</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">test2</span><span class="p">)</span>
+
+    <span class="n">max2</span> <span class="o">=</span> <span class="n">test3</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">test4</span><span class="p">)</span>
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">max1</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">max2</span><span class="p">)</span>
+
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="c1"># print(max1.bins)</span>
+
+    <span class="c1"># ACTUAL</span>
+        <span class="c1"># init</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x2</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x3</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x3</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x4</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x4</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+    <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+    <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">test2</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+
+    <span class="n">RV3</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x3</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">test3</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+    <span class="n">RV4</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x4</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">test4</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+        <span class="c1"># GET obj. function and constr</span>
+
+    <span class="n">maximum</span><span class="p">,</span> <span class="n">constr1</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_McCormick</span><span class="p">(</span><span class="n">RV2</span><span class="p">)</span>
+    <span class="n">maximum2</span><span class="p">,</span> <span class="n">constr2</span> <span class="o">=</span> <span class="n">RV3</span><span class="o">.</span><span class="n">maximum_McCormick</span><span class="p">(</span><span class="n">RV4</span><span class="p">)</span>
+    <span class="c1"># maximum, constr3 = maximum.convolution_McCormick(RV3)</span>
+
+
+    <span class="n">maximum</span><span class="p">,</span> <span class="n">constr3</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">maximum_McCormick</span><span class="p">(</span><span class="n">maximum2</span><span class="p">)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span>
+
+    <span class="c1"># print(len(constr1))</span>
+    <span class="c1"># print(len(constr2))</span>
+    <span class="c1"># constr = constr1 + constr3</span>
+    <span class="n">constr</span> <span class="o">=</span> <span class="n">constr1</span> <span class="o">+</span> <span class="n">constr2</span> <span class="o">+</span> <span class="n">constr3</span>
+    <span class="c1"># print(len(constr))</span>
+
+
+
+        <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># objective function</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="nb">sum</span> <span class="o">+=</span> <span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span>
+
+    <span class="c1"># other constraints</span>
+
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="n">convBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberOfBins</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">convBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">maxRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">convBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">maxRV</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">maxRV</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">maxRV</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="test_CVXPY_CONVOLUTION_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_CONVOLUTION_GP">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_CONVOLUTION_GP</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Problem is formulated as minimization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">mu1</span> <span class="o">=</span> <span class="mf">22.98553396</span>
+    <span class="n">sigma1</span> <span class="o">=</span> <span class="mf">2.76804456</span>
+
+    <span class="n">mu2</span> <span class="o">=</span> <span class="mf">10.98483475</span>
+    <span class="n">sigma2</span> <span class="o">=</span> <span class="mf">2.802585</span>
+
+    <span class="n">mu3</span> <span class="o">=</span> <span class="mf">10.98553396</span>
+    <span class="n">sigma3</span> <span class="o">=</span> <span class="mf">3.76804456</span>
+
+    <span class="n">mu4</span> <span class="o">=</span> <span class="mf">10.98483475</span>
+    <span class="n">sigma4</span> <span class="o">=</span> <span class="mf">1.802585</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+
+    <span class="n">numberOfSamples</span> <span class="o">=</span> <span class="mi">2000000</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">41</span>
+
+
+    <span class="c1"># DESIRED</span>
+
+    <span class="n">test1</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu1</span><span class="p">,</span> <span class="n">sigma1</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">forGP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">test2</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu2</span><span class="p">,</span> <span class="n">sigma2</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">forGP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">test3</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu3</span><span class="p">,</span> <span class="n">sigma3</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">forGP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">test4</span> <span class="o">=</span> <span class="n">histogramGenerator</span><span class="o">.</span><span class="n">get_gauss_bins</span><span class="p">(</span><span class="n">mu4</span><span class="p">,</span> <span class="n">sigma4</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">numberOfSamples</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">forGP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">test1</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">test2</span><span class="p">)</span>
+
+    <span class="c1"># max1 = test1.maxOfDistributionsFORM(test2)</span>
+    <span class="n">max2</span> <span class="o">=</span> <span class="n">test3</span><span class="o">.</span><span class="n">maxOfDistributionsFORM</span><span class="p">(</span><span class="n">test4</span><span class="p">)</span>
+
+    <span class="n">max1</span> <span class="o">=</span> <span class="n">max1</span><span class="o">.</span><span class="n">convolutionOfTwoVarsNaiveSAME</span><span class="p">(</span><span class="n">max2</span><span class="p">)</span>
+
+    <span class="n">desired</span> <span class="o">=</span> <span class="p">[</span><span class="n">max1</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">max1</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="c1"># print(max1.bins)</span>
+
+    <span class="c1"># ACTUAL</span>
+        <span class="c1"># init</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">inv1</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">constr</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+
+        <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">inv1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span>
+        <span class="c1"># if test1.bins[bin] == 0:</span>
+        <span class="c1">#     test1.bins[bin] += 0.00000000000000001</span>
+        <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x1</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">test1</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">])</span>
+
+
+    <span class="n">x2</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">inv2</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">inv2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span>
+        <span class="c1"># if test2.bins[bin] == 0:</span>
+        <span class="c1">#     test2.bins[bin] += 0.000000000000000001</span>
+        <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x2</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">test2</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">])</span>
+
+    <span class="n">x3</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+
+        <span class="n">x3</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># if test3.bins[bin] == 0:</span>
+        <span class="c1">#     test3.bins[bin] += 0.000000000000000001</span>
+        <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x3</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">test3</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">])</span>
+
+    <span class="n">x4</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">x4</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># if test4.bins[bin] == 0:</span>
+        <span class="c1">#     test4.bins[bin] += 0.000000000000000001</span>
+        <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x4</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">test4</span><span class="o">.</span><span class="n">bins</span><span class="p">[</span><span class="nb">bin</span><span class="p">])</span>
+
+
+    <span class="n">RV1</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">RV2</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+
+    <span class="n">RV3</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x3</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+    <span class="n">RV4</span> <span class="o">=</span> <span class="n">RandomVariableCVXPY</span><span class="p">(</span><span class="n">x4</span><span class="p">,</span> <span class="n">test1</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+
+        <span class="c1"># GET obj. function and constr</span>
+
+    <span class="c1"># maximum, constr1 = RV1.maximum_GP(RV2)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">constr</span><span class="p">))</span>
+    <span class="n">maximum</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV1</span><span class="o">.</span><span class="n">maximum_GP_OPT</span><span class="p">(</span><span class="n">RV2</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="c1"># maximum = RV1.maximum_GP(RV2)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">constr</span>
+              <span class="p">))</span>
+
+    <span class="n">maximum2</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">RV3</span><span class="o">.</span><span class="n">maximum_GP_OPT</span><span class="p">(</span><span class="n">RV4</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="c1"># maximum2 = RV3.maximum_GP(RV4)</span>
+    <span class="n">maximum</span><span class="p">,</span> <span class="n">constr</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">convolution_GP_OPT</span><span class="p">(</span><span class="n">maximum2</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="c1"># maximum, constr = maximum.convolution_GP(maximum2, constr)</span>
+    <span class="c1"># maximum2, constr2 = RV3.maximum_McCormick(RV4)</span>
+    <span class="c1"># maximum, constr3 = maximum.convolution_McCormick(RV3)</span>
+
+
+    <span class="c1"># maximum, constr3 = maximum.maximum_McCormick(maximum2)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">maximum</span><span class="o">.</span><span class="n">bins</span>
+
+    <span class="c1"># print(len(constr1))</span>
+    <span class="c1"># print(len(constr2))</span>
+    <span class="c1"># constr = constr1 + constr3</span>
+    <span class="c1"># constr = constr1 + constr2 + constr3</span>
+    <span class="c1"># print(len(constr))</span>
+
+    <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># objective function</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="nb">sum</span> <span class="o">+=</span> <span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span>
+
+
+
+    <span class="c1"># other constraints</span>
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span> <span class="nb">sum</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">gp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">mosek_params</span><span class="o">=</span><span class="p">{</span>  <span class="s1">&#39;MSK_DPAR_INTPNT_CO_TOL_MU_RED&#39;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+               <span class="s1">&#39;MSK_DPAR_OPTIMIZER_MAX_TIME&#39;</span><span class="p">:</span> <span class="mi">1200</span><span class="p">}</span>  <span class="c1"># max time</span>
+               <span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Problem value: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">max1</span><span class="o">.</span><span class="n">bins</span><span class="p">))</span>
+
+    <span class="n">convBins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberOfBins</span><span class="p">)</span>
+    <span class="k">for</span> <span class="nb">bin</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">):</span>
+        <span class="n">convBins</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span> <span class="o">=</span> <span class="n">maximum</span><span class="p">[</span><span class="nb">bin</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">interval</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">interval</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numberOfBins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">maxRV</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="p">(</span><span class="n">convBins</span><span class="p">,</span> <span class="n">edges</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">maxRV</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">max1</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">maxRV</span><span class="o">.</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">maxRV</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">maxRV</span><span class="o">.</span><span class="n">bins</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span><span class="n">density</span><span class="o">=</span><span class="s2">&quot;PDF&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">max1</span><span class="o">.</span><span class="n">edges</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">max1</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">max1</span><span class="o">.</span><span class="n">bins</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="s2">&quot;PDF&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="p">[</span><span class="n">maxRV</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">maxRV</span><span class="o">.</span><span class="n">std</span><span class="p">]</span>
+
+    <span class="c1"># TESTING</span>
+    <span class="c1"># desired = maxRV.bins</span>
+    <span class="c1"># actual = max1.bins</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="test_CVXPY_MULTIPLICATION_McCormick"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_MULTIPLICATION_McCormick">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_MULTIPLICATION_McCormick</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Problem is formulated as minimization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x1</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+    <span class="n">desired</span> <span class="o">=</span> <span class="n">x1</span><span class="o">*</span><span class="n">x2</span>
+
+    <span class="c1"># actual</span>
+
+    <span class="n">constr</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">slackMult</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">nonneg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># mccormick envelope</span>
+
+    <span class="n">x_L</span> <span class="o">=</span> <span class="n">x1</span>
+    <span class="n">x_U</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">y_L</span> <span class="o">=</span> <span class="n">x2</span>
+    <span class="n">y_U</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+    <span class="c1"># McCormick constraints</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span> <span class="o">&gt;=</span> <span class="n">x_L</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y_L</span> <span class="o">-</span> <span class="n">x_L</span> <span class="o">*</span> <span class="n">y_L</span><span class="p">)</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span> <span class="o">&gt;=</span> <span class="n">x_U</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y_U</span> <span class="o">-</span> <span class="n">x_U</span> <span class="o">*</span> <span class="n">y_U</span><span class="p">)</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span> <span class="o">&lt;=</span> <span class="n">x_U</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y_L</span> <span class="o">-</span> <span class="n">x_U</span> <span class="o">*</span> <span class="n">y_L</span><span class="p">)</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y_U</span> <span class="o">+</span> <span class="n">x_L</span> <span class="o">*</span> <span class="n">y</span> <span class="o">-</span> <span class="n">x_L</span> <span class="o">*</span> <span class="n">y_U</span><span class="p">)</span>
+
+
+
+
+    <span class="c1"># constr.append(slackMult &gt;= x1 * y + x * x2 - x1 * x2)</span>
+    <span class="c1"># constr.append(slackMult &gt;= x_U * y + x * y_U - x_U * y_U)</span>
+    <span class="c1"># constr.append(slackMult &lt;= x_U * y + x * x2 - x_U * x2)</span>
+    <span class="c1"># constr.append(slackMult &lt;= x * y_U + x1 * y - x1 * y_U)</span>
+
+
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slackMult</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">)</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="p">)</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="p">)</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="p">)</span>
+
+    <span class="c1"># FORMULATE</span>
+
+    <span class="c1"># other constraints</span>
+
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x1</span> <span class="p">)</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x2</span> <span class="p">)</span>
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span> <span class="n">slackMult</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">MOSEK</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">desired</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="test_CVXPY_MULTIPLICATION_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_Operations_Cvxpy.test_CVXPY_MULTIPLICATION_GP">[docs]</a><span class="k">def</span> <span class="nf">test_CVXPY_MULTIPLICATION_GP</span><span class="p">(</span><span class="n">dec</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Problem is formulated as minimization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x1</span> <span class="o">=</span> <span class="mf">0.00000001</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="mf">0.00000001</span>
+
+    <span class="n">desired</span> <span class="o">=</span> <span class="n">x1</span><span class="o">*</span><span class="n">x2</span>
+
+    <span class="c1"># actual</span>
+
+    <span class="n">constr</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x1</span> <span class="p">)</span>
+    <span class="n">constr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="n">x2</span> <span class="p">)</span>
+
+
+        <span class="c1"># solve</span>
+    <span class="n">objective</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Minimize</span><span class="p">(</span> <span class="n">x</span><span class="o">*</span><span class="n">y</span> <span class="p">)</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">cp</span><span class="o">.</span><span class="n">Problem</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">constr</span><span class="p">)</span>
+    <span class="n">prob</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">gp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">cp</span><span class="o">.</span><span class="n">GUROBI</span><span class="p">)</span>
+
+        <span class="c1"># PRINT OUT THE VALUES</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+
+    <span class="n">actual</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">value</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+
+
+    <span class="c1"># TESTING</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_almost_equal</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">desired</span><span class="p">,</span> <span class="n">decimal</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+        <span class="c1"># dec param is Desired precision</span>
+
+    <span class="c1"># test_CVXPY_MAX_UNARY_OLD(dec=5)</span>
+    <span class="c1"># test_CVXPY_MAX_UNARY_NEW_AS_MAX(dec=</span>
+    <span class="c1"># test_CVXPY_MAX_UNARY_NEW_AS_MIN(dec=5)</span>
+    <span class="c1"># test_CVXPY_CONVOLUTION_UNARY_MIN(dec=5)</span>
+    <span class="c1"># test_CVXPY_CONVOLUTION_UNARY_MAX(dec=5)</span>
+    <span class="c1"># test_CVXPY_MAXIMUM_McCormick(dec=5)</span>
+    <span class="c1"># test_CVXPY_MULTIPLICATION_McCormick(5)</span>
+    <span class="c1"># test_CVXPY_CONVOLUTION_McCormick(5)</span>
+    <span class="c1"># test_CVXPY_MAX_UNARY_NEW_AS_MAX_FORM(3)</span>
+    <span class="c1"># test_CVXPY_MULTIPLICATION_GP(5)</span>
+    <span class="n">test_CVXPY_CONVOLUTION_GP</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;All tests passed!&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Adam Bosak.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

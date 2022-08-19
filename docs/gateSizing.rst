@@ -1,118 +1,190 @@
-GP-Optimization package
+gateSizing package
 ==================
 
 Submodules
 ----------
 
-distrFitter module
+gateSizing.test\_mosekOperations module
 --------------------------------
 
-.. automodule:: src.sizing.distrFitter
+.. automodule:: src.gateSizing.test_mosekOperations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gateSizing.distrFitter module
+--------------------------------
+
+.. automodule:: src.gateSizing.distrFitter
    :members:
    :undoc-members:
    :show-inheritance:
 
 
-mosekVariable module
+gateSizing.mosekVariable module
 --------------------------------
 
-.. automodule:: src.timing.mosekVariable
+.. automodule:: src.gateSizing.mosekVariable
    :members:
    :undoc-members:
    :show-inheritance:
 
-Plotter module
+gateSizing.Parser\_Matrix module
+--------------------------------
+
+.. automodule:: src.gateSizing.Parser_Matrix
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gateSizing.Plotter module
 -------------------------
 
-.. automodule:: src.other.Plotter
+.. automodule:: src.gateSizing.Plotter
    :members:
    :undoc-members:
    :show-inheritance:
 
-SSTA module
+gateSizing.SSTA module
 ----------------------
 
-.. automodule:: src.timing.SSTA
+.. automodule:: src.gateSizing.SSTA
    :members:
    :undoc-members:
    :show-inheritance:
 
-cvxpyVariable module
+gateSizing.cvxpyVariable module
 -------------------------------
 
-.. automodule:: src.timing.cvxpyVariable
+.. automodule:: src.gateSizing.cvxpyVariable
    :members:
    :undoc-members:
    :show-inheritance:
 
-deterministicDelay module
+gateSizing.deterministicDelay module
 ------------------------------------
 
-.. automodule:: src.timing.deterministicDelay
+.. automodule:: src.gateSizing.deterministicDelay
    :members:
    :undoc-members:
    :show-inheritance:
 
-histogramGenerator module
+gateSizing.histogramGenerator module
 ------------------------------------
 
-.. automodule:: src.other.histogramGenerator
+.. automodule:: src.gateSizing.histogramGenerator
    :members:
    :undoc-members:
    :show-inheritance:
 
-infinite\_ladder\_montecarlo module
+gateSizing.infinite\_ladder\_montecarlo module
 ----------------------------------------------
 
-.. automodule:: src.timing.examples_monteCarlo.infinite_ladder_montecarlo
+.. automodule:: src.gateSizing.examples_monteCarlo.infinite_ladder_montecarlo
    :members:
    :undoc-members:
    :show-inheritance:
 
-examples_monteCarlo.montecarlo module
+gateSizing.examples_monteCarlo.montecarlo module
 ----------------------------
 
-.. automodule:: src.timing.examples_monteCarlo.montecarlo
+.. automodule:: src.gateSizing.examples_monteCarlo.montecarlo
    :members:
    :undoc-members:
    :show-inheritance:
 
-node module
+gateSizing.node module
 ----------------------
 
-.. automodule:: src.other.node
+.. automodule:: src.gateSizing.node
    :members:
    :undoc-members:
    :show-inheritance:
 
-optimizeGatesSimple_Boyd module
+gateSizing.optimizeGatesSimple_Boyd module
 -------------------------------------
 
-.. automodule:: src.sizing.optimizeGatesSimple_Boyd
+.. automodule:: src.gateSizing.optimizeGatesSimple_Boyd
    :members:
    :undoc-members:
    :show-inheritance:
 
-optimizeGatesVectorized_Boyd module
+gateSizing.optimizeGatesVectorized_Boyd module
 -----------------------------------------
 
-.. automodule:: src.sizing.optimizeGatesVectorized_Boyd
+.. automodule:: src.gateSizing.optimizeGatesVectorized_Boyd
    :members:
    :undoc-members:
    :show-inheritance:
 
-randomVariableHist\_Numpy module
+gateSizing.randomVariableHist\_Numpy module
 -------------------------------------------
 
-.. automodule:: src.timing.randomVariableHist_Numpy
+.. automodule:: src.gateSizing.randomVariableHist_Numpy
    :members:
    :undoc-members:
    :show-inheritance:
 
-unaryTesting module
+gateSizing.test\_Operations\_Cvxpy module
+-----------------------------------------
+
+.. automodule:: src.gateSizing.test_Operations_Cvxpy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gateSizing.test\_RV\_Numpy module
+---------------------------------
+
+.. automodule:: src.gateSizing.test_RV_Numpy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gateSizing.test\_SSTA\_Numpy module
+-----------------------------------
+
+.. automodule:: src.gateSizing.test_SSTA_Numpy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gateSizing.test\_SSTA\_cvxpy module
+-----------------------------------
+
+.. automodule:: src.gateSizing.test_SSTA_cvxpy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gateSizing.test\_algorithms module
+----------------------------------
+
+.. automodule:: src.gateSizing.test_algorithms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gateSizing.test\_infiniteLadder module
+--------------------------------------
+
+.. automodule:: src.gateSizing.test_infiniteLadder
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gateSizing.test\_parser module
 ------------------------------
 
-.. automodule:: src.timing.unaryTesting
+.. automodule:: src.gateSizing.test_parser
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+gateSizing.unaryTesting module
+------------------------------
+
+.. automodule:: src.gateSizing.unaryTesting
    :members:
    :undoc-members:
    :show-inheritance:

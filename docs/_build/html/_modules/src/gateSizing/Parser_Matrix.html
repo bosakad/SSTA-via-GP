@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.gateSizing.Parser_Matrix &mdash; Gate Sizing  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Gate Sizing
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Gate Sizing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>src.gateSizing.Parser_Matrix</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.gateSizing.Parser_Matrix</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+
+
+<div class="viewcode-block" id="getIncidenceMatrixFromNetlist"><a class="viewcode-back" href="../../../index.html#src.gateSizing.Parser_Matrix.getIncidenceMatrixFromNetlist">[docs]</a><span class="k">def</span> <span class="nf">getIncidenceMatrixFromNetlist</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get incidence matrix from netlist.</span>
+
+<span class="sd">    :param argv: arguments given to main function</span>
+<span class="sd">    :return matrix: incidence matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">netListString</span> <span class="o">=</span> <span class="n">parseFileName</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">parseNetListIntoMatrix</span><span class="p">(</span><span class="n">netListString</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">matrix</span></div>
+
+
+<div class="viewcode-block" id="parseFileName"><a class="viewcode-back" href="../../../index.html#src.gateSizing.Parser_Matrix.parseFileName">[docs]</a><span class="k">def</span> <span class="nf">parseFileName</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses file name. Does edge casing. Returns content of the file if</span>
+<span class="sd">    no errors appeared.</span>
+
+<span class="sd">    :param argv: arguments given to main function</span>
+<span class="sd">    :return ret: name of the file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># edge casing</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error: Name of the .bench file needed!&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error: Too many arguments!&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error: Too many arguments!&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.bench&#39;</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error: Wrong file! Script accepts only .bench files.&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># loading file</span>
+        <span class="n">fileName</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: File does not appear to exist.&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="parseNetListIntoMatrix"><a class="viewcode-back" href="../../../index.html#src.gateSizing.Parser_Matrix.parseNetListIntoMatrix">[docs]</a><span class="k">def</span> <span class="nf">parseNetListIntoMatrix</span><span class="p">(</span><span class="n">netList</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses file name. Does edge casing. Returns content of the file if</span>
+<span class="sd">    no errors appeared.</span>
+
+<span class="sd">    :param netList: string with circuit information</span>
+<span class="sd">    :return matrix: wanted incidence matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">global</span> <span class="n">gateIndex</span><span class="p">,</span> <span class="n">edgeIndex</span><span class="p">,</span> <span class="n">mappingList</span><span class="p">,</span> <span class="n">matrixDict</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">netList</span><span class="p">)</span>
+    <span class="n">readLine</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="n">inputGates</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># skip empty lines or comments</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">readLine</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;INPUT&quot;</span><span class="p">):</span>
+        <span class="n">readLine</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+
+        <span class="c1"># read inputs</span>
+    <span class="k">while</span> <span class="n">readLine</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;INPUT&quot;</span><span class="p">):</span>
+
+        <span class="n">gateNum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">readLine</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">())</span>
+        <span class="n">inputGates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gateNum</span><span class="p">)</span>   <span class="c1"># input gates are -1</span>
+
+        <span class="n">readLine</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+
+        <span class="c1"># skip empty lines or comments</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">readLine</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;OUTPUT&quot;</span><span class="p">):</span>
+        <span class="n">readLine</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># read outputs</span>
+    <span class="k">while</span> <span class="n">readLine</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;OUTPUT&quot;</span><span class="p">):</span>
+        <span class="c1"># todo: save output gates</span>
+        <span class="n">readLine</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="c1"># skip empty lines or comments</span>
+    <span class="k">while</span> <span class="n">readLine</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="n">readLine</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+
+
+        <span class="n">matrixDict</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># matrix in dict</span>
+        <span class="n">mappingList</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># list to map a gate to a matrix index</span>
+
+        <span class="n">edgeIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">gateIndex</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># parse circuit - for circuit information</span>
+    <span class="k">while</span> <span class="n">readLine</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="n">gates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">readLine</span><span class="p">)))</span>    <span class="c1"># get line gates</span>
+
+        <span class="n">newGate</span> <span class="o">=</span> <span class="n">gates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                  <span class="c1"># get new gate and create a mapping</span>
+        <span class="n">mappingList</span><span class="p">[</span><span class="n">newGate</span><span class="p">]</span> <span class="o">=</span> <span class="n">gateIndex</span>
+
+        <span class="k">if</span> <span class="n">gates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inputGates</span><span class="p">:</span>
+            <span class="n">matrixDict</span><span class="p">[(</span><span class="n">gateIndex</span><span class="p">,</span> <span class="n">edgeIndex</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">matrixDict</span><span class="p">[(</span><span class="n">mappingList</span><span class="p">[</span><span class="n">gates</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">edgeIndex</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">edgeIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">gates</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inputGates</span><span class="p">:</span>
+            <span class="n">matrixDict</span><span class="p">[(</span><span class="n">gateIndex</span><span class="p">,</span> <span class="n">edgeIndex</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">matrixDict</span><span class="p">[(</span><span class="n">mappingList</span><span class="p">[</span><span class="n">gates</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">edgeIndex</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">edgeIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">gateIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">readLine</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+
+    <span class="c1"># put dict. into matrix</span>
+
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span> <span class="n">edgeIndex</span><span class="p">]</span> <span class="o">*</span> <span class="n">gateIndex</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">matrixDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">matrix</span><span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+
+    <span class="k">return</span> <span class="n">matrix</span></div>
+
+
+<div class="viewcode-block" id="parseGatesPropertiesFromTXT"><a class="viewcode-back" href="../../../index.html#src.gateSizing.Parser_Matrix.parseGatesPropertiesFromTXT">[docs]</a><span class="k">def</span> <span class="nf">parseGatesPropertiesFromTXT</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">gates</span><span class="p">):</span>   <span class="c1"># TODO</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse gate properties from .txt</span>
+
+<span class="sd">    Function should parse all gates properties for VLSI optimization such as</span>
+<span class="sd">    -- alphas, betas, gammas constants</span>
+<span class="sd">    -- energyLoss, frequencies</span>
+
+<span class="sd">    :param netList: string with circuit information</span>
+<span class="sd">    :return matrix: wanted incidence matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Adam Bosak.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.gateSizing.test_algorithms &mdash; Gate Sizing  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Gate Sizing
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Gate Sizing</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>src.gateSizing.test_algorithms</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.gateSizing.test_algorithms</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">test_infiniteLadder</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This Module includes functions that test infiniteLadder on on 2 algorithms and dependant on number of gates.</span>
+<span class="sd">    Indicator is number of nonzero constraints dependant on number of gates. Also tests optimization of the circuit. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="testAlgorithms"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.testAlgorithms">[docs]</a><span class="k">def</span> <span class="nf">testAlgorithms</span><span class="p">():</span>
+
+        <span class="c1"># number of testing</span>
+    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">numberOfGatesStart</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">35</span><span class="p">)</span>
+
+        <span class="c1"># for saving values of the last gates and calculating error</span>
+    <span class="n">rvs_nonPrecise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">rvs_Precise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">rvs_MonteCarlo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># MonteCarlo</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">numberOfGatesStart</span> <span class="o">+</span> <span class="nb">iter</span> <span class="o">*</span> <span class="n">step</span>
+        <span class="n">lastGate</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">MonteCarlo</span><span class="p">(</span><span class="n">numGates</span><span class="p">)</span>
+
+        <span class="c1"># saving values</span>
+        <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SYMMETRY</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># test precise</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">iter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. iteration: </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">numberOfGatesStart</span> <span class="o">+</span> <span class="nb">iter</span> <span class="o">*</span> <span class="n">step</span>
+        <span class="n">numNonZeros</span><span class="p">,</span> <span class="n">ObjVal</span><span class="p">,</span> <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span>
+                                                                       <span class="n">interval</span><span class="p">,</span>
+                                                                       <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># saving values</span>
+        <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">MAPE</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:],</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]))</span>
+
+        <span class="k">if</span> <span class="nb">iter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">prevError</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">3</span><span class="p">]</span>
+
+            <span class="n">MAPE</span> <span class="o">=</span> <span class="p">((</span><span class="n">MAPE</span> <span class="o">+</span> <span class="n">prevError</span><span class="p">)</span> <span class="o">*</span> <span class="nb">iter</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">iter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">numNonZeros</span><span class="p">,</span> <span class="n">ObjVal</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NO SYMMETRY</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># test non-precise</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">iter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. iteration: </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># calculating</span>
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">numberOfGatesStart</span> <span class="o">+</span> <span class="nb">iter</span> <span class="o">*</span> <span class="n">step</span>
+        <span class="n">numNonZeros</span><span class="p">,</span> <span class="n">ObjVal</span><span class="p">,</span> <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span>
+                                                                <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+            <span class="c1"># saving values</span>
+        <span class="n">rvs_nonPrecise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rvs_nonPrecise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">MAPE</span> <span class="o">=</span> <span class="mi">100</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rvs_nonPrecise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:],</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:])</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">iter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">prevError</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">False</span><span class="p">)][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">False</span><span class="p">)][</span><span class="mi">3</span><span class="p">]</span>
+
+            <span class="n">MAPE</span> <span class="o">=</span> <span class="p">((</span><span class="n">MAPE</span> <span class="o">+</span> <span class="n">prevError</span><span class="p">)</span> <span class="o">*</span> <span class="nb">iter</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">iter</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span><span class="p">,</span> <span class="kc">False</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">numNonZeros</span><span class="p">,</span> <span class="n">ObjVal</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># print results</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+
+
+
+
+
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">NON-symmetry:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">rvs_nonPrecise</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">symmetry:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">rvs_Precise</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">GROUND-TRUTH:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">rvs_MonteCarlo</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> no symmetry MAPE:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rvs_nonPrecise</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">,</span> <span class="n">rvs_MonteCarlo</span><span class="p">)))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">symmetry MAPE:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rvs_Precise</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">,</span> <span class="n">rvs_MonteCarlo</span><span class="p">)))</span>
+
+
+        <span class="c1"># print results</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="testAlgorithms_MOSEK"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.testAlgorithms_MOSEK">[docs]</a><span class="k">def</span> <span class="nf">testAlgorithms_MOSEK</span><span class="p">():</span>
+
+    <span class="c1"># number of testing</span>
+    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">prevMape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.0627844482985895</span><span class="p">,</span> <span class="mf">31.477761094020565</span><span class="p">])</span>
+
+    <span class="n">numberOfGatesStart</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">19</span><span class="p">)</span>
+
+    <span class="c1"># for saving values of the last gates and calculating error</span>
+    <span class="n">rvs_nonPrecise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">rvs_Precise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">rvs_MonteCarlo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># MonteCarlo</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">numberOfGatesStart</span> <span class="o">+</span> <span class="nb">iter</span> <span class="o">*</span> <span class="n">step</span>
+        <span class="n">lastGate</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">MonteCarlo</span><span class="p">(</span><span class="n">numGates</span><span class="p">)</span>
+
+        <span class="c1"># saving values</span>
+        <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SYMMETRY</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># test precise</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">iter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. iteration: </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">numberOfGatesStart</span> <span class="o">+</span> <span class="nb">iter</span> <span class="o">*</span> <span class="n">step</span>
+        <span class="n">numNonZeros</span><span class="p">,</span> <span class="n">ObjVal</span><span class="p">,</span> <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">numVars</span><span class="p">,</span> <span class="n">numConstr</span><span class="p">,</span> <span class="n">mipGapRoot</span><span class="p">,</span><span class="n">nVarsPresolve</span><span class="p">,</span> <span class="n">nConstrPresolve</span> <span class="o">=</span> \
+                                            <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">mainMOSEK</span><span class="p">(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span>
+                                                                            <span class="n">interval</span><span class="p">,</span> <span class="n">TRI</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                                            <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># saving values</span>
+        <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:])</span> <span class="o">/</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:])</span>
+
+        <span class="n">MAPE</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:],</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">MAPE</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">iter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">prevError</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">4</span><span class="p">]</span>
+
+            <span class="n">MAPE</span> <span class="o">=</span> <span class="p">(</span><span class="n">MAPE</span> <span class="o">+</span> <span class="p">(</span><span class="n">prevError</span><span class="p">)</span> <span class="o">*</span><span class="p">(</span><span class="nb">iter</span> <span class="o">+</span> <span class="mi">19</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="nb">iter</span> <span class="o">+</span> <span class="mi">19</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">iter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="n">MAPE</span> <span class="o">=</span> <span class="p">(</span><span class="n">MAPE</span> <span class="o">+</span> <span class="p">(</span><span class="n">prevMape</span><span class="p">)</span> <span class="o">*</span> <span class="mi">19</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">iter</span> <span class="o">+</span> <span class="mi">19</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">numNonZeros</span><span class="p">,</span> <span class="n">ObjVal</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">numVars</span><span class="p">,</span> <span class="n">numConstr</span><span class="p">,</span> <span class="n">mipGapRoot</span><span class="p">,</span>
+                                     <span class="n">nVarsPresolve</span><span class="p">,</span> <span class="n">nConstrPresolve</span><span class="p">)</span>
+
+        <span class="c1"># print results</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+
+
+    <span class="c1"># print(&quot;NO SYMMETRY\n\n&quot;)</span>
+    <span class="c1"># # test non-precise</span>
+    <span class="c1"># for iter in range(0, numberOfIterations):</span>
+    <span class="c1">#     print(str(iter) + &quot;. iteration: \n\n&quot;)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # calculating</span>
+    <span class="c1">#     numGates = numberOfGatesStart + iter * step</span>
+    <span class="c1">#     numNonZeros, ObjVal, lastGate, time, numVars, numConstr, mipGapRoot,nVarsPresolve, nConstrPresolve   = \</span>
+    <span class="c1">#                                             test_infiniteLadder.mainMOSEK(numGates, numberOfUnaries, numberOfBins,</span>
+    <span class="c1">#                                                                    interval,</span>
+    <span class="c1">#                                                                    withSymmetryConstr=False)</span>
+    <span class="c1">#     # saving values</span>
+    <span class="c1">#     rvs_nonPrecise[iter, 0] = lastGate[0]</span>
+    <span class="c1">#     rvs_nonPrecise[iter, 1] = lastGate[1]</span>
+    <span class="c1">#</span>
+    <span class="c1">#     MAPE = 100 * np.abs(np.divide(rvs_nonPrecise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]))</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if iter != 0:</span>
+    <span class="c1">#         prevError = np.zeros(2)</span>
+    <span class="c1">#         prevError[0] = results[(numGates - step, False)][2]</span>
+    <span class="c1">#         prevError[1] = results[(numGates - step, False)][3]</span>
+    <span class="c1">#</span>
+    <span class="c1">#         MAPE = ((MAPE + prevError) * iter) / (iter + 1)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     results[(numGates, False)] = (numNonZeros, ObjVal, time, MAPE[0], MAPE[1], numVars, numConstr, mipGapRoot,</span>
+    <span class="c1">#                                                                                     nVarsPresolve, nConstrPresolve)</span>
+    <span class="c1">#</span>
+    <span class="c1">#     # print results</span>
+    <span class="c1">#     print(&quot;\n\n&quot; + str(results))</span>
+
+
+
+    <span class="c1"># print(&quot;\nNON-symmetry:\n&quot;)</span>
+    <span class="c1"># print(rvs_nonPrecise)</span>
+    <span class="c1">#</span>
+    <span class="c1"># print(&quot;\nsymmetry:\n&quot;)</span>
+    <span class="c1"># print(rvs_Precise)</span>
+    <span class="c1">#</span>
+    <span class="c1"># print(&quot;\nGROUND-TRUTH:\n&quot;)</span>
+    <span class="c1"># print(rvs_MonteCarlo)</span>
+    <span class="c1">#</span>
+    <span class="c1"># print(&quot;\n no symmetry MAPE:\n&quot;)</span>
+    <span class="c1"># print(100 * np.abs(np.divide(rvs_nonPrecise - rvs_MonteCarlo, rvs_MonteCarlo)))</span>
+    <span class="c1">#</span>
+    <span class="c1"># print(&quot;\nsymmetry MAPE:\n&quot;)</span>
+    <span class="c1"># print(100 * np.abs(np.divide(rvs_Precise - rvs_MonteCarlo, rvs_MonteCarlo)))</span>
+
+    <span class="c1"># print results</span>
+    <span class="c1"># print(&quot;\n\n&quot; + str(results))</span>
+
+
+
+<div class="viewcode-block" id="testAlgorithms_CVXPY_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.testAlgorithms_CVXPY_GP">[docs]</a><span class="k">def</span> <span class="nf">testAlgorithms_CVXPY_GP</span><span class="p">():</span>
+
+    <span class="c1"># number of testing</span>
+    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">numberOfGatesStart</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">60</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+
+    <span class="c1"># for saving values of the last gates and calculating error</span>
+    <span class="n">rvs_nonPrecise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">rvs_Precise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">rvs_MonteCarlo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># MonteCarlo</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">numberOfGatesStart</span> <span class="o">+</span> <span class="nb">iter</span> <span class="o">*</span> <span class="n">step</span>
+        <span class="n">lastGate</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">MonteCarlo</span><span class="p">(</span><span class="n">numGates</span><span class="p">)</span>
+
+        <span class="c1"># saving values</span>
+        <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SYMMETRY</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># test precise</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">iter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. iteration: </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">numberOfGatesStart</span> <span class="o">+</span> <span class="nb">iter</span> <span class="o">*</span> <span class="n">step</span>
+        <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">mainCVXPY_GP</span><span class="p">(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+        <span class="c1"># saving values</span>
+        <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])</span>
+
+        <span class="n">MAPE</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:],</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">MAPE</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">iter</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">prevError</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">prevError</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span> <span class="o">-</span> <span class="n">step</span><span class="p">,</span> <span class="kc">True</span><span class="p">)][</span><span class="mi">4</span><span class="p">]</span>
+
+            <span class="n">MAPE</span> <span class="o">=</span> <span class="p">(</span><span class="n">MAPE</span> <span class="o">+</span> <span class="p">(</span><span class="n">prevError</span><span class="p">)</span> <span class="o">*</span><span class="p">(</span><span class="nb">iter</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="nb">iter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># print results</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="scalingBins_CVXPY_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.scalingBins_CVXPY_GP">[docs]</a><span class="k">def</span> <span class="nf">scalingBins_CVXPY_GP</span><span class="p">():</span>
+
+    <span class="c1"># number of testing</span>
+    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">4</span>
+
+    <span class="n">numberOfGates</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">numBinsStart</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+
+    <span class="c1"># for saving values of the last gates and calculating error</span>
+    <span class="n">rvs_nonPrecise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">rvs_Precise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberOfIterations</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">rvs_MonteCarlo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># MonteCarlo</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">numberOfGates</span>
+        <span class="n">lastGate</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">MonteCarlo</span><span class="p">(</span><span class="n">numGates</span><span class="p">)</span>
+
+        <span class="c1"># saving values</span>
+        <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SYMMETRY</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">BINS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">BINS</span><span class="p">)</span>
+    <span class="c1"># test precise</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">iter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. iteration: </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># numBins = numBinsStart + iter * step</span>
+        <span class="n">numBins</span> <span class="o">=</span> <span class="n">BINS</span><span class="p">[</span><span class="nb">iter</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">numBins</span><span class="p">)</span>
+        <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">mainCVXPY_GP</span><span class="p">(</span><span class="n">numberOfGates</span><span class="p">,</span> <span class="n">numBins</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+        <span class="c1"># saving values</span>
+        <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">lastGate</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])</span>
+
+        <span class="n">MAPE</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">rvs_Precise</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">rvs_MonteCarlo</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">MAPE</span><span class="p">)</span>
+
+        <span class="c1"># if iter != 0:</span>
+        <span class="c1">#     prevError = np.zeros(2)</span>
+        <span class="c1">#     lastNumBins = BINS[iter-1]</span>
+        <span class="c1">#</span>
+        <span class="c1">#     prevError[0] = results[(lastNumBins, True)][3]</span>
+        <span class="c1">#     prevError[1] = results[(lastNumBins, True)][4]</span>
+        <span class="c1">#     prevError[0] = results[(numBins - step, True)][3]</span>
+        <span class="c1">#     prevError[1] = results[(numBins - step, True)][4]</span>
+            <span class="c1"># </span>
+            <span class="c1"># MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)</span>
+
+        <span class="n">results</span><span class="p">[(</span><span class="n">numBins</span><span class="p">,</span> <span class="kc">True</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">MAPE</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># print results</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="scalingOptimization_CVXPY_GP"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.scalingOptimization_CVXPY_GP">[docs]</a><span class="k">def</span> <span class="nf">scalingOptimization_CVXPY_GP</span><span class="p">():</span>
+
+    <span class="c1"># number of testing</span>
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">20</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+    <span class="n">GATES</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span>
+    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">GATES</span><span class="p">)</span>
+    <span class="c1"># test precise</span>
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">iter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. iteration: </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># numBins = numBinsStart + iter * step</span>
+        <span class="n">numGates</span> <span class="o">=</span> <span class="n">GATES</span><span class="p">[</span><span class="nb">iter</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">numGates</span><span class="p">)</span>
+        <span class="c1"># lastGate, time = test_infiniteLadder.mainCVXPY_GP_Sizing(numGates, numberOfBins, interval)</span>
+        <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">mainCVXPY_GP</span><span class="p">(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span><span class="p">,</span> <span class="kc">False</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># print results</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="testAlgorithms_PRESOLVE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.testAlgorithms_PRESOLVE">[docs]</a><span class="k">def</span> <span class="nf">testAlgorithms_PRESOLVE</span><span class="p">():</span>
+
+    <span class="c1"># number of testing</span>
+    <span class="n">numberOfIterations</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">numberOfGatesStart</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">numIterPass</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">numberOfPassesStart</span> <span class="o">=</span> <span class="mi">100000</span>
+    <span class="n">passesStep</span> <span class="o">=</span> <span class="mi">100</span>
+
+    <span class="n">numberOfBins</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">numberOfUnaries</span> <span class="o">=</span> <span class="mi">15</span>
+
+    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">18</span><span class="p">)</span>
+
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">passes</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numIterPass</span><span class="p">):</span>
+        <span class="n">curPasses</span> <span class="o">=</span> <span class="n">numberOfPassesStart</span> <span class="o">*</span> <span class="p">(</span><span class="n">passesStep</span><span class="o">**</span><span class="n">passes</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">passes</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; pass: </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># test precise</span>
+        <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numberOfIterations</span><span class="p">):</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">iter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;. iteration: </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">numGates</span> <span class="o">=</span> <span class="n">numberOfGatesStart</span> <span class="o">+</span> <span class="nb">iter</span> <span class="o">*</span> <span class="n">step</span>
+            <span class="n">numNonZeros</span><span class="p">,</span> <span class="n">ObjVal</span><span class="p">,</span> <span class="n">lastGate</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">numVars</span><span class="p">,</span> <span class="n">numConstr</span> <span class="o">=</span> <span class="n">test_infiniteLadder</span><span class="o">.</span><span class="n">mainMOSEK</span><span class="p">(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">numberOfUnaries</span><span class="p">,</span> <span class="n">numberOfBins</span><span class="p">,</span>
+                                                                                <span class="n">interval</span><span class="p">,</span>
+                                                                                <span class="n">withSymmetryConstr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">presolvePasses</span><span class="o">=</span><span class="n">curPasses</span><span class="p">)</span>
+
+
+            <span class="n">results</span><span class="p">[(</span><span class="n">numGates</span><span class="p">,</span> <span class="n">curPasses</span><span class="p">)]</span> <span class="o">=</span> <span class="p">(</span><span class="n">numNonZeros</span><span class="p">,</span> <span class="n">numVars</span><span class="p">,</span> <span class="n">numConstr</span><span class="p">)</span>
+
+        <span class="c1"># print results</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+
+
+
+
+<span class="c1">#     np.testing.assert_almost_equal(desired, actual, decimal=5)</span>
+
+<div class="viewcode-block" id="computeMAPE"><a class="viewcode-back" href="../../../index.html#src.gateSizing.test_algorithms.computeMAPE">[docs]</a><span class="k">def</span> <span class="nf">computeMAPE</span><span class="p">(</span><span class="n">n_bins</span><span class="p">,</span> <span class="n">n_unaries</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+
+    <span class="n">MAPE_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_bins</span><span class="p">,</span> <span class="n">n_unaries</span><span class="p">))</span>
+    <span class="n">MAPE_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_bins</span><span class="p">,</span> <span class="n">n_unaries</span><span class="p">))</span>
+
+    <span class="n">jump</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">for</span> <span class="n">bins</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">unaries</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_unaries</span><span class="p">):</span>
+            <span class="n">actual</span><span class="p">,</span> <span class="n">desired</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">jump</span><span class="o">*</span><span class="n">bins</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">jump</span><span class="o">*</span><span class="n">unaries</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;bins:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">jump</span><span class="o">*</span><span class="n">bins</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;unaries: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">jump</span><span class="o">*</span><span class="n">unaries</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">desired</span><span class="p">)</span>
+
+            <span class="n">curMAPE</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">actual</span> <span class="o">-</span> <span class="n">desired</span><span class="p">)</span> <span class="o">/</span> <span class="n">desired</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">curMAPE</span><span class="p">)</span>
+    
+            <span class="n">MAPE_mean</span><span class="p">[</span><span class="n">bins</span><span class="p">,</span> <span class="n">unaries</span><span class="p">]</span> <span class="o">=</span> <span class="n">curMAPE</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">MAPE_std</span><span class="p">[</span><span class="n">bins</span><span class="p">,</span> <span class="n">unaries</span><span class="p">]</span> <span class="o">=</span> <span class="n">curMAPE</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+
+    <span class="k">return</span> <span class="n">MAPE_mean</span><span class="p">,</span> <span class="n">MAPE_std</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="c1"># testAlgorithms()</span>
+    <span class="c1"># testAlgorithms_MOSEK()</span>
+    <span class="c1"># testAlgorithms_CVXPY_GP()</span>
+    <span class="c1"># scalingBins_CVXPY_GP()</span>
+    <span class="n">scalingOptimization_CVXPY_GP</span><span class="p">()</span>
+
+    <span class="c1"># testAlgorithms_PRESOLVE()</span>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Adam Bosak.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
