@@ -1,7 +1,7 @@
 import numpy as np
 
-from src.other.node import Node
-import src.other.histogramGenerator as histogramGenerator
+from src.utility_tools.node import Node
+import src.utility_tools.histogramGenerator as histogramGenerator
 import src.timing.SSTA as SSTA
 import networkx as nx
 

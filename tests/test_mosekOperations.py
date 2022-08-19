@@ -1,6 +1,6 @@
 import mosek
 import sys
-import src.other.histogramGenerator as histogramGenerator
+import src.utility_tools.histogramGenerator as histogramGenerator
 import numpy as np
 
 from src.timing.randomVariableHist_Numpy import RandomVariable
