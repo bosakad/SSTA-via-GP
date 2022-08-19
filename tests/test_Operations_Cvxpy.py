@@ -4,7 +4,7 @@ from src.timing.cvxpyVariable import RandomVariableCVXPY
 import cvxpy as cp
 
 from src.timing.randomVariableHist_Numpy import RandomVariable
-import src.other.histogramGenerator as histogramGenerator
+import src.utility_tools.histogramGenerator as histogramGenerator
 
 
 def test_CVXPY_MAXIMUM_McCormick(dec=2):
