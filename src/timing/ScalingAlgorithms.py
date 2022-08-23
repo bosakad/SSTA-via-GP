@@ -1,3 +1,4 @@
+import sys
 import src.timing.infiniteLadder as infiniteLadder
 import numpy as np
 
@@ -119,18 +120,8 @@ def AlgorithmsScaling():
     print("\n\n" + str(results))
 
 
-def AlgorithmsScaling_MOSEK():
-
-    # number of testing
-    numberOfIterations = 1
-    step = 1
-    # prevMape = np.array([3.0627844482985895, 31.477761094020565])
-
-    numberOfGatesStart = 3
-    numberOfBins = 10
-    numberOfUnaries = 10
-
-    interval = (-4, 19)
+def AlgorithmsScaling_MOSEK(numberOfIterations = 1, step = 1, numberOfGatesStart = 3, numberOfBins = 10, numberOfUnaries = 10, interval = (-4, 19)
+                            , TRI=False, Constr=False):
 
     # for saving values of the last gates and calculating error
     rvs_nonPrecise = np.zeros((numberOfIterations, 2))
@@ -148,12 +139,13 @@ def AlgorithmsScaling_MOSEK():
         rvs_MonteCarlo[iter, 0] = lastGate[0]
         rvs_MonteCarlo[iter, 1] = lastGate[1]
 
-    print("SYMMETRY\n\n")
+    # print("SYMMETRY\n\n")
     # test precise
     for iter in range(0, numberOfIterations):
-        print("\n\n" + str(iter) + ". iteration: \n\n")
+        # print("\n\n" + str(iter) + ". iteration: \n\n")
 
         numGates = numberOfGatesStart + iter * step
+
         (
             numNonZeros,
             ObjVal,
@@ -169,18 +161,14 @@ def AlgorithmsScaling_MOSEK():
             numberOfUnaries,
             numberOfBins,
             interval,
-            TRI=False,
-            withSymmetryConstr=True,
+            TRI=TRI,
+            withSymmetryConstr=Constr,
         )
 
         # saving values
         rvs_Precise[iter, 0] = lastGate[0]
         rvs_Precise[iter, 1] = lastGate[1]
 
-        print(
-            np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :])
-            / rvs_MonteCarlo[iter, :]
-        )
 
         MAPE = 100 * np.abs(
             np.divide(
@@ -188,7 +176,6 @@ def AlgorithmsScaling_MOSEK():
             )
         )
 
-        print(MAPE)
 
         if iter != 0:
             prevError = np.zeros(2)
@@ -213,8 +200,10 @@ def AlgorithmsScaling_MOSEK():
             nConstrPresolve,
         )
 
+
+    return results
         # print results
-        print("\n\n" + str(results))
+    # print("\n\n" + str(results))
 
     # print("NO SYMMETRY\n\n")
     # # test non-precise
@@ -265,16 +254,9 @@ def AlgorithmsScaling_MOSEK():
     # print("\n\n" + str(results))
 
 
-def testAlgorithms_CVXPY_GP():
+def scalingGates_CVXPY_GP(numberOfGatesStart = 10, numberOfBins = 15, numberOfIterations = 15, step = 1, interval = (-4, 25)):
 
     # number of testing
-    numberOfIterations = 15
-    step = 1
-
-    numberOfGatesStart = 10
-    numberOfBins = 15
-
-    interval = (-4, 25)
 
     # for saving values of the last gates and calculating error
     rvs_nonPrecise = np.zeros((numberOfIterations, 2))
@@ -315,27 +297,19 @@ def testAlgorithms_CVXPY_GP():
 
         if iter != 0:
             prevError = np.zeros(2)
-            prevError[0] = results[(numGates - step, True)][3]
-            prevError[1] = results[(numGates - step, True)][4]
+            prevError[0] = results[(numGates - step, True)][1]
+            prevError[1] = results[(numGates - step, True)][2]
 
             MAPE = (MAPE + (prevError) * (iter)) / (iter + 1)
 
-        results[(numGates, True)] = (-1, -1, time, MAPE[0], MAPE[1], -1, -1, -1, -1, -1)
+        results[(numGates, True)] = (time, MAPE[0], MAPE[1])
 
         # print results
         print("\n\n" + str(results))
 
 
-def scalingBins_CVXPY_GP():
+def scalingBins_CVXPY_GP(numberOfIterations = 2,step = 4,numberOfGates = 10,numBinsStart = 10,interval = (-4, 25)):
 
-    # number of testing
-    numberOfIterations = 5
-    step = 4
-
-    numberOfGates = 2
-    numBinsStart = 10
-
-    interval = (-4, 25)
 
     # for saving values of the last gates and calculating error
     rvs_nonPrecise = np.zeros((numberOfIterations, 2))
@@ -353,17 +327,15 @@ def scalingBins_CVXPY_GP():
         rvs_MonteCarlo[iter, 0] = lastGate[0]
         rvs_MonteCarlo[iter, 1] = lastGate[1]
 
-    print("SYMMETRY\n\n")
 
-    BINS = [5, 8, 10]
-    numberOfIterations = len(BINS)
+    # BINS = [5, 8, 10]
+    # numberOfIterations = len(BINS)
     # test precise
     for iter in range(0, numberOfIterations):
         print("\n\n" + str(iter) + ". iteration: \n\n")
 
-        # numBins = numBinsStart + iter * step
-        numBins = BINS[iter]
-        print(numBins)
+        numBins = numBinsStart + iter * step
+
         lastGate, time = infiniteLadder.mainCVXPY_GP(numberOfGates, numBins, interval)
 
         # saving values
@@ -376,7 +348,6 @@ def scalingBins_CVXPY_GP():
             np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[0, :], rvs_MonteCarlo[0, :])
         )
 
-        print(MAPE)
 
         # if iter != 0:
         #     prevError = np.zeros(2)
@@ -387,9 +358,9 @@ def scalingBins_CVXPY_GP():
         #     prevError[0] = results[(numBins - step, True)][3]
         #     prevError[1] = results[(numBins - step, True)][4]
         #
-        # MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
+        #     MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
 
-        results[(numBins, True)] = (-1, -1, time, MAPE[0], MAPE[1], -1, -1, -1, -1, -1)
+        results[(numBins, True)] = (time, MAPE[0], MAPE[1])
 
         # print results
         print("\n\n" + str(results))
@@ -502,8 +473,43 @@ def computeMAPE(n_bins, n_unaries, start, function):
 
 
 if __name__ == "__main__":
+    args = sys.argv
 
-    scalingBins_CVXPY_GP()
-    # scalingOptimization_CVXPY_GP()
+    if args[1] == "GP_bins":
+        scalingBins_CVXPY_GP(numberOfIterations=int(args[2]), step=int(args[3]), numberOfGates=int(args[4]), numBinsStart=int(args[5]), interval=(int(args[6]), int(args[7])))
 
-    # testAlgorithms_PRESOLVE()
+    if args[1] == "GP_gates":
+        scalingGates_CVXPY_GP(numberOfIterations=int(args[2]), step=int(args[3]), numberOfBins=int(args[4]), numberOfGatesStart=int(args[5]), interval=(int(args[6]), int(args[7])))
+
+    #
+    # if args[1] == "MIP":
+    #
+    #     TRI = False
+    #     Constr = False
+    #     r1 = AlgorithmsScaling_MOSEK(numberOfIterations=int(args[2]), step=int(args[3]), numberOfBins=int(args[4]),
+    #                           numberOfGatesStart=int(args[5]), interval=(int(args[6]), int(args[7])), numberOfUnaries=int(args[8]),
+    #                                  TRI=TRI, Constr=Constr)
+    #
+    #     print(r1)
+    #
+    #     TRI = False
+    #     Constr = True
+    #     r2 = AlgorithmsScaling_MOSEK(numberOfIterations=int(args[2]), step=int(args[3]), numberOfBins=int(args[4]),
+    #                           numberOfGatesStart=int(args[5]), interval=(int(args[6]), int(args[7])), numberOfUnaries=int(args[8]),
+    #                                  TRI=TRI, Constr=Constr)
+    #
+    #     print(r2)
+    #
+    #     TRI = True
+    #     Constr = True
+    #     r3 = AlgorithmsScaling_MOSEK(numberOfIterations=int(args[2]), step=int(args[3]), numberOfBins=int(args[4]),
+    #                           numberOfGatesStart=int(args[5]), interval=(int(args[6]), int(args[7])), numberOfUnaries=int(args[8]),
+    #                                  TRI=TRI, Constr=Constr)
+    #
+    #     print(r3)
+    #
+    # #
+    # # scalingOptimization_CVXPY_GP()
+    # # scalingGates_CVXPY_GP(numberOfGatesStart = 10, numberOfBins = 15, numberOfIterations = 15, step = 1, interval = (-4, 25))
+    #
+    # # testAlgorithms_PRESOLVE()

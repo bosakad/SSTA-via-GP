@@ -17,6 +17,7 @@ from src.timing.examples_monteCarlo.infinite_ladder_montecarlo import (
 
 import matplotlib.pyplot as plt
 import mosek
+from mosek import *
 
 
 def mainCVXPY(
