@@ -13,9 +13,11 @@ random variable in 440 seconds
 `pip install .`  
 `python3 setup.py clean`
 
-### Other info: ###
-Full documentation is located at: [docs/_build/html](https://htmlpreview.github.io/?https://github.com/bosakad/GP-Optimization/blob/development/docs/_build/html/index.html), which the concept is 
-explained in our [arXiv draft](https://arxiv.org/abs/2211.02981). 
+### For more details, please see: ###
+
+Our [arXiv draft](https://arxiv.org/abs/2211.02981)
+
+Full documentation at: [docs/_build/html](https://htmlpreview.github.io/?https://github.com/bosakad/GP-Optimization/blob/development/docs/_build/html/index.html)
 
 If you like the concept, please cite our draft:
 
