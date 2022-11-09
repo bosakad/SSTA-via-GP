@@ -1,4 +1,4 @@
-#Statistical static timing analysis via modern optimization lens
+# Statistical static timing analysis via modern optimization lens
 
 We formulate statistical static timing analysis (SSTA) as a mixed-
 integer program and as a geometric program, utilizing histogram approxima-
@@ -15,3 +15,4 @@ random variable in 440 seconds
 
 ### Other info: ###
 Full documentation is located at: docs/_build/html
+https://arxiv.org/abs/2211.02981
