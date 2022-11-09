@@ -14,5 +14,18 @@ random variable in 440 seconds
 `python3 setup.py clean`
 
 ### Other info: ###
-Full documentation is located at: docs/_build/html  
-arxiv link: https://arxiv.org/abs/2211.02981
+Full documentation is located at: [docs/_build/html](https://htmlpreview.github.io/?https://github.com/bosakad/GP-Optimization/blob/development/docs/_build/html/index.html), which the concept is 
+explained in our [arXiv draft](https://arxiv.org/abs/2211.02981). 
+
+If you like the concept, please cite our draft:
+
+```
+@misc{Bosak2022,
+  doi = {10.48550/ARXIV.2211.02981},  
+  url = {https://arxiv.org/abs/2211.02981},
+  author = {Bosak, Adam and Mishagli, Dmytro and Marecek, Jakub},
+  title = {Statistical timing analysis via modern optimization lens},
+  publisher = {arXiv},
+  year = {2022},
+}
+```
