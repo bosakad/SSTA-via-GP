@@ -14,5 +14,5 @@ random variable in 440 seconds
 `python3 setup.py clean`
 
 ### Other info: ###
-Full documentation is located at: docs/_build/html
-https://arxiv.org/abs/2211.02981
+Full documentation is located at: docs/_build/html  
+arxiv link: https://arxiv.org/abs/2211.02981
