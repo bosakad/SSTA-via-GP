@@ -1,19 +1,32 @@
-# Novel Geometric-Programming Formulations  in Computer-Aided Design of Integrated Circuits
+# Statistical static timing analysis via modern optimization lens
 
-Geometric programming is often used in the layout and timing problems of circuit design.
-The gate sizing problem is perhaps the best known special case. To the best of our
-knowledge, the literature has used either deterministic delay models or approximating
-statistical models, so far. A significant part of the thesis includes the solution to finding
-a multiplication of two numbers using only optimization variables that can then be used
-in the SSTA algorithm. This thesis also presents two new solutions of the statistical
-approach to the gate sizing problem using mixed-integer programming and geometric
-programming. In particular, a histogram approximation of the statistical approach is
-employed. We apply our proposed algorithms to the ISCAS benchmark circuit and
-compare the results with the deterministic approach.
+We formulate statistical static timing analysis (SSTA) as a mixed-
+integer program and as a geometric program, utilizing histogram approximations of the random variables involved. The geometric-programming approach
+scales linearly with the number of gates and quadratically with the number
+of bins in the histogram. This translates, for example, to solving the SSTA
+for a circuit of 400 gates with 30 bins per each histogram approximation of a
+random variable in 440 seconds
 
+### Set up: ###
+`pip install -r requirements.txt`  
+`pip install .`  
+`python3 setup.py clean`
 
-Full documentation is located at: docs/_build/html
+### For more details, please see: ###
 
-Source of the project is located at: src/gateSizing
+Our [arXiv draft](https://arxiv.org/abs/2211.02981)
 
-Main script is src/gateSizing/optimizeGates.py
+Full documentation at: [docs/_build/html](https://htmlpreview.github.io/?https://github.com/bosakad/GP-Optimization/blob/development/docs/_build/html/index.html)
+
+If you like the concept, please cite our draft:
+
+```
+@misc{Bosak2022,
+  doi = {10.48550/ARXIV.2211.02981},  
+  url = {https://arxiv.org/abs/2211.02981},
+  author = {Bosak, Adam and Mishagli, Dmytro and Marecek, Jakub},
+  title = {Statistical timing analysis via modern optimization lens},
+  publisher = {arXiv},
+  year = {2022},
+}
+```
