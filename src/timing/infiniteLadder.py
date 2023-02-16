@@ -1247,7 +1247,9 @@ def mainMOSEK(
             task.putobjsense(mosek.objsense.maximize)
             # set mip gap to 1%
             task.putdouparam(dparam.mio_tol_rel_gap, 1.0e-2)
-            # task.putdouparam(dparam.mio_max_time, 1200)
+
+            task.putdouparam(dparam.mio_max_time, 300)
+
 
             # task.putintparam(iparam.presolve_max_num_reductions, 1)
             # task.putintparam(iparam.presolve_eliminator_max_fill, 0)
@@ -1291,9 +1293,11 @@ def mainMOSEK(
                     )
                 )
 
-            print("\n MOSEK UNARY VALUES: \n")
-            for i in range(0, number_of_nodes):
-                print(rvs[i].mean, rvs[i].std)
+            # print("\n MOSEK UNARY VALUES: \n")
+            # for i in range(0, number_of_nodes):
+            #     print(rvs[i].mean, rvs[i].std)
+
+            # print(rvs[0].bins)
 
             lastGate = (rvs[-1].mean, rvs[-1].std)
 

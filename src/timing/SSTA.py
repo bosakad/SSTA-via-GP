@@ -113,7 +113,7 @@ def calculateCircuitDelay(
                     currentRandVar,
                     curNofVariables,
                     curNofConstr,
-                ) = RV1.maximum_AND_Convolution_VECTORIZED_MIN(
+                ) = RV1.maximum_AND_Convolution_VECTORIZED(
                     RV2, RV3, curNofVariables, curNofConstr
                 )
 
@@ -285,7 +285,7 @@ def maxOfDistributionsMOSEK_UNARY(withSymmetryConstr=False) -> cp.Variable:
                 curNofVariables,
                 curNofConstr,
                 withSymmetryConstr=withSymmetryConstr,
-                asMin=True,
+                asMin=False,
             )
             delays[i + 1] = newRV
 

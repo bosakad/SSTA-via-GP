@@ -418,9 +418,9 @@ class RandomVariableMOSEK:
         self.cutBins(self.edges, sumOfConvs)
 
         roundScalar = 0.5
-        # division = numberOfUnaries * numberOfBins / 14
+        division = numberOfUnaries * numberOfBins / 14
         # division = 54
-        division = 50
+        # division = 50
 
         offset = curNofConstr
 
@@ -687,8 +687,8 @@ class RandomVariableMOSEK:
         self.cutBins(self.edges, sumOfConvs)
 
         roundScalar = 0.5
-        # division = numberOfUnaries * numberOfBins / 14
-        division = 40
+        division = numberOfUnaries * numberOfBins / 14
+        # division = 10
         # division = 50
 
         offset = curNofConstr
@@ -713,7 +713,8 @@ class RandomVariableMOSEK:
                 )
                 # task.putaijlist([bin + offset2] * nSums, sumOfMultiplicationsRow, [-1 / division] * nSums)
 
-            task.putconbound(bin + offset, mosek.boundkey.lo, -roundScalar, +self.inf)
+            # task.putconbound(bin + offset, mosek.boundkey.lo, -roundScalar, +self.inf)
+                task.putconbound(newNofConstr + offset, mosek.boundkey.lo, 0, self.inf)
             # task.putconbound(bin + offset2, mosek.boundkey.up, -self.inf, +roundScalar)
 
         if VAR:
@@ -1194,7 +1195,6 @@ class RandomVariableMOSEK:
 
         round = 0.5
         division = numberOfUnaries * numberOfBins / 30
-        division = 10
 
         offset = curNofConstr
 

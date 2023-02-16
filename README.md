@@ -1,8 +1,7 @@
 # Statistical static timing analysis via modern optimization lens
 
 We formulate statistical static timing analysis (SSTA) as a mixed-
-integer program and as a geometric program, utilizing histogram approxima-
-tions of the random variables involved. The geometric-programming approach
+integer program and as a geometric program, utilizing histogram approximations of the random variables involved. The geometric-programming approach
 scales linearly with the number of gates and quadratically with the number
 of bins in the histogram. This translates, for example, to solving the SSTA
 for a circuit of 400 gates with 30 bins per each histogram approximation of a
