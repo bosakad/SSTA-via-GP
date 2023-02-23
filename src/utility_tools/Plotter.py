@@ -220,8 +220,8 @@ def plotComparison(res1=None, res2=None, res3=None):
     axs.flat[i].set(ylabel="Time (seconds)")
     i += 1
 
+    # plt.savefig("scalingComparison.png", dpi=1000)
     plt.show()
-    # plt.savefig("Inputs.outputs/scaling.jpeg", dpi=500)
 
 
 def plotNonzeros(results, only1=True):
@@ -438,7 +438,7 @@ def plotNonzeros(results, only1=True):
             Gates, errorWithConstr[:, 0], errorWithConstr[:, 1], alpha=0.3, color="blue"
         )
 
-        axs.flat[i].set(ylabel="MAPE(%)")
+        axs.flat[i].set(ylabel="Relative Error(%)")
         i += 1
 
         for ax in axs.flat:
@@ -620,8 +620,8 @@ def plotNonzeros(results, only1=True):
             for ax in axs.flat:
                 ax.label_outer()
 
+    # plt.savefig("scalingMIP.png", dpi=1000, bbox_inches='tight')
     plt.show()
-    # plt.savefig("Inputs.outputs/scaling.jpeg", dpi=800, bbox_inches='tight')
 
 
 def plotScalingOptimization():
@@ -834,7 +834,7 @@ def plotScalingOptimization():
         j += 1
 
     # plt.show()
-    plt.savefig("Inputs.outputs/scaling.jpeg", dpi=800, bbox_inches="tight")
+    # plt.savefig("Inputs.outputs/scaling.jpeg", dpi=800, bbox_inches="tight")
 
 
 def plotPresolve(verbose, bins=False):
@@ -970,7 +970,7 @@ def plotPresolve(verbose, bins=False):
     if bins:
         axs.flat[i].set(ylabel="Relative Error(%)")
     else:
-        axs.flat[i].set(ylabel="MAPE(%)")
+        axs.flat[i].set(ylabel="Relative Error(%)")
 
     i += 1
 
@@ -1002,6 +1002,8 @@ def plotPresolve(verbose, bins=False):
         )
         j += 1
 
+
+    # plt.savefig("ScalingGatesGP.png", dpi=1000)
     plt.show()
 
 def plotForThesis():
@@ -1020,7 +1022,7 @@ def plotForThesis():
     for i, j in zip(edges[2:-1], bins[1:-1]):
         ax.annotate(str(j), xy=(i - 0.6, j + 0.005))
 
-    plt.savefig("Inputs.outputs/exampleHist.jpeg", dpi=500)
+    # plt.savefig("Inputs.outputs/exampleHist.jpeg", dpi=500)
 
     # plt.show()
 
@@ -1074,7 +1076,7 @@ def plotDelays():
         j += 1
 
     # plt.show()
-    plt.savefig("Inputs.outputs/delayComparison2.jpeg", dpi=800, bbox_inches="tight")
+    # plt.savefig("Inputs.outputs/delayComparison2.jpeg", dpi=800, bbox_inches="tight")
 
 
 if __name__ == "__main__":

@@ -169,30 +169,30 @@ def AlgorithmsScaling_MOSEK(numberOfIterations = 1, step = 1, numberOfGatesStart
         rvs_Precise[iter, 0] = lastGate[0]
         rvs_Precise[iter, 1] = lastGate[1]
 
-
-        MAPE = 100 * np.abs(
+        # compute relative error
+        relativeError = 100 * np.abs(
             np.divide(
                 rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]
             )
         )
 
 
-        if iter != 0:
-            prevError = np.zeros(2)
-            prevError[0] = results[(numGates - step, True)][3]
-            prevError[1] = results[(numGates - step, True)][4]
+        # if iter != 0:
+        #     prevError = np.zeros(2)
+        #     prevError[0] = results[(numGates - step, True)][3]
+        #     prevError[1] = results[(numGates - step, True)][4]
 
-            MAPE = (MAPE + (prevError) * (iter)) / (iter + 1)
-        elif iter == 0:
+        #     MAPE = (MAPE + (prevError) * (iter)) / (iter + 1)
+        # elif iter == 0:
 
-            MAPE = (MAPE) / (iter + 1)
+        #     MAPE = (MAPE) / (iter + 1)
 
         results[(numGates, True)] = (
             numNonZeros,
             ObjVal,
             time,
-            MAPE[0],
-            MAPE[1],
+            relativeError[0],
+            relativeError[1],
             numVars,
             numConstr,
             mipGapRoot,
@@ -287,22 +287,23 @@ def scalingGates_CVXPY_GP(numberOfGatesStart = 10, numberOfBins = 15, numberOfIt
 
         # print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
 
-        MAPE = 100 * np.abs(
+        # compute relative error
+        relativeError = 100 * np.abs(
             np.divide(
                 rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :], rvs_MonteCarlo[iter, :]
             )
         )
 
-        print(MAPE)
+        # print(relativeError)
+        # if iter != 0:
+        #     prevError = np.zeros(2)
+        #     prevError[0] = results[(numGates - step, True)][1]
+        #     prevError[1] = results[(numGates - step, True)][2]
 
-        if iter != 0:
-            prevError = np.zeros(2)
-            prevError[0] = results[(numGates - step, True)][1]
-            prevError[1] = results[(numGates - step, True)][2]
+        #     relativeError = (relativeError + (prevError) * (iter)) / (iter + 1)
+        
 
-            MAPE = (MAPE + (prevError) * (iter)) / (iter + 1)
-
-        results[(numGates, True)] = (time, MAPE[0], MAPE[1])
+        results[(numGates, True)] = (time, relativeError[0], relativeError[1])
 
         # print results
         print("\n\n" + str(results))
@@ -344,7 +345,7 @@ def scalingBins_CVXPY_GP(numberOfIterations = 2,step = 4,numberOfGates = 10,numB
 
         # print(np.abs(rvs_Precise[iter, :] - rvs_MonteCarlo[iter, :]) / rvs_MonteCarlo[iter, :])
 
-        MAPE = 100 * np.abs(
+        relativeError = 100 * np.abs(
             np.divide(rvs_Precise[iter, :] - rvs_MonteCarlo[0, :], rvs_MonteCarlo[0, :])
         )
 
@@ -360,7 +361,7 @@ def scalingBins_CVXPY_GP(numberOfIterations = 2,step = 4,numberOfGates = 10,numB
         #
         #     MAPE = (MAPE + (prevError) *(iter)) / (iter + 1)
 
-        results[(numBins, True)] = (time, MAPE[0], MAPE[1])
+        results[(numBins, True)] = (time, relativeError[0], relativeError[1])
 
         # print results
         print("\n\n" + str(results))
