@@ -1006,6 +1006,7 @@ def plotPresolve(verbose, bins=False):
 
 
     # plt.savefig("ScalingGatesGP.png", dpi=1000)
+    # plt.savefig("ScalingBinsGP.png", dpi=1000)
 
     plt.show()
 
