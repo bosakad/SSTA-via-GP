@@ -914,6 +914,8 @@ def plotPresolve(verbose, bins=False):
     )  # line width
 
     axs.flat[i].set(ylabel="Count")
+
+    axs[i].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     # axs[i].legend(["Nonzeros", "Variables", "Constraints"])
     i += 1
 
@@ -1004,6 +1006,7 @@ def plotPresolve(verbose, bins=False):
 
 
     # plt.savefig("ScalingGatesGP.png", dpi=1000)
+
     plt.show()
 
 def plotForThesis():
