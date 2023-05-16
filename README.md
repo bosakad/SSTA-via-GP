@@ -1,4 +1,4 @@
-# Statistical static timing analysis via modern optimization lens   I. Histogram–based approach
+# Statistical static timing analysis via modern optimization lens : I. Histogram–based approach
 
 
 Statistical static timing analysis (SSTA) is studied from the mathematical optimization point of view. We give two formulations of the problem of finding the critical path delay distribution that were not known before: (i) a formal mathematical formulation of the SSTA problem using Binary–Integer Programming and (ii) a practical formulation using Geometric Programming. For simplicity, we use histogram approximation of the distributions. Scalability of the approaches are studied and possible generalizations are discussed.
