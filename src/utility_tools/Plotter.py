@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.transforms as mtransforms
 import src.sizing.optimizeGates as optimizeGates
 from src.timing.randomVariableHist_Numpy import RandomVariable
+from matplotlib.ticker import MaxNLocator
 
 """
     This module includes plotting functions for thesis.
@@ -80,6 +81,7 @@ def parseVerboseGP(verboseFile):
             iterMet = False
             opt = False
 
+        
         # parse dict
         if "{" in line:
             dict = eval(line)
@@ -176,6 +178,8 @@ def plotComparison(res1=None, res2=None, res3=None):
     )  # line width
 
     axs.flat[i].set(ylabel="Mip gap at root (%)")
+
+    axs[i].legend(["ORIG", "SBC", "SBC+TTM"], bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0.)  
     i += 1
 
     p0 = axs[i].plot(
@@ -218,9 +222,13 @@ def plotComparison(res1=None, res2=None, res3=None):
     )  # line width
 
     axs.flat[i].set(ylabel="Time (seconds)")
+    axs[i].set(xlabel=r"Number of gates, $N$")
+
+    axs[i].legend(["ORIG", "SBC", "SBC+TTM"], bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0.)  
     i += 1
 
-    # plt.savefig("scalingComparison.png", dpi=1000)
+
+    # plt.savefig("scalingComparison.png", dpi=1000, bbox_inches="tight")
     plt.show()
 
 
@@ -369,7 +377,8 @@ def plotNonzeros(results, only1=True):
         # axs[i].plot(Gates, constrWithConstr, color='green')
 
         axs.flat[i].set(ylabel="Count")
-        # axs[i].legend(["Nonzeros", "Variables", "Constraints"])
+        
+        axs[i].legend(["Nonzeros", "Variables", "Constraints"], bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
         i += 1
 
         # constraints
@@ -438,11 +447,15 @@ def plotNonzeros(results, only1=True):
             Gates, errorWithConstr[:, 0], errorWithConstr[:, 1], alpha=0.3, color="blue"
         )
 
-        axs.flat[i].set(ylabel="Relative Error(%)")
+        axs.flat[i].set(ylabel="Relative Error\n    (%)")
+
+        axs[i].legend(["Mean", "Std"], bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
         i += 1
 
         for ax in axs.flat:
-            ax.set(xlabel="Number of gates")
+            ax.set(xlabel=r"Number of gates, $N$")
+        
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
         # Hide x labels and tick labels for top plots and y ticks for right plots.
         for ax in axs.flat:
@@ -915,6 +928,9 @@ def plotPresolve(verbose, bins=False):
 
     axs.flat[i].set(ylabel="Count")
 
+    axs[i].legend(["Cones", "Variables", "Constraints"], bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0.)
+    # axs[i].legend()
+
     axs[i].ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     # axs[i].legend(["Nonzeros", "Variables", "Constraints"])
     i += 1
@@ -969,6 +985,8 @@ def plotPresolve(verbose, bins=False):
         Gates, errorWithConstrM, errorWithConstrS, alpha=0.3, color="blue"
     )
 
+    axs[i].legend(["Mean", "Std"], bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+
     if bins:
         axs.flat[i].set(ylabel="Relative Error(%)")
     else:
@@ -978,9 +996,10 @@ def plotPresolve(verbose, bins=False):
 
     for ax in axs.flat:
         if bins:
-            ax.set(xlabel="Number of bins")
+            ax.set(xlabel=r"Number of bins, $n$")
+            # ax.set(xlabel="Number of bins")
         else:
-            ax.set(xlabel="Number of gates")
+            ax.set(xlabel=r"Number of gates, $N$")
 
     # Hide x labels and tick labels for top plots and y ticks for right plots.
     for ax in axs.flat:
@@ -1005,8 +1024,10 @@ def plotPresolve(verbose, bins=False):
         j += 1
 
 
-    # plt.savefig("ScalingGatesGP.png", dpi=1000)
-    # plt.savefig("ScalingBinsGP.png", dpi=1000)
+    # fig.set_size_inches(8.5, 5.5)
+
+    # plt.savefig("ScalingGatesGP.png", dpi=1000, bbox_inches='tight')
+    # plt.savefig("ScalingBinsGP.png", dpi=1000, bbox_inches='tight')
 
     plt.show()
 
